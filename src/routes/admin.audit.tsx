@@ -35,7 +35,7 @@ function AdminAudit() {
             <p className="p-8 text-center text-[14px] text-slate">No internal admin events yet.</p>
           ) : (
             <div className="divide-y divide-chalk">
-              {data.map((entry) => (
+              {(data as any[]).map((entry: any) => (
                 <div key={entry.id} className="p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

@@ -1,19 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { Archive, Copy, Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { useSuperAdmin } from "@/hooks/useSuperAdmin";
+import { useHoiAdmin } from "@/hooks/useHoiAdmin";
+import { AdminPageHeader, AdminShell } from "@/components/admin/AdminShell";
 import {
+  archiveLibraryItem,
   createLibraryItem,
-  deleteLibraryItem,
+  duplicateLibraryItem,
   listLibraryItems,
   updateLibraryItem,
   uploadLibraryFile,
 } from "@/lib/library/queries";
 import { TYPE_LIST, TYPE_SCHEMAS } from "@/lib/library/typeSchemas";
-import type { LibraryItem, LibraryType } from "@/lib/library/types";
+import type { LibraryEditorialStatus, LibraryItem, LibraryType } from "@/lib/library/types";
 import { isLibraryType, LIBRARY_TYPES } from "@/lib/library/types";
 import { MODULES, PHASES } from "@/lib/curriculum";
 
@@ -23,24 +25,25 @@ export const Route = createFileRoute("/admin/library")({
 
 function AdminLibrary() {
   const { user } = useAuth();
-  const { isSuperAdmin, loading } = useSuperAdmin();
+  const admin = useHoiAdmin();
   const qc = useQueryClient();
   const [typeFilter, setTypeFilter] = useState<LibraryType | "">("");
-  const [pubFilter, setPubFilter] = useState<"all" | "published" | "draft">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | LibraryEditorialStatus>("all");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<LibraryItem | "new" | null>(null);
 
   const { data: items = [], isLoading } = useQuery({
-    enabled: isSuperAdmin,
+    enabled: admin.isHoiAdmin,
     queryKey: ["library", "admin", "all"],
-    queryFn: () => listLibraryItems({ includeUnpublished: true }),
+    queryFn: () => listLibraryItems({ includeUnpublished: true, includeArchived: true }),
   });
 
   const filtered = useMemo(() => {
     return items.filter((it) => {
       if (typeFilter && it.type !== typeFilter) return false;
-      if (pubFilter === "published" && !it.published) return false;
-      if (pubFilter === "draft" && it.published) return false;
+      if (statusFilter !== "all" && (it.editorial_status ?? (it.published ? "published" : "draft")) !== statusFilter) {
+        return false;
+      }
       if (search.trim()) {
         const q = search.trim().toLowerCase();
         const hay = [it.title, it.summary ?? "", it.tags.join(" ")].join(" ").toLowerCase();
@@ -48,50 +51,64 @@ function AdminLibrary() {
       }
       return true;
     });
-  }, [items, typeFilter, pubFilter, search]);
+  }, [items, typeFilter, statusFilter, search]);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["library"] });
   };
 
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => deleteLibraryItem(id),
+  const archiveMut = useMutation({
+    mutationFn: (it: LibraryItem) => archiveLibraryItem(it, user?.id),
     onSuccess: () => {
-      toast.success("Deleted");
+      toast.success("Archived");
       invalidate();
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
-  const togglePublish = useMutation({
-    mutationFn: (it: LibraryItem) => updateLibraryItem(it.id, { published: !it.published, version: it.version }),
+  const duplicateMut = useMutation({
+    mutationFn: (it: LibraryItem) => duplicateLibraryItem(it, user!.id),
     onSuccess: (it) => {
-      toast.success(it.published ? "Published" : "Unpublished");
+      toast.success(`Duplicated "${it.title}"`);
       invalidate();
     },
     onError: (e) => toast.error((e as Error).message),
   });
 
-  if (loading) return <p className="p-8 text-[13px] text-slate">Loading…</p>;
-  if (!user) return <p className="p-8 text-[14px] text-navy">Sign in required.</p>;
-  if (!isSuperAdmin) return <p className="p-8 text-[14px] text-navy">Super-admin access required.</p>;
+  const setStatus = useMutation({
+    mutationFn: (args: { item: LibraryItem; editorial_status: LibraryEditorialStatus }) =>
+      updateLibraryItem(args.item.id, {
+        editorial_status: args.editorial_status,
+        version: args.item.version,
+        changed_by: user?.id,
+      }),
+    onSuccess: () => {
+      toast.success("Status updated");
+      invalidate();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] space-y-6 px-6 py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="eyebrow">ADMIN · LIBRARY CMS</p>
-          <h1 className="h-display-md mt-1">Manage the HOI library.</h1>
-        </div>
-        <button
-          type="button"
-          onClick={() => setEditing("new")}
-          className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-[13px] font-medium text-white hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" /> New item
-        </button>
-      </header>
+    <AdminShell>
+      <AdminPageHeader
+        eyebrow="ADMIN · LIBRARY CMS"
+        title="Manage the HOI library."
+        lead="Create, review, publish, archive, and version the global content that powers Discover."
+        action={
+          admin.canManageContent && (
+            <button
+              type="button"
+              onClick={() => setEditing("new")}
+              className="inline-flex items-center gap-1.5 rounded-md bg-navy px-3 py-2 text-[13px] font-medium text-white hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> New item
+            </button>
+          )
+        }
+      />
 
+      <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-2">
         <input
           value={search}
@@ -112,13 +129,15 @@ function AdminLibrary() {
           ))}
         </select>
         <select
-          value={pubFilter}
-          onChange={(e) => setPubFilter(e.target.value as typeof pubFilter)}
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
           className="rounded-md border border-chalk bg-paper px-2.5 py-1.5 text-[13px] text-navy outline-none"
         >
-          <option value="all">All</option>
-          <option value="published">Published</option>
+          <option value="all">All statuses</option>
           <option value="draft">Draft</option>
+          <option value="in_review">In review</option>
+          <option value="published">Published</option>
+          <option value="archived">Archived</option>
         </select>
       </div>
 
@@ -131,50 +150,76 @@ function AdminLibrary() {
               <tr>
                 <th className="px-3 py-2 text-left">Title</th>
                 <th className="px-3 py-2 text-left">Type</th>
-                <th className="px-3 py-2 text-left">Status</th>
+                <th className="px-3 py-2 text-left">Editorial status</th>
+                <th className="px-3 py-2 text-left">Review</th>
                 <th className="px-3 py-2 text-left">v</th>
                 <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((it) => (
-                <tr key={it.id} className="border-t border-chalk text-navy">
-                  <td className="px-3 py-2">
-                    <button onClick={() => setEditing(it)} className="hover:text-terracotta">
-                      {it.title}
-                    </button>
-                  </td>
-                  <td className="px-3 py-2">{TYPE_SCHEMAS[it.type].label}</td>
-                  <td className="px-3 py-2">
-                    <button
-                      onClick={() => togglePublish.mutate(it)}
-                      className={
-                        "rounded-full px-2 py-0.5 text-[11px] " +
-                        (it.published
-                          ? "bg-terracotta text-white"
-                          : "border border-chalk text-slate hover:border-navy")
-                      }
-                    >
-                      {it.published ? "Published" : "Draft"}
-                    </button>
-                  </td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-slate">{it.version}</td>
-                  <td className="px-3 py-2 text-right">
-                    <button
-                      onClick={() => {
-                        if (confirm(`Delete "${it.title}"?`)) deleteMut.mutate(it.id);
-                      }}
-                      className="text-slate hover:text-terracotta"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((it) => {
+                const status = it.editorial_status ?? (it.published ? "published" : "draft");
+                return (
+                  <tr key={it.id} className="border-t border-chalk text-navy">
+                    <td className="px-3 py-2">
+                      <button onClick={() => setEditing(it)} className="hover:text-terracotta">
+                        {it.title}
+                      </button>
+                    </td>
+                    <td className="px-3 py-2">{TYPE_SCHEMAS[it.type].label}</td>
+                    <td className="px-3 py-2">
+                      {admin.canManageContent ? (
+                        <select
+                          value={status}
+                          onChange={(e) =>
+                            setStatus.mutate({
+                              item: it,
+                              editorial_status: e.target.value as LibraryEditorialStatus,
+                            })
+                          }
+                          className="rounded-md border border-chalk bg-paper px-2 py-1 text-[12px]"
+                        >
+                          <option value="draft">Draft</option>
+                          <option value="in_review">In review</option>
+                          <option value="published">Published</option>
+                          <option value="archived">Archived</option>
+                        </select>
+                      ) : (
+                        <StatusPill status={status} />
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-slate">
+                      {it.last_reviewed_at ? new Date(it.last_reviewed_at).toLocaleDateString() : "Not reviewed"}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-[11px] text-slate">{it.version}</td>
+                    <td className="px-3 py-2 text-right">
+                      {admin.canManageContent && (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => duplicateMut.mutate(it)}
+                            className="text-slate hover:text-navy"
+                            title="Duplicate"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm(`Archive "${it.title}"?`)) archiveMut.mutate(it);
+                            }}
+                            className="text-slate hover:text-terracotta"
+                            title="Archive"
+                          >
+                            <Archive className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate">
+                  <td colSpan={6} className="px-3 py-6 text-center text-slate">
                     No items match the filters.
                   </td>
                 </tr>
@@ -184,13 +229,7 @@ function AdminLibrary() {
         </div>
       )}
 
-      <p className="text-[12px] text-slate">
-        <Link to="/app" className="hover:text-navy">
-          ← Back to app
-        </Link>
-      </p>
-
-      {editing && (
+      {editing && admin.canManageContent && user && (
         <ItemEditor
           item={editing === "new" ? null : editing}
           userId={user.id}
@@ -201,9 +240,23 @@ function AdminLibrary() {
           }}
         />
       )}
-    </div>
+      </div>
+    </AdminShell>
   );
 }
+
+function StatusPill({ status }: { status: string }) {
+  return (
+    <span className="rounded-full border border-chalk px-2 py-0.5 text-[11px] text-slate">
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
+/*
+ * Editor implementation below remains local because every library type has
+ * unique metadata fields and the modal needs direct access to TYPE_SCHEMAS.
+ */
 
 interface EditorProps {
   item: LibraryItem | null;
@@ -219,7 +272,13 @@ function ItemEditor({ item, userId, onClose, onSaved }: EditorProps) {
   const [moduleIds, setModuleIds] = useState<string[]>(item?.module_ids ?? []);
   const [phaseIds, setPhaseIds] = useState<string[]>(item?.phase_ids ?? []);
   const [tags, setTags] = useState((item?.tags ?? []).join(", "));
-  const [published, setPublished] = useState(item?.published ?? false);
+  const [editorialStatus, setEditorialStatus] = useState<LibraryEditorialStatus>(
+    item?.editorial_status ?? (item?.published ? "published" : "draft"),
+  );
+  const [internalNotes, setInternalNotes] = useState(item?.internal_notes ?? "");
+  const [lastReviewedAt, setLastReviewedAt] = useState(
+    item?.last_reviewed_at ? item.last_reviewed_at.slice(0, 10) : "",
+  );
   const [contentUrl, setContentUrl] = useState(item?.content_url ?? "");
   const [contentMd, setContentMd] = useState<string>(
     typeof item?.metadata?.content_markdown === "string" ? (item.metadata.content_markdown as string) : "",
@@ -246,7 +305,7 @@ function ItemEditor({ item, userId, onClose, onSaved }: EditorProps) {
       const missing = schema.fields.filter((f) => f.required && !readField(meta, f.key)).map((f) => f.label);
       if (missing.length) throw new Error(`Required: ${missing.join(", ")}`);
       // file-based: when publishing, require either the type-specific URL or a content URL fallback
-      if (published && schema.fileUrlKey) {
+      if (editorialStatus === "published" && schema.fileUrlKey) {
         const typeUrl = readField(meta, schema.fileUrlKey);
         const hasTypeUrl = typeof typeUrl === "string" && typeUrl.trim().length > 0;
         const hasContentUrl = contentUrl.trim().length > 0;
@@ -263,11 +322,14 @@ function ItemEditor({ item, userId, onClose, onSaved }: EditorProps) {
         module_ids: moduleIds,
         phase_ids: phaseIds,
         tags: arr(tags),
-        published,
+        published: editorialStatus === "published",
+        editorial_status: editorialStatus,
         content_url: contentUrl.trim() || null,
         metadata: meta,
+        internal_notes: internalNotes.trim() || null,
+        last_reviewed_at: lastReviewedAt ? new Date(`${lastReviewedAt}T00:00:00Z`).toISOString() : null,
       };
-      if (item) return updateLibraryItem(item.id, { ...payload, version: item.version });
+      if (item) return updateLibraryItem(item.id, { ...payload, version: item.version, changed_by: userId });
       return createLibraryItem(payload, userId);
     },
     onSuccess: () => {
@@ -364,10 +426,38 @@ function ItemEditor({ item, userId, onClose, onSaved }: EditorProps) {
             </details>
           )}
         </Row>
-        <label className="flex items-center gap-2 text-[13px] text-navy">
-          <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
-          Published
-        </label>
+        <Row label="Editorial status">
+          <select
+            value={editorialStatus}
+            onChange={(e) => setEditorialStatus(e.target.value as LibraryEditorialStatus)}
+            className="input"
+          >
+            <option value="draft">Draft</option>
+            <option value="in_review">In review</option>
+            <option value="published">Published</option>
+            <option value="archived">Archived</option>
+          </select>
+          <p className="mt-1 text-[11px] text-slate">
+            Discover only shows items with Published status.
+          </p>
+        </Row>
+        <Row label="Last reviewed">
+          <input
+            type="date"
+            value={lastReviewedAt}
+            onChange={(e) => setLastReviewedAt(e.target.value)}
+            className="input"
+          />
+        </Row>
+        <Row label="Internal notes">
+          <textarea
+            value={internalNotes}
+            onChange={(e) => setInternalNotes(e.target.value)}
+            rows={3}
+            className="input"
+            placeholder="Private editorial notes for House of Ichigo admins"
+          />
+        </Row>
 
         <div className="space-y-3 rounded-md border border-chalk p-4">
           <p className="eyebrow-muted">TYPE-SPECIFIC FIELDS · {schema.label.toUpperCase()}</p>

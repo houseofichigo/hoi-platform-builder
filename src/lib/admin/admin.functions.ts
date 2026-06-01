@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 import type { HoiAdminRole } from "@/hooks/useHoiAdmin";
 
 const adminDb = supabaseAdmin as any;
@@ -39,8 +41,8 @@ type WorkspaceRow = {
   updated_at: string;
   worked_example: string | null;
   onboarding_dismissed_at: string | null;
-  workspace_profile: any;
-  use_case_profile: any;
+  workspace_profile: Json | null;
+  use_case_profile: Json | null;
 };
 
 async function getAdminAccess(userId: string) {
@@ -65,6 +67,45 @@ async function requireHoiAdmin(userId: string, roles: HoiAdminRole[] = ADMIN_ROL
 function firstError(errors: Array<{ message?: string } | null | undefined>) {
   return errors.find((e) => e?.message)?.message;
 }
+
+const AdminNoteEntity = z.enum(["user", "workspace", "library_item", "billing", "support"]);
+const AdminNoteStatus = z.enum(["open", "reviewed", "closed"]);
+
+async function writeAdminAudit(input: {
+  actorId: string;
+  actionType: string;
+  entityType: string;
+  entityId?: string | null;
+  entityLabel?: string | null;
+  beforeState?: Record<string, unknown> | null;
+  afterState?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown>;
+}) {
+  const { error } = await adminDb.from("hoi_admin_audit_log").insert({
+    actor_id: input.actorId,
+    action_type: input.actionType,
+    entity_type: input.entityType,
+    entity_id: input.entityId ?? null,
+    entity_label: input.entityLabel ?? null,
+    before_state: input.beforeState ?? null,
+    after_state: input.afterState ?? null,
+    metadata: input.metadata ?? {},
+  });
+  if (error) throw new Error(error.message);
+}
+
+type AdminNote = {
+  id: string;
+  entity_type: "user" | "workspace" | "library_item" | "billing" | "support";
+  entity_id: string;
+  note: string;
+  status: "open" | "reviewed" | "closed";
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+};
 
 export type AdminDashboardData = {
   counts: {
@@ -318,7 +359,7 @@ export const getAdminBilling = createServerFn({ method: "GET" })
     if (error) throw new Error(error);
 
     const wsById = new Map((workspaces ?? []).map((w) => [w.id, w]));
-    const explicitSubs = ((subs ?? []) as any[]).map((s: any) => ({
+    const explicitSubs = ((subs ?? []) as AdminBillingData["subscriptions"]).map((s) => ({
       workspace_id: s.workspace_id,
       workspace_name: wsById.get(s.workspace_id)?.name ?? "Unknown workspace",
       plan_id: s.plan_id,
@@ -329,9 +370,9 @@ export const getAdminBilling = createServerFn({ method: "GET" })
     }));
 
     const subbed = new Set(explicitSubs.map((s) => s.workspace_id));
-    const manualSubs = ((workspaces ?? []) as any[])
-      .filter((ws: any) => !subbed.has(ws.id))
-      .map((ws: any) => ({
+    const manualSubs = (workspaces ?? [])
+      .filter((ws) => !subbed.has(ws.id))
+      .map((ws) => ({
         workspace_id: ws.id,
         workspace_name: ws.name,
         plan_id: ws.plan,
@@ -362,7 +403,7 @@ export const getAdminSupport = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<AdminSupportItem[]> => {
     await requireHoiAdmin(context.userId, ["owner", "admin", "support", "read_only"]);
 
-    const [{ data: workspaces }, { data: invites }, { data: approvals }, { data: flags }] = await Promise.all([
+    const [{ data: workspaces }, { data: invites }, { data: approvals }, { data: flags }, { data: closedNotes }] = await Promise.all([
       supabaseAdmin.from("workspaces").select("id, name, workspace_profile, use_case_profile, worked_example, created_at"),
       supabaseAdmin
         .from("workspace_invitations")
@@ -370,21 +411,41 @@ export const getAdminSupport = createServerFn({ method: "GET" })
         .eq("status", "pending"),
       supabaseAdmin
         .from("use_case_approvals")
-        .select("id, workspace_id, use_case_id, submitted_at")
+        .select("id, use_case_id, submitted_at")
         .eq("decision", "pending"),
       supabaseAdmin
         .from("governance_flags")
         .select("id, workspace_id, rule_code, severity, status, created_at")
         .in("status", ["open", "in_progress"]),
+      adminDb
+        .from("hoi_admin_notes")
+        .select("entity_id")
+        .eq("entity_type", "support")
+        .in("status", ["reviewed", "closed"]),
     ]);
 
     const wsById = new Map((workspaces ?? []).map((w) => [w.id, w.name]));
+    const closedSupportSignals = new Set((closedNotes ?? []).map((n: { entity_id: string }) => n.entity_id));
+    const approvalUseCaseIds = [...new Set((approvals ?? []).map((a) => a.use_case_id).filter(Boolean))];
+    const useCaseById = new Map<string, { id: string; name: string; workspace_id: string }>();
+    if (approvalUseCaseIds.length > 0) {
+      const { data: useCases, error: ucErr } = await supabaseAdmin
+        .from("use_cases")
+        .select("id, name, workspace_id")
+        .in("id", approvalUseCaseIds);
+      if (ucErr) throw new Error(ucErr.message);
+      for (const useCase of useCases ?? []) {
+        useCaseById.set(useCase.id, useCase as { id: string; name: string; workspace_id: string });
+      }
+    }
     const items: AdminSupportItem[] = [];
 
     for (const ws of workspaces ?? []) {
+      const supportId = `onboarding:${ws.id}`;
+      if (closedSupportSignals.has(supportId)) continue;
       if (!ws.workspace_profile || !ws.use_case_profile || !ws.worked_example) {
         items.push({
-          id: `onboarding:${ws.id}`,
+          id: supportId,
           kind: "incomplete_onboarding",
           title: "Workspace onboarding incomplete",
           detail: "Company profile, worked example, or use-case profile is missing.",
@@ -396,8 +457,10 @@ export const getAdminSupport = createServerFn({ method: "GET" })
     }
 
     for (const invite of invites ?? []) {
+      const supportId = `invite:${invite.id}`;
+      if (closedSupportSignals.has(supportId)) continue;
       items.push({
-        id: invite.id,
+        id: supportId,
         kind: "pending_invite",
         title: "Pending invitation",
         detail: invite.email,
@@ -408,21 +471,25 @@ export const getAdminSupport = createServerFn({ method: "GET" })
     }
 
     for (const approval of approvals ?? []) {
-      if (!approval.workspace_id || !approval.submitted_at) continue;
+      const supportId = `approval:${approval.id}`;
+      if (closedSupportSignals.has(supportId)) continue;
+      const useCase = useCaseById.get(approval.use_case_id);
       items.push({
-        id: approval.id,
+        id: supportId,
         kind: "pending_approval",
         title: "Build approval waiting",
-        detail: `Use case ${approval.use_case_id}`,
-        workspace_id: approval.workspace_id,
-        workspace_name: wsById.get(approval.workspace_id) ?? null,
-        created_at: approval.submitted_at,
+        detail: useCase ? `${useCase.name} (${approval.use_case_id})` : `Use case ${approval.use_case_id}`,
+        workspace_id: useCase?.workspace_id ?? null,
+        workspace_name: useCase ? wsById.get(useCase.workspace_id) ?? null : null,
+        created_at: approval.submitted_at ?? new Date().toISOString(),
       });
     }
 
     for (const flag of flags ?? []) {
+      const supportId = `governance:${flag.id}`;
+      if (closedSupportSignals.has(supportId)) continue;
       items.push({
-        id: flag.id,
+        id: supportId,
         kind: "open_governance_flag",
         title: `${flag.severity} governance flag`,
         detail: flag.rule_code,
@@ -435,9 +502,20 @@ export const getAdminSupport = createServerFn({ method: "GET" })
     return items.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 100);
   });
 
+export type AdminAuditEntry = {
+  id: string;
+  actor_id: string | null;
+  action_type: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_label: string | null;
+  metadata: Json | null;
+  created_at: string;
+};
+
 export const getAdminAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<AdminAuditEntry[]> => {
     await requireHoiAdmin(context.userId, ["owner", "admin", "support", "read_only"]);
     const { data, error } = await adminDb
       .from("hoi_admin_audit_log")
@@ -445,7 +523,7 @@ export const getAdminAudit = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return (data ?? []) as AdminAuditEntry[];
   });
 
 export const getAdminSettings = createServerFn({ method: "GET" })
@@ -458,4 +536,365 @@ export const getAdminSettings = createServerFn({ method: "GET" })
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []) as AdminUserRow[];
+  });
+
+const NotesInput = z.object({
+  entityType: AdminNoteEntity,
+  entityId: z.string().min(1),
+});
+
+export const getAdminNotes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => NotesInput.parse(input))
+  .handler(async ({ data, context }): Promise<AdminNote[]> => {
+    await requireHoiAdmin(context.userId);
+    const { data: notes, error } = await adminDb
+      .from("hoi_admin_notes")
+      .select("id, entity_type, entity_id, note, status, created_by, created_at, updated_at, reviewed_at, reviewed_by")
+      .eq("entity_type", data.entityType)
+      .eq("entity_id", data.entityId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (notes ?? []) as AdminNote[];
+  });
+
+const CreateNoteInput = NotesInput.extend({
+  note: z.string().trim().min(2).max(4000),
+  status: AdminNoteStatus.optional(),
+});
+
+export const createAdminNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => CreateNoteInput.parse(input))
+  .handler(async ({ data, context }): Promise<AdminNote> => {
+    await requireHoiAdmin(context.userId);
+    const row = {
+      entity_type: data.entityType,
+      entity_id: data.entityId,
+      note: data.note,
+      status: data.status ?? "open",
+      created_by: context.userId,
+      reviewed_at: data.status && data.status !== "open" ? new Date().toISOString() : null,
+      reviewed_by: data.status && data.status !== "open" ? context.userId : null,
+    };
+    const { data: note, error } = await adminDb
+      .from("hoi_admin_notes")
+      .insert(row)
+      .select("id, entity_type, entity_id, note, status, created_by, created_at, updated_at, reviewed_at, reviewed_by")
+      .single();
+    if (error) throw new Error(error.message);
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "admin_note_created",
+      entityType: data.entityType,
+      entityId: data.entityId,
+      afterState: row,
+    });
+    return note as AdminNote;
+  });
+
+const UpdateNoteInput = z.object({
+  noteId: z.string().uuid(),
+  status: AdminNoteStatus,
+});
+
+export const updateAdminNoteStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => UpdateNoteInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId);
+    const { data: before, error: beforeErr } = await adminDb
+      .from("hoi_admin_notes")
+      .select("id, entity_type, entity_id, note, status")
+      .eq("id", data.noteId)
+      .maybeSingle();
+    if (beforeErr) throw new Error(beforeErr.message);
+    if (!before) throw new Error("Admin note not found");
+
+    const patch = {
+      status: data.status,
+      reviewed_at: data.status === "open" ? null : new Date().toISOString(),
+      reviewed_by: data.status === "open" ? null : context.userId,
+    };
+    const { error } = await adminDb.from("hoi_admin_notes").update(patch).eq("id", data.noteId);
+    if (error) throw new Error(error.message);
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "admin_note_status_updated",
+      entityType: before.entity_type,
+      entityId: before.entity_id,
+      beforeState: { status: before.status },
+      afterState: { status: data.status },
+    });
+    return { ok: true };
+  });
+
+const ResolveSupportInput = z.object({
+  supportId: z.string().min(1),
+  note: z.string().trim().min(2).max(4000),
+});
+
+export const resolveAdminSupportSignal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => ResolveSupportInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin", "support"]);
+    const row = {
+      entity_type: "support",
+      entity_id: data.supportId,
+      note: data.note,
+      status: "closed",
+      created_by: context.userId,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: context.userId,
+    };
+    const { error } = await adminDb.from("hoi_admin_notes").insert(row);
+    if (error) throw new Error(error.message);
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "support_signal_resolved",
+      entityType: "support",
+      entityId: data.supportId,
+      afterState: row,
+    });
+    return { ok: true };
+  });
+
+const WorkspaceUpdateInput = z.object({
+  workspaceId: z.string().uuid(),
+  plan: z.enum(["free", "team", "enterprise"]).optional(),
+});
+
+export const updateAdminWorkspace = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => WorkspaceUpdateInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin", "billing_admin", "support"]);
+    const { data: before, error: beforeErr } = await supabaseAdmin
+      .from("workspaces")
+      .select("id, name, plan")
+      .eq("id", data.workspaceId)
+      .maybeSingle();
+    if (beforeErr) throw new Error(beforeErr.message);
+    if (!before) throw new Error("Workspace not found");
+
+    const patch: { plan?: "free" | "team" | "enterprise" } = {};
+    if (data.plan) patch.plan = data.plan;
+    if (Object.keys(patch).length === 0) return { ok: true };
+
+    const { error } = await supabaseAdmin.from("workspaces").update(patch).eq("id", data.workspaceId);
+    if (error) throw new Error(error.message);
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "workspace_admin_updated",
+      entityType: "workspace",
+      entityId: data.workspaceId,
+      entityLabel: before.name,
+      beforeState: { plan: before.plan },
+      afterState: patch,
+    });
+    return { ok: true };
+  });
+
+export type AdminWorkspaceMemberRow = {
+  user_id: string;
+  role: "owner" | "admin" | "member" | "viewer";
+  joined_at: string;
+  invited_by: string | null;
+  full_name: string | null;
+  email: string | null;
+};
+
+const WorkspaceMembersInput = z.object({
+  workspaceId: z.string().uuid(),
+});
+
+export const getAdminWorkspaceMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => WorkspaceMembersInput.parse(input))
+  .handler(async ({ data, context }): Promise<AdminWorkspaceMemberRow[]> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin", "support", "read_only"]);
+
+    const { data: members, error } = await supabaseAdmin
+      .from("workspace_members")
+      .select("user_id, role, joined_at, invited_by")
+      .eq("workspace_id", data.workspaceId)
+      .order("joined_at", { ascending: true });
+    if (error) throw new Error(error.message);
+
+    const userIds = [...new Set((members ?? []).map((member) => member.user_id))];
+    const profileByUser = new Map<string, { full_name: string | null }>();
+    if (userIds.length) {
+      const { data: profiles, error: profileErr } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", userIds);
+      if (profileErr) throw new Error(profileErr.message);
+      for (const profile of profiles ?? []) profileByUser.set(profile.user_id, profile);
+    }
+
+    const { data: authUsers, error: authErr } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+    if (authErr) throw new Error(authErr.message);
+    const emailByUser = new Map(authUsers.users.map((user) => [user.id, user.email ?? null]));
+
+    return (members ?? []).map((member) => ({
+      user_id: member.user_id,
+      role: member.role as AdminWorkspaceMemberRow["role"],
+      joined_at: member.joined_at,
+      invited_by: member.invited_by,
+      full_name: profileByUser.get(member.user_id)?.full_name ?? null,
+      email: emailByUser.get(member.user_id) ?? null,
+    }));
+  });
+
+const WorkspaceMemberRoleInput = z.object({
+  workspaceId: z.string().uuid(),
+  userId: z.string().uuid(),
+  role: z.enum(["owner", "admin", "member", "viewer"]),
+});
+
+export const updateAdminWorkspaceMemberRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => WorkspaceMemberRoleInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin"]);
+
+    const { data: workspace, error: wsErr } = await supabaseAdmin
+      .from("workspaces")
+      .select("id, name")
+      .eq("id", data.workspaceId)
+      .maybeSingle();
+    if (wsErr) throw new Error(wsErr.message);
+    if (!workspace) throw new Error("Workspace not found");
+
+    const { data: before, error: beforeErr } = await supabaseAdmin
+      .from("workspace_members")
+      .select("role")
+      .eq("workspace_id", data.workspaceId)
+      .eq("user_id", data.userId)
+      .maybeSingle();
+    if (beforeErr) throw new Error(beforeErr.message);
+    if (!before) throw new Error("Workspace member not found");
+    if (before.role === data.role) return { ok: true };
+
+    const { error } = await supabaseAdmin
+      .from("workspace_members")
+      .update({ role: data.role })
+      .eq("workspace_id", data.workspaceId)
+      .eq("user_id", data.userId);
+    if (error) throw new Error(error.message);
+
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "workspace_member_role_updated",
+      entityType: "workspace",
+      entityId: data.workspaceId,
+      entityLabel: workspace.name,
+      beforeState: { user_id: data.userId, role: before.role },
+      afterState: { user_id: data.userId, role: data.role },
+    });
+    return { ok: true };
+  });
+
+const SubscriptionInput = z.object({
+  workspaceId: z.string().uuid(),
+  planId: z.string().min(1),
+  status: z.enum(["manual", "trialing", "active", "past_due", "canceled", "unpaid", "incomplete"]),
+  seatLimit: z.number().int().positive().nullable().optional(),
+  stripeCustomerId: z.string().trim().nullable().optional(),
+  stripeSubscriptionId: z.string().trim().nullable().optional(),
+  priceId: z.string().trim().nullable().optional(),
+  currentPeriodEnd: z.string().trim().nullable().optional(),
+});
+
+export const upsertAdminWorkspaceSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => SubscriptionInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin", "billing_admin"]);
+    const { data: ws, error: wsErr } = await supabaseAdmin
+      .from("workspaces")
+      .select("id, name, plan")
+      .eq("id", data.workspaceId)
+      .maybeSingle();
+    if (wsErr) throw new Error(wsErr.message);
+    if (!ws) throw new Error("Workspace not found");
+
+    const { data: before } = await adminDb
+      .from("workspace_subscriptions")
+      .select("workspace_id, plan_id, status, stripe_customer_id, stripe_subscription_id, current_period_end, seat_limit, price_id")
+      .eq("workspace_id", data.workspaceId)
+      .maybeSingle();
+
+    const subscription = {
+      workspace_id: data.workspaceId,
+      plan_id: data.planId,
+      status: data.status,
+      stripe_customer_id: data.stripeCustomerId || null,
+      stripe_subscription_id: data.stripeSubscriptionId || null,
+      current_period_end: data.currentPeriodEnd || null,
+      seat_limit: data.seatLimit ?? null,
+      price_id: data.priceId || null,
+    };
+    const { error } = await adminDb
+      .from("workspace_subscriptions")
+      .upsert(subscription, { onConflict: "workspace_id" });
+    if (error) throw new Error(error.message);
+
+    if (["free", "team", "enterprise"].includes(data.planId)) {
+      const { error: planErr } = await supabaseAdmin
+        .from("workspaces")
+        .update({ plan: data.planId })
+        .eq("id", data.workspaceId);
+      if (planErr) throw new Error(planErr.message);
+    }
+
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "workspace_subscription_upserted",
+      entityType: "billing",
+      entityId: data.workspaceId,
+      entityLabel: ws.name,
+      beforeState: before ?? { plan: ws.plan },
+      afterState: subscription,
+    });
+    return { ok: true };
+  });
+
+const AdminRoleInput = z.object({
+  userId: z.string().uuid(),
+  role: z.enum(["owner", "admin", "content_editor", "support", "billing_admin", "read_only"]),
+  status: z.enum(["active", "suspended"]),
+});
+
+export const upsertHoiAdminUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => AdminRoleInput.parse(input))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await requireHoiAdmin(context.userId, ["owner", "admin"]);
+    const { data: before } = await adminDb
+      .from("hoi_admin_users")
+      .select("user_id, role, status")
+      .eq("user_id", data.userId)
+      .maybeSingle();
+    const row = {
+      user_id: data.userId,
+      role: data.role,
+      status: data.status,
+      created_by: context.userId,
+    };
+    const { error } = await adminDb.from("hoi_admin_users").upsert(row, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+    await writeAdminAudit({
+      actorId: context.userId,
+      actionType: "hoi_admin_user_upserted",
+      entityType: "user",
+      entityId: data.userId,
+      beforeState: before ?? null,
+      afterState: row,
+    });
+    return { ok: true };
   });

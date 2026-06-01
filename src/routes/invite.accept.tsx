@@ -88,15 +88,7 @@ function AcceptInvitePage() {
       </AuthCard>
     );
   }
-
-  if (!invitation) {
-    return (
-      <AuthCard eyebrow="Invitation" title={<>Invitation <span className="accent-italic">unavailable.</span></>}>
-        <p className="text-[14px] text-graphite">This invitation could not be loaded.</p>
-        <Link to="/login" className="mt-4 inline-block text-[13px] text-azure hover:underline">Go to login</Link>
-      </AuthCard>
-    );
-  }
+  if (!invitation) return null;
 
   // invitation present + pending
   const returnTo = `/invite/accept?token=${encodeURIComponent(token)}`;

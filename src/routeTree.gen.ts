@@ -35,11 +35,14 @@ import { Route as AppWorkspaceSlugScaleRouteImport } from './routes/app.$workspa
 import { Route as AppWorkspaceSlugInviteRouteImport } from './routes/app.$workspaceSlug.invite'
 import { Route as AppWorkspaceSlugDiscoverRouteImport } from './routes/app.$workspaceSlug.discover'
 import { Route as AppWorkspaceSlugBuildRouteImport } from './routes/app.$workspaceSlug.build'
+import { Route as AppWorkspaceSlugAdminRouteImport } from './routes/app.$workspaceSlug.admin'
 import { Route as AppWorkspaceSlugScaleIndexRouteImport } from './routes/app.$workspaceSlug.scale.index'
 import { Route as AppWorkspaceSlugDiscoverIndexRouteImport } from './routes/app.$workspaceSlug.discover.index'
 import { Route as AppWorkspaceSlugBuildIndexRouteImport } from './routes/app.$workspaceSlug.build.index'
 import { Route as AppWorkspaceSlugAssessIndexRouteImport } from './routes/app.$workspaceSlug.assess.index'
+import { Route as AppWorkspaceSlugAdminIndexRouteImport } from './routes/app.$workspaceSlug.admin.index'
 import { Route as AppWorkspaceSlugScaleRoadmapRouteImport } from './routes/app.$workspaceSlug.scale.roadmap'
+import { Route as AppWorkspaceSlugScaleReviewsRouteImport } from './routes/app.$workspaceSlug.scale.reviews'
 import { Route as AppWorkspaceSlugScaleGovernanceRouteImport } from './routes/app.$workspaceSlug.scale.governance'
 import { Route as AppWorkspaceSlugScaleAuditRouteImport } from './routes/app.$workspaceSlug.scale.audit'
 import { Route as AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport } from './routes/app.$workspaceSlug.onboarding.workspace-profile'
@@ -51,6 +54,11 @@ import { Route as AppWorkspaceSlugBuildApprovalsRouteImport } from './routes/app
 import { Route as AppWorkspaceSlugAssessCompleteRouteImport } from './routes/app.$workspaceSlug.assess.complete'
 import { Route as AppWorkspaceSlugAssessAssignmentsRouteImport } from './routes/app.$workspaceSlug.assess.assignments'
 import { Route as AppWorkspaceSlugAssessModuleIdRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId'
+import { Route as AppWorkspaceSlugAdminSettingsRouteImport } from './routes/app.$workspaceSlug.admin.settings'
+import { Route as AppWorkspaceSlugAdminMembersRouteImport } from './routes/app.$workspaceSlug.admin.members'
+import { Route as AppWorkspaceSlugAdminInvoicesRouteImport } from './routes/app.$workspaceSlug.admin.invoices'
+import { Route as AppWorkspaceSlugAdminBillingRouteImport } from './routes/app.$workspaceSlug.admin.billing'
+import { Route as AppWorkspaceSlugAdminAnalyticsRouteImport } from './routes/app.$workspaceSlug.admin.analytics'
 import { Route as AppWorkspaceSlugBuildCaptureIndexRouteImport } from './routes/app.$workspaceSlug.build.capture.index'
 import { Route as AppWorkspaceSlugAssessModuleIdIndexRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.index'
 import { Route as AppWorkspaceSlugScaleUseCaseIdReviewRouteImport } from './routes/app.$workspaceSlug.scale.$useCaseId.review'
@@ -192,6 +200,11 @@ const AppWorkspaceSlugBuildRoute = AppWorkspaceSlugBuildRouteImport.update({
   path: '/build',
   getParentRoute: () => AppWorkspaceSlugRoute,
 } as any)
+const AppWorkspaceSlugAdminRoute = AppWorkspaceSlugAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppWorkspaceSlugRoute,
+} as any)
 const AppWorkspaceSlugScaleIndexRoute =
   AppWorkspaceSlugScaleIndexRouteImport.update({
     id: '/',
@@ -216,10 +229,22 @@ const AppWorkspaceSlugAssessIndexRoute =
     path: '/assess/',
     getParentRoute: () => AppWorkspaceSlugRoute,
   } as any)
+const AppWorkspaceSlugAdminIndexRoute =
+  AppWorkspaceSlugAdminIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
 const AppWorkspaceSlugScaleRoadmapRoute =
   AppWorkspaceSlugScaleRoadmapRouteImport.update({
     id: '/roadmap',
     path: '/roadmap',
+    getParentRoute: () => AppWorkspaceSlugScaleRoute,
+  } as any)
+const AppWorkspaceSlugScaleReviewsRoute =
+  AppWorkspaceSlugScaleReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
     getParentRoute: () => AppWorkspaceSlugScaleRoute,
   } as any)
 const AppWorkspaceSlugScaleGovernanceRoute =
@@ -288,6 +313,36 @@ const AppWorkspaceSlugAssessModuleIdRoute =
     path: '/assess/$moduleId',
     getParentRoute: () => AppWorkspaceSlugRoute,
   } as any)
+const AppWorkspaceSlugAdminSettingsRoute =
+  AppWorkspaceSlugAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
+const AppWorkspaceSlugAdminMembersRoute =
+  AppWorkspaceSlugAdminMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
+const AppWorkspaceSlugAdminInvoicesRoute =
+  AppWorkspaceSlugAdminInvoicesRouteImport.update({
+    id: '/invoices',
+    path: '/invoices',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
+const AppWorkspaceSlugAdminBillingRoute =
+  AppWorkspaceSlugAdminBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
+const AppWorkspaceSlugAdminAnalyticsRoute =
+  AppWorkspaceSlugAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
 const AppWorkspaceSlugBuildCaptureIndexRoute =
   AppWorkspaceSlugBuildCaptureIndexRouteImport.update({
     id: '/capture/',
@@ -351,6 +406,7 @@ export interface FileRoutesByFullPath {
   '/invite/accept': typeof InviteAcceptRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/app/$workspaceSlug/admin': typeof AppWorkspaceSlugAdminRouteWithChildren
   '/app/$workspaceSlug/build': typeof AppWorkspaceSlugBuildRouteWithChildren
   '/app/$workspaceSlug/discover': typeof AppWorkspaceSlugDiscoverRouteWithChildren
   '/app/$workspaceSlug/invite': typeof AppWorkspaceSlugInviteRoute
@@ -358,6 +414,11 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug/': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
+  '/app/$workspaceSlug/admin/billing': typeof AppWorkspaceSlugAdminBillingRoute
+  '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
+  '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
+  '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
@@ -369,7 +430,9 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
+  '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
   '/app/$workspaceSlug/scale/roadmap': typeof AppWorkspaceSlugScaleRoadmapRoute
+  '/app/$workspaceSlug/admin/': typeof AppWorkspaceSlugAdminIndexRoute
   '/app/$workspaceSlug/assess/': typeof AppWorkspaceSlugAssessIndexRoute
   '/app/$workspaceSlug/build/': typeof AppWorkspaceSlugBuildIndexRoute
   '/app/$workspaceSlug/discover/': typeof AppWorkspaceSlugDiscoverIndexRoute
@@ -404,6 +467,11 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
+  '/app/$workspaceSlug/admin/billing': typeof AppWorkspaceSlugAdminBillingRoute
+  '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
+  '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
+  '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
@@ -414,7 +482,9 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
+  '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
   '/app/$workspaceSlug/scale/roadmap': typeof AppWorkspaceSlugScaleRoadmapRoute
+  '/app/$workspaceSlug/admin': typeof AppWorkspaceSlugAdminIndexRoute
   '/app/$workspaceSlug/assess': typeof AppWorkspaceSlugAssessIndexRoute
   '/app/$workspaceSlug/build': typeof AppWorkspaceSlugBuildIndexRoute
   '/app/$workspaceSlug/discover': typeof AppWorkspaceSlugDiscoverIndexRoute
@@ -448,6 +518,7 @@ export interface FileRoutesById {
   '/invite/accept': typeof InviteAcceptRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/app/$workspaceSlug/admin': typeof AppWorkspaceSlugAdminRouteWithChildren
   '/app/$workspaceSlug/build': typeof AppWorkspaceSlugBuildRouteWithChildren
   '/app/$workspaceSlug/discover': typeof AppWorkspaceSlugDiscoverRouteWithChildren
   '/app/$workspaceSlug/invite': typeof AppWorkspaceSlugInviteRoute
@@ -455,6 +526,11 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug/': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
+  '/app/$workspaceSlug/admin/billing': typeof AppWorkspaceSlugAdminBillingRoute
+  '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
+  '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
+  '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
@@ -466,7 +542,9 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
+  '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
   '/app/$workspaceSlug/scale/roadmap': typeof AppWorkspaceSlugScaleRoadmapRoute
+  '/app/$workspaceSlug/admin/': typeof AppWorkspaceSlugAdminIndexRoute
   '/app/$workspaceSlug/assess/': typeof AppWorkspaceSlugAssessIndexRoute
   '/app/$workspaceSlug/build/': typeof AppWorkspaceSlugBuildIndexRoute
   '/app/$workspaceSlug/discover/': typeof AppWorkspaceSlugDiscoverIndexRoute
@@ -501,6 +579,7 @@ export interface FileRouteTypes {
     | '/invite/accept'
     | '/admin/'
     | '/app/'
+    | '/app/$workspaceSlug/admin'
     | '/app/$workspaceSlug/build'
     | '/app/$workspaceSlug/discover'
     | '/app/$workspaceSlug/invite'
@@ -508,6 +587,11 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug/'
+    | '/app/$workspaceSlug/admin/analytics'
+    | '/app/$workspaceSlug/admin/billing'
+    | '/app/$workspaceSlug/admin/invoices'
+    | '/app/$workspaceSlug/admin/members'
+    | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
@@ -519,7 +603,9 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
+    | '/app/$workspaceSlug/scale/reviews'
     | '/app/$workspaceSlug/scale/roadmap'
+    | '/app/$workspaceSlug/admin/'
     | '/app/$workspaceSlug/assess/'
     | '/app/$workspaceSlug/build/'
     | '/app/$workspaceSlug/discover/'
@@ -554,6 +640,11 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug'
+    | '/app/$workspaceSlug/admin/analytics'
+    | '/app/$workspaceSlug/admin/billing'
+    | '/app/$workspaceSlug/admin/invoices'
+    | '/app/$workspaceSlug/admin/members'
+    | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
@@ -564,7 +655,9 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
+    | '/app/$workspaceSlug/scale/reviews'
     | '/app/$workspaceSlug/scale/roadmap'
+    | '/app/$workspaceSlug/admin'
     | '/app/$workspaceSlug/assess'
     | '/app/$workspaceSlug/build'
     | '/app/$workspaceSlug/discover'
@@ -597,6 +690,7 @@ export interface FileRouteTypes {
     | '/invite/accept'
     | '/admin/'
     | '/app/'
+    | '/app/$workspaceSlug/admin'
     | '/app/$workspaceSlug/build'
     | '/app/$workspaceSlug/discover'
     | '/app/$workspaceSlug/invite'
@@ -604,6 +698,11 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug/'
+    | '/app/$workspaceSlug/admin/analytics'
+    | '/app/$workspaceSlug/admin/billing'
+    | '/app/$workspaceSlug/admin/invoices'
+    | '/app/$workspaceSlug/admin/members'
+    | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
@@ -615,7 +714,9 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
+    | '/app/$workspaceSlug/scale/reviews'
     | '/app/$workspaceSlug/scale/roadmap'
+    | '/app/$workspaceSlug/admin/'
     | '/app/$workspaceSlug/assess/'
     | '/app/$workspaceSlug/build/'
     | '/app/$workspaceSlug/discover/'
@@ -833,6 +934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugBuildRouteImport
       parentRoute: typeof AppWorkspaceSlugRoute
     }
+    '/app/$workspaceSlug/admin': {
+      id: '/app/$workspaceSlug/admin'
+      path: '/admin'
+      fullPath: '/app/$workspaceSlug/admin'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminRouteImport
+      parentRoute: typeof AppWorkspaceSlugRoute
+    }
     '/app/$workspaceSlug/scale/': {
       id: '/app/$workspaceSlug/scale/'
       path: '/'
@@ -861,11 +969,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugAssessIndexRouteImport
       parentRoute: typeof AppWorkspaceSlugRoute
     }
+    '/app/$workspaceSlug/admin/': {
+      id: '/app/$workspaceSlug/admin/'
+      path: '/'
+      fullPath: '/app/$workspaceSlug/admin/'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminIndexRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
     '/app/$workspaceSlug/scale/roadmap': {
       id: '/app/$workspaceSlug/scale/roadmap'
       path: '/roadmap'
       fullPath: '/app/$workspaceSlug/scale/roadmap'
       preLoaderRoute: typeof AppWorkspaceSlugScaleRoadmapRouteImport
+      parentRoute: typeof AppWorkspaceSlugScaleRoute
+    }
+    '/app/$workspaceSlug/scale/reviews': {
+      id: '/app/$workspaceSlug/scale/reviews'
+      path: '/reviews'
+      fullPath: '/app/$workspaceSlug/scale/reviews'
+      preLoaderRoute: typeof AppWorkspaceSlugScaleReviewsRouteImport
       parentRoute: typeof AppWorkspaceSlugScaleRoute
     }
     '/app/$workspaceSlug/scale/governance': {
@@ -945,6 +1067,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugAssessModuleIdRouteImport
       parentRoute: typeof AppWorkspaceSlugRoute
     }
+    '/app/$workspaceSlug/admin/settings': {
+      id: '/app/$workspaceSlug/admin/settings'
+      path: '/settings'
+      fullPath: '/app/$workspaceSlug/admin/settings'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminSettingsRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
+    '/app/$workspaceSlug/admin/members': {
+      id: '/app/$workspaceSlug/admin/members'
+      path: '/members'
+      fullPath: '/app/$workspaceSlug/admin/members'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminMembersRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
+    '/app/$workspaceSlug/admin/invoices': {
+      id: '/app/$workspaceSlug/admin/invoices'
+      path: '/invoices'
+      fullPath: '/app/$workspaceSlug/admin/invoices'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminInvoicesRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
+    '/app/$workspaceSlug/admin/billing': {
+      id: '/app/$workspaceSlug/admin/billing'
+      path: '/billing'
+      fullPath: '/app/$workspaceSlug/admin/billing'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminBillingRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
+    '/app/$workspaceSlug/admin/analytics': {
+      id: '/app/$workspaceSlug/admin/analytics'
+      path: '/analytics'
+      fullPath: '/app/$workspaceSlug/admin/analytics'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminAnalyticsRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
     '/app/$workspaceSlug/build/capture/': {
       id: '/app/$workspaceSlug/build/capture/'
       path: '/capture'
@@ -997,6 +1154,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppWorkspaceSlugAdminRouteChildren {
+  AppWorkspaceSlugAdminAnalyticsRoute: typeof AppWorkspaceSlugAdminAnalyticsRoute
+  AppWorkspaceSlugAdminBillingRoute: typeof AppWorkspaceSlugAdminBillingRoute
+  AppWorkspaceSlugAdminInvoicesRoute: typeof AppWorkspaceSlugAdminInvoicesRoute
+  AppWorkspaceSlugAdminMembersRoute: typeof AppWorkspaceSlugAdminMembersRoute
+  AppWorkspaceSlugAdminSettingsRoute: typeof AppWorkspaceSlugAdminSettingsRoute
+  AppWorkspaceSlugAdminIndexRoute: typeof AppWorkspaceSlugAdminIndexRoute
+}
+
+const AppWorkspaceSlugAdminRouteChildren: AppWorkspaceSlugAdminRouteChildren = {
+  AppWorkspaceSlugAdminAnalyticsRoute: AppWorkspaceSlugAdminAnalyticsRoute,
+  AppWorkspaceSlugAdminBillingRoute: AppWorkspaceSlugAdminBillingRoute,
+  AppWorkspaceSlugAdminInvoicesRoute: AppWorkspaceSlugAdminInvoicesRoute,
+  AppWorkspaceSlugAdminMembersRoute: AppWorkspaceSlugAdminMembersRoute,
+  AppWorkspaceSlugAdminSettingsRoute: AppWorkspaceSlugAdminSettingsRoute,
+  AppWorkspaceSlugAdminIndexRoute: AppWorkspaceSlugAdminIndexRoute,
+}
+
+const AppWorkspaceSlugAdminRouteWithChildren =
+  AppWorkspaceSlugAdminRoute._addFileChildren(
+    AppWorkspaceSlugAdminRouteChildren,
+  )
+
 interface AppWorkspaceSlugBuildRouteChildren {
   AppWorkspaceSlugBuildApprovalsRoute: typeof AppWorkspaceSlugBuildApprovalsRoute
   AppWorkspaceSlugBuildDashboardRoute: typeof AppWorkspaceSlugBuildDashboardRoute
@@ -1041,6 +1221,7 @@ const AppWorkspaceSlugDiscoverRouteWithChildren =
 interface AppWorkspaceSlugScaleRouteChildren {
   AppWorkspaceSlugScaleAuditRoute: typeof AppWorkspaceSlugScaleAuditRoute
   AppWorkspaceSlugScaleGovernanceRoute: typeof AppWorkspaceSlugScaleGovernanceRoute
+  AppWorkspaceSlugScaleReviewsRoute: typeof AppWorkspaceSlugScaleReviewsRoute
   AppWorkspaceSlugScaleRoadmapRoute: typeof AppWorkspaceSlugScaleRoadmapRoute
   AppWorkspaceSlugScaleIndexRoute: typeof AppWorkspaceSlugScaleIndexRoute
   AppWorkspaceSlugScaleUseCaseIdReviewRoute: typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
@@ -1049,6 +1230,7 @@ interface AppWorkspaceSlugScaleRouteChildren {
 const AppWorkspaceSlugScaleRouteChildren: AppWorkspaceSlugScaleRouteChildren = {
   AppWorkspaceSlugScaleAuditRoute: AppWorkspaceSlugScaleAuditRoute,
   AppWorkspaceSlugScaleGovernanceRoute: AppWorkspaceSlugScaleGovernanceRoute,
+  AppWorkspaceSlugScaleReviewsRoute: AppWorkspaceSlugScaleReviewsRoute,
   AppWorkspaceSlugScaleRoadmapRoute: AppWorkspaceSlugScaleRoadmapRoute,
   AppWorkspaceSlugScaleIndexRoute: AppWorkspaceSlugScaleIndexRoute,
   AppWorkspaceSlugScaleUseCaseIdReviewRoute:
@@ -1085,6 +1267,7 @@ const AppWorkspaceSlugAssessModuleIdRouteWithChildren =
   )
 
 interface AppWorkspaceSlugRouteChildren {
+  AppWorkspaceSlugAdminRoute: typeof AppWorkspaceSlugAdminRouteWithChildren
   AppWorkspaceSlugBuildRoute: typeof AppWorkspaceSlugBuildRouteWithChildren
   AppWorkspaceSlugDiscoverRoute: typeof AppWorkspaceSlugDiscoverRouteWithChildren
   AppWorkspaceSlugInviteRoute: typeof AppWorkspaceSlugInviteRoute
@@ -1100,6 +1283,7 @@ interface AppWorkspaceSlugRouteChildren {
 }
 
 const AppWorkspaceSlugRouteChildren: AppWorkspaceSlugRouteChildren = {
+  AppWorkspaceSlugAdminRoute: AppWorkspaceSlugAdminRouteWithChildren,
   AppWorkspaceSlugBuildRoute: AppWorkspaceSlugBuildRouteWithChildren,
   AppWorkspaceSlugDiscoverRoute: AppWorkspaceSlugDiscoverRouteWithChildren,
   AppWorkspaceSlugInviteRoute: AppWorkspaceSlugInviteRoute,

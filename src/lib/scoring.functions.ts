@@ -755,7 +755,7 @@ export const scoreUseCase = createServerFn({ method: "POST" })
       confidence,
     };
 
-    const { error: snapshotErr } = await supabaseAdmin
+    const { error: snapshotErr } = await (supabaseAdmin as any)
       .from("use_case_score_snapshots")
       .insert({
         workspace_id: uc.workspace_id,

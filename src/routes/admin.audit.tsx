@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { AdminPageHeader, AdminShell } from "@/components/admin/AdminShell";
-import { getAdminAudit } from "@/lib/admin/admin.functions";
+import { getAdminAudit, type AdminAuditEntry } from "@/lib/admin/admin.functions";
 
 export const Route = createFileRoute("/admin/audit")({
   component: AdminAudit,
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/audit")({
 
 function AdminAudit() {
   const getAudit = useServerFn(getAdminAudit);
-  const { data = [], isLoading, error } = useQuery({
+  const { data = [], isLoading, error } = useQuery<AdminAuditEntry[]>({
     queryKey: ["admin", "audit"],
     queryFn: () => getAudit(),
   });
@@ -35,7 +35,7 @@ function AdminAudit() {
             <p className="p-8 text-center text-[14px] text-slate">No internal admin events yet.</p>
           ) : (
             <div className="divide-y divide-chalk">
-              {(data as any[]).map((entry: any) => (
+              {data.map((entry) => (
                 <div key={entry.id} className="p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

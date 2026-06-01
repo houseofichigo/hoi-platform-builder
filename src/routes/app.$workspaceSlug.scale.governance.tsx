@@ -13,6 +13,7 @@ import {
 import {
   updateGovernanceFlag,
   bulkMarkAdvisoryNotApplicable,
+  recomputeGovernanceFlags,
 } from "@/lib/scale/scale.functions";
 
 export const Route = createFileRoute("/app/$workspaceSlug/scale/governance")({
@@ -53,37 +54,28 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 const SOURCE_LABEL: Record<string, string> = {
-  sdaia: "SDAIA",
-  pdpl: "PDPL",
-  ndmo: "NDMO",
-  nca_sama: "NCA / SAMA",
-  saip: "SAIP",
+  eu_ai_act: "EU AI Act",
+  gdpr: "GDPR",
   internal_policy: "Internal policy",
 };
 
 const RULE_EXPLANATION: Record<string, string> = {
-  SDAIA_HIGH_IMPACT_AI:
-    "This use case has high-impact AI signals. Confirm risk classification, human accountability, validation, and monitoring before deployment.",
-  SDAIA_TECHNICAL_DOCUMENTATION:
-    "Production deployment requires a technical file covering purpose, data, model behavior, human oversight, monitoring, and change controls.",
-  SDAIA_HUMAN_OVERSIGHT_REQUIRED:
+  EU_AI_ACT_HIGH_RISK:
+    "This use case has high-risk AI signals. Confirm classification, human accountability, validation, monitoring, and conformity obligations before deployment.",
+  ARTICLE_11_DOCUMENTATION:
+    "Production deployment requires technical documentation covering purpose, data, system behavior, human oversight, monitoring, and change controls.",
+  HITL_REQUIRED_ART14:
     "Meaningful human oversight is required. A reviewer must be able to approve, override, pause, or escalate the system output.",
-  SDAIA_TRANSPARENCY_REQUIRED:
-    "Customer- or citizen-facing AI requires clear disclosure, user instructions, and support paths.",
-  SDAIA_MODEL_VALIDATION_REQUIRED:
-    "High-impact AI must have validation evidence before launch, including test cases, accuracy thresholds, and failure handling.",
-  PDPL_PRIVACY_IMPACT_REVIEW:
-    "Personal data and automated processing require privacy review, lawful basis, notice, minimisation, retention, and data-subject handling.",
-  PDPL_DATA_MINIMISATION:
+  TRANSPARENCY_ART13:
+    "Customer- or user-facing AI requires clear disclosure, user instructions, and support paths.",
+  CONFORMITY_ASSESSMENT:
+    "High-risk AI needs conformity assessment evidence before launch, including test cases, thresholds, and failure handling.",
+  DPIA_REQUIRED:
+    "Personal data and automated processing require GDPR privacy review, lawful basis, notice, minimisation, retention, and data-subject handling.",
+  DATA_MINIMISATION:
     "Review the data scope and remove fields that are not necessary for the business purpose.",
-  PDPL_CROSS_BORDER_REVIEW:
-    "Personal data combined with foreign vendor access needs a cross-border transfer and processor review.",
-  NDMO_DATA_GOVERNANCE_REVIEW:
-    "Data classification, ownership, lineage, quality, and access controls need review before scaling.",
-  NCA_SAMA_SECURITY_REVIEW:
-    "Security review is required for sensitive data, external access, financial services, or critical infrastructure exposure.",
-  SAIP_IP_REVIEW:
-    "Review ownership and licensing for prompts, training data, vendor models, generated outputs, and reusable IP.",
+  RIGHT_TO_EXPLANATION:
+    "Automated decisions affecting individuals need a clear explanation, appeal, and human review path.",
   SECURITY_REVIEW_REQUIRED:
     "Internal policy requires a security review when foreign data access or multiple integrations are involved.",
   CHANGE_MANAGEMENT:
@@ -92,7 +84,7 @@ const RULE_EXPLANATION: Record<string, string> = {
 
 const STATUSES = ["open", "in_progress", "resolved", "accepted_risk", "not_applicable"] as const;
 const SEVERITIES = ["hard_stop", "requires_action", "advisory"] as const;
-const SOURCES = ["sdaia", "pdpl", "ndmo", "nca_sama", "saip", "internal_policy"] as const;
+const SOURCES = ["eu_ai_act", "gdpr", "internal_policy"] as const;
 
 const ALLOWED_FLAG_TRANSITIONS: Record<string, string[]> = {
   open: ["in_progress", "resolved", "accepted_risk", "not_applicable"],
@@ -163,6 +155,7 @@ function GovernancePage() {
   );
 
   const bulkFn = useServerFn(bulkMarkAdvisoryNotApplicable);
+  const recomputeFn = useServerFn(recomputeGovernanceFlags);
   const bulk = useMutation({
     mutationFn: () => bulkFn({ data: { workspaceId: workspace!.id } }),
     onSuccess: (res) => {
@@ -179,6 +172,21 @@ function GovernancePage() {
     onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Bulk update failed"),
   });
 
+  const recompute = useMutation({
+    mutationFn: () => recomputeFn({ data: { workspaceId: workspace!.id } }),
+    onSuccess: (res) => {
+      if (!res.ok) {
+        toast.error("Only workspace admins can recompute flags");
+        return;
+      }
+      toast.success(`Governance register refreshed: ${res.created} created, ${res.resolved} resolved`);
+      qc.invalidateQueries({ queryKey: ["scale", "governance_flags_full", workspace?.id] });
+      qc.invalidateQueries({ queryKey: ["scale", "governance_flags_summary", workspace?.id] });
+      qc.invalidateQueries({ queryKey: ["scale", "audit_month_count", workspace?.id] });
+    },
+    onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Recompute failed"),
+  });
+
   if (!workspace) return null;
 
   return (
@@ -190,7 +198,7 @@ function GovernancePage() {
             Governance <em className="text-terracotta not-italic font-display italic">flags.</em>
           </h2>
           <p className="text-[13px] text-graphite mt-1">
-            Track SDAIA, PDPL, NDMO, NCA/SAMA, SAIP, and operating-policy flags across the deployment roadmap.
+            Track EU AI Act, GDPR, and operating-policy flags across the deployment roadmap.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -200,18 +208,27 @@ function GovernancePage() {
             </span>
           )}
           {isAdmin && (
-            <button
-              onClick={() => setConfirmBulk(true)}
-              disabled={bulkCandidates.length === 0}
-              className="rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] text-navy hover:bg-mist disabled:opacity-50"
-              title={
-                bulkCandidates.length === 0
-                  ? "No open/in-progress advisory flags"
-                  : `Affects ${bulkCandidates.length} advisory flag(s)`
-              }
-            >
-              Mark all advisory as not applicable
-            </button>
+            <>
+              <button
+                onClick={() => recompute.mutate()}
+                disabled={recompute.isPending}
+                className="rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] text-navy hover:bg-mist disabled:opacity-50"
+              >
+                {recompute.isPending ? "Refreshing…" : "Recompute flags"}
+              </button>
+              <button
+                onClick={() => setConfirmBulk(true)}
+                disabled={bulkCandidates.length === 0}
+                className="rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] text-navy hover:bg-mist disabled:opacity-50"
+                title={
+                  bulkCandidates.length === 0
+                    ? "No open/in-progress advisory flags"
+                    : `Affects ${bulkCandidates.length} advisory flag(s)`
+                }
+              >
+                Mark all advisory as not applicable
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -456,6 +473,25 @@ function FlagDetail({
             </p>
           </div>
 
+          <div className="rounded-md border border-chalk bg-paper p-3">
+            <p className="text-[10px] uppercase tracking-wide text-slate">Reviewer and evidence</p>
+            <p className="mt-1 text-navy">{flag.reviewer_role ?? reviewerFallback(flag.rule_source)}</p>
+            <ul className="mt-2 space-y-1 text-[12px] text-graphite">
+              {(Array.isArray(flag.evidence_requirements) && flag.evidence_requirements.length > 0
+                ? flag.evidence_requirements
+                : evidenceFallback(flag.rule_source)
+              ).map((item) => (
+                <li key={item}>- {item}</li>
+              ))}
+            </ul>
+            {(flag.resolved_at || flag.resolved_reason) && (
+              <p className="mt-2 text-[11px] text-slate">
+                Resolved {flag.resolved_at ? new Date(flag.resolved_at).toLocaleString() : ""}
+                {flag.resolved_reason ? `: ${flag.resolved_reason}` : ""}
+              </p>
+            )}
+          </div>
+
           {isAdmin ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -634,6 +670,28 @@ function ConfirmModal({
 function shortDate(iso: string): string {
   const d = new Date(iso);
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function reviewerFallback(source: string): string {
+  switch (source) {
+    case "gdpr":
+      return "DPO";
+    case "eu_ai_act":
+      return "AI governance owner";
+    default:
+      return "Business owner";
+  }
+}
+
+function evidenceFallback(source: string): string[] {
+  switch (source) {
+    case "gdpr":
+      return ["processing purpose", "DPIA decision", "data minimisation note"];
+    case "eu_ai_act":
+      return ["AI purpose", "oversight design", "validation evidence"];
+    default:
+      return ["owner sign-off", "change record", "rollback path"];
+  }
 }
 
 function describeAction(type: string): string {

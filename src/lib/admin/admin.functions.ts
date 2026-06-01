@@ -408,6 +408,7 @@ export const getAdminSupport = createServerFn({ method: "GET" })
     }
 
     for (const approval of approvals ?? []) {
+      if (!approval.workspace_id || !approval.submitted_at) continue;
       items.push({
         id: approval.id,
         kind: "pending_approval",

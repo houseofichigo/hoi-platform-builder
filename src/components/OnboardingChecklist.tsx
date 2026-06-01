@@ -363,6 +363,7 @@ export function OnboardingChecklist() {
       | "/app/$workspaceSlug/build/capture"
       | "/app/$workspaceSlug/scale",
   ) {
+    if (!workspace) return;
     markTourCompleted.mutate(undefined, {
       onSuccess: () => {
         setTourOpen(false);

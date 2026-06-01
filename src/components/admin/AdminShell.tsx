@@ -16,29 +16,21 @@ import { useAuth } from "@/hooks/useAuth";
 import { useHoiAdmin } from "@/hooks/useHoiAdmin";
 
 const ADMIN_NAV = [
-  { href: "/admin", label: "Dashboard", icon: Home },
-  { href: "/admin/library", label: "Library", icon: Library },
-  { href: "/admin/content", label: "Content Ops", icon: BookOpen },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/workspaces", label: "Workspaces", icon: Shield },
-  { href: "/admin/billing", label: "Billing", icon: CreditCard },
-  { href: "/admin/support", label: "Support", icon: LifeBuoy },
-  { href: "/admin/audit", label: "Audit", icon: FileClock },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin", label: "Dashboard", icon: Home, canShow: () => true },
+  { href: "/admin/library", label: "Library", icon: Library, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canManageContent },
+  { href: "/admin/content", label: "Content Ops", icon: BookOpen, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canManageContent },
+  { href: "/admin/users", label: "Users", icon: Users, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canSupportCustomers || admin.role === "read_only" },
+  { href: "/admin/workspaces", label: "Workspaces", icon: Shield, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canSupportCustomers || admin.canManageBilling || admin.role === "read_only" },
+  { href: "/admin/billing", label: "Billing", icon: CreditCard, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canManageBilling || admin.role === "read_only" },
+  { href: "/admin/support", label: "Support", icon: LifeBuoy, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canSupportCustomers || admin.role === "read_only" },
+  { href: "/admin/audit", label: "Audit", icon: FileClock, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canSupportCustomers || admin.role === "read_only" },
+  { href: "/admin/settings", label: "Settings", icon: Settings, canShow: (admin: ReturnType<typeof useHoiAdmin>) => admin.canManageAdmins },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { user, loading: authLoading } = useAuth();
+  const { user } = useAuth();
   const admin = useHoiAdmin();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-paper">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-chalk border-t-terracotta" />
-      </div>
-    );
-  }
 
   if (!user) {
     return (
@@ -82,6 +74,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
   }
 
+  const visibleNav = ADMIN_NAV.filter((item) => item.canShow(admin));
+
   return (
     <div className="min-h-screen bg-paper text-navy">
       <aside className="fixed inset-y-0 left-0 hidden w-[244px] border-r border-chalk bg-ink text-white lg:block">
@@ -93,7 +87,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <p className="mt-1 text-[12px] text-white/55">Role: {admin.role}</p>
         </div>
         <nav className="space-y-1 p-3">
-          {ADMIN_NAV.map((item) => {
+          {visibleNav.map((item) => {
             const Icon = item.icon;
             const active =
               item.href === "/admin"
@@ -138,7 +132,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </div>
           </div>
           <nav className="mt-3 flex gap-2 overflow-x-auto lg:hidden">
-            {ADMIN_NAV.map((item) => (
+            {visibleNav.map((item) => (
               <a
                 key={item.href}
                 href={item.href}

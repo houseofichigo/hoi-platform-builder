@@ -51,6 +51,7 @@ import { Route as AppWorkspaceSlugBuildApprovalsRouteImport } from './routes/app
 import { Route as AppWorkspaceSlugAssessCompleteRouteImport } from './routes/app.$workspaceSlug.assess.complete'
 import { Route as AppWorkspaceSlugAssessAssignmentsRouteImport } from './routes/app.$workspaceSlug.assess.assignments'
 import { Route as AppWorkspaceSlugAssessModuleIdRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId'
+import { Route as AppWorkspaceSlugAdminAnalyticsRouteImport } from './routes/app.$workspaceSlug.admin.analytics'
 import { Route as AppWorkspaceSlugBuildCaptureIndexRouteImport } from './routes/app.$workspaceSlug.build.capture.index'
 import { Route as AppWorkspaceSlugAssessModuleIdIndexRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.index'
 import { Route as AppWorkspaceSlugScaleUseCaseIdReviewRouteImport } from './routes/app.$workspaceSlug.scale.$useCaseId.review'
@@ -288,6 +289,12 @@ const AppWorkspaceSlugAssessModuleIdRoute =
     path: '/assess/$moduleId',
     getParentRoute: () => AppWorkspaceSlugRoute,
   } as any)
+const AppWorkspaceSlugAdminAnalyticsRoute =
+  AppWorkspaceSlugAdminAnalyticsRouteImport.update({
+    id: '/admin/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AppWorkspaceSlugRoute,
+  } as any)
 const AppWorkspaceSlugBuildCaptureIndexRoute =
   AppWorkspaceSlugBuildCaptureIndexRouteImport.update({
     id: '/capture/',
@@ -358,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug/': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
@@ -404,6 +412,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
@@ -455,6 +464,7 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/settings': typeof AppWorkspaceSlugSettingsRoute
   '/app/onboarding/create-workspace': typeof AppOnboardingCreateWorkspaceRoute
   '/app/$workspaceSlug/': typeof AppWorkspaceSlugIndexRoute
+  '/app/$workspaceSlug/admin/analytics': typeof AppWorkspaceSlugAdminAnalyticsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug/'
+    | '/app/$workspaceSlug/admin/analytics'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
@@ -554,6 +565,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug'
+    | '/app/$workspaceSlug/admin/analytics'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
@@ -604,6 +616,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/settings'
     | '/app/onboarding/create-workspace'
     | '/app/$workspaceSlug/'
+    | '/app/$workspaceSlug/admin/analytics'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
@@ -945,6 +958,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugAssessModuleIdRouteImport
       parentRoute: typeof AppWorkspaceSlugRoute
     }
+    '/app/$workspaceSlug/admin/analytics': {
+      id: '/app/$workspaceSlug/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/app/$workspaceSlug/admin/analytics'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminAnalyticsRouteImport
+      parentRoute: typeof AppWorkspaceSlugRoute
+    }
     '/app/$workspaceSlug/build/capture/': {
       id: '/app/$workspaceSlug/build/capture/'
       path: '/capture'
@@ -1091,6 +1111,7 @@ interface AppWorkspaceSlugRouteChildren {
   AppWorkspaceSlugScaleRoute: typeof AppWorkspaceSlugScaleRouteWithChildren
   AppWorkspaceSlugSettingsRoute: typeof AppWorkspaceSlugSettingsRoute
   AppWorkspaceSlugIndexRoute: typeof AppWorkspaceSlugIndexRoute
+  AppWorkspaceSlugAdminAnalyticsRoute: typeof AppWorkspaceSlugAdminAnalyticsRoute
   AppWorkspaceSlugAssessModuleIdRoute: typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   AppWorkspaceSlugAssessAssignmentsRoute: typeof AppWorkspaceSlugAssessAssignmentsRoute
   AppWorkspaceSlugAssessCompleteRoute: typeof AppWorkspaceSlugAssessCompleteRoute
@@ -1106,6 +1127,7 @@ const AppWorkspaceSlugRouteChildren: AppWorkspaceSlugRouteChildren = {
   AppWorkspaceSlugScaleRoute: AppWorkspaceSlugScaleRouteWithChildren,
   AppWorkspaceSlugSettingsRoute: AppWorkspaceSlugSettingsRoute,
   AppWorkspaceSlugIndexRoute: AppWorkspaceSlugIndexRoute,
+  AppWorkspaceSlugAdminAnalyticsRoute: AppWorkspaceSlugAdminAnalyticsRoute,
   AppWorkspaceSlugAssessModuleIdRoute:
     AppWorkspaceSlugAssessModuleIdRouteWithChildren,
   AppWorkspaceSlugAssessAssignmentsRoute:
@@ -1157,3 +1179,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

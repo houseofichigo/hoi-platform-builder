@@ -277,7 +277,7 @@ export function OnboardingChecklist() {
             {[
               {
                 title: "Assess",
-                body: "Diagnose readiness, maturity, evidence confidence, and KSA governance posture.",
+                body: "Diagnose readiness, maturity, evidence confidence, and EU governance posture.",
               },
               {
                 title: "Discover",
@@ -363,11 +363,10 @@ export function OnboardingChecklist() {
       | "/app/$workspaceSlug/build/capture"
       | "/app/$workspaceSlug/scale",
   ) {
-    if (!workspace) return;
     markTourCompleted.mutate(undefined, {
       onSuccess: () => {
         setTourOpen(false);
-        navigate({ to, params: { workspaceSlug: workspace.slug } });
+        navigate({ to, params: { workspaceSlug: workspace?.slug ?? "" } });
       },
       onError: (e) => toast.error((e as Error).message),
     });

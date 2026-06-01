@@ -418,7 +418,7 @@ export function computeScore({ block1, block2, block3, block4 }: ComputeInput): 
     complexity_score <= 54 ? "Moderate" :
     complexity_score <= 74 ? "Complex" :
     "Very Complex";
-  const classification: ScoreResult["classification"] =
+  const classificationResult: ScoreResult["classification"] =
     tier === "tier_3" && reason_codes.some((c) => HARD_STOP_CODES.includes(c)) ? "Not Ready" :
     agent_suitability >= 70 && ai_suitability >= 60 && avgAutomation >= 3 && risk < 75 ? "AI Agent" :
     ai_suitability >= 65 && steps.length >= 2 ? "AI Workflow" :
@@ -480,7 +480,7 @@ export function computeScore({ block1, block2, block3, block4 }: ComputeInput): 
     priority,
     quadrant,
     tier,
-    classification,
+    classification: classificationResult,
     complexity_score,
     complexity_tag,
     reason_codes: Array.from(new Set(reason_codes)),

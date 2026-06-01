@@ -155,6 +155,59 @@ export type Database = {
           },
         ]
       }
+      assessment_score_snapshots: {
+        Row: {
+          computed_at: string
+          computed_by: string | null
+          computed_outputs: Json
+          confidence: number
+          id: string
+          input_hash: string
+          raw_inputs: Json
+          reason_codes: string[]
+          score_type: string
+          scoring_model_version: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash?: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_score_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action_type: string
@@ -245,12 +298,18 @@ export type Database = {
           assignee_id: string | null
           created_at: string
           created_by: string | null
+          evidence_requirements: Json
           id: string
+          recomputed_at: string | null
           resolution_notes: string | null
+          resolved_at: string | null
+          resolved_reason: string | null
+          reviewer_role: string | null
           roadmap_entry_id: string | null
           rule_code: string
           rule_source: string
           severity: string
+          source_snapshot: Json
           status: string
           updated_at: string
           use_case_id: string
@@ -260,12 +319,18 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          evidence_requirements?: Json
           id?: string
+          recomputed_at?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          reviewer_role?: string | null
           roadmap_entry_id?: string | null
           rule_code: string
           rule_source: string
           severity: string
+          source_snapshot?: Json
           status?: string
           updated_at?: string
           use_case_id: string
@@ -275,12 +340,18 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          evidence_requirements?: Json
           id?: string
+          recomputed_at?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          reviewer_role?: string | null
           roadmap_entry_id?: string | null
           rule_code?: string
           rule_source?: string
           severity?: string
+          source_snapshot?: Json
           status?: string
           updated_at?: string
           use_case_id?: string
@@ -357,6 +428,9 @@ export type Database = {
           entity_type: string
           id: string
           note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
           updated_at: string
         }
         Insert: {
@@ -366,6 +440,9 @@ export type Database = {
           entity_type: string
           id?: string
           note: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -375,6 +452,9 @@ export type Database = {
           entity_type?: string
           id?: string
           note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -581,6 +661,41 @@ export type Database = {
           },
         ]
       }
+      onboarding_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          user_id: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
           active: boolean
@@ -747,9 +862,12 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          evidence_summary: Json
+          gate_status: Json
           id: string
           owner_id: string | null
           priority_score: number | null
+          source_metadata: Json
           stage: string
           target_quarter: string | null
           updated_at: string
@@ -759,9 +877,12 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          evidence_summary?: Json
+          gate_status?: Json
           id?: string
           owner_id?: string | null
           priority_score?: number | null
+          source_metadata?: Json
           stage?: string
           target_quarter?: string | null
           updated_at?: string
@@ -771,9 +892,12 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          evidence_summary?: Json
+          gate_status?: Json
           id?: string
           owner_id?: string | null
           priority_score?: number | null
+          source_metadata?: Json
           stage?: string
           target_quarter?: string | null
           updated_at?: string
@@ -939,6 +1063,66 @@ export type Database = {
             columns: ["use_case_id"]
             isOneToOne: false
             referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      use_case_score_snapshots: {
+        Row: {
+          computed_at: string
+          computed_by: string | null
+          computed_outputs: Json
+          confidence: number
+          id: string
+          input_hash: string
+          raw_inputs: Json
+          reason_codes: string[]
+          score_type: string
+          scoring_model_version: string
+          use_case_id: string
+          workspace_id: string
+        }
+        Insert: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version: string
+          use_case_id: string
+          workspace_id: string
+        }
+        Update: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash?: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version?: string
+          use_case_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "use_case_score_snapshots_use_case_id_fkey"
+            columns: ["use_case_id"]
+            isOneToOne: false
+            referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "use_case_score_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]

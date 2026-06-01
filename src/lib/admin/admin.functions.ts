@@ -318,7 +318,7 @@ export const getAdminBilling = createServerFn({ method: "GET" })
     if (error) throw new Error(error);
 
     const wsById = new Map((workspaces ?? []).map((w) => [w.id, w]));
-    const explicitSubs = (subs ?? []).map((s) => ({
+    const explicitSubs = ((subs ?? []) as any[]).map((s: any) => ({
       workspace_id: s.workspace_id,
       workspace_name: wsById.get(s.workspace_id)?.name ?? "Unknown workspace",
       plan_id: s.plan_id,
@@ -329,9 +329,9 @@ export const getAdminBilling = createServerFn({ method: "GET" })
     }));
 
     const subbed = new Set(explicitSubs.map((s) => s.workspace_id));
-    const manualSubs = (workspaces ?? [])
-      .filter((ws) => !subbed.has(ws.id))
-      .map((ws) => ({
+    const manualSubs = ((workspaces ?? []) as any[])
+      .filter((ws: any) => !subbed.has(ws.id))
+      .map((ws: any) => ({
         workspace_id: ws.id,
         workspace_name: ws.name,
         plan_id: ws.plan,

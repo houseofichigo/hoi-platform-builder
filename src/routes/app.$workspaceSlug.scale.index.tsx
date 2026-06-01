@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import {
   useRoadmapEntries,
@@ -9,7 +12,9 @@ import {
   useAuditMonthCount,
   useWorkspaceMemberProfiles,
 } from "@/hooks/useScaleRoadmap";
+import { governanceFlagsFullQO } from "@/lib/scale/queries";
 import { STAGE_LABEL, type RoadmapStage } from "@/lib/scale/types";
+import { generateEvidencePack } from "@/lib/scale/scale.functions";
 
 export const Route = createFileRoute("/app/$workspaceSlug/scale/")({
   component: ScaleOverview,
@@ -19,10 +24,12 @@ function ScaleOverview() {
   const { workspace } = useWorkspace();
   const { data: entries = [] } = useRoadmapEntries();
   const { data: flags = [] } = useGovernanceFlagsSummary();
+  const { data: fullFlags = [] } = useQuery(governanceFlagsFullQO(workspace?.id));
   const { data: history = [] } = useRecentStageHistory(5);
   const { data: reviewCounts } = usePostPilotReviewCounts();
   const { data: auditMonth } = useAuditMonthCount();
   const { data: members = [] } = useWorkspaceMemberProfiles();
+  const exportEvidencePack = useServerFn(generateEvidencePack);
 
   const byStage = useMemo(() => {
     const m: Record<RoadmapStage, number> = {
@@ -48,6 +55,24 @@ function ScaleOverview() {
   }, [members]);
 
   if (!workspace) return null;
+
+  const downloadEvidencePack = async () => {
+    try {
+      const pack = await exportEvidencePack({ data: { workspaceId: workspace.id } });
+      const blob = new Blob([JSON.stringify(pack, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ksa-evidence-pack-${workspace.slug}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Evidence pack generated");
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
 
   const cards = [
     {
@@ -97,6 +122,12 @@ function ScaleOverview() {
           className="rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] font-medium text-navy hover:bg-mist">
           View audit log
         </Link>
+        <button
+          onClick={downloadEvidencePack}
+          className="rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] font-medium text-navy hover:bg-mist"
+        >
+          Download evidence pack
+        </button>
       </div>
 
       <div className="card space-y-3">

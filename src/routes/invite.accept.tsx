@@ -89,6 +89,15 @@ function AcceptInvitePage() {
     );
   }
 
+  if (!invitation) {
+    return (
+      <AuthCard eyebrow="Invitation" title={<>Invitation <span className="accent-italic">unavailable.</span></>}>
+        <p className="text-[14px] text-graphite">This invitation could not be loaded.</p>
+        <Link to="/login" className="mt-4 inline-block text-[13px] text-azure hover:underline">Go to login</Link>
+      </AuthCard>
+    );
+  }
+
   // invitation present + pending
   const returnTo = `/invite/accept?token=${encodeURIComponent(token)}`;
   const expiresMs = new Date(invitation.expires_at).getTime() - Date.now();

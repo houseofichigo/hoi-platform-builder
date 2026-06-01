@@ -39,8 +39,8 @@ type WorkspaceRow = {
   updated_at: string;
   worked_example: string | null;
   onboarding_dismissed_at: string | null;
-  workspace_profile: unknown;
-  use_case_profile: unknown;
+  workspace_profile: any;
+  use_case_profile: any;
 };
 
 async function getAdminAccess(userId: string) {

@@ -28,9 +28,17 @@ const ADMIN_NAV = [
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const admin = useHoiAdmin();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-paper">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-chalk border-t-terracotta" />
+      </div>
+    );
+  }
 
   if (!user) {
     return (

@@ -991,6 +991,7 @@ export type Database = {
           submitted_by: string | null
           updated_at: string
           use_case_id: string
+          workspace_id: string | null
         }
         Insert: {
           comment?: string | null
@@ -1003,6 +1004,7 @@ export type Database = {
           submitted_by?: string | null
           updated_at?: string
           use_case_id: string
+          workspace_id?: string | null
         }
         Update: {
           comment?: string | null
@@ -1015,6 +1017,7 @@ export type Database = {
           submitted_by?: string | null
           updated_at?: string
           use_case_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -1022,6 +1025,13 @@ export type Database = {
             columns: ["use_case_id"]
             isOneToOne: true
             referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "use_case_approvals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]

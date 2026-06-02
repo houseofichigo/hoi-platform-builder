@@ -81,91 +81,103 @@ export function Step({
     onContinue?.();
   };
 
+  const helperItems = [
+    { label: "WHY THIS MATTERS", content: why, variant: "prose" },
+    { label: "EXAMPLE", content: example, variant: "example" },
+    { label: "WHAT TO NOTICE", content: whatToNotice, variant: "prose" },
+    { label: "PRODUCES", content: produces, variant: "produce" },
+  ].filter((item): item is { label: string; content: ReactNode; variant: string } => Boolean(item.content));
+
   return (
-    <article className="space-y-10 opacity-100 transition-opacity duration-200">
-      {storyHeader && (
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate">
-          {storyHeader}
-        </p>
-      )}
+    <article className="space-y-8 opacity-100 transition-opacity duration-200">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <main className="min-w-0 space-y-8">
+          {storyHeader && (
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-slate">
+              {storyHeader}
+            </p>
+          )}
 
-      <header className="space-y-3">
-        <p className="eyebrow">
-          {chapterLabel} · {stepLabel}
-        </p>
-        <h2 className="h-display-sm max-w-[28ch]">{title}</h2>
-      </header>
+          <header className="space-y-3">
+            <p className="eyebrow">
+              {chapterLabel} · {stepLabel}
+            </p>
+            <h2 className="h-display-sm max-w-[30ch]">{title}</h2>
+          </header>
 
-      {why && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">WHY THIS MATTERS</p>
-          <div className="prose-ichigo">{why}</div>
-        </section>
-      )}
+          {yourVersion && (
+            <section className="space-y-3">
+              <p className="eyebrow-muted">YOUR VERSION</p>
+              <div>{yourVersion}</div>
+            </section>
+          )}
 
-      {example && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">EXAMPLE</p>
-          <div className="card bg-mist/40">{example}</div>
-        </section>
-      )}
+          {sections?.map((s) => (
+            <section key={s.id} className="space-y-3">
+              {s.label && <p className="eyebrow-muted">{s.label}</p>}
+              <div>{s.content}</div>
+            </section>
+          ))}
 
-      {whatToNotice && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">WHAT TO NOTICE</p>
-          <div className="prose-ichigo">{whatToNotice}</div>
-        </section>
-      )}
+          {outputKey && !yourVersion && !ackOnly && (
+            <section className="space-y-3">
+              <p className="eyebrow-muted">YOUR RESPONSE</p>
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={6}
+                placeholder="Write your response..."
+                className="w-full rounded-md border border-chalk bg-white p-3 text-[14px] text-navy outline-none focus:border-terracotta"
+              />
+            </section>
+          )}
 
-      {yourVersion && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">YOUR VERSION</p>
-          <div>{yourVersion}</div>
-        </section>
-      )}
+          {outputKey && ackOnly && (
+            <section className="rounded-md border border-chalk bg-white p-4">
+              <label className="inline-flex cursor-pointer items-center gap-3 text-[14px] text-navy">
+                <input
+                  type="checkbox"
+                  checked={acked}
+                  onChange={(e) => setAcked(e.target.checked)}
+                  className="h-4 w-4 accent-terracotta"
+                />
+                {ackLabel}
+              </label>
+            </section>
+          )}
+        </main>
 
-      {sections?.map((s) => (
-        <section key={s.id} className="space-y-2">
-          {s.label && <p className="eyebrow-muted">{s.label}</p>}
-          <div>{s.content}</div>
-        </section>
-      ))}
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          {helperItems.length > 0 ? (
+            helperItems.map((item) => (
+              <section
+                key={item.label}
+                className={`rounded-md border p-4 ${
+                  item.variant === "produce"
+                    ? "border-terracotta/25 bg-terracotta/5"
+                    : item.variant === "example"
+                      ? "border-chalk bg-mist/40"
+                      : "border-chalk bg-white"
+                }`}
+              >
+                <p className={item.variant === "produce" ? "eyebrow text-terracotta" : "eyebrow-muted"}>
+                  {item.label}
+                </p>
+                <div className="prose-ichigo mt-3 text-[14px] leading-relaxed">{item.content}</div>
+              </section>
+            ))
+          ) : (
+            <section className="rounded-md border border-chalk bg-white p-4">
+              <p className="eyebrow-muted">ASSIGNMENT STEP</p>
+              <p className="mt-3 text-[14px] leading-relaxed text-graphite">
+                Complete this step, save your response, then continue through the assignment.
+              </p>
+            </section>
+          )}
+        </aside>
+      </div>
 
-      {outputKey && !yourVersion && !ackOnly && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">YOUR RESPONSE</p>
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={6}
-            placeholder="Write your response…"
-            className="w-full rounded-md border border-chalk bg-white p-3 text-[14px] text-navy outline-none focus:border-terracotta"
-          />
-        </section>
-      )}
-
-      {outputKey && ackOnly && (
-        <section>
-          <label className="inline-flex cursor-pointer items-center gap-2 text-[14px] text-navy">
-            <input
-              type="checkbox"
-              checked={acked}
-              onChange={(e) => setAcked(e.target.checked)}
-              className="h-4 w-4 accent-terracotta"
-            />
-            {ackLabel}
-          </label>
-        </section>
-      )}
-
-      {produces && (
-        <section className="space-y-2">
-          <p className="eyebrow-muted">WHAT THIS PRODUCES</p>
-          <div className="card border-l-[3px] border-l-terracotta">{produces}</div>
-        </section>
-      )}
-
-      <footer className="flex items-center justify-between gap-4 border-t border-chalk pt-6">
+      <footer className="sticky bottom-0 z-20 -mx-4 flex items-center justify-between gap-4 border-t border-chalk bg-paper/95 px-4 py-4 backdrop-blur sm:mx-0 sm:px-0">
         {onBack ? (
           <button
             type="button"

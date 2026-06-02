@@ -1,146 +1,326 @@
+import { useMemo, useState, type MouseEvent } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Check, Lock } from "lucide-react";
+import { ArrowRight, Check, Circle, FileText, Flag, Lock, Play } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { PHASES, getModule, type ModuleId } from "@/lib/curriculum";
-import { useAssessAllProgress, useWorkedExample, type AssessProgressRow } from "@/hooks/useAssess";
+import {
+  ARTIFACTS,
+  MODULES,
+  PHASES,
+  getModule,
+  type ModuleId,
+  type ModuleMeta,
+} from "@/lib/curriculum";
+import {
+  currentResumeModule,
+  useAssessAllProgress,
+  useWorkedExample,
+  type AssessProgressRow,
+} from "@/hooks/useAssess";
 import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
 });
 
+type CourseTab = "curriculum" | "artifacts" | "gates" | "about";
+
 function AssessHome() {
   const { workspace } = useWorkspace();
   const { data: progress } = useAssessAllProgress();
   const { data: worked } = useWorkedExample();
   const { isComplete: useCaseComplete, isLoading: useCaseLoading } = useUseCaseProfile();
+  const [tab, setTab] = useState<CourseTab>("curriculum");
+
+  const stats = useMemo(() => {
+    const completed = MODULES.filter((m) => progress?.[m.id]?.status === "complete").length;
+    const inProgress = MODULES.filter((m) => progress?.[m.id]?.status === "in_progress").length;
+    const percent = Math.round((completed / MODULES.length) * 100);
+    const resume = currentResumeModule(progress);
+    const resumeProgress = progress?.[resume.module.id];
+    const target: "/app/$workspaceSlug/assess/$moduleId" | "/app/$workspaceSlug/assess/$moduleId/work" =
+      resumeProgress?.status === "in_progress" || resumeProgress?.studied
+        ? "/app/$workspaceSlug/assess/$moduleId/work"
+        : "/app/$workspaceSlug/assess/$moduleId";
+
+    return { completed, inProgress, percent, resume, target };
+  }, [progress]);
 
   if (!workspace) return null;
   const slug = workspace.slug;
+  const currentArtifact =
+    ARTIFACTS.find((artifact) => artifact.modules.some((m) => progress?.[m]?.status !== "complete")) ??
+    ARTIFACTS[ARTIFACTS.length - 1];
 
   return (
-    <div className="space-y-14">
-      <header>
-        <p className="eyebrow">
-          <Link to="/app/$workspaceSlug" params={{ workspaceSlug: slug }} className="hover:text-terracotta">
-            ← {workspace.name.toUpperCase()}
-          </Link>{" "}
-          · ASSESS · METHODOLOGY
-        </p>
-        <h1 className="h-display-md mt-3 max-w-[24ch]">
-          Assess your team's <span className="accent-italic">methodology.</span>
-        </h1>
-        <p className="lead mt-3 max-w-[60ch]">
-          Twelve modules across four phases, anchored by three governance gates.{" "}
-          {worked ? (
-            <>
-              Built on <span className="font-medium text-navy">{worked.shortName}</span> for {worked.industry}.
-            </>
-          ) : (
-            <span className="italic text-slate">No worked example selected yet.</span>
-          )}
-        </p>
-      </header>
+    <div className="space-y-12">
+      <CourseHero
+        workspaceName={workspace.name}
+        slug={slug}
+        workedName={worked?.name}
+        workedIndustry={worked?.industry}
+        percent={stats.percent}
+        completed={stats.completed}
+        inProgress={stats.inProgress}
+        resumeModule={stats.resume.module}
+        resumeStarted={stats.resume.started}
+        resumeTarget={stats.target}
+        currentArtifact={currentArtifact.title}
+      />
 
       {!worked && (
-        <div className="card border-l-[3px] border-l-terracotta">
-          <p className="text-[14px] text-navy">
-            Set your worked example first — the methodology is anchored to a single case carried through every module.
-          </p>
-          <Link
-            to="/app/$workspaceSlug"
-            params={{ workspaceSlug: slug }}
-            className="mt-3 inline-block text-[13px] font-medium text-terracotta hover:opacity-80"
-          >
-            Go to onboarding →
-          </Link>
-        </div>
+        <NoticeCard
+          eyebrow="SETUP NEEDED"
+          title="Pick the worked example before starting Assess."
+          body="The methodology carries one example through all twelve modules, so every assignment has a shared thread."
+          actionLabel="Go to onboarding"
+          to="/app/$workspaceSlug"
+          slug={slug}
+        />
       )}
 
       {worked && !useCaseLoading && !useCaseComplete && (
-        <div className="card border-l-[3px] border-l-terracotta">
-          <p className="eyebrow text-terracotta">ONE QUICK STEP BEFORE YOU START</p>
-          <h2 className="h-heading-md mt-2">
-            Tell us how your team runs {worked.shortName}.
-          </h2>
-          <p className="mt-3 max-w-[60ch] text-[14px] text-graphite">
-            The assignments in every module are generated from your real context — your
-            accounting system, your invoice volume, your VAT regime, your supplier mix. Six
-            questions, takes a minute.
-          </p>
-          <Link
-            to="/app/$workspaceSlug/onboarding/use-case-profile"
-            params={{ workspaceSlug: slug }}
-            search={{ return_to: `/app/${slug}/assess` }}
-            className="mt-4 inline-block rounded-full bg-terracotta px-4 py-2 text-[13px] font-medium text-white hover:opacity-90"
-          >
-            Set up use-case profile →
-          </Link>
-        </div>
+        <NoticeCard
+          eyebrow="ONE QUICK STEP BEFORE YOU START"
+          title={`Tell us how your team runs ${worked.shortName}.`}
+          body="Six profile questions personalize the examples, systems, data assumptions, and governance prompts throughout Assess."
+          actionLabel="Set up use-case profile"
+          to="/app/$workspaceSlug/onboarding/use-case-profile"
+          slug={slug}
+          search={{ return_to: `/app/${slug}/assess` }}
+        />
       )}
 
       {worked && (useCaseLoading || useCaseComplete) && progress?.m12?.status === "complete" && (
-        <div className="card border-l-[3px] border-l-terracotta">
-          <p className="eyebrow text-terracotta">PROGRAM COMPLETION READY</p>
-          <h2 className="h-heading-md mt-2">Review your artifacts, gates, and certification readiness.</h2>
-          <Link
-            to="/app/$workspaceSlug/assess/complete"
-            params={{ workspaceSlug: slug }}
-            className="mt-4 inline-block rounded-full bg-terracotta px-4 py-2 text-[13px] font-medium text-white hover:opacity-90"
-          >
-            Open completion dashboard →
-          </Link>
-        </div>
+        <NoticeCard
+          eyebrow="PROGRAM COMPLETION READY"
+          title="Review your artifacts, gates, and certification readiness."
+          body="The completion dashboard gathers the evidence trail from all twelve modules into one executive view."
+          actionLabel="Open completion dashboard"
+          to="/app/$workspaceSlug/assess/complete"
+          slug={slug}
+        />
       )}
 
-      {worked && (useCaseLoading || useCaseComplete) &&
-        PHASES.map((phase) => (
-          <PhaseSection
-            key={phase.num}
-            phase={phase}
-            slug={slug}
-            progress={progress ?? {}}
-          />
-        ))}
+      <section className="space-y-6">
+        <nav className="flex gap-2 overflow-x-auto border-b border-chalk" aria-label="Assess course sections">
+          {([
+            ["curriculum", "Curriculum"],
+            ["artifacts", "Artifacts"],
+            ["gates", "Gates"],
+            ["about", "About"],
+          ] as const).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`border-b-2 px-4 py-3 text-[14px] font-medium transition-colors ${
+                tab === id
+                  ? "border-terracotta text-navy"
+                  : "border-transparent text-slate hover:border-chalk hover:text-navy"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {tab === "curriculum" && (
+          <CurriculumPanel slug={slug} progress={progress ?? {}} />
+        )}
+        {tab === "artifacts" && (
+          <ArtifactsPanel slug={slug} progress={progress ?? {}} />
+        )}
+        {tab === "gates" && (
+          <GatesPanel slug={slug} progress={progress ?? {}} />
+        )}
+        {tab === "about" && (
+          <AboutPanel workedName={worked?.name} />
+        )}
+      </section>
     </div>
   );
 }
 
-function PhaseSection({
-  phase,
+function CourseHero({
+  workspaceName,
+  slug,
+  workedName,
+  workedIndustry,
+  percent,
+  completed,
+  inProgress,
+  resumeModule,
+  resumeStarted,
+  resumeTarget,
+  currentArtifact,
+}: {
+  workspaceName: string;
+  slug: string;
+  workedName?: string;
+  workedIndustry?: string;
+  percent: number;
+  completed: number;
+  inProgress: number;
+  resumeModule: ModuleMeta;
+  resumeStarted: boolean;
+  resumeTarget: "/app/$workspaceSlug/assess/$moduleId" | "/app/$workspaceSlug/assess/$moduleId/work";
+  currentArtifact: string;
+}) {
+  return (
+    <header className="rounded-md border border-chalk bg-white px-6 py-8 md:px-10 md:py-12">
+      <p className="eyebrow">
+        <Link to="/app/$workspaceSlug" params={{ workspaceSlug: slug }} className="hover:text-terracotta">
+          {workspaceName.toUpperCase()}
+        </Link>{" "}
+        · ASSESS · COURSE
+      </p>
+      <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+        <div>
+          <h1 className="font-display text-[46px] font-medium leading-[1.02] tracking-[-0.015em] text-navy md:text-[64px]">
+            House of Ichigo
+            <br />
+            <span className="accent-italic">Assess.</span>
+          </h1>
+          <p className="lead mt-5 max-w-[64ch]">
+            Twelve guided modules that turn AI concepts into a usable operating methodology:
+            study the idea, complete the assignment, and carry the evidence into Build and Scale.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Link
+              to={resumeTarget}
+              params={{ workspaceSlug: slug, moduleId: resumeModule.id }}
+              className="btn-ichigo btn-ichigo-primary"
+            >
+              {resumeStarted ? "Resume" : "Start Assess"} <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/app/$workspaceSlug/assess/assignments"
+              params={{ workspaceSlug: slug }}
+              className="btn-ichigo btn-ichigo-outline"
+            >
+              View assignments
+            </Link>
+          </div>
+        </div>
+
+        <aside className="rounded-md border border-chalk bg-paper p-5">
+          <p className="eyebrow-muted">YOUR PROGRESS</p>
+          <div className="mt-4">
+            <div className="flex items-end justify-between gap-4">
+              <p className="font-display text-[44px] leading-none text-navy">{percent}%</p>
+              <p className="text-right font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+                {completed} of {MODULES.length}
+                <br />
+                modules complete
+              </p>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-chalk">
+              <div className="h-full rounded-full bg-terracotta" style={{ width: `${percent}%` }} />
+            </div>
+          </div>
+          <dl className="mt-5 space-y-3 text-[13px]">
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate">Current module</dt>
+              <dd className="text-right font-medium text-navy">M{String(resumeModule.num).padStart(2, "0")} · {resumeModule.title}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate">Current artifact</dt>
+              <dd className="text-right font-medium text-navy">{currentArtifact}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate">In progress</dt>
+              <dd className="text-right font-medium text-navy">{inProgress}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-slate">Worked example</dt>
+              <dd className="text-right font-medium text-navy">
+                {workedName ? `${workedName}${workedIndustry ? ` · ${workedIndustry}` : ""}` : "Not selected"}
+              </dd>
+            </div>
+          </dl>
+        </aside>
+      </div>
+    </header>
+  );
+}
+
+function NoticeCard({
+  eyebrow,
+  title,
+  body,
+  actionLabel,
+  to,
+  slug,
+  search,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  actionLabel: string;
+  to: "/app/$workspaceSlug" | "/app/$workspaceSlug/onboarding/use-case-profile" | "/app/$workspaceSlug/assess/complete";
+  slug: string;
+  search?: Record<string, string>;
+}) {
+  return (
+    <div className="rounded-md border border-terracotta/25 bg-terracotta/5 p-5">
+      <p className="eyebrow text-terracotta">{eyebrow}</p>
+      <h2 className="h-heading-md mt-2">{title}</h2>
+      <p className="mt-3 max-w-[68ch] text-[14px] leading-relaxed text-graphite">{body}</p>
+      <Link
+        to={to}
+        params={{ workspaceSlug: slug }}
+        search={search}
+        className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
+      >
+        {actionLabel} <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+function CurriculumPanel({
   slug,
   progress,
 }: {
-  phase: (typeof PHASES)[number];
   slug: string;
   progress: Record<string, AssessProgressRow>;
 }) {
   return (
-    <section className="space-y-5">
-      <div>
-        <p className="eyebrow">PHASE {String(phase.num).padStart(2, "0")} · {phase.name.toUpperCase()}</p>
-        <h2 className="h-display-sm mt-2 font-display">{phase.name}</h2>
-        <p className="text-[14px] text-graphite mt-1">{phase.subtitle}</p>
-        <p className="mt-2 inline-block rounded-full bg-mist px-3 py-1 font-mono text-[10px] uppercase tracking-[0.18em] text-slate">
-          ARTIFACT {String(phase.num).padStart(2, "0")} · {phase.artifact}
-        </p>
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {phase.modules.map((modId) => (
-          <ModuleCard
-            key={modId}
-            modId={modId}
-            slug={slug}
-            progress={progress}
-          />
-        ))}
-      </div>
-    </section>
+    <div className="space-y-5">
+      {PHASES.map((phase, index) => {
+        const phaseComplete = phase.modules.filter((m) => progress[m]?.status === "complete").length;
+        return (
+          <details
+            key={phase.id}
+            open={index === 0 || phase.modules.some((m) => progress[m]?.status === "in_progress")}
+            className="rounded-md border border-chalk bg-white"
+          >
+            <summary className="cursor-pointer list-none px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="eyebrow-muted">PHASE {String(phase.num).padStart(2, "0")} · {phase.artifact}</p>
+                  <h2 className="mt-1 font-display text-[26px] leading-tight text-navy">{phase.name}</h2>
+                  <p className="mt-1 text-[13px] text-graphite">{phase.subtitle}</p>
+                </div>
+                <span className="rounded-full bg-mist px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+                  {phaseComplete}/{phase.modules.length} complete
+                </span>
+              </div>
+            </summary>
+            <div className="border-t border-chalk px-3 pb-3">
+              {phase.modules.map((modId) => (
+                <ModuleRow key={modId} modId={modId} slug={slug} progress={progress} />
+              ))}
+            </div>
+          </details>
+        );
+      })}
+    </div>
   );
 }
 
-function ModuleCard({
+function ModuleRow({
   modId,
   slug,
   progress,
@@ -150,75 +330,206 @@ function ModuleCard({
   progress: Record<string, AssessProgressRow>;
 }) {
   const m = getModule(modId)!;
-  const p = progress[modId];
-  const status = p?.status ?? "not_started";
+  const row = progress[modId];
+  const status = row?.status ?? "not_started";
+  const locked = !!m.prereq && progress[m.prereq]?.status !== "complete";
+  const target =
+    status === "in_progress" || row?.studied
+      ? "/app/$workspaceSlug/assess/$moduleId/work"
+      : "/app/$workspaceSlug/assess/$moduleId";
 
-  const prereqMet = !m.prereq || progress[m.prereq]?.status === "complete";
-  const locked = !!m.prereq && !prereqMet;
-
-  const StatusBadge = () => {
-    if (status === "complete") {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-terracotta px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-white">
-          <Check className="h-3 w-3" strokeWidth={3} /> Complete
-        </span>
-      );
-    }
-    if (status === "in_progress") {
-      return (
-        <span className="rounded-full bg-terracotta/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-terracotta">
-          Step {Math.min(p?.current_step ?? 1, m.steps)} of {m.steps}
-        </span>
-      );
-    }
-    return (
-      <span className="rounded-full bg-mist px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
-        Not started
-      </span>
-    );
-  };
-
-  const GateBadge = () => {
-    if (!m.gateNumber) return null;
-    const formal = m.gateNumber === 3;
-    return (
-      <span
-        className={`rounded-full px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] ${
-          formal ? "bg-terracotta text-white" : "bg-navy text-white"
-        }`}
-      >
-        G{m.gateNumber}
-      </span>
-    );
-  };
-
-  const onClick = (e: React.MouseEvent) => {
-    if (locked) {
-      e.preventDefault();
-      const prereq = getModule(m.prereq!);
-      toast.error(`Complete ${prereq?.title} first.`);
-    }
+  const onClick = (e: MouseEvent) => {
+    if (!locked) return;
+    e.preventDefault();
+    const prereq = getModule(m.prereq!);
+    toast.error(`Complete ${prereq?.title} first.`);
   };
 
   return (
     <Link
-      to="/app/$workspaceSlug/assess/$moduleId"
-      params={{ workspaceSlug: slug, moduleId: modId }}
+      to={target}
+      params={{ workspaceSlug: slug, moduleId: m.id }}
       onClick={onClick}
-      className={`card card-elevate group block transition-opacity ${locked ? "opacity-60" : ""}`}
+      className={`group flex items-start gap-4 border-b border-chalk/80 px-3 py-4 last:border-b-0 ${
+        locked ? "opacity-55" : "hover:bg-mist/40"
+      }`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <p className="eyebrow-muted">M{String(m.num).padStart(2, "0")} · {m.duration.toUpperCase()}</p>
-        <div className="flex items-center gap-2">
-          {locked && <Lock className="h-3 w-3 text-slate" />}
-          <GateBadge />
+      <CompletionCircle status={status} locked={locked} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+            M{String(m.num).padStart(2, "0")} · {m.duration}
+          </p>
+          {m.gateNumber && (
+            <span className="rounded-full bg-navy px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-white">
+              Gate {m.gateNumber}
+            </span>
+          )}
         </div>
+        <h3 className="mt-1 text-[16px] font-medium text-navy">{m.title}</h3>
+        <p className="mt-1 line-clamp-2 text-[13px] text-graphite">{m.assignment}</p>
       </div>
-      <h3 className="mt-3 font-display text-[24px] leading-[1.15] text-navy">{m.title}</h3>
-      <p className="mt-2 line-clamp-2 text-[13px] text-graphite">{m.subtitle}</p>
-      <div className="mt-4">
-        <StatusBadge />
+      <div className="hidden shrink-0 items-center gap-2 text-[13px] font-medium text-terracotta sm:flex">
+        {locked ? "Locked" : status === "complete" ? "Review" : status === "in_progress" ? "Resume" : "Open"}
+        {locked ? <Lock className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
       </div>
     </Link>
+  );
+}
+
+function CompletionCircle({
+  status,
+  locked,
+}: {
+  status: "not_started" | "in_progress" | "complete";
+  locked: boolean;
+}) {
+  if (locked) {
+    return (
+      <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-chalk bg-mist text-slate">
+        <Lock className="h-3 w-3" />
+      </span>
+    );
+  }
+  if (status === "complete") {
+    return (
+      <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-terracotta text-white">
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+      </span>
+    );
+  }
+  if (status === "in_progress") {
+    return (
+      <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-terracotta bg-terracotta/10">
+        <Play className="h-3 w-3 fill-terracotta text-terracotta" />
+      </span>
+    );
+  }
+  return (
+    <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate/50 bg-white">
+      <Circle className="h-3 w-3 text-slate" />
+    </span>
+  );
+}
+
+function ArtifactsPanel({
+  slug,
+  progress,
+}: {
+  slug: string;
+  progress: Record<string, AssessProgressRow>;
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {ARTIFACTS.map((artifact) => {
+        const complete = artifact.modules.filter((m) => progress[m]?.status === "complete").length;
+        const next = artifact.modules.find((m) => progress[m]?.status !== "complete") ?? artifact.modules[artifact.modules.length - 1];
+        return (
+          <Link
+            key={artifact.id}
+            to="/app/$workspaceSlug/assess/$moduleId"
+            params={{ workspaceSlug: slug, moduleId: next }}
+            className="rounded-md border border-chalk bg-white p-5 transition-colors hover:border-terracotta/50"
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mist text-terracotta">
+                <FileText className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="eyebrow-muted">ARTIFACT {String(artifact.phase).padStart(2, "0")} · {artifact.phaseName}</p>
+                <h3 className="mt-1 font-display text-[24px] text-navy">{artifact.title}</h3>
+                <p className="mt-2 text-[13px] text-graphite">
+                  {complete}/{artifact.modules.length} modules complete. Continue with {getModule(next)?.title}.
+                </p>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function GatesPanel({
+  slug,
+  progress,
+}: {
+  slug: string;
+  progress: Record<string, AssessProgressRow>;
+}) {
+  const gates = MODULES.filter((m) => m.gateNumber);
+  return (
+    <div className="space-y-3">
+      {gates.map((m) => {
+        const unlocked = progress[m.id]?.status === "complete";
+        return (
+          <Link
+            key={m.id}
+            to={unlocked ? "/app/$workspaceSlug/assess/$moduleId/gate" : "/app/$workspaceSlug/assess/$moduleId"}
+            params={{ workspaceSlug: slug, moduleId: m.id }}
+            className="flex items-center justify-between gap-4 rounded-md border border-chalk bg-white p-5 transition-colors hover:border-terracotta/50"
+          >
+            <div className="flex items-start gap-3">
+              <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${unlocked ? "bg-terracotta text-white" : "bg-mist text-slate"}`}>
+                {unlocked ? <Flag className="h-5 w-5" /> : <Lock className="h-4 w-4" />}
+              </span>
+              <div>
+                <p className="eyebrow-muted">GATE {m.gateNumber} · M{String(m.num).padStart(2, "0")}</p>
+                <h3 className="mt-1 text-[16px] font-medium text-navy">{m.title}</h3>
+                <p className="mt-1 text-[13px] text-graphite">
+                  {m.gateNumber === 3 ? "Formal portfolio investment decision." : "Informal readiness decision."}
+                </p>
+              </div>
+            </div>
+            <span className="shrink-0 text-[13px] font-medium text-terracotta">
+              {unlocked ? "Open gate →" : "Complete assignment first"}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function AboutPanel({ workedName }: { workedName?: string }) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="max-w-[72ch] space-y-5 text-[16px] leading-relaxed text-graphite">
+        <h2 className="h-heading-md">About this course</h2>
+        <p>
+          Assess is the House of Ichigo methodology layer. It teaches the core AI system concepts
+          and turns them into reusable evidence: data maps, prompt libraries, assistant blueprints,
+          prototypes, agent pilots, tool decisions, deployment plans, portfolio scores, monitoring
+          routines, and a roadmap.
+        </p>
+        <p>
+          The course is structured around a single worked example
+          {workedName ? `, ${workedName},` : ""} so every module builds on the last. The goal is not
+          memorisation; it is a practical operating model your team can use when moving into Build
+          and Scale.
+        </p>
+      </div>
+      <aside className="rounded-md border border-chalk bg-white p-5">
+        <p className="eyebrow-muted">COURSE SHAPE</p>
+        <dl className="mt-4 space-y-3 text-[13px]">
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate">Modules</dt>
+            <dd className="font-medium text-navy">12</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate">Phases</dt>
+            <dd className="font-medium text-navy">4</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate">Gates</dt>
+            <dd className="font-medium text-navy">3</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate">Primary mode</dt>
+            <dd className="font-medium text-navy">Study + assignment</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
   );
 }

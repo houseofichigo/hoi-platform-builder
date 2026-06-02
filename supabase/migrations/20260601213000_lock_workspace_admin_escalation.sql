@@ -1,3 +1,6 @@
+-- Lock client-side workspace admin escalation.
+-- House of Ichigo internal admins promote owners/admins through audited server functions.
+
 CREATE OR REPLACE FUNCTION public.enforce_workspace_role_escalation_limits()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -5,10 +8,12 @@ SECURITY DEFINER
 SET search_path TO 'public'
 AS $$
 BEGIN
+  -- Server-side service-role functions remain the privileged path for HOI operations.
   IF auth.uid() IS NULL OR auth.role() = 'service_role' THEN
     RETURN NEW;
   END IF;
 
+  -- HOI owners/admins may perform controlled operations from internal tooling.
   IF public.is_hoi_admin(auth.uid(), ARRAY['owner','admin']) THEN
     RETURN NEW;
   END IF;
@@ -19,6 +24,7 @@ BEGIN
         RETURN NEW;
       END IF;
 
+      -- Keep the existing first-owner bootstrap path for brand-new workspaces.
       IF NEW.user_id = auth.uid()
          AND NEW.role = 'owner'
          AND NOT EXISTS (
@@ -79,6 +85,9 @@ WITH CHECK (
 
 DROP POLICY IF EXISTS "Owners/admins can update members; users can update self"
 ON public.workspace_members;
+
+-- Intentionally no client UPDATE policy for workspace_members.
+-- Role updates go through HOI-admin server functions using service role.
 
 DROP POLICY IF EXISTS "Owners/admins can remove members; users can remove themselves"
 ON public.workspace_members;

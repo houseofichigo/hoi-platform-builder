@@ -1,3 +1,6 @@
+-- House of Ichigo internal admin backend foundation.
+-- This is separate from customer workspace administration.
+
 CREATE TABLE IF NOT EXISTS public.hoi_admin_users (
   user_id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   role text NOT NULL CHECK (role IN ('owner','admin','content_editor','support','billing_admin','read_only')),
@@ -7,10 +10,12 @@ CREATE TABLE IF NOT EXISTS public.hoi_admin_users (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS hoi_admin_users_set_updated_at ON public.hoi_admin_users;
 CREATE TRIGGER hoi_admin_users_set_updated_at
 BEFORE UPDATE ON public.hoi_admin_users
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+-- Migrate the previous bootstrap role into the dedicated admin table.
 INSERT INTO public.hoi_admin_users (user_id, role, status, created_by)
 SELECT user_id, 'owner', 'active', user_id
 FROM public.profiles
@@ -36,6 +41,7 @@ AS $$
   )
 $$;
 
+-- Backwards-compatible helper for existing RLS/code. It no longer trusts profiles.role.
 CREATE OR REPLACE FUNCTION public.is_super_admin(_user_id uuid)
 RETURNS boolean
 LANGUAGE sql
@@ -46,6 +52,7 @@ AS $$
   SELECT public.is_hoi_admin(_user_id, ARRAY['owner','admin'])
 $$;
 
+-- profiles.role is legacy and must not be a self-service privilege field.
 CREATE OR REPLACE FUNCTION public.protect_profiles_legacy_role()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -89,6 +96,7 @@ ON public.hoi_admin_users FOR DELETE
 TO authenticated
 USING (public.is_hoi_admin(auth.uid(), ARRAY['owner']));
 
+-- Let HOI admins inspect customer data in the internal console without joining every workspace.
 CREATE POLICY "HOI admins can read all workspaces"
 ON public.workspaces FOR SELECT
 TO authenticated
@@ -130,6 +138,7 @@ BEGIN
   END IF;
 END $$;
 
+-- Library editorial workflow fields.
 ALTER TABLE public.library_items
   ADD COLUMN IF NOT EXISTS editorial_status text NOT NULL DEFAULT 'draft'
     CHECK (editorial_status IN ('draft','in_review','published','archived')),
@@ -152,6 +161,64 @@ SET editorial_status = CASE
 
 CREATE INDEX IF NOT EXISTS library_items_editorial_status_idx
 ON public.library_items (editorial_status);
+
+DROP POLICY IF EXISTS "Super-admins can read all library items" ON public.library_items;
+DROP POLICY IF EXISTS "Super-admins can insert library items" ON public.library_items;
+DROP POLICY IF EXISTS "Super-admins can update library items" ON public.library_items;
+DROP POLICY IF EXISTS "Super-admins can delete library items" ON public.library_items;
+
+CREATE POLICY "HOI admins can read all library items"
+ON public.library_items FOR SELECT
+TO authenticated
+USING (public.is_hoi_admin(auth.uid()));
+
+CREATE POLICY "HOI content admins can insert library items"
+ON public.library_items FOR INSERT
+TO authenticated
+WITH CHECK (public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor']));
+
+CREATE POLICY "HOI content admins can update library items"
+ON public.library_items FOR UPDATE
+TO authenticated
+USING (public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor']))
+WITH CHECK (public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor']));
+
+CREATE POLICY "HOI owners and admins can delete library items"
+ON public.library_items FOR DELETE
+TO authenticated
+USING (public.is_hoi_admin(auth.uid(), ARRAY['owner','admin']));
+
+DROP POLICY IF EXISTS "Super-admins can upload library-files" ON storage.objects;
+DROP POLICY IF EXISTS "Super-admins can update library-files" ON storage.objects;
+DROP POLICY IF EXISTS "Super-admins can delete library-files" ON storage.objects;
+
+CREATE POLICY "HOI content admins can upload library-files"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'library-files'
+  AND public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor'])
+);
+
+CREATE POLICY "HOI content admins can update library-files"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'library-files'
+  AND public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor'])
+)
+WITH CHECK (
+  bucket_id = 'library-files'
+  AND public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor'])
+);
+
+CREATE POLICY "HOI content admins can delete library-files"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'library-files'
+  AND public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor'])
+);
 
 CREATE OR REPLACE FUNCTION public.sync_library_item_editorial_state()
 RETURNS trigger
@@ -205,6 +272,7 @@ ON public.library_item_versions FOR INSERT
 TO authenticated
 WITH CHECK (public.is_hoi_admin(auth.uid(), ARRAY['owner','admin','content_editor']));
 
+-- Future billing and Stripe readiness.
 CREATE TABLE IF NOT EXISTS public.plans (
   id text PRIMARY KEY,
   name text NOT NULL,
@@ -219,6 +287,7 @@ CREATE TABLE IF NOT EXISTS public.plans (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS plans_set_updated_at ON public.plans;
 CREATE TRIGGER plans_set_updated_at
 BEFORE UPDATE ON public.plans
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -245,6 +314,7 @@ CREATE TABLE IF NOT EXISTS public.workspace_subscriptions (
   UNIQUE (workspace_id)
 );
 
+DROP TRIGGER IF EXISTS workspace_subscriptions_set_updated_at ON public.workspace_subscriptions;
 CREATE TRIGGER workspace_subscriptions_set_updated_at
 BEFORE UPDATE ON public.workspace_subscriptions
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -289,6 +359,7 @@ ON public.billing_events FOR SELECT
 TO authenticated
 USING (public.is_hoi_admin(auth.uid()));
 
+-- Internal admin audit and notes.
 CREATE TABLE IF NOT EXISTS public.hoi_admin_audit_log (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -324,6 +395,7 @@ CREATE TABLE IF NOT EXISTS public.hoi_admin_notes (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+DROP TRIGGER IF EXISTS hoi_admin_notes_set_updated_at ON public.hoi_admin_notes;
 CREATE TRIGGER hoi_admin_notes_set_updated_at
 BEFORE UPDATE ON public.hoi_admin_notes
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();

@@ -1,30 +1,68 @@
-## What changed upstream
+# Current protected plan
 
-One new commit on `main` (`091a997` — "Harden Build approval and wizard validation") touches 8 files. No new migrations, no new dependencies.
+This app already contains the protected Assess, Discover, Build, and Scale source tree. Do not rebuild these phases from scratch, delete their support folders, or replace real product flows with placeholders.
 
-## Files to sync from GitHub → project
+## Source-tree contract
 
-1. `src/lib/build/approvals.functions.ts` — **new file** (server functions for Build approval flow)
-2. `src/lib/build/wizard-schema.ts` — tightened wizard validation
-3. `src/lib/scale/scale.functions.ts` — refactor aligned with new approval flow
-4. `src/hooks/useBuild.tsx` — small hook update
-5. `src/routes/app.$workspaceSlug.build.approvals.tsx` — wire to new approvals fns
-6. `src/routes/app.$workspaceSlug.build.capture.$useCaseId.tsx` — capture flow update
-7. `scripts/check-build-output-keys.ts` — extended guard checks
-8. `.lovable/plan.md` — doc update
+Treat `docs/source-tree-contract.md` as authoritative.
 
-## Plan
+Protected paths:
 
-1. Copy the 8 files verbatim from the freshly cloned `hoi-check` working tree into `/dev-server` at the same paths.
-2. Run the project's own guards to confirm the sync is internally consistent:
-   - `bun scripts/check-import-integrity.ts`
-   - `bun scripts/check-build-output-keys.ts`
-   - `bunx tsc --noEmit`
-3. Confirm dev server still serves (preview reload).
+- `src/routes/app.$workspaceSlug.build*`
+- `src/routes/app.$workspaceSlug.scale*`
+- `src/components/build/`
+- `src/lib/build/`
+- `src/lib/scale/`
+- `scripts/check-import-integrity.ts`
+- `scripts/check-build-output-keys.ts`
 
-No database migrations, no `bun add`, no env changes needed.
+The global phase order is intentionally:
 
-## Risks
+1. Assess
+2. Discover
+3. Build
+4. Scale
 
-- `approvals.functions.ts` is brand new; if `useBuild.tsx` or the approvals route reference exports we don't sync correctly the typecheck will catch it.
-- If the updated `check-build-output-keys.ts` adds stricter rules that the rest of the synced code doesn't satisfy, we fix forward — the upstream commit was authored together so it should pass as a set.
+Do not reorder phases.
+
+## Build phase status
+
+The Build capture wizard is the real four-step wizard, not a placeholder:
+
+1. Strategic Intent
+2. Data & System
+3. Process Shape
+4. Governance
+
+The route imports `@/lib/build/wizard-schema`. Preserve these stable exports:
+
+- `STEPS`
+- `validateStep`
+- `isFieldFilled`
+- `FieldDef`
+- `StepDef`
+- `WizardValues`
+
+The wizard field keys are aligned to `src/lib/scoring.functions.ts` and must stay aligned. The final submission must score the use case before approval submission.
+
+## Current hardening work
+
+The next safe improvements are:
+
+1. Keep Build approvals behind `src/lib/build/approvals.functions.ts`.
+2. On approval, generate Scale governance flags through `src/lib/scale/scale.functions.ts`.
+3. Keep repeater validation strict enough that a process/input/output row only counts when its columns are complete.
+4. Preserve the existing tabs, phase order, content, and source-tree checks.
+
+## Required verification
+
+When the toolchain is available, run:
+
+- `bun scripts/check-import-integrity.ts`
+- `bun scripts/check-build-output-keys.ts`
+- `bun scripts/check-assess-output-keys.ts`
+- `bunx tsc --noEmit`
+- `bun run build`
+- `bunx vitest run`
+
+Do not delete checks or routes to make validation pass. Fix the root cause.

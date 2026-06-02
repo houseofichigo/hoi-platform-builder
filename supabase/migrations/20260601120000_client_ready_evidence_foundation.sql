@@ -1,3 +1,7 @@
+-- Client-ready evidence foundation.
+-- Adds auditable score snapshots, governance lifecycle metadata, roadmap source
+-- metadata, onboarding events, and support follow-up fields.
+
 CREATE TABLE IF NOT EXISTS public.assessment_score_snapshots (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
@@ -24,7 +28,9 @@ ALTER TABLE public.assessment_score_snapshots ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Members can view assessment score snapshots"
 ON public.assessment_score_snapshots FOR SELECT
 TO authenticated
-USING (public.is_workspace_member(workspace_id, auth.uid()));
+USING (
+  public.is_workspace_member(workspace_id, auth.uid())
+);
 
 CREATE POLICY "Members can insert their assessment score snapshots"
 ON public.assessment_score_snapshots FOR INSERT
@@ -61,12 +67,16 @@ ALTER TABLE public.use_case_score_snapshots ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Members can view use case score snapshots"
 ON public.use_case_score_snapshots FOR SELECT
 TO authenticated
-USING (public.is_workspace_member(workspace_id, auth.uid()));
+USING (
+  public.is_workspace_member(workspace_id, auth.uid())
+);
 
 CREATE POLICY "Use case modifiers can insert score snapshots"
 ON public.use_case_score_snapshots FOR INSERT
 TO authenticated
-WITH CHECK (public.can_modify_use_case(use_case_id, auth.uid()));
+WITH CHECK (
+  public.can_modify_use_case(use_case_id, auth.uid())
+);
 
 ALTER TABLE public.governance_flags
   ADD COLUMN IF NOT EXISTS reviewer_role text,

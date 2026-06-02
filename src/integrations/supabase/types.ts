@@ -155,6 +155,59 @@ export type Database = {
           },
         ]
       }
+      assessment_score_snapshots: {
+        Row: {
+          computed_at: string
+          computed_by: string | null
+          computed_outputs: Json
+          confidence: number
+          id: string
+          input_hash: string
+          raw_inputs: Json
+          reason_codes: string[]
+          score_type: string
+          scoring_model_version: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash?: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_score_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action_type: string
@@ -205,17 +258,58 @@ export type Database = {
           },
         ]
       }
+      billing_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          stripe_event_id: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          stripe_event_id?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          stripe_event_id?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_flags: {
         Row: {
           assignee_id: string | null
           created_at: string
           created_by: string | null
+          evidence_requirements: Json
           id: string
+          recomputed_at: string | null
           resolution_notes: string | null
+          resolved_at: string | null
+          resolved_reason: string | null
+          reviewer_role: string | null
           roadmap_entry_id: string | null
           rule_code: string
           rule_source: string
           severity: string
+          source_snapshot: Json
           status: string
           updated_at: string
           use_case_id: string
@@ -225,12 +319,18 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          evidence_requirements?: Json
           id?: string
+          recomputed_at?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          reviewer_role?: string | null
           roadmap_entry_id?: string | null
           rule_code: string
           rule_source: string
           severity: string
+          source_snapshot?: Json
           status?: string
           updated_at?: string
           use_case_id: string
@@ -240,12 +340,18 @@ export type Database = {
           assignee_id?: string | null
           created_at?: string
           created_by?: string | null
+          evidence_requirements?: Json
           id?: string
+          recomputed_at?: string | null
           resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_reason?: string | null
+          reviewer_role?: string | null
           roadmap_entry_id?: string | null
           rule_code?: string
           rule_source?: string
           severity?: string
+          source_snapshot?: Json
           status?: string
           updated_at?: string
           use_case_id?: string
@@ -275,16 +381,163 @@ export type Database = {
           },
         ]
       }
+      hoi_admin_audit_log: {
+        Row: {
+          action_type: string
+          actor_id: string | null
+          after_state: Json | null
+          before_state: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          action_type: string
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          action_type?: string
+          actor_id?: string | null
+          after_state?: Json | null
+          before_state?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: []
+      }
+      hoi_admin_notes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          note: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          note: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          note?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hoi_admin_users: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          role: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      library_item_versions: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          library_item_id: string
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          library_item_id: string
+          snapshot: Json
+          version: number
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          library_item_id?: string
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_item_versions_library_item_id_fkey"
+            columns: ["library_item_id"]
+            isOneToOne: false
+            referencedRelation: "library_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_items: {
         Row: {
+          archived_at: string | null
+          content_owner_id: string | null
           content_url: string | null
           created_at: string
           created_by: string | null
+          editorial_status: string
           id: string
+          internal_notes: string | null
+          last_reviewed_at: string | null
           metadata: Json
           module_ids: string[]
           phase_ids: string[]
           published: boolean
+          published_at: string | null
+          reviewer_id: string | null
           summary: string | null
           tags: string[]
           title: string
@@ -294,14 +547,21 @@ export type Database = {
           workspace_id: string | null
         }
         Insert: {
+          archived_at?: string | null
+          content_owner_id?: string | null
           content_url?: string | null
           created_at?: string
           created_by?: string | null
+          editorial_status?: string
           id?: string
+          internal_notes?: string | null
+          last_reviewed_at?: string | null
           metadata?: Json
           module_ids?: string[]
           phase_ids?: string[]
           published?: boolean
+          published_at?: string | null
+          reviewer_id?: string | null
           summary?: string | null
           tags?: string[]
           title: string
@@ -311,14 +571,21 @@ export type Database = {
           workspace_id?: string | null
         }
         Update: {
+          archived_at?: string | null
+          content_owner_id?: string | null
           content_url?: string | null
           created_at?: string
           created_by?: string | null
+          editorial_status?: string
           id?: string
+          internal_notes?: string | null
+          last_reviewed_at?: string | null
           metadata?: Json
           module_ids?: string[]
           phase_ids?: string[]
           published?: boolean
+          published_at?: string | null
+          reviewer_id?: string | null
           summary?: string | null
           tags?: string[]
           title?: string
@@ -393,6 +660,83 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      onboarding_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          user_id: string | null
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          metadata: Json
+          monthly_price_cents: number | null
+          name: string
+          seat_limit: number | null
+          stripe_price_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id: string
+          metadata?: Json
+          monthly_price_cents?: number | null
+          name: string
+          seat_limit?: number | null
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          monthly_price_cents?: number | null
+          name?: string
+          seat_limit?: number | null
+          stripe_price_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       post_pilot_reviews: {
         Row: {
@@ -518,9 +862,12 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          evidence_summary: Json
+          gate_status: Json
           id: string
           owner_id: string | null
           priority_score: number | null
+          source_metadata: Json
           stage: string
           target_quarter: string | null
           updated_at: string
@@ -530,9 +877,12 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          evidence_summary?: Json
+          gate_status?: Json
           id?: string
           owner_id?: string | null
           priority_score?: number | null
+          source_metadata?: Json
           stage?: string
           target_quarter?: string | null
           updated_at?: string
@@ -542,9 +892,12 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          evidence_summary?: Json
+          gate_status?: Json
           id?: string
           owner_id?: string | null
           priority_score?: number | null
+          source_metadata?: Json
           stage?: string
           target_quarter?: string | null
           updated_at?: string
@@ -638,6 +991,7 @@ export type Database = {
           submitted_by: string | null
           updated_at: string
           use_case_id: string
+          workspace_id: string | null
         }
         Insert: {
           comment?: string | null
@@ -650,6 +1004,7 @@ export type Database = {
           submitted_by?: string | null
           updated_at?: string
           use_case_id: string
+          workspace_id?: string | null
         }
         Update: {
           comment?: string | null
@@ -662,6 +1017,7 @@ export type Database = {
           submitted_by?: string | null
           updated_at?: string
           use_case_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -669,6 +1025,13 @@ export type Database = {
             columns: ["use_case_id"]
             isOneToOne: true
             referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "use_case_approvals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -710,6 +1073,66 @@ export type Database = {
             columns: ["use_case_id"]
             isOneToOne: false
             referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      use_case_score_snapshots: {
+        Row: {
+          computed_at: string
+          computed_by: string | null
+          computed_outputs: Json
+          confidence: number
+          id: string
+          input_hash: string
+          raw_inputs: Json
+          reason_codes: string[]
+          score_type: string
+          scoring_model_version: string
+          use_case_id: string
+          workspace_id: string
+        }
+        Insert: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version: string
+          use_case_id: string
+          workspace_id: string
+        }
+        Update: {
+          computed_at?: string
+          computed_by?: string | null
+          computed_outputs?: Json
+          confidence?: number
+          id?: string
+          input_hash?: string
+          raw_inputs?: Json
+          reason_codes?: string[]
+          score_type?: string
+          scoring_model_version?: string
+          use_case_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "use_case_score_snapshots_use_case_id_fkey"
+            columns: ["use_case_id"]
+            isOneToOne: false
+            referencedRelation: "use_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "use_case_score_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -950,6 +1373,63 @@ export type Database = {
           },
         ]
       }
+      workspace_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan_id: string
+          price_id: string | null
+          seat_limit: number | null
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_id: string
+          price_id?: string | null
+          seat_limit?: number | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_id?: string
+          price_id?: string | null
+          seat_limit?: number | null
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspaces: {
         Row: {
           created_at: string
@@ -1071,6 +1551,10 @@ export type Database = {
       }
       has_workspace_role: {
         Args: { _roles: string[]; _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
+      is_hoi_admin: {
+        Args: { _roles?: string[]; _user_id: string }
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }

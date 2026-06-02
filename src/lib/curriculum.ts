@@ -2,6 +2,21 @@ export type CurriculumPhase = 'scope' | 'build' | 'govern' | 'scale';
 export type ModuleId = 'm01' | 'm02' | 'm03' | 'm04' | 'm05' | 'm06' | 'm07' | 'm08' | 'm09' | 'm10' | 'm11' | 'm12';
 export type GateNumber = 1 | 2 | 3;
 export type GateRole = 'pre' | 'g1' | 'g2' | 'g3' | 'post1' | 'post2' | 'post3';
+export type AssessCourseId = 'ai-transformation-foundations';
+
+export type CoursePrimaryMedia =
+  | {
+      type: 'youtube';
+      url: string;
+      embedUrl: string;
+      title: string;
+    }
+  | {
+      type: 'slides';
+      url: string;
+      title: string;
+      format: 'pptx' | 'pdf' | 'google_slides';
+    };
 
 export interface ModuleMeta {
   id: ModuleId;
@@ -23,6 +38,19 @@ export interface ModuleMeta {
   concepts: { term: string; definition: string }[];
   assignment: string;
   outcome: string;
+}
+
+export interface AssessCourseMeta {
+  id: AssessCourseId;
+  slug: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  audience: string;
+  level: string;
+  duration: string;
+  modules: ModuleId[];
+  primaryMedia: CoursePrimaryMedia;
 }
 
 export const MODULES: ModuleMeta[] = [
@@ -326,11 +354,48 @@ export const ARTIFACTS = [
   { id: 'handoff_pack', phase: 4, phaseName: 'Deploy', title: 'The Handoff Pack', modules: ['m10', 'm11', 'm12'] as ModuleId[] },
 ];
 
+export const DEFAULT_ASSESS_COURSE_ID = 'ai-transformation-foundations' as const;
+
+export const COURSES: AssessCourseMeta[] = [
+  {
+    id: DEFAULT_ASSESS_COURSE_ID,
+    slug: DEFAULT_ASSESS_COURSE_ID,
+    title: 'AI Transformation Foundations',
+    subtitle: 'The first House of Ichigo Assess course.',
+    description:
+      'A twelve-module foundation course that teaches the core AI system concepts, governance checkpoints, and operating artifacts needed before a team moves into Build and Scale.',
+    audience: 'Business, operations, transformation, and AI delivery teams',
+    level: 'Foundation',
+    duration: '22h 10m',
+    modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06', 'm07', 'm08', 'm09', 'm10', 'm11', 'm12'],
+    primaryMedia: {
+      type: 'slides',
+      url: '',
+      title: 'AI Transformation Foundations slides',
+      format: 'pdf',
+    },
+  },
+];
+
 export function getModule(id: ModuleId): ModuleMeta | undefined {
   return MODULES.find(m => m.id === id);
 }
 export function getPhase(num: 1 | 2 | 3 | 4) {
   return PHASES.find(p => p.num === num);
+}
+
+export function getCourse(courseId: string): AssessCourseMeta | undefined {
+  return COURSES.find((course) => course.id === courseId || course.slug === courseId);
+}
+
+export function getCourseModules(courseId: string): ModuleMeta[] {
+  const course = getCourse(courseId);
+  if (!course) return [];
+  return course.modules.map((moduleId) => getModule(moduleId)).filter((module): module is ModuleMeta => Boolean(module));
+}
+
+export function getModuleCourse(moduleId: ModuleId): AssessCourseMeta | undefined {
+  return COURSES.find((course) => course.modules.includes(moduleId));
 }
 
 export function isValidModuleId(id: string): id is ModuleId {

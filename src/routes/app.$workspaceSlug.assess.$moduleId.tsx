@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { CheckCircle2, Clock, Circle, Lock, PlayCircle } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
+import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
 import { ModuleTabs } from "@/components/assess/ModuleTabs";
 
@@ -18,6 +18,7 @@ function ModuleLayout() {
     return <p className="text-slate">Unknown module.</p>;
   }
   const m = getModule(moduleId as ModuleId)!;
+  const course = getModuleCourse(m.id);
   const { data: progress, isLoading } = useAssessProgress(m.id);
   const slug = workspace.slug;
   const status = progress?.status ?? "not_started";
@@ -32,13 +33,15 @@ function ModuleLayout() {
         <Link to="/app/$workspaceSlug/assess" params={{ workspaceSlug: slug }} className="hover:text-terracotta">
           ← ASSESS
         </Link>{" "}
-        · PHASE {String(m.phaseNum).padStart(2, "0")}: {m.phaseName.toUpperCase()} · M{String(m.num).padStart(2, "0")}
+        · {course ? `COURSE: ${course.title.toUpperCase()} · ` : ""}M{String(m.num).padStart(2, "0")}
       </p>
 
       <header className="rounded-md border border-chalk bg-white px-5 py-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <p className="eyebrow-muted">MODULE {String(m.num).padStart(2, "0")} · {m.phaseName}</p>
+            <p className="eyebrow-muted">
+              {course ? `COURSE: ${course.title} · ` : ""}MODULE {String(m.num).padStart(2, "0")} · {m.phaseName}
+            </p>
             <h1 className="mt-1 font-display text-[30px] leading-tight text-navy md:text-[38px]">
               {m.title}
             </h1>

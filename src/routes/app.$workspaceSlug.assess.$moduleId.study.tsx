@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { ArrowRight, BookOpen, Check, FileText, Lightbulb, PlayCircle, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
+import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
 import { TokenizerLab } from "@/components/assess/TokenizerLab";
 
@@ -18,6 +18,7 @@ function ModuleStudy() {
   const { data: worked } = useWorkedExample();
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
+  const course = getModuleCourse(m.id);
   const { data: progress, setStudied } = useAssessProgress(m.id);
   const slug = workspace.slug;
   const studied = progress?.studied ?? false;
@@ -40,7 +41,9 @@ function ModuleStudy() {
   return (
     <div className="space-y-10">
       <header className="max-w-[78ch] space-y-4">
-        <p className="eyebrow-muted">LESSON · M{String(m.num).padStart(2, "0")} · ~{m.estimatedMinutes} MIN</p>
+        <p className="eyebrow-muted">
+          {course ? `COURSE: ${course.title} · ` : ""}LESSON · M{String(m.num).padStart(2, "0")} · ~{m.estimatedMinutes} MIN
+        </p>
         <h2 className="font-display text-[40px] leading-tight text-navy md:text-[58px]">
           {m.title}
         </h2>
@@ -115,6 +118,15 @@ function ModuleStudy() {
         </main>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          {course && (
+            <div className="rounded-md border border-chalk bg-white p-5">
+              <p className="eyebrow-muted">COURSE</p>
+              <p className="mt-3 text-[16px] font-semibold text-navy">{course.title}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-graphite">
+                {course.level} · {course.duration}
+              </p>
+            </div>
+          )}
           <div className="rounded-md border border-chalk bg-white p-5">
             <p className="eyebrow-muted">LESSON STATUS</p>
             <div className="mt-4 flex items-center gap-3">

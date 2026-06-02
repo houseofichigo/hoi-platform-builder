@@ -5,9 +5,14 @@ import { ArrowRight, Check, Circle, FileText, Flag, Lock, Play } from "lucide-re
 import { useWorkspace } from "@/hooks/useWorkspace";
 import {
   ARTIFACTS,
+  COURSES,
+  DEFAULT_ASSESS_COURSE_ID,
   MODULES,
   PHASES,
+  getCourse,
+  getCourseModules,
   getModule,
+  type AssessCourseMeta,
   type ModuleId,
   type ModuleMeta,
 } from "@/lib/curriculum";
@@ -18,6 +23,7 @@ import {
   type AssessProgressRow,
 } from "@/hooks/useAssess";
 import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
+import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
@@ -31,11 +37,13 @@ function AssessHome() {
   const { data: worked } = useWorkedExample();
   const { isComplete: useCaseComplete, isLoading: useCaseLoading } = useUseCaseProfile();
   const [tab, setTab] = useState<CourseTab>("curriculum");
+  const course = getCourse(DEFAULT_ASSESS_COURSE_ID)!;
+  const courseModules = useMemo(() => getCourseModules(course.id), [course.id]);
 
   const stats = useMemo(() => {
-    const completed = MODULES.filter((m) => progress?.[m.id]?.status === "complete").length;
-    const inProgress = MODULES.filter((m) => progress?.[m.id]?.status === "in_progress").length;
-    const percent = Math.round((completed / MODULES.length) * 100);
+    const completed = courseModules.filter((m) => progress?.[m.id]?.status === "complete").length;
+    const inProgress = courseModules.filter((m) => progress?.[m.id]?.status === "in_progress").length;
+    const percent = Math.round((completed / courseModules.length) * 100);
     const resume = currentResumeModule(progress);
     const resumeProgress = progress?.[resume.module.id];
     const target: "/app/$workspaceSlug/assess/$moduleId" | "/app/$workspaceSlug/assess/$moduleId/work" =
@@ -44,7 +52,7 @@ function AssessHome() {
         : "/app/$workspaceSlug/assess/$moduleId";
 
     return { completed, inProgress, percent, resume, target };
-  }, [progress]);
+  }, [courseModules, progress]);
 
   if (!workspace) return null;
   const slug = workspace.slug;
@@ -55,6 +63,7 @@ function AssessHome() {
   return (
     <div className="space-y-12">
       <CourseHero
+        course={course}
         workspaceName={workspace.name}
         slug={slug}
         workedName={worked?.name}
@@ -66,7 +75,10 @@ function AssessHome() {
         resumeStarted={stats.resume.started}
         resumeTarget={stats.target}
         currentArtifact={currentArtifact.title}
+        totalModules={courseModules.length}
       />
+
+      <CourseMediaBlock media={course.primaryMedia} />
 
       {!worked && (
         <NoticeCard
@@ -102,6 +114,8 @@ function AssessHome() {
         />
       )}
 
+      <CourseShelf course={course} slug={slug} progress={progress ?? {}} />
+
       <section className="space-y-6">
         <nav className="flex gap-2 overflow-x-auto border-b border-chalk" aria-label="Assess course sections">
           {([
@@ -135,7 +149,7 @@ function AssessHome() {
           <GatesPanel slug={slug} progress={progress ?? {}} />
         )}
         {tab === "about" && (
-          <AboutPanel workedName={worked?.name} />
+          <AboutPanel course={course} workedName={worked?.name} />
         )}
       </section>
     </div>
@@ -143,6 +157,7 @@ function AssessHome() {
 }
 
 function CourseHero({
+  course,
   workspaceName,
   slug,
   workedName,
@@ -154,7 +169,9 @@ function CourseHero({
   resumeStarted,
   resumeTarget,
   currentArtifact,
+  totalModules,
 }: {
+  course: AssessCourseMeta;
   workspaceName: string;
   slug: string;
   workedName?: string;
@@ -166,6 +183,7 @@ function CourseHero({
   resumeStarted: boolean;
   resumeTarget: "/app/$workspaceSlug/assess/$moduleId" | "/app/$workspaceSlug/assess/$moduleId/work";
   currentArtifact: string;
+  totalModules: number;
 }) {
   return (
     <header className="rounded-md border border-chalk bg-white px-6 py-8 md:px-10 md:py-12">
@@ -178,13 +196,12 @@ function CourseHero({
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div>
           <h1 className="font-display text-[46px] font-medium leading-[1.02] tracking-[-0.015em] text-navy md:text-[64px]">
-            House of Ichigo
+            {course.title}
             <br />
-            <span className="accent-italic">Assess.</span>
+            <span className="accent-italic">Course.</span>
           </h1>
           <p className="lead mt-5 max-w-[64ch]">
-            Twelve guided modules that turn AI concepts into a usable operating methodology:
-            study the idea, complete the assignment, and carry the evidence into Build and Scale.
+            {course.description}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -210,7 +227,7 @@ function CourseHero({
             <div className="flex items-end justify-between gap-4">
               <p className="font-display text-[44px] leading-none text-navy">{percent}%</p>
               <p className="text-right font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
-                {completed} of {MODULES.length}
+                {completed} of {totalModules}
                 <br />
                 modules complete
               </p>
@@ -233,6 +250,10 @@ function CourseHero({
               <dd className="text-right font-medium text-navy">{inProgress}</dd>
             </div>
             <div className="flex justify-between gap-4">
+              <dt className="text-slate">Course</dt>
+              <dd className="text-right font-medium text-navy">{course.level} · {course.duration}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
               <dt className="text-slate">Worked example</dt>
               <dd className="text-right font-medium text-navy">
                 {workedName ? `${workedName}${workedIndustry ? ` · ${workedIndustry}` : ""}` : "Not selected"}
@@ -242,6 +263,60 @@ function CourseHero({
         </aside>
       </div>
     </header>
+  );
+}
+
+function CourseShelf({
+  course,
+  slug,
+  progress,
+}: {
+  course: AssessCourseMeta;
+  slug: string;
+  progress: Record<string, AssessProgressRow>;
+}) {
+  const complete = course.modules.filter((moduleId) => progress[moduleId]?.status === "complete").length;
+  const percent = Math.round((complete / course.modules.length) * 100);
+  const next = course.modules.find((moduleId) => progress[moduleId]?.status !== "complete") ?? course.modules[course.modules.length - 1];
+
+  return (
+    <section className="space-y-3">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow-muted">COURSES</p>
+          <h2 className="font-display text-[30px] leading-tight text-navy">Course library</h2>
+        </div>
+        <span className="rounded-full bg-mist px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+          {COURSES.length} course{COURSES.length === 1 ? "" : "s"}
+        </span>
+      </div>
+      <Link
+        to="/app/$workspaceSlug/assess/$moduleId"
+        params={{ workspaceSlug: slug, moduleId: next }}
+        className="block rounded-md border border-chalk bg-white p-5 transition-colors hover:border-terracotta/50"
+      >
+        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
+          <div>
+            <p className="eyebrow-muted">{course.level} · {course.duration} · {course.modules.length} modules</p>
+            <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">{course.title}</h3>
+            <p className="mt-2 max-w-[72ch] text-[14px] leading-relaxed text-graphite">{course.subtitle}</p>
+            <p className="mt-2 text-[13px] text-slate">{course.audience}</p>
+          </div>
+          <div>
+            <div className="flex items-center justify-between text-[12px] text-slate">
+              <span>{complete}/{course.modules.length} complete</span>
+              <span>{percent}%</span>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-chalk">
+              <div className="h-full rounded-full bg-terracotta" style={{ width: `${percent}%` }} />
+            </div>
+            <span className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta">
+              Open course <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </section>
   );
 }
 
@@ -491,17 +566,12 @@ function GatesPanel({
   );
 }
 
-function AboutPanel({ workedName }: { workedName?: string }) {
+function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedName?: string }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="max-w-[72ch] space-y-5 text-[16px] leading-relaxed text-graphite">
         <h2 className="h-heading-md">About this course</h2>
-        <p>
-          Assess is the House of Ichigo methodology layer. It teaches the core AI system concepts
-          and turns them into reusable evidence: data maps, prompt libraries, assistant blueprints,
-          prototypes, agent pilots, tool decisions, deployment plans, portfolio scores, monitoring
-          routines, and a roadmap.
-        </p>
+        <p>{course.description}</p>
         <p>
           The course is structured around a single worked example
           {workedName ? `, ${workedName},` : ""} so every module builds on the last. The goal is not
@@ -514,7 +584,7 @@ function AboutPanel({ workedName }: { workedName?: string }) {
         <dl className="mt-4 space-y-3 text-[13px]">
           <div className="flex justify-between gap-4">
             <dt className="text-slate">Modules</dt>
-            <dd className="font-medium text-navy">12</dd>
+            <dd className="font-medium text-navy">{course.modules.length}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-slate">Phases</dt>
@@ -527,6 +597,10 @@ function AboutPanel({ workedName }: { workedName?: string }) {
           <div className="flex justify-between gap-4">
             <dt className="text-slate">Primary mode</dt>
             <dd className="font-medium text-navy">Study + assignment</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-slate">Course level</dt>
+            <dd className="font-medium text-navy">{course.level}</dd>
           </div>
         </dl>
       </aside>

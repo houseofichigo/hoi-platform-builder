@@ -2,8 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, CheckCircle2, Clock, FileText, Flag, Layers, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
+import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
+import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/")({
   component: ModuleOverview,
@@ -17,6 +18,7 @@ function ModuleOverview() {
 
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
+  const course = getModuleCourse(m.id);
   const { data: progress } = useAssessProgress(m.id);
   const slug = workspace.slug;
 
@@ -35,7 +37,7 @@ function ModuleOverview() {
       <section className="rounded-md border border-chalk bg-white px-6 py-8 md:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
           <div>
-            <p className="eyebrow-muted">MODULE OVERVIEW</p>
+            <p className="eyebrow-muted">{course ? `COURSE: ${course.title} · ` : ""}MODULE OVERVIEW</p>
             <h2 className="mt-3 font-display text-[38px] leading-tight text-navy md:text-[54px]">
               {m.title}
             </h2>
@@ -153,6 +155,15 @@ function ModuleOverview() {
         </main>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          {course && (
+            <div className="rounded-md border border-chalk bg-white p-5">
+              <p className="eyebrow-muted">COURSE</p>
+              <p className="mt-3 text-[16px] font-semibold text-navy">{course.title}</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-graphite">
+                {course.level} · {course.duration} · {course.modules.length} modules
+              </p>
+            </div>
+          )}
           <div className="rounded-md border border-chalk bg-white p-5">
             <p className="eyebrow-muted">WHAT YOU'LL BUILD</p>
             <p className="mt-3 text-[14px] leading-relaxed text-navy">{m.assignment}</p>
@@ -189,6 +200,7 @@ function ModuleOverview() {
               {m.gateNumber && <p className="flex items-center gap-2"><Flag className="h-4 w-4 text-slate" /> Gate {m.gateNumber}</p>}
             </div>
           </div>
+          {course && <CourseMediaBlock media={course.primaryMedia} compact />}
         </aside>
       </div>
 

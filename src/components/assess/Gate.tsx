@@ -24,10 +24,10 @@ export interface GateProps {
 }
 
 const DECISION_OPTIONS: { value: GateDecision; label: string; description: string }[] = [
-  { value: "continue", label: "Continue", description: "Proceed without changes." },
-  { value: "constraints", label: "Continue with constraints", description: "Proceed, but with named guardrails." },
-  { value: "improve", label: "Improve and retry", description: "Pause, address gaps, re-run the gate." },
-  { value: "stop", label: "Stop", description: "Park or kill the use case." },
+  { value: "continue", label: "PASS", description: "Proceed without changes." },
+  { value: "constraints", label: "PARTIAL", description: "Proceed, but only with named guardrails." },
+  { value: "improve", label: "FAIL — improve and retry", description: "Pause, address gaps, then re-run the gate." },
+  { value: "stop", label: "FAIL — stop", description: "Park or kill the use case." },
 ];
 
 export function Gate({

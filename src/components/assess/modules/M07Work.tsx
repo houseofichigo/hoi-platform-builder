@@ -266,7 +266,7 @@ export function M07Work() {
     qc.invalidateQueries({ queryKey: ["assess-progress-all", workspace.id, user.id] });
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
-    toast.success("M07 complete. M08 Deployment Planning is unlocked.");
+    toast.success("M07 complete. M08 Integration & Deployment Planning is unlocked.");
   };
 
   if (!workspace) return null;

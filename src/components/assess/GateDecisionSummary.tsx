@@ -46,7 +46,7 @@ export function GateDecisionSummary({ decisions, workspaceSlug }: GateDecisionSu
               {recorded ? (
                 <>
                   <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.14em] text-terracotta">
-                    Decision · {d!.decision}
+                    Decision · {gateDecisionLabel(d!.decision)}
                   </p>
                   <p className="mt-2 line-clamp-3 text-[13px] text-graphite">{d!.justification}</p>
                   <p className="mt-3 text-[12px] text-slate">
@@ -72,4 +72,12 @@ export function GateDecisionSummary({ decisions, workspaceSlug }: GateDecisionSu
       </div>
     </section>
   );
+}
+
+function gateDecisionLabel(decision: string) {
+  if (decision === "continue") return "PASS";
+  if (decision === "constraints") return "PARTIAL";
+  if (decision === "improve") return "FAIL — improve and retry";
+  if (decision === "stop") return "FAIL — stop";
+  return decision;
 }

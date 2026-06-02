@@ -39,10 +39,10 @@ export function ProgramCompletionDashboard({
   ).length;
   const gatesRecorded = GATES.filter((g) => decisions.some((d) => d.gate_number === g.num)).length;
 
-  const tier2Ready = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
+  const capstoneReady = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
   const tier =
-    tier2Ready
-      ? "Tier 02 — Certified AI Systems Builder"
+    capstoneReady
+      ? "Ready for Tier 02 capstone"
       : modulesComplete >= 3 && artifactsComplete >= 1
         ? "Tier 01 — AI Builder Foundations"
         : "Not yet";
@@ -75,7 +75,8 @@ export function ProgramCompletionDashboard({
           Program <span className="accent-italic">completion.</span>
         </h1>
         <p className="lead mt-3 max-w-[60ch]">
-          Review your modules, artifacts, gates, and certification readiness.
+          Review your modules, artifacts, gates, and certification readiness. Tier 02 certification
+          is completed through the separate capstone track.
         </p>
       </header>
 

@@ -12,7 +12,7 @@ export function CertificationReadiness({
   gatesRecorded,
 }: CertificationReadinessProps) {
   const tier1Ready = modulesComplete >= 3 && artifactsComplete >= 1;
-  const tier2Ready = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
+  const tier2PrereqsReady = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
 
   return (
     <section className="space-y-5">
@@ -33,11 +33,14 @@ export function CertificationReadiness({
         <TierCard
           tier="02"
           title="Certified AI Systems Builder"
-          ready={tier2Ready}
+          ready={false}
+          badge={tier2PrereqsReady ? "Capstone ready" : "Track required"}
+          description="Tier 02 is earned through the separate mentored capstone track after the method evidence is complete."
           gaps={[
             { label: "M01–M12 complete", met: modulesComplete >= 12 },
             { label: "All four artifacts complete", met: artifactsComplete >= 4 },
             { label: "All three gates recorded", met: gatesRecorded >= 3 },
+            { label: "Capstone track completed", met: false },
           ]}
         />
       </div>
@@ -49,11 +52,15 @@ function TierCard({
   tier,
   title,
   ready,
+  badge,
+  description,
   gaps,
 }: {
   tier: string;
   title: string;
   ready: boolean;
+  badge?: string;
+  description?: string;
   gaps: Array<{ label: string; met: boolean }>;
 }) {
   return (
@@ -66,11 +73,12 @@ function TierCard({
           </span>
         ) : (
           <span className="rounded-full bg-mist px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
-            Not yet
+            {badge ?? "Not yet"}
           </span>
         )}
       </div>
       <h3 className="mt-3 font-display text-[22px] leading-[1.15] text-navy">{title}</h3>
+      {description && <p className="mt-2 text-[13px] leading-relaxed text-graphite">{description}</p>}
       <ul className="mt-4 space-y-2">
         {gaps.map((g) => (
           <li key={g.label} className="flex items-center gap-2 text-[13px]">

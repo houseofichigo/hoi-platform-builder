@@ -33,7 +33,7 @@ export const ARTIFACTS: ArtifactDef[] = [
     id: "artifact-02",
     title: "The System",
     phase: 2,
-    phaseName: "Develop",
+    phaseName: "Build",
     modules: ["m04", "m05", "m06"],
     outputKeys: [
       "m04.architecture",
@@ -78,7 +78,7 @@ export const ARTIFACTS: ArtifactDef[] = [
     id: "artifact-04",
     title: "The Handoff Pack",
     phase: 4,
-    phaseName: "Deploy",
+    phaseName: "Scale",
     modules: ["m10", "m11", "m12"],
     outputKeys: [
       "m10.documentation_outline",
@@ -97,9 +97,9 @@ export const ARTIFACTS: ArtifactDef[] = [
 ];
 
 export const GATES = [
-  { num: 1 as const, moduleId: "m04" as ModuleId, formal: false, question: "Is it safe to develop?" },
+  { num: 1 as const, moduleId: "m04" as ModuleId, formal: false, question: "Is it safe to build?" },
   { num: 2 as const, moduleId: "m06" as ModuleId, formal: false, question: "Is it safe to deploy?" },
-  { num: 3 as const, moduleId: "m09" as ModuleId, formal: true, question: "Is it stable enough to deploy at scale?" },
+  { num: 3 as const, moduleId: "m09" as ModuleId, formal: true, question: "Which use cases earn the next investment cycle?" },
 ];
 
 /**

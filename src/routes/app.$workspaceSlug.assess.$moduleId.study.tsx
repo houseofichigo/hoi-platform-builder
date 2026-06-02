@@ -99,12 +99,13 @@ function ModuleStudy() {
           </ReaderSection>
 
           {worked && (
-            <ReaderSection icon={PlayCircle} title={`Apply it to ${worked.shortName}`}>
+            <ReaderSection icon={PlayCircle} title={`Practice with ${worked.shortName}`}>
               <p>{worked.contextBlurb}</p>
               <p>
-                In this module, use the worked example as a controlled practice case:
+                In this module, use the demo as a controlled practice case:
                 keep the business context stable, notice which decisions are repeatable,
-                and capture the evidence that future Build and Scale work will need.
+                and capture the evidence pattern. The final certification capstone applies
+                the same method to a participant-chosen workflow.
               </p>
             </ReaderSection>
           )}

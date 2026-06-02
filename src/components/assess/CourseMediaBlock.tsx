@@ -8,6 +8,10 @@ interface CourseMediaBlockProps {
 }
 
 export function CourseMediaBlock({ media, compact = false, label }: CourseMediaBlockProps) {
+  const fallbackLabel = label?.toUpperCase().includes("MODULE")
+    ? `${media.title.split(" · ")[0]} slides coming soon.`
+    : "Course slides coming soon.";
+
   if (media.type === "youtube") {
     const embedUrl = media.embedUrl || toYouTubeEmbedUrl(media.url);
 
@@ -65,7 +69,7 @@ export function CourseMediaBlock({ media, compact = false, label }: CourseMediaB
           Open slides <ExternalLink className="h-3.5 w-3.5" />
         </a>
       ) : (
-        <MediaFallback label="Slides coming soon." />
+        <MediaFallback label={fallbackLabel} />
       )}
     </section>
   );

@@ -165,6 +165,16 @@ function ModuleOverview() {
                 />
               )}
             </div>
+            {m.assignmentAlignment && (
+              <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-800">
+                  Assignment content pass
+                </p>
+                <p className="mt-2 text-[13px] leading-relaxed text-amber-900">
+                  {m.assignmentAlignment}
+                </p>
+              </div>
+            )}
           </CourseSection>
         </main>
 
@@ -188,7 +198,7 @@ function ModuleOverview() {
           </div>
           {worked && (
             <div className="rounded-md border border-chalk bg-white p-5">
-              <p className="eyebrow-muted">WORKED EXAMPLE</p>
+              <p className="eyebrow-muted">MODULE DEMO</p>
               <p className="mt-3 text-[14px] font-semibold text-navy">{worked.name}</p>
               <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{worked.industry}</p>
               <p className="mt-3 text-[13px] leading-relaxed text-graphite">{worked.contextBlurb}</p>

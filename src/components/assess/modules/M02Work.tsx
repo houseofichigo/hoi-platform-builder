@@ -189,7 +189,7 @@ export function M02Work() {
     qc.invalidateQueries({ queryKey: ["assess-progress-all", workspace.id, user.id] });
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
-    toast.success("M02 complete. M03 Prompt Engineering is unlocked.");
+    toast.success("M02 complete. M03 Prompt-Driven Automation is unlocked.");
   };
 
   if (!workspace) return null;

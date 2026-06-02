@@ -13,6 +13,7 @@ import {
   getCourseModules,
   getModule,
   type AssessCourseMeta,
+  type CapstoneCaseMeta,
   type ModuleId,
   type ModuleMeta,
 } from "@/lib/curriculum";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
 });
 
-type CourseTab = "courses" | "curriculum" | "artifacts" | "gates" | "about";
+type CourseTab = "courses" | "curriculum" | "capstones" | "artifacts" | "gates" | "about";
 
 function AssessHome() {
   const { workspace } = useWorkspace();
@@ -81,8 +82,8 @@ function AssessHome() {
       {!worked && (
         <NoticeCard
           eyebrow="SETUP NEEDED"
-          title="Pick the worked example before starting Assess."
-          body="The methodology carries one example through all twelve modules, so every assignment has a shared thread."
+          title="Pick the module demo before starting Assess."
+          body="The module demo gives every assignment a shared practice thread. The certification capstone is separate and can be chosen later from the Capstone Library."
           actionLabel="Go to onboarding"
           to="/app/$workspaceSlug"
           slug={slug}
@@ -117,6 +118,7 @@ function AssessHome() {
           {([
             ["courses", "Courses"],
             ["curriculum", "Current course"],
+            ["capstones", "Capstone Library"],
             ["artifacts", "Artifacts"],
             ["gates", "Gates"],
             ["about", "About"],
@@ -149,6 +151,9 @@ function AssessHome() {
             <CourseMediaBlock media={course.primaryMedia} />
             <CurriculumPanel slug={slug} progress={progress ?? {}} />
           </div>
+        )}
+        {tab === "capstones" && (
+          <CapstonePanel course={course} />
         )}
         {tab === "artifacts" && (
           <ArtifactsPanel slug={slug} progress={progress ?? {}} />
@@ -209,8 +214,8 @@ function CourseHero({
             <span className="accent-italic">Assess.</span>
           </h1>
           <p className="lead mt-5 max-w-[64ch]">
-            Start with {course.title}: twelve chapters, four phases, three gates, and four artifacts
-            that carry one worked example into Build and Scale.
+            Start with {course.title}: {course.framing}. Learn the universal method here;
+            apply it later to a chosen capstone case for certification.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -263,7 +268,7 @@ function CourseHero({
               <dd className="text-right font-medium text-navy">{course.level} · {course.duration}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-slate">Worked example</dt>
+              <dt className="text-slate">Module demo</dt>
               <dd className="text-right font-medium text-navy">
                 {workedName ? `${workedName}${workedIndustry ? ` · ${workedIndustry}` : ""}` : "Not selected"}
               </dd>
@@ -307,10 +312,12 @@ function CourseShelf({
             <p className="eyebrow text-terracotta">COURSE 01 · {course.level} · {course.duration}</p>
             <h3 className="mt-3 font-display text-[36px] leading-tight text-navy">{course.title}</h3>
             <p className="mt-3 max-w-[72ch] text-[15px] leading-relaxed text-graphite">{course.description}</p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-3">
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.16em] text-slate">{course.framing}</p>
+            <div className="mt-5 grid gap-2 sm:grid-cols-4">
               <CourseMiniStat label="Modules" value={`${course.modules.length}`} />
               <CourseMiniStat label="Gates" value="3" />
               <CourseMiniStat label="Artifacts" value="4" />
+              <CourseMiniStat label="Formats" value="4" />
             </div>
             <p className="mt-4 text-[13px] leading-relaxed text-slate">{course.audience}</p>
           </div>
@@ -346,6 +353,10 @@ function CourseShelf({
               {artifact}
             </div>
           ))}
+        </div>
+        <div className="mt-4 rounded-md border border-chalk bg-paper p-4">
+          <p className="eyebrow-muted">CERTIFICATION</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-graphite">{course.certification.assessment}</p>
         </div>
       </div>
     </section>
@@ -481,6 +492,11 @@ function ModuleRow({
               Gate {m.gateNumber}
             </span>
           )}
+          {m.assignmentAlignment && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-amber-800">
+              Content pass needed
+            </span>
+          )}
         </div>
         <h3 className="mt-1 text-[16px] font-medium text-navy">{m.title}</h3>
         <p className="mt-1 line-clamp-2 text-[13px] text-graphite">{m.assignment}</p>
@@ -607,6 +623,52 @@ function GatesPanel({
   );
 }
 
+function CapstonePanel({ course }: { course: AssessCourseMeta }) {
+  return (
+    <section className="space-y-6">
+      <div className="rounded-md border border-chalk bg-white p-6">
+        <p className="eyebrow text-terracotta">CAPSTONE LIBRARY</p>
+        <h2 className="mt-3 font-display text-[34px] leading-tight text-navy">
+          Six cases. One method.
+        </h2>
+        <p className="mt-3 max-w-[76ch] text-[15px] leading-relaxed text-graphite">
+          The twelve modules teach the transferable method. The capstone track applies every artifact
+          pattern end-to-end to one chosen workflow. Selection is preview-only for now; persistence and
+          capstone assignments will come after the module assignments are finalized.
+        </p>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {course.capstoneCases.map((capstone) => (
+          <CapstoneCard key={capstone.id} capstone={capstone} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CapstoneCard({ capstone }: { capstone: CapstoneCaseMeta }) {
+  return (
+    <article className="rounded-md border border-chalk bg-white p-5">
+      <p className="eyebrow-muted">{capstone.function}</p>
+      <h3 className="mt-2 font-display text-[24px] leading-tight text-navy">{capstone.title}</h3>
+      <dl className="mt-4 space-y-3 text-[13px] leading-relaxed">
+        <div>
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Workflow</dt>
+          <dd className="mt-1 text-graphite">{capstone.workflow}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Agent pattern</dt>
+          <dd className="mt-1 text-graphite">{capstone.agent}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Why it matters</dt>
+          <dd className="mt-1 text-navy">{capstone.why}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
+
 function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedName?: string }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -615,11 +677,12 @@ function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedNa
         <p>{course.description}</p>
         <p>{course.methodology}</p>
         <p>
-          The course is structured around a single worked example
-          {workedName ? `, ${workedName},` : ""} so every module builds on the last. The goal is not
-          memorisation; it is a practical operating model your team can use when moving into Build
-          and Scale.
+          The current module demo
+          {workedName ? `, ${workedName},` : ""} keeps practice concrete while the method stays
+          universal. The final certification capstone is chosen separately and applies the same
+          Scope → Build → Govern → Scale pattern to a real workflow.
         </p>
+        <p>{course.certification.assessment}</p>
         <div className="grid gap-3 md:grid-cols-2">
           {course.gates.map((gate) => (
             <div key={gate} className="rounded-md border border-chalk bg-white p-4 text-[14px] text-navy">

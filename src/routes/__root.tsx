@@ -82,6 +82,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@houseofichigo" },
+      { name: "twitter:title", content: "House of Ichigo Platform" },
+      { name: "twitter:description", content: "House of Ichigo — multi-tenant workspace platform." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b2ba6d5-a763-4219-8a05-f1068611723f/id-preview-60a993ff--19589897-f79a-4c92-9375-11c15dcb0222.lovable.app-1780391670450.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b2ba6d5-a763-4219-8a05-f1068611723f/id-preview-60a993ff--19589897-f79a-4c92-9375-11c15dcb0222.lovable.app-1780391670450.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

@@ -29,14 +29,14 @@ export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
 });
 
-type CourseTab = "curriculum" | "artifacts" | "gates" | "about";
+type CourseTab = "courses" | "curriculum" | "artifacts" | "gates" | "about";
 
 function AssessHome() {
   const { workspace } = useWorkspace();
   const { data: progress } = useAssessAllProgress();
   const { data: worked } = useWorkedExample();
   const { isComplete: useCaseComplete, isLoading: useCaseLoading } = useUseCaseProfile();
-  const [tab, setTab] = useState<CourseTab>("curriculum");
+  const [tab, setTab] = useState<CourseTab>("courses");
   const course = getCourse(DEFAULT_ASSESS_COURSE_ID)!;
   const courseModules = useMemo(() => getCourseModules(course.id), [course.id]);
 
@@ -78,8 +78,6 @@ function AssessHome() {
         totalModules={courseModules.length}
       />
 
-      <CourseMediaBlock media={course.primaryMedia} />
-
       {!worked && (
         <NoticeCard
           eyebrow="SETUP NEEDED"
@@ -114,12 +112,11 @@ function AssessHome() {
         />
       )}
 
-      <CourseShelf course={course} slug={slug} progress={progress ?? {}} />
-
       <section className="space-y-6">
         <nav className="flex gap-2 overflow-x-auto border-b border-chalk" aria-label="Assess course sections">
           {([
-            ["curriculum", "Curriculum"],
+            ["courses", "Courses"],
+            ["curriculum", "Current course"],
             ["artifacts", "Artifacts"],
             ["gates", "Gates"],
             ["about", "About"],
@@ -139,8 +136,19 @@ function AssessHome() {
           ))}
         </nav>
 
+        {tab === "courses" && (
+          <CourseShelf
+            course={course}
+            slug={slug}
+            progress={progress ?? {}}
+            onOpenCourse={() => setTab("curriculum")}
+          />
+        )}
         {tab === "curriculum" && (
-          <CurriculumPanel slug={slug} progress={progress ?? {}} />
+          <div className="space-y-6">
+            <CourseMediaBlock media={course.primaryMedia} />
+            <CurriculumPanel slug={slug} progress={progress ?? {}} />
+          </div>
         )}
         {tab === "artifacts" && (
           <ArtifactsPanel slug={slug} progress={progress ?? {}} />
@@ -196,12 +204,13 @@ function CourseHero({
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div>
           <h1 className="font-display text-[46px] font-medium leading-[1.02] tracking-[-0.015em] text-navy md:text-[64px]">
-            {course.title}
+            Assess
             <br />
-            <span className="accent-italic">Course.</span>
+            <span className="accent-italic">Courses.</span>
           </h1>
           <p className="lead mt-5 max-w-[64ch]">
-            {course.description}
+            Choose a guided House of Ichigo course, study the concepts, complete the assignments,
+            and carry the evidence into Build and Scale.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -270,10 +279,12 @@ function CourseShelf({
   course,
   slug,
   progress,
+  onOpenCourse,
 }: {
   course: AssessCourseMeta;
   slug: string;
   progress: Record<string, AssessProgressRow>;
+  onOpenCourse: () => void;
 }) {
   const complete = course.modules.filter((moduleId) => progress[moduleId]?.status === "complete").length;
   const percent = Math.round((complete / course.modules.length) * 100);
@@ -290,11 +301,7 @@ function CourseShelf({
           {COURSES.length} course{COURSES.length === 1 ? "" : "s"}
         </span>
       </div>
-      <Link
-        to="/app/$workspaceSlug/assess/$moduleId"
-        params={{ workspaceSlug: slug, moduleId: next }}
-        className="block rounded-md border border-chalk bg-white p-5 transition-colors hover:border-terracotta/50"
-      >
+      <div className="rounded-md border border-chalk bg-white p-5">
         <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
           <div>
             <p className="eyebrow-muted">{course.level} · {course.duration} · {course.modules.length} modules</p>
@@ -310,12 +317,25 @@ function CourseShelf({
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-chalk">
               <div className="h-full rounded-full bg-terracotta" style={{ width: `${percent}%` }} />
             </div>
-            <span className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta">
-              Open course <ArrowRight className="h-3.5 w-3.5" />
-            </span>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onOpenCourse}
+                className="btn-ichigo btn-ichigo-primary"
+              >
+                Open course <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+              <Link
+                to="/app/$workspaceSlug/assess/$moduleId"
+                params={{ workspaceSlug: slug, moduleId: next }}
+                className="btn-ichigo btn-ichigo-outline"
+              >
+                Resume
+              </Link>
+            </div>
           </div>
         </div>
-      </Link>
+      </div>
     </section>
   );
 }

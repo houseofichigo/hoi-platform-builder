@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -65,7 +65,6 @@ function emptyCost(): CostOutput {
 export function M08Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m08");
@@ -245,10 +244,6 @@ export function M08Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M08 complete. M09 Portfolio Scoring is unlocked.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId",
-      params: { workspaceSlug: workspace.slug, moduleId: "m09" },
-    });
   };
 
   if (!workspace) return null;
@@ -298,7 +293,7 @@ export function M08Work() {
                   architectureOut.setValue.mutate(next);
                 }}
                 rows={4}
-                placeholder="Why these four choices together? Min 40 characters."
+                placeholder="Optional context — the choices above are enough to continue."
                 className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
               />
             </div>
@@ -306,7 +301,7 @@ export function M08Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={canContinue}
-        disabledReason="Pick all four choices and write a rationale of at least 40 characters."
+        disabledReason="Pick all four architecture choices."
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await architectureOut.setValue.mutateAsync(architecture);

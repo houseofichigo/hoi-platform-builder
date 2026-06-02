@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,7 +71,6 @@ function isQualityComplete(value: QualityCheckedOutput) {
 export function M03Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m03");
@@ -255,10 +254,6 @@ export function M03Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M03 complete. M04 AI Assistants & RAG is unlocked.");
-    navigate({
-      to: "/app/$workspaceSlug/assess",
-      params: { workspaceSlug: workspace.slug },
-    });
   };
 
   if (!workspace) return null;

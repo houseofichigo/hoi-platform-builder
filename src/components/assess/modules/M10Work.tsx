@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,7 +74,6 @@ function emptyHandoff(): HandoffOutput {
 export function M10Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m10");
@@ -251,10 +250,6 @@ export function M10Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M10 complete. M11 Monitoring & Quality is unlocked.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId",
-      params: { workspaceSlug: workspace.slug, moduleId: "m11" },
-    });
   };
 
   if (!workspace) return null;

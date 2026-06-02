@@ -35,6 +35,7 @@ export interface ModuleMeta {
   deliverable: string;
   description: string;
   objectives: string[];
+  keySections?: string[];
   concepts: { term: string; definition: string }[];
   assignment: string;
   outcome: string;
@@ -51,6 +52,11 @@ export interface AssessCourseMeta {
   duration: string;
   modules: ModuleId[];
   primaryMedia: CoursePrimaryMedia;
+  moduleMedia: Record<ModuleId, CoursePrimaryMedia>;
+  methodology: string;
+  artifacts: string[];
+  gates: string[];
+  formats: { label: string; duration: string; coverage: string }[];
 }
 
 export const MODULES: ModuleMeta[] = [
@@ -58,15 +64,23 @@ export const MODULES: ModuleMeta[] = [
     id: 'm01', num: 1, title: 'LLM Fundamentals',
     subtitle: 'From tools to systems: what language models do, how they work, where they fail.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
-    steps: 2, prereq: null, duration: '1h 20m', estimatedMinutes: 80,
+    steps: 2, prereq: null, duration: '1h 45m', estimatedMinutes: 105,
     gateRole: 'pre', gateNumber: null,
-    deliverable: 'Working mental model + first observations on hallucination & temperature.',
-    description: 'Build a working mental model of LLMs — tokenisation, context windows, temperature, the Tool→System spectrum, and why hallucination is a governance problem.',
+    deliverable: 'Comparison notes + hallucination log + readiness self-assessment.',
+    description: 'Understand what language models do, how they work, and how to know when your organisation is ready to use them.',
     objectives: [
       'Explain LLM mechanics: tokenisation, context windows, temperature',
       'Distinguish between Tool, Assistant, Agent, and System levels',
       'Identify hallucination as a governance problem',
       'Compare model capability tables across providers',
+      'Self-assess organisational AI readiness across six pillars',
+    ],
+    keySections: [
+      'Prediction and probability',
+      'Operational implications of context windows',
+      'The Four-Level Spectrum: Tool → System',
+      'Hallucination: causes and governance',
+      'Six-pillar readiness self-assessment',
     ],
     concepts: [
       { term: 'Hallucination', definition: 'When an AI model produces output that sounds confident but is factually wrong or invented. Models hallucinate because they predict the next likely word, not the next true word.' },
@@ -77,18 +91,24 @@ export const MODULES: ModuleMeta[] = [
     outcome: 'A working mental model of LLM behavior plus your first method note: where confidently-wrong AI would be dangerous in your company.',
   },
   {
-    id: 'm02', num: 2, title: 'Data Readiness',
+    id: 'm02', num: 2, title: 'Data Readiness & Preparation',
     subtitle: 'Connect, govern, and prepare the data your AI system will use.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 4, prereq: 'm01', duration: '1h 15m', estimatedMinutes: 75,
     gateRole: 'pre', gateNumber: null,
-    deliverable: 'Three-layer data map: internal · contextual · test data.',
+    deliverable: 'Completed three-layer data map.',
     description: 'Identify internal, contextual and task-specific data sources; apply ownership, lineage, quality and access governance; classify by EU/HOI regime (GDPR, ISO 42001, EU AI Act, security/sector regulator where relevant).',
     objectives: [
       'Identify data sources: Internal, Contextual, Task-specific',
       'Apply governance: Ownership, Lineage, Quality, Access',
       'Classify data by EU/HOI regime (GDPR, ISO 42001, EU AI Act, security/sector regulator where relevant)',
       'Produce a three-layer data map for the worked example',
+    ],
+    keySections: [
+      'The three-layer data model',
+      'Data residency and transfer',
+      'Audit trail requirements',
+      'Synthetic data as a safe alternative',
     ],
     concepts: [
       { term: 'Internal data', definition: 'Data that lives inside your organisation — the fields your systems of record use.' },
@@ -112,6 +132,13 @@ export const MODULES: ModuleMeta[] = [
       'Build prompts incrementally — one element at a time — and observe how each removes uncertainty',
       'Document three reusable prompt entries mapped to the three data layers',
       'Identify prompt injection and data-leakage risks for each entry',
+    ],
+    keySections: [
+      'The six-element framework',
+      'Advanced techniques: chain-of-thought, few-shot',
+      'Prompt safety and provider data handling',
+      'Cross-model prompt differences',
+      'Building a reusable prompt library entry',
     ],
     concepts: [
       { term: 'Placement vs task type', definition: 'Placement (user · system · context · workflow) defines authority. Task type (search · extract · classify · generate · summarise · transform · reason · evaluate · guard) defines behaviour. Decide both before writing any prompt.' },
@@ -137,6 +164,12 @@ export const MODULES: ModuleMeta[] = [
       'Apply four RAG governance dimensions: indexing, access, retention, change',
       'Evaluate the assistant with five representative query types and prepare Gate 1',
     ],
+    keySections: [
+      'RAG architecture: embeddings and vector search',
+      'Building a custom GPT or Claude Project',
+      'RAG governance: indexing, access, retention, change',
+      'Gate 1 walkthrough: is it safe to build?',
+    ],
     concepts: [
       { term: 'Assistant architecture', definition: 'A useful assistant is not just a prompt. It has instructions, knowledge sources, retrieval behaviour, tool boundaries, and evaluation tests.' },
       { term: 'RAG', definition: 'Retrieval-Augmented Generation: the assistant retrieves relevant knowledge at query time, then generates an answer grounded in that retrieved context.' },
@@ -152,14 +185,20 @@ export const MODULES: ModuleMeta[] = [
     phase: 'build', phaseNum: 2, phaseName: 'Develop',
     steps: 3, prereq: 'm04', duration: '1h 40m', estimatedMinutes: 100,
     gateRole: 'post1', gateNumber: null,
-    deliverable: 'Prototype blueprint + no-code build brief + three agent requirement cards.',
-    description: 'Design the sandbox prototype your agent will later operate inside. Define the four workflow surfaces, produce a no-code build brief, walk through the prototype, and translate the gaps into M06 agent requirements.',
+    deliverable: 'Working prototype + 3-item requirement list.',
+    description: 'Build the application your agent will operate inside. Use a no-code prototype to bridge assistant evaluation and agent design.',
     objectives: [
       'Explain why a prototype bridges assistant evaluation and agent design',
       'Define the four prototype surfaces: upload, review, approve, audit',
       'Write a no-code build brief using sandbox governance and mock data only',
       'Run a stakeholder walkthrough and record friction points',
       'Translate prototype gaps into three agent requirement cards for M06',
+    ],
+    keySections: [
+      'No-code landscape: Lovable, Bubble, Retool',
+      'Four components of the OCR prototype',
+      'What the prototype fakes vs. what is real',
+      'Sandbox boundaries and the path to Gate 2',
     ],
     concepts: [
       { term: 'Prototype', definition: 'A working interface that demonstrates a workflow, not a production system. It uses mock data, simplified logic, and explicit visual cues.' },
@@ -176,14 +215,23 @@ export const MODULES: ModuleMeta[] = [
     phase: 'build', phaseNum: 2, phaseName: 'Develop',
     steps: 5, prereq: 'm05', duration: '3h 00m', estimatedMinutes: 180,
     gateRole: 'g2', gateNumber: 2,
-    deliverable: 'Agent blueprint + integration plan + HITL policy + pilot plan + Gate 2 readiness dossier.',
-    description: 'Turn the prototype requirements into an agent design. Define the agent goal, tools, memory, action boundary, MCP-style integration plan, HITL checkpoints, pilot metrics, and Gate 2 readiness.',
+    deliverable: 'Working AI agent + pilot metrics report + Gate 2 decision.',
+    description: 'Build a multi-step agent, connect tools through controlled integrations, evaluate against a baseline, and apply Gate 2 as an informal readiness check.',
     objectives: [
       'Distinguish assistant behaviour from agent action',
-      'Design an agent workflow with goals, tools, memory, state, and action limits',
-      'Map MCP-style integrations to accounting, document, notification, and audit systems',
-      'Define human-in-the-loop checkpoints and escalation rules',
-      'Run a controlled pilot plan and prepare Gate 2',
+      'Configure a multi-step workflow in n8n',
+      'Integrate external tools via Model Context Protocol-style tool definitions',
+      'Design Human-in-the-Loop triggers and escalation rules',
+      'Measure pilot outcomes: precision, recall, confidence calibration',
+      'Apply Gate 2 informally: governance rules, HITL, security, monitoring',
+    ],
+    keySections: [
+      'Agent architecture: logic, tools, memory',
+      'The n8n workflow environment',
+      'MCP integration and tool definitions',
+      'HITL design patterns and escalation paths',
+      'Evaluation: precision, recall, confidence thresholds',
+      'Gate 2 walkthrough: is it safe to deploy?',
     ],
     concepts: [
       { term: 'AI agent', definition: 'An AI system that can pursue a goal through steps, tool calls, memory, and state. It can take action, so its boundary must be explicit.' },
@@ -209,6 +257,12 @@ export const MODULES: ModuleMeta[] = [
       'Write a Tool Selection ADR with alternatives and rationale',
       'Decide whether to keep, replace, or constrain the pilot stack',
     ],
+    keySections: [
+      'Tool choice as a governance decision',
+      'Platform walkthroughs: ChatGPT, Claude, Google AI Studio, Perplexity, ElevenLabs',
+      'Governance comparison: data residency, training opt-out, MCP support',
+      'From pilot stack to production stack: validate or replace',
+    ],
     concepts: [
       { term: 'Tool choice as governance', definition: 'Tool selection determines where data goes, who can access it, what is logged, and how failures are investigated.' },
       { term: 'Governance criteria', definition: 'Data residency, training opt-out, MCP/tool support, audit logs, compliance certifications, vendor stability, cost, and operational fit.' },
@@ -219,7 +273,7 @@ export const MODULES: ModuleMeta[] = [
     outcome: 'A governance-ready tool decision with comparison matrix, ADR, and production constraints.',
   },
   {
-    id: 'm08', num: 8, title: 'Deployment Planning',
+    id: 'm08', num: 8, title: 'Integration & Deployment Planning',
     subtitle: 'Architecture decisions, security, and cost modelling for the path to production.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 4, prereq: 'm07', duration: '1h 30m', estimatedMinutes: 90,
@@ -232,6 +286,12 @@ export const MODULES: ModuleMeta[] = [
       'Identify and mitigate the top three deployment security risks',
       'Estimate cost across tokens, infrastructure, licensing, and operations',
       'Write a partner-ready integration and rollback plan',
+    ],
+    keySections: [
+      'Architecture Decision Records (ADRs)',
+      'Security at scale: auth, secrets, data flow',
+      'Cost modelling: tokens, infrastructure, licensing',
+      'Deployment readiness: compliance, rollback',
     ],
     concepts: [
       { term: 'Architecture decision', definition: 'A consequential technical choice documented with context, alternatives, rationale, consequences, and review date.' },
@@ -257,6 +317,13 @@ export const MODULES: ModuleMeta[] = [
       'Create step-level automation maps for each candidate',
       'Apply Gate 3 as a formal investment decision across the portfolio',
     ],
+    keySections: [
+      'From informal gates to formal scoring',
+      'Four-block Capture: Identify · Data & Tools · Workflow · Safety & Limits',
+      'Eight-pillar engine scoring and reason codes',
+      'stepAutomationMap and gateStatus interpretation',
+      'Gate 3 walkthrough: which use cases earn the next investment?',
+    ],
     concepts: [
       { term: 'Eight-pillar engine', definition: 'Business Impact, Feasibility, Process Maturity, Risk, AI Suitability, Agent Suitability, Delivery Readiness, and Priority.' },
       { term: 'Reason codes', definition: 'Traceable labels that explain why a use case is blocked, constrained, or preferred.' },
@@ -280,6 +347,12 @@ export const MODULES: ModuleMeta[] = [
       'Produce an operating playbook for non-engineers',
       'Distinguish tacit knowledge from explicit operating instructions',
       'Design a five-stage handoff: review, shadow, joint, backup, ownership',
+    ],
+    keySections: [
+      'Model cards vs. system cards',
+      'EU AI Act compliance documentation',
+      'The five-stage handoff: review → shadow → joint → backup → ownership',
+      'Tacit vs. explicit knowledge',
     ],
     concepts: [
       { term: 'System card', definition: 'A system card documents the complete AI system in context: purpose, boundaries, data, users, risks, monitoring, and human oversight.' },
@@ -305,6 +378,12 @@ export const MODULES: ModuleMeta[] = [
       'Write an incident response path for monitoring failures',
       'Trigger portfolio re-scoring on significant drift events',
     ],
+    keySections: [
+      'Monitoring categories and alert tiers',
+      'Drift detection and incident response',
+      'Operating the scoring engine in production',
+      'Feedback loops: from production data to portfolio decisions',
+    ],
     concepts: [
       { term: 'Monitoring categories', definition: 'Four tiers: performance, accuracy, drift, and fairness. A healthy system watches all four.' },
       { term: 'Drift types', definition: 'Data drift changes inputs, concept drift changes meaning, model drift changes behaviour. Each needs a different response.' },
@@ -328,6 +407,13 @@ export const MODULES: ModuleMeta[] = [
       'Identify capability gaps across people, tools, and partnerships',
       'Design an executive scorecard for AI program health',
       'Plan the next pilot cycle with explicit go/no-go criteria',
+    ],
+    keySections: [
+      'From portfolio to roadmap: sequencing scored use cases',
+      'The three horizons: now · next · later',
+      'Capability development plan: people, tools, partnerships',
+      'Executive scorecard and KPI alignment',
+      'Securing investment and managing sponsor expectations',
     ],
     concepts: [
       { term: 'Portfolio to roadmap', definition: 'The roadmap sequences scored use cases by readiness, dependencies, investment, and organisational capacity.' },
@@ -363,23 +449,62 @@ export const COURSES: AssessCourseMeta[] = [
     title: 'AI Transformation Foundations',
     subtitle: 'The first House of Ichigo Assess course.',
     description:
-      'A twelve-module foundation course that teaches the core AI system concepts, governance checkpoints, and operating artifacts needed before a team moves into Build and Scale.',
-    audience: 'Business, operations, transformation, and AI delivery teams',
+      'A twelve-module course across four phases, anchored by three governance gates and four cumulative artifacts. Teams leave with the practical evidence trail needed to build, govern, and scale real AI systems.',
+    audience: 'Executives, operations leaders, transformation teams, and business teams in finance, HR, marketing operations, customer service, procurement, and support functions.',
     level: 'Foundation',
     duration: '22h 10m',
     modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06', 'm07', 'm08', 'm09', 'm10', 'm11', 'm12'],
     primaryMedia: {
       type: 'slides',
       url: '',
-      title: 'AI Transformation Foundations slides',
+      title: 'AI Transformation Foundations course slides',
       format: 'pdf',
     },
+    moduleMedia: {
+      m01: { type: 'slides', url: '', title: 'M01 · LLM Fundamentals slides', format: 'pdf' },
+      m02: { type: 'slides', url: '', title: 'M02 · Data Readiness & Preparation slides', format: 'pdf' },
+      m03: { type: 'slides', url: '', title: 'M03 · Prompt Engineering slides', format: 'pdf' },
+      m04: { type: 'slides', url: '', title: 'M04 · AI Assistants & RAG slides', format: 'pdf' },
+      m05: { type: 'slides', url: '', title: 'M05 · Prototyping with No-Code slides', format: 'pdf' },
+      m06: { type: 'slides', url: '', title: 'M06 · AI Agents & Pilot slides', format: 'pdf' },
+      m07: { type: 'slides', url: '', title: 'M07 · Tools & Platforms slides', format: 'pdf' },
+      m08: { type: 'slides', url: '', title: 'M08 · Integration & Deployment Planning slides', format: 'pdf' },
+      m09: { type: 'slides', url: '', title: 'M09 · AI Portfolio Scoring & Use Case Prioritisation slides', format: 'pdf' },
+      m10: { type: 'slides', url: '', title: 'M10 · Documentation & Adoption slides', format: 'pdf' },
+      m11: { type: 'slides', url: '', title: 'M11 · Monitoring & Quality slides', format: 'pdf' },
+      m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
+    },
+    methodology:
+      'Four phases. One worked example carried end-to-end. Three governance gates decide what gets built, deployed, and scaled.',
+    artifacts: [
+      'The Foundation — readiness lens, data map, prompt library.',
+      'The System — assistant, prototype, agent with pilot metrics.',
+      'The Operating Plan — tool ADR, integration plan, scored portfolio.',
+      'The Handoff Pack — system card, playbook, monitoring plan, strategic roadmap.',
+    ],
+    gates: [
+      'Gate 1 — informal readiness check: is it safe to build?',
+      'Gate 2 — informal readiness check: is it safe to deploy?',
+      'Gate 3 — formal investment decision: is it stable enough to scale?',
+    ],
+    formats: [
+      { label: 'Executive Sprint', duration: '1 day', coverage: 'Selected modules for orientation and conviction.' },
+      { label: 'Team Workshop', duration: '2 days', coverage: 'Hands-on build plus governance overview.' },
+      { label: 'Intensive Bootcamp', duration: '5 days', coverage: 'Complete program with all assignments.' },
+      { label: 'Cohort Program', duration: '4–12 weeks', coverage: 'Full program with portfolio extension.' },
+    ],
   },
 ];
 
 export function getModule(id: ModuleId): ModuleMeta | undefined {
   return MODULES.find(m => m.id === id);
 }
+
+export function getNextModule(id: ModuleId): ModuleMeta | undefined {
+  const index = MODULES.findIndex((m) => m.id === id);
+  return index >= 0 ? MODULES[index + 1] : undefined;
+}
+
 export function getPhase(num: 1 | 2 | 3 | 4) {
   return PHASES.find(p => p.num === num);
 }
@@ -396,6 +521,10 @@ export function getCourseModules(courseId: string): ModuleMeta[] {
 
 export function getModuleCourse(moduleId: ModuleId): AssessCourseMeta | undefined {
   return COURSES.find((course) => course.modules.includes(moduleId));
+}
+
+export function getModuleMedia(moduleId: ModuleId): CoursePrimaryMedia | undefined {
+  return getModuleCourse(moduleId)?.moduleMedia[moduleId];
 }
 
 export function isValidModuleId(id: string): id is ModuleId {

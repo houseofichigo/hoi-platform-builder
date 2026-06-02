@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -86,7 +85,6 @@ function uid() {
 export function M12Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m12");
@@ -278,10 +276,6 @@ export function M12Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M12 complete. The Handoff Pack is complete.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/complete",
-      params: { workspaceSlug: workspace.slug },
-    });
   };
 
   if (!workspace) return null;

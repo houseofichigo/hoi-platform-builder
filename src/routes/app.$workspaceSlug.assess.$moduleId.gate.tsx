@@ -1,8 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
 import { Gate, type GateCriterion } from "@/components/assess/Gate";
+import { GateCompletionActions } from "@/components/assess/GateCompletionActions";
 import { M04_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m04";
 import { M06_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m06";
 import { M09_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m09";
@@ -14,9 +16,9 @@ export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/gate"
 function ModuleGate() {
   const { moduleId } = Route.useParams();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const valid = isValidModuleId(moduleId);
   const m = valid ? getModule(moduleId as ModuleId)! : null;
+  const [gateRecorded, setGateRecorded] = useState(false);
 
   if (!workspace || !m) return null;
   const slug = workspace.slug;
@@ -71,8 +73,10 @@ function ModuleGate() {
         </div>
       )}
 
+      {gateRecorded ? (
+        <GateCompletionActions module={m} workspaceSlug={slug} />
+      ) : isM04Gate1 ? (
 
-      {isM04Gate1 ? (
         <Gate
           gateNumber={1}
           moduleId="m04"
@@ -81,12 +85,7 @@ function ModuleGate() {
           criteria={criteria}
           synthesis="Continue if value, data, quality, risk, and operability all pass. Continue with constraints if risk or operability are partial and can be named. Improve if quality is partial. Stop if value or data fail."
           nextLabel="Record Gate 1 decision"
-          onSaved={() => {
-            navigate({
-              to: "/app/$workspaceSlug/assess",
-              params: { workspaceSlug: slug },
-            });
-          }}
+          onSaved={() => setGateRecorded(true)}
         />
       ) : isM06Gate2 ? (
         <Gate
@@ -97,12 +96,7 @@ function ModuleGate() {
           criteria={criteria}
           synthesis="Continue if goal, permissions, HITL, scope, rollback, auditability, metrics, and residual risk all pass. Continue with constraints if rollback or residual risk are partial and can be named. Improve if HITL coverage or auditability are partial. Stop if goal clarity, tool permissions, or pilot scope fail."
           nextLabel="Record Gate 2 decision"
-          onSaved={() => {
-            navigate({
-              to: "/app/$workspaceSlug/assess",
-              params: { workspaceSlug: slug },
-            });
-          }}
+          onSaved={() => setGateRecorded(true)}
         />
       ) : isM09Gate3 ? (
         <Gate
@@ -113,12 +107,7 @@ function ModuleGate() {
           criteria={criteria}
           synthesis="Fund if portfolio value, data, governance, monitoring, ownership, fit, risk acceptance, and rollback all pass. Fund with constraints if governance or monitoring are partial and constraints are enforceable. Defer if a dependency or evidence is missing. Stop if value, risk, or readiness fails."
           nextLabel="Record Gate 3 decision"
-          onSaved={() => {
-            navigate({
-              to: "/app/$workspaceSlug/assess",
-              params: { workspaceSlug: slug },
-            });
-          }}
+          onSaved={() => setGateRecorded(true)}
         />
       ) : (
         <div className="card border-l-[3px] border-l-terracotta">

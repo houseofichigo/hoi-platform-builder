@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -101,7 +101,6 @@ void (null as unknown as ArtifactCheckId);
 export function M04Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m04");
@@ -267,10 +266,6 @@ export function M04Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M04 complete. Gate 1 is ready.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId/gate",
-      params: { workspaceSlug: workspace.slug, moduleId: "m04" },
-    });
   };
 
   if (!workspace) return null;

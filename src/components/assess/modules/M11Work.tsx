@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -72,7 +72,6 @@ function emptyDrift(): DriftOutput {
 export function M11Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m11");
@@ -272,10 +271,6 @@ export function M11Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M11 complete. M12 Strategy & Roadmap is unlocked.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId",
-      params: { workspaceSlug: workspace.slug, moduleId: "m12" },
-    });
   };
 
   if (!workspace) return null;

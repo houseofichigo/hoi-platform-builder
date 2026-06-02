@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +42,6 @@ const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";
 export function M01Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const workspaceProfile = useWorkspaceProfile();
@@ -197,10 +196,6 @@ export function M01Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M01 complete. M02 Data Readiness is unlocked.");
-    navigate({
-      to: "/app/$workspaceSlug/assess",
-      params: { workspaceSlug: workspace.slug },
-    });
   };
 
   if (!workspace) return null;

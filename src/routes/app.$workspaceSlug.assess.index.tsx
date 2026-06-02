@@ -204,13 +204,13 @@ function CourseHero({
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div>
           <h1 className="font-display text-[46px] font-medium leading-[1.02] tracking-[-0.015em] text-navy md:text-[64px]">
-            Assess
+            Course Library.
             <br />
-            <span className="accent-italic">Courses.</span>
+            <span className="accent-italic">Assess.</span>
           </h1>
           <p className="lead mt-5 max-w-[64ch]">
-            Choose a guided House of Ichigo course, study the concepts, complete the assignments,
-            and carry the evidence into Build and Scale.
+            Start with {course.title}: twelve chapters, four phases, three gates, and four artifacts
+            that carry one worked example into Build and Scale.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -294,20 +294,25 @@ function CourseShelf({
     <section className="space-y-3">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="eyebrow-muted">COURSES</p>
-          <h2 className="font-display text-[30px] leading-tight text-navy">Course library</h2>
+          <p className="eyebrow-muted">COURSE LIBRARY</p>
+          <h2 className="font-display text-[30px] leading-tight text-navy">Featured course</h2>
         </div>
         <span className="rounded-full bg-mist px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
           {COURSES.length} course{COURSES.length === 1 ? "" : "s"}
         </span>
       </div>
-      <div className="rounded-md border border-chalk bg-white p-5">
-        <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
+      <div className="rounded-md border border-terracotta/25 bg-white p-6 shadow-sm">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-end">
           <div>
-            <p className="eyebrow-muted">{course.level} · {course.duration} · {course.modules.length} modules</p>
-            <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">{course.title}</h3>
-            <p className="mt-2 max-w-[72ch] text-[14px] leading-relaxed text-graphite">{course.subtitle}</p>
-            <p className="mt-2 text-[13px] text-slate">{course.audience}</p>
+            <p className="eyebrow text-terracotta">COURSE 01 · {course.level} · {course.duration}</p>
+            <h3 className="mt-3 font-display text-[36px] leading-tight text-navy">{course.title}</h3>
+            <p className="mt-3 max-w-[72ch] text-[15px] leading-relaxed text-graphite">{course.description}</p>
+            <div className="mt-5 grid gap-2 sm:grid-cols-3">
+              <CourseMiniStat label="Modules" value={`${course.modules.length}`} />
+              <CourseMiniStat label="Gates" value="3" />
+              <CourseMiniStat label="Artifacts" value="4" />
+            </div>
+            <p className="mt-4 text-[13px] leading-relaxed text-slate">{course.audience}</p>
           </div>
           <div>
             <div className="flex items-center justify-between text-[12px] text-slate">
@@ -335,8 +340,24 @@ function CourseShelf({
             </div>
           </div>
         </div>
+        <div className="mt-6 grid gap-3 md:grid-cols-2">
+          {course.artifacts.map((artifact) => (
+            <div key={artifact} className="rounded-md border border-chalk bg-paper p-3 text-[13px] leading-relaxed text-navy">
+              {artifact}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
+  );
+}
+
+function CourseMiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-chalk bg-paper p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{label}</p>
+      <p className="mt-1 font-display text-[24px] leading-none text-navy">{value}</p>
+    </div>
   );
 }
 
@@ -592,14 +613,23 @@ function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedNa
       <div className="max-w-[72ch] space-y-5 text-[16px] leading-relaxed text-graphite">
         <h2 className="h-heading-md">About this course</h2>
         <p>{course.description}</p>
+        <p>{course.methodology}</p>
         <p>
           The course is structured around a single worked example
           {workedName ? `, ${workedName},` : ""} so every module builds on the last. The goal is not
           memorisation; it is a practical operating model your team can use when moving into Build
           and Scale.
         </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {course.gates.map((gate) => (
+            <div key={gate} className="rounded-md border border-chalk bg-white p-4 text-[14px] text-navy">
+              {gate}
+            </div>
+          ))}
+        </div>
       </div>
-      <aside className="rounded-md border border-chalk bg-white p-5">
+      <aside className="space-y-4">
+      <div className="rounded-md border border-chalk bg-white p-5">
         <p className="eyebrow-muted">COURSE SHAPE</p>
         <dl className="mt-4 space-y-3 text-[13px]">
           <div className="flex justify-between gap-4">
@@ -623,6 +653,19 @@ function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedNa
             <dd className="font-medium text-navy">{course.level}</dd>
           </div>
         </dl>
+      </div>
+      <div className="rounded-md border border-chalk bg-white p-5">
+        <p className="eyebrow-muted">FORMAT DEPTH GUIDE</p>
+        <div className="mt-3 space-y-3">
+          {course.formats.map((format) => (
+            <div key={format.label} className="border-b border-chalk pb-3 last:border-b-0 last:pb-0">
+              <p className="text-[14px] font-medium text-navy">{format.label}</p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{format.duration}</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-graphite">{format.coverage}</p>
+            </div>
+          ))}
+        </div>
+      </div>
       </aside>
     </div>
   );

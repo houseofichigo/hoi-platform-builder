@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, BookOpen, CheckCircle2, Clock, FileText, Flag, Layers, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
+import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
 
@@ -19,6 +19,7 @@ function ModuleOverview() {
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
   const course = getModuleCourse(m.id);
+  const moduleMedia = getModuleMedia(m.id);
   const { data: progress } = useAssessProgress(m.id);
   const slug = workspace.slug;
 
@@ -122,6 +123,19 @@ function ModuleOverview() {
             </div>
           </CourseSection>
 
+          {m.keySections && m.keySections.length > 0 && (
+            <CourseSection icon={FileText} eyebrow="KEY SECTIONS" title="What the slides will cover">
+              <ul className="space-y-3">
+                {m.keySections.map((section) => (
+                  <li key={section} className="flex gap-3">
+                    <FileText className="mt-0.5 h-4 w-4 shrink-0 text-terracotta" />
+                    <span>{section}</span>
+                  </li>
+                ))}
+              </ul>
+            </CourseSection>
+          )}
+
           <CourseSection icon={Play} eyebrow="LESSONS & ASSIGNMENT" title="How this module works">
             <div className="grid gap-3 md:grid-cols-2">
               <LessonCard
@@ -200,7 +214,7 @@ function ModuleOverview() {
               {m.gateNumber && <p className="flex items-center gap-2"><Flag className="h-4 w-4 text-slate" /> Gate {m.gateNumber}</p>}
             </div>
           </div>
-          {course && <CourseMediaBlock media={course.primaryMedia} compact />}
+          {moduleMedia && <CourseMediaBlock media={moduleMedia} compact label="MODULE SLIDES" />}
         </aside>
       </div>
 

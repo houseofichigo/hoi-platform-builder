@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -124,7 +124,6 @@ function avgScore(s: Record<PillarId, number>): number {
 export function M09Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m09");
@@ -391,10 +390,6 @@ export function M09Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M09 complete. Gate 3 dossier is ready.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId/gate",
-      params: { workspaceSlug: workspace.slug, moduleId: "m09" },
-    });
   };
 
   if (!workspace) return null;

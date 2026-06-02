@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
+import { ModuleCompletionActions } from "@/components/assess/ModuleCompletionActions";
 import { M01Work } from "@/components/assess/modules/M01Work";
 import { M02Work } from "@/components/assess/modules/M02Work";
 import { M03Work } from "@/components/assess/modules/M03Work";
@@ -27,10 +28,11 @@ function ModuleWork() {
   const slug = workspace.slug;
   const { data: progress } = useAssessProgress(m.id);
   const studied = progress?.studied ?? false;
+  const assignmentComplete = (progress?.status ?? "not_started") === "complete";
 
   return (
     <div className="space-y-8">
-      {!studied && (
+      {!assignmentComplete && !studied && (
         <div className="rounded-md border border-chalk bg-mist/40 px-4 py-3 text-[13px] text-navy flex items-center justify-between gap-4">
           <span>Tip: review the slides before starting this assignment.</span>
           <Link
@@ -43,62 +45,66 @@ function ModuleWork() {
         </div>
       )}
 
+      {assignmentComplete ? (
+        <ModuleCompletionActions module={m} workspaceSlug={slug} />
+      ) : (
+        <>
+          {(() => {
+            switch (moduleId) {
+              case "m01":
+                return <M01Work />;
+              case "m02":
+                return <M02Work />;
+              case "m03":
+                return <M03Work />;
+              case "m04":
+                return <M04Work />;
+              case "m05":
+                return <M05Work />;
+              case "m06":
+                return <M06Work />;
+              case "m07":
+                return <M07Work />;
+              case "m08":
+                return <M08Work />;
+              case "m09":
+                return <M09Work />;
+              case "m10":
+                return <M10Work />;
+              case "m11":
+                return <M11Work />;
+              case "m12":
+                return <M12Work />;
+              default:
+                return (
+                  <div className="card border-l-[3px] border-l-terracotta space-y-4">
+                    <p className="text-[14px] text-navy">
+                      Assignment content for <span className="font-medium">{m.id.toUpperCase()}</span> is being built. This shell will be
+                      replaced with step-by-step assignment content in batch 3.{m.num}.
+                    </p>
+                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate">{m.steps} steps planned</p>
+                    <div>
+                      <p className="eyebrow-muted">ASSIGNMENT</p>
+                      <p className="mt-1 text-[14px] text-navy">{m.assignment}</p>
+                    </div>
+                    <div>
+                      <p className="eyebrow-muted">OUTCOME</p>
+                      <p className="mt-1 text-[14px] text-navy">{m.outcome}</p>
+                    </div>
+                  </div>
+                );
+            }
+          })()}
 
-
-      {(() => {
-        switch (moduleId) {
-          case "m01":
-            return <M01Work />;
-          case "m02":
-            return <M02Work />;
-          case "m03":
-            return <M03Work />;
-          case "m04":
-            return <M04Work />;
-          case "m05":
-            return <M05Work />;
-          case "m06":
-            return <M06Work />;
-          case "m07":
-            return <M07Work />;
-          case "m08":
-            return <M08Work />;
-          case "m09":
-            return <M09Work />;
-          case "m10":
-            return <M10Work />;
-          case "m11":
-            return <M11Work />;
-          case "m12":
-            return <M12Work />;
-          default:
-            return (
-              <div className="card border-l-[3px] border-l-terracotta space-y-4">
-                <p className="text-[14px] text-navy">
-                  Assignment content for <span className="font-medium">{m.id.toUpperCase()}</span> is being built. This shell will be
-                  replaced with step-by-step assignment content in batch 3.{m.num}.
-                </p>
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate">{m.steps} steps planned</p>
-                <div>
-                  <p className="eyebrow-muted">ASSIGNMENT</p>
-                  <p className="mt-1 text-[14px] text-navy">{m.assignment}</p>
-                </div>
-                <div>
-                  <p className="eyebrow-muted">OUTCOME</p>
-                  <p className="mt-1 text-[14px] text-navy">{m.outcome}</p>
-                </div>
-              </div>
-            );
-        }
-      })()}
-
-      <Link
-        to="/app/$workspaceSlug/assess/$moduleId"
-        params={{ workspaceSlug: slug, moduleId: m.id }}
-        className="inline-block text-[13px] font-medium text-slate hover:text-navy"
-      >
-        ← Back to overview
-      </Link>
+          <Link
+            to="/app/$workspaceSlug/assess/$moduleId"
+            params={{ workspaceSlug: slug, moduleId: m.id }}
+            className="inline-block text-[13px] font-medium text-slate hover:text-navy"
+          >
+            ← Back to overview
+          </Link>
+        </>
+      )}
     </div>
   );
 }

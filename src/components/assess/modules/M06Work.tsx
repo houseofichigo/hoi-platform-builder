@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -92,15 +92,15 @@ function buildHitlDefaults(): HitlPolicyOutput {
 }
 function buildPilotDefaults(): PilotPlanOutput {
   return {
-    population: "",
-    window: "",
-    rollbackOwner: "",
+    population: "One AP pilot team using mock or sandbox invoice data only.",
+    window: "Two-week controlled pilot window with a fixed review date.",
+    rollbackOwner: "Named AP lead or pilot owner.",
     targets: {
-      accuracy: "",
-      cycle_time: "",
-      hitl_rate: "",
-      exception_rate: "",
-      audit_completeness: "",
+      accuracy: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "accuracy")?.target ?? "",
+      cycle_time: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "cycle_time")?.target ?? "",
+      hitl_rate: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "hitl_rate")?.target ?? "",
+      exception_rate: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "exception_rate")?.target ?? "",
+      audit_completeness: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "audit_completeness")?.target ?? "",
     },
   };
 }
@@ -120,7 +120,6 @@ const HITL_SEVERITIES: readonly { value: Exclude<HitlSeverity, "">; label: strin
 export function M06Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m06");
@@ -323,10 +322,6 @@ export function M06Work() {
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
     toast.success("M06 complete. Gate 2 is ready.");
-    navigate({
-      to: "/app/$workspaceSlug/assess/$moduleId/gate",
-      params: { workspaceSlug: workspace.slug, moduleId: "m06" },
-    });
   };
 
   if (!workspace) return null;
@@ -562,9 +557,9 @@ export function M06Work() {
     const canContinue = baseFilled && targetsFilled;
 
     const baseFields: { key: "population" | "window" | "rollbackOwner"; label: string; placeholder: string }[] = [
-      { key: "population", label: "PILOT POPULATION", placeholder: "Who and which data are in scope?" },
-      { key: "window", label: "TIME WINDOW", placeholder: "Start date → end date." },
-      { key: "rollbackOwner", label: "ROLLBACK OWNER", placeholder: "One named person." },
+      { key: "population", label: "PILOT POPULATION", placeholder: "Default: one AP pilot team using mock or sandbox invoice data only." },
+      { key: "window", label: "TIME WINDOW", placeholder: "Default: two-week controlled pilot with a fixed review date." },
+      { key: "rollbackOwner", label: "ROLLBACK OWNER", placeholder: "Default: named AP lead or pilot owner." },
     ];
 
     return (
@@ -584,6 +579,11 @@ export function M06Work() {
         yourVersion={
           <div className="space-y-6">
             <PilotMetricList metrics={M06_OCR_CONTENT.pilotMetrics} />
+
+            <div className="rounded-md border border-chalk bg-mist/40 p-4 text-[13px] leading-relaxed text-navy">
+              We pre-filled the pilot plan from the reference pattern. Review the defaults,
+              then edit only if your pilot boundary is different.
+            </div>
 
             <div className="space-y-3">
               {baseFields.map((f) => (

@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import { ArrowRight, BookOpen, Check, FileText, Lightbulb, PlayCircle, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
-import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
+import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
 import { TokenizerLab } from "@/components/assess/TokenizerLab";
+import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/study")({
   component: ModuleStudy,
@@ -19,6 +20,7 @@ function ModuleStudy() {
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
   const course = getModuleCourse(m.id);
+  const moduleMedia = getModuleMedia(m.id);
   const { data: progress, setStudied } = useAssessProgress(m.id);
   const slug = workspace.slug;
   const studied = progress?.studied ?? false;
@@ -71,6 +73,19 @@ function ModuleStudy() {
               ))}
             </div>
           </ReaderSection>
+
+          {m.keySections && m.keySections.length > 0 && (
+            <ReaderSection icon={FileText} title="Slide sections">
+              <ul className="space-y-3">
+                {m.keySections.map((section) => (
+                  <li key={section} className="flex gap-3">
+                    <FileText className="mt-1 h-4 w-4 shrink-0 text-terracotta" />
+                    <span>{section}</span>
+                  </li>
+                ))}
+              </ul>
+            </ReaderSection>
+          )}
 
           <ReaderSection icon={Sparkles} title="What to pay attention to">
             <ul className="space-y-3">
@@ -127,6 +142,7 @@ function ModuleStudy() {
               </p>
             </div>
           )}
+          {moduleMedia && <CourseMediaBlock media={moduleMedia} compact label="MODULE SLIDES" />}
           <div className="rounded-md border border-chalk bg-white p-5">
             <p className="eyebrow-muted">LESSON STATUS</p>
             <div className="mt-4 flex items-center gap-3">

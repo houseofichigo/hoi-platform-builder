@@ -4,9 +4,10 @@ import type { CoursePrimaryMedia } from "@/lib/curriculum";
 interface CourseMediaBlockProps {
   media: CoursePrimaryMedia;
   compact?: boolean;
+  label?: string;
 }
 
-export function CourseMediaBlock({ media, compact = false }: CourseMediaBlockProps) {
+export function CourseMediaBlock({ media, compact = false, label }: CourseMediaBlockProps) {
   if (media.type === "youtube") {
     const embedUrl = media.embedUrl || toYouTubeEmbedUrl(media.url);
 
@@ -17,7 +18,7 @@ export function CourseMediaBlock({ media, compact = false }: CourseMediaBlockPro
             <PlayCircle className="h-4 w-4" />
           </span>
           <div>
-            <p className="eyebrow-muted">COURSE VIDEO</p>
+            <p className="eyebrow-muted">{label ?? "COURSE VIDEO"}</p>
             <h2 className="text-[16px] font-semibold text-navy">{media.title}</h2>
           </div>
         </div>
@@ -45,7 +46,7 @@ export function CourseMediaBlock({ media, compact = false }: CourseMediaBlockPro
           <Presentation className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="eyebrow-muted">COURSE SLIDES</p>
+          <p className="eyebrow-muted">{label ?? "COURSE SLIDES"}</p>
           <h2 className="text-[16px] font-semibold text-navy">{media.title}</h2>
           {!compact && (
             <p className="mt-2 text-[13px] leading-relaxed text-graphite">
@@ -64,7 +65,7 @@ export function CourseMediaBlock({ media, compact = false }: CourseMediaBlockPro
           Open slides <ExternalLink className="h-3.5 w-3.5" />
         </a>
       ) : (
-        <MediaFallback label="Slides are ready to connect from the course library." />
+        <MediaFallback label="Slides coming soon." />
       )}
     </section>
   );

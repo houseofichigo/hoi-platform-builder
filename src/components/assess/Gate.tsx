@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { GATE_CONSTRAINT_OPTIONS, GATE_RATIONALE_OPTIONS } from "@/lib/assess/gate-options";
 import { useAssessGateDecision } from "@/hooks/useAssess";
@@ -44,6 +44,7 @@ export function Gate({
 
   const [decision, setDecision] = useState<GateDecision>("continue");
   const [justification, setJustification] = useState("");
+  const [justificationEdited, setJustificationEdited] = useState(false);
   const [criteriaResponses, setCriteriaResponses] = useState<Record<string, "yes" | "partial" | "no">>({});
   const [constraints, setConstraints] = useState<string[]>([]);
   const [rationales, setRationales] = useState<string[]>([]);
@@ -52,6 +53,7 @@ export function Gate({
     if (existing) {
       setDecision(existing.decision);
       setJustification(existing.justification);
+      setJustificationEdited(!!existing.justification);
       setCriteriaResponses(existing.criteria_responses ?? {});
       setConstraints(existing.constraints ?? []);
       setRationales(existing.rationales ?? []);
@@ -61,7 +63,31 @@ export function Gate({
   const toggleArray = (arr: string[], id: string) =>
     arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
 
-  const canSubmit = justification.trim().length > 0;
+  const generatedJustification = useMemo(() => {
+    const decisionLabel = DECISION_OPTIONS.find((opt) => opt.value === decision)?.label ?? decision;
+    const answered = criteria
+      .filter((criterion) => criteriaResponses[criterion.id])
+      .map((criterion) => `${criterion.question}: ${criteriaResponses[criterion.id]}`);
+    const rationaleLabels = rationales
+      .map((id) => GATE_RATIONALE_OPTIONS.find((option) => option.id === id)?.label)
+      .filter((label): label is string => Boolean(label));
+    const constraintLabels = constraints
+      .map((id) => GATE_CONSTRAINT_OPTIONS.find((option) => option.id === id)?.label)
+      .filter((label): label is string => Boolean(label));
+
+    const parts = [
+      `Decision: ${decisionLabel}.`,
+      answered.length > 0 ? `Criteria checked: ${answered.join("; ")}.` : "Criteria will be reviewed against the saved module dossier.",
+      rationaleLabels.length > 0 ? `Rationale: ${rationaleLabels.join("; ")}.` : "",
+      constraintLabels.length > 0 ? `Constraints: ${constraintLabels.join("; ")}.` : "",
+    ];
+    return parts.filter(Boolean).join(" ");
+  }, [constraints, criteria, criteriaResponses, decision, rationales]);
+
+  const finalJustification = justificationEdited && justification.trim().length > 0
+    ? justification.trim()
+    : generatedJustification;
+  const canSubmit = finalJustification.trim().length > 0;
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -72,7 +98,7 @@ export function Gate({
       await submit.mutateAsync({
         module_id: moduleId,
         decision,
-        justification: justification.trim(),
+        justification: finalJustification.trim(),
         criteria_responses: criteriaResponses,
         constraints,
         rationales,
@@ -202,20 +228,43 @@ export function Gate({
         </div>
       </section>
 
-      <section className="space-y-2">
-        <p className="eyebrow-muted">JUSTIFICATION</p>
-        <textarea
-          value={justification}
-          onChange={(e) => setJustification(e.target.value)}
-          rows={4}
-          placeholder="A few sentences capturing why this decision."
-          className="w-full rounded-md border border-chalk bg-white p-3 text-[14px] text-navy outline-none focus:border-terracotta"
-        />
+      <section className="space-y-3">
+        <p className="eyebrow-muted">GENERATED DECISION SUMMARY</p>
+        <div className="rounded-md border border-chalk bg-mist/40 p-4 text-[14px] leading-relaxed text-navy">
+          {finalJustification}
+        </div>
+        <details className="rounded-md border border-chalk bg-white p-4">
+          <summary className="cursor-pointer text-[13px] font-medium text-navy">
+            Advanced — edit the summary text (optional)
+          </summary>
+          <textarea
+            value={justificationEdited ? justification : generatedJustification}
+            onChange={(e) => {
+              setJustificationEdited(true);
+              setJustification(e.target.value);
+            }}
+            rows={4}
+            placeholder={generatedJustification}
+            className="mt-3 w-full rounded-md border border-chalk bg-white p-3 text-[14px] text-navy outline-none focus:border-terracotta"
+          />
+          {justificationEdited && (
+            <button
+              type="button"
+              onClick={() => {
+                setJustification("");
+                setJustificationEdited(false);
+              }}
+              className="mt-2 text-[12px] font-medium text-terracotta hover:opacity-80"
+            >
+              Use generated summary
+            </button>
+          )}
+        </details>
       </section>
 
       <footer className="flex items-center justify-between border-t border-chalk pt-6">
         <span className="text-[12px] italic text-slate">
-          {existing ? "Updating a previously recorded decision." : "This decision is per-user, per-workspace."}
+          {existing ? "Updating a previously recorded decision." : "This decision is generated from your structured choices."}
         </span>
         <button
           type="button"

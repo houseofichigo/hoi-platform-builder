@@ -21,7 +21,51 @@ async function getServerEntry(): Promise<ServerEntry> {
 function brandedErrorResponse(): Response {
   return new Response(renderErrorPage(), {
     status: 500,
-    headers: { "content-type": "text/html; charset=utf-8" },
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store, max-age=0",
+      pragma: "no-cache",
+      expires: "0",
+    },
+  });
+}
+
+function isStaticAssetRequest(request: Request): boolean {
+  const pathname = new URL(request.url).pathname;
+  return (
+    pathname.startsWith("/assets/") ||
+    /\.(?:avif|css|gif|ico|jpe?g|js|json|map|png|svg|webp|woff2?)$/i.test(pathname)
+  );
+}
+
+function shouldPreventShellCaching(request: Request, response: Response): boolean {
+  if (isStaticAssetRequest(request)) return false;
+
+  const accept = request.headers.get("accept") ?? "";
+  const fetchMode = request.headers.get("sec-fetch-mode") ?? request.mode;
+  const contentType = response.headers.get("content-type") ?? "";
+
+  return (
+    fetchMode === "navigate" ||
+    accept.includes("text/html") ||
+    contentType.includes("text/html")
+  );
+}
+
+function withRefreshSafeHeaders(request: Request, response: Response): Response {
+  if (!shouldPreventShellCaching(request, response)) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.set("cache-control", "no-store, max-age=0");
+  headers.set("pragma", "no-cache");
+  headers.set("expires", "0");
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
   });
 }
 
@@ -71,7 +115,8 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalizedResponse = await normalizeCatastrophicSsrResponse(response);
+      return withRefreshSafeHeaders(request, normalizedResponse);
     } catch (error) {
       console.error(error);
       return brandedErrorResponse();

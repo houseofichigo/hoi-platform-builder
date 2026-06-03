@@ -1,7 +1,7 @@
 import type {
   AlertRule,
   AlertTier,
-} from "@/lib/worked-examples/invoice-ocr/m11";
+} from "@/lib/assess/content/types";
 
 export interface AlertRuleState {
   enabled: boolean;

@@ -1,4 +1,4 @@
-import type { PrototypeSurface } from "@/lib/worked-examples/invoice-ocr/m05";
+import type { PrototypeSurface } from "@/lib/assess/content/types";
 
 interface PrototypeSurfaceMapProps {
   surfaces: readonly PrototypeSurface[];

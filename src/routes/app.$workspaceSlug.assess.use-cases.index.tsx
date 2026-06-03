@@ -19,16 +19,16 @@ function UseCaseTracksPage() {
           <Link to="/app/$workspaceSlug/assess" params={{ workspaceSlug: slug }} className="hover:text-terracotta">
             ← ASSESS
           </Link>{" "}
-          · USE CASE TRACKS
+          · CAPSTONE LIBRARY
         </p>
         <h1 className="mt-8 font-display text-[44px] leading-tight text-navy md:text-[58px]">
-          Applied tracks.
+          Capstone cases.
           <br />
           <span className="accent-italic">One method, many cases.</span>
         </h1>
         <p className="lead mt-5 max-w-[74ch]">
-          The core course teaches the universal method. Use case tracks apply that method end-to-end
-          to a specific workflow. Invoice OCR is the first active track; the others preview the track model.
+          The core course teaches the universal method. Capstone cases apply that method end-to-end
+          to a specific workflow for Tier 02 certification. Invoice OCR is the first preview; the others show the future case library.
         </p>
       </header>
 
@@ -56,7 +56,7 @@ function TrackCard({ track, workspaceSlug }: { track: UseCaseTrack; workspaceSlu
           }`}
         >
           {active ? <BadgeCheck className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-          {active ? "Active" : "Preview"}
+          {active ? "Preview" : "Coming soon"}
         </span>
       </div>
       <dl className="mt-5 space-y-3 text-[13px] leading-relaxed">
@@ -79,7 +79,7 @@ function TrackCard({ track, workspaceSlug }: { track: UseCaseTrack; workspaceSlu
           params={{ workspaceSlug, trackId: track.slug }}
           className={active ? "btn-ichigo btn-ichigo-primary" : "btn-ichigo btn-ichigo-outline"}
         >
-          {active ? "Preview track" : "View preview"} <ArrowRight className="h-3.5 w-3.5" />
+          {active ? "Preview capstone" : "View case preview"} <ArrowRight className="h-3.5 w-3.5" />
         </Link>
         {active && (
           <Link
@@ -87,7 +87,7 @@ function TrackCard({ track, workspaceSlug }: { track: UseCaseTrack; workspaceSlu
             params={{ workspaceSlug, trackId: track.slug, moduleId: "m01" }}
             className="btn-ichigo btn-ichigo-outline"
           >
-            Start OCR track <Sparkles className="h-3.5 w-3.5" />
+            Open OCR preview <Sparkles className="h-3.5 w-3.5" />
           </Link>
         )}
       </div>

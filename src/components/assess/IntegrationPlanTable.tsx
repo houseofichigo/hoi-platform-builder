@@ -1,4 +1,4 @@
-import type { IntegrationPlanItem } from "@/lib/worked-examples/invoice-ocr/m06";
+import type { IntegrationPlanItem } from "@/lib/assess/content/types";
 
 interface IntegrationPlanTableProps {
   integrations: readonly IntegrationPlanItem[];

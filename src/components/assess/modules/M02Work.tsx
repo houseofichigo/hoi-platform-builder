@@ -12,10 +12,10 @@ import { Step } from "@/components/assess/Step";
 import { OCRBlockWalkthrough } from "@/components/assess/OCRBlockWalkthrough";
 import { SeededBadge } from "@/components/assess/SeededBadge";
 import {
-  M02_OCR_CONTENT,
+  M02_COURSE_CONTENT,
   getM02InternalSourceOptions,
   getM02ContextualRuleOptions,
-} from "@/lib/worked-examples/invoice-ocr/m02";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
 const TOTAL_STEPS = 4;
@@ -129,7 +129,7 @@ export function M02Work() {
     if (testSetOut.isLoading) return;
     if (testSetOut.value !== undefined) return;
     (async () => {
-      const seeds = M02_OCR_CONTENT.seeds["m02.test_set"];
+      const seeds = M02_COURSE_CONTENT.seeds["m02.test_set"];
       const { error } = await supabase.from("assess_outputs").upsert(
         {
           workspace_id: workspace.id,
@@ -250,10 +250,10 @@ export function M02Work() {
 
   // ============ STEP 1 — Internal knowledge ============
   if (step === 1) {
-    const s = M02_OCR_CONTENT.step1;
+    const s = M02_COURSE_CONTENT.step1;
     return (
       <Step
-        storyHeader={M02_OCR_CONTENT.storyHeader}
+        storyHeader={M02_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -268,7 +268,7 @@ export function M02Work() {
           <div className="space-y-8">
             <div className="space-y-3">
               <p className="eyebrow">THE OCR INTERNAL-KNOWLEDGE MAP</p>
-              <OCRBlockWalkthrough block={M02_OCR_CONTENT.internalSources} />
+              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.internalSources} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -311,7 +311,7 @@ export function M02Work() {
 
   // ============ STEP 2 — Contextual rules ============
   if (step === 2) {
-    const s = M02_OCR_CONTENT.step2;
+    const s = M02_COURSE_CONTENT.step2;
     return (
       <Step
         chapterLabel={CHAPTER_LABEL}
@@ -328,7 +328,7 @@ export function M02Work() {
           <div className="space-y-8">
             <div className="space-y-3">
               <p className="eyebrow">THE OCR CONTEXTUAL-KNOWLEDGE MAP</p>
-              <OCRBlockWalkthrough block={M02_OCR_CONTENT.contextualRules} />
+              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.contextualRules} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -372,7 +372,7 @@ export function M02Work() {
 
   // ============ STEP 3 — Task-specific test set ============
   if (step === 3) {
-    const s = M02_OCR_CONTENT.step3;
+    const s = M02_COURSE_CONTENT.step3;
 
     const updateTestSet = (key: keyof TestSetShape, value: number) => {
       const next = { ...testSet, [key]: Math.max(0, value) };
@@ -396,7 +396,7 @@ export function M02Work() {
           <div className="space-y-8">
             <div className="space-y-3">
               <p className="eyebrow">THE OCR TASK-SPECIFIC KNOWLEDGE SET</p>
-              <OCRBlockWalkthrough block={M02_OCR_CONTENT.testSet} />
+              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.testSet} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -449,9 +449,9 @@ export function M02Work() {
   }
 
   // ============ STEP 4 — Three-layer map + gaps + complete ============
-  const s = M02_OCR_CONTENT.step4;
-  const requiredKnowledgeEntries = M02_OCR_CONTENT.knowledgeEntryOptions.length;
-  const requiredRetrievalTests = M02_OCR_CONTENT.retrievalTestOptions.length;
+  const s = M02_COURSE_CONTENT.step4;
+  const requiredKnowledgeEntries = M02_COURSE_CONTENT.knowledgeEntryOptions.length;
+  const requiredRetrievalTests = M02_COURSE_CONTENT.retrievalTestOptions.length;
   const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
     const next = { ...gateReadiness, ...patch };
     setGateReadiness(next);
@@ -508,7 +508,7 @@ export function M02Work() {
           <ChecklistSection
             title="Create five knowledge-entry categories"
             hint="A knowledge entry needs title, source, owner, rule/fact/example, tags, sensitivity, status, and refresh rule."
-            items={M02_OCR_CONTENT.knowledgeEntryOptions}
+            items={M02_COURSE_CONTENT.knowledgeEntryOptions}
             selected={knowledgeEntrySel}
             onToggle={(opt) => {
               const next = toggle(knowledgeEntrySel, opt);
@@ -521,7 +521,7 @@ export function M02Work() {
           <ChecklistSection
             title="Write five retrieval test questions"
             hint="Each test should name the expected entry, expected source, and expected limitation."
-            items={M02_OCR_CONTENT.retrievalTestOptions}
+            items={M02_COURSE_CONTENT.retrievalTestOptions}
             selected={retrievalTestSel}
             onToggle={(opt) => {
               const next = toggle(retrievalTestSel, opt);
@@ -567,16 +567,16 @@ export function M02Work() {
             <ChecklistSection
               title="Evidence checks satisfied"
               hint="Select the checks you can currently support with evidence."
-              items={M02_OCR_CONTENT.gateReadinessChecks}
+              items={M02_COURSE_CONTENT.gateReadinessChecks}
               selected={gateReadiness.checks}
               onToggle={(opt) => updateGateReadiness({ checks: toggle(gateReadiness.checks, opt) })}
-              footer={`${gateReadiness.checks.length}/${M02_OCR_CONTENT.gateReadinessChecks.length} checks selected.`}
+              footer={`${gateReadiness.checks.length}/${M02_COURSE_CONTENT.gateReadinessChecks.length} checks selected.`}
             />
 
             <ChecklistSection
               title="Reason codes to carry forward"
               hint="Use reason codes to make gaps traceable before Build."
-              items={M02_OCR_CONTENT.gateReasonCodes}
+              items={M02_COURSE_CONTENT.gateReasonCodes}
               selected={gateReadiness.reasonCodes}
               onToggle={(opt) => updateGateReadiness({ reasonCodes: toggle(gateReadiness.reasonCodes, opt) })}
               footer={`${gateReadiness.reasonCodes.length} reason codes selected.`}
@@ -592,7 +592,7 @@ export function M02Work() {
               At least one. M02 is done when the gaps are named, not when the layers are listed.
             </p>
             <ul className="space-y-2">
-              {M02_OCR_CONTENT.gapOptions.map((opt) => (
+              {M02_COURSE_CONTENT.gapOptions.map((opt) => (
                 <li key={opt}>
                   <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
                     <input
@@ -618,7 +618,7 @@ export function M02Work() {
           {/* Method-note callout */}
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M02_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M02_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

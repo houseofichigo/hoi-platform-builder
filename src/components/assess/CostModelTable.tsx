@@ -1,4 +1,4 @@
-import type { CostCategory, CostCategoryId } from "@/lib/worked-examples/invoice-ocr/m08";
+import type { CostCategory, CostCategoryId } from "@/lib/assess/content/types";
 
 export interface CostRow {
   volume: number;

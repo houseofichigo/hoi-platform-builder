@@ -13,19 +13,19 @@ import { PromptLadder } from "@/components/assess/PromptLadder";
 import { type PromptEntryFormValue } from "@/components/assess/PromptEntryForm";
 import { PromptBlock } from "@/components/assess/PromptBlock";
 import {
-  M03_OCR_CONTENT,
+  M03_COURSE_CONTENT,
   getM03PromptScaffolds,
   type ScaffoldKey,
   type SixElementScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m03";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 01 · M03 · PROMPT ENGINEERING";
 const TOTAL_STEPS = 4;
 
 type StepNum = 1 | 2 | 3 | 4;
 
-type PlacementId = (typeof M03_OCR_CONTENT.placementOptions)[number]["id"];
-type TaskTypeId = (typeof M03_OCR_CONTENT.taskTypeOptions)[number]["id"];
+type PlacementId = (typeof M03_COURSE_CONTENT.placementOptions)[number]["id"];
+type TaskTypeId = (typeof M03_COURSE_CONTENT.taskTypeOptions)[number]["id"];
 
 interface ArchitectureOutput {
   placement: PlacementId | "";
@@ -38,7 +38,7 @@ type PromptsOutput = Record<ScaffoldKey, PromptEntry>;
 type QualityCheckedOutput = Record<ScaffoldKey, string[]>;
 
 const PROMPT_KEYS: readonly ScaffoldKey[] = ["schema", "context", "mock"] as const;
-const QUALITY_IDS = M03_OCR_CONTENT.qualityBar.map((q) => q.id);
+const QUALITY_IDS = M03_COURSE_CONTENT.qualityBar.map((q) => q.id);
 
 function buildPromptDefaults(scaffolds: Record<ScaffoldKey, SixElementScaffold>): PromptsOutput {
   return {
@@ -260,8 +260,8 @@ export function M03Work() {
 
   // ============ STEP 1 — Architecture ============
   if (step === 1) {
-    const s = M03_OCR_CONTENT.step1;
-    const ref = M03_OCR_CONTENT.step1ReferencePrompt;
+    const s = M03_COURSE_CONTENT.step1;
+    const ref = M03_COURSE_CONTENT.step1ReferencePrompt;
     const bothPicked = architecture.placement !== "" && architecture.taskType !== "";
     const architectureMatches =
       architecture.placement === ref.correctPlacement &&
@@ -269,7 +269,7 @@ export function M03Work() {
 
     return (
       <Step
-        storyHeader={M03_OCR_CONTENT.storyHeader}
+        storyHeader={M03_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -296,7 +296,7 @@ export function M03Work() {
                 Question 1 — Where does this prompt live? (placement)
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {M03_OCR_CONTENT.placementOptions.map((p) => (
+                {M03_COURSE_CONTENT.placementOptions.map((p) => (
                   <label
                     key={p.id}
                     className={`cursor-pointer rounded-md border p-3 transition-colors ${
@@ -327,7 +327,7 @@ export function M03Work() {
                 Question 2 — What is its primary task type?
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {M03_OCR_CONTENT.taskTypeOptions.map((t) => (
+                {M03_COURSE_CONTENT.taskTypeOptions.map((t) => (
                   <label
                     key={t.id}
                     className={`cursor-pointer rounded-md border p-2.5 transition-colors ${
@@ -396,7 +396,7 @@ export function M03Work() {
 
   // ============ STEP 2 — Ladder ============
   if (step === 2) {
-    const s = M03_OCR_CONTENT.step2;
+    const s = M03_COURSE_CONTENT.step2;
     return (
       <Step
         chapterLabel={CHAPTER_LABEL}
@@ -411,7 +411,7 @@ export function M03Work() {
             ))}
           </ul>
         }
-        yourVersion={<PromptLadder rungs={M03_OCR_CONTENT.ladder} />}
+        yourVersion={<PromptLadder rungs={M03_COURSE_CONTENT.ladder} />}
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         outputKey="m03.ladder_understood"
         ackOnly
@@ -425,7 +425,7 @@ export function M03Work() {
 
   // ============ STEP 3 — Three prompt entries ============
   if (step === 3) {
-    const s = M03_OCR_CONTENT.step3;
+    const s = M03_COURSE_CONTENT.step3;
     const allComplete = PROMPT_KEYS.every((k) => isPromptEntryComplete(prompts[k]));
 
     return (
@@ -447,7 +447,7 @@ export function M03Work() {
             <div className="rounded-md border border-chalk bg-mist/40 p-3 space-y-2">
               <p className="eyebrow-muted">OPTIMIZER CHECKLIST</p>
               <ul className="flex flex-wrap gap-1.5">
-                {M03_OCR_CONTENT.optimizerChecklist.map((item) => (
+                {M03_COURSE_CONTENT.optimizerChecklist.map((item) => (
                   <li
                     key={item}
                     className="rounded-full border border-chalk bg-white px-2 py-0.5 text-[11px] text-slate"
@@ -459,12 +459,12 @@ export function M03Work() {
             </div>
 
             <div className="space-y-6">
-              {M03_OCR_CONTENT.promptAssignments.map((a) => {
+              {M03_COURSE_CONTENT.promptAssignments.map((a) => {
                 const entry = prompts[a.id];
-                const assembled = M03_OCR_CONTENT.frameworkElements
+                const assembled = M03_COURSE_CONTENT.frameworkElements
                   .map((el) => `# ${el.ordinal} · ${el.label}\n${entry[el.key] ?? ""}`)
                   .join("\n\n");
-                const risks = M03_OCR_CONTENT.injectionRisks[a.id];
+                const risks = M03_COURSE_CONTENT.injectionRisks[a.id];
                 return (
                   <div
                     key={a.id}
@@ -536,7 +536,7 @@ export function M03Work() {
   }
 
   // ============ STEP 4 — Quality bar + complete ============
-  const s = M03_OCR_CONTENT.step4;
+  const s = M03_COURSE_CONTENT.step4;
   const allChecked = isQualityComplete(qualityChecked);
 
   return (
@@ -555,7 +555,7 @@ export function M03Work() {
       }
       yourVersion={
         <div className="space-y-8">
-          {M03_OCR_CONTENT.promptAssignments.map((a) => {
+          {M03_COURSE_CONTENT.promptAssignments.map((a) => {
             const entry = prompts[a.id];
             const checked = qualityChecked[a.id];
             return (
@@ -575,7 +575,7 @@ export function M03Work() {
                     Show prompt summary
                   </summary>
                   <div className="space-y-3 border-t border-chalk px-3 py-3">
-                    {M03_OCR_CONTENT.frameworkElements.map((el) => (
+                    {M03_COURSE_CONTENT.frameworkElements.map((el) => (
                       <div key={el.key} className="space-y-1">
                         <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-terracotta">
                           {el.ordinal} · {el.label}
@@ -595,7 +595,7 @@ export function M03Work() {
                 </details>
 
                 <ul className="space-y-2">
-                  {M03_OCR_CONTENT.qualityBar.map((item) => (
+                  {M03_COURSE_CONTENT.qualityBar.map((item) => (
                     <li key={item.id}>
                       <label className="flex cursor-pointer items-start gap-2">
                         <input
@@ -618,7 +618,7 @@ export function M03Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M03_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M03_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

@@ -1,7 +1,7 @@
 import type {
   AutomationLevel,
   AutomationStepTemplate,
-} from "@/lib/worked-examples/invoice-ocr/m09";
+} from "@/lib/assess/content/types";
 
 export interface AutomationMapEntry {
   level: AutomationLevel | "";

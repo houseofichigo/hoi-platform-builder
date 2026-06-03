@@ -1,7 +1,7 @@
 import type {
   RoadmapHorizon,
   RoadmapHorizonId,
-} from "@/lib/worked-examples/invoice-ocr/m12";
+} from "@/lib/assess/content/types";
 
 export interface HorizonInitiative {
   id: string;

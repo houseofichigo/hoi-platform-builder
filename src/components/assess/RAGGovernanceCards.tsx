@@ -1,4 +1,4 @@
-import type { RagGovernanceDimension } from "@/lib/worked-examples/invoice-ocr/m04";
+import type { RagGovernanceDimension } from "@/lib/assess/content/types";
 
 interface RAGGovernanceCardsProps {
   dimensions: readonly RagGovernanceDimension[];

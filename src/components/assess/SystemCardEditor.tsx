@@ -1,4 +1,4 @@
-import type { SystemCardSection } from "@/lib/worked-examples/invoice-ocr/m10";
+import type { SystemCardSection } from "@/lib/assess/content/types";
 
 interface Props {
   sections: readonly SystemCardSection[];

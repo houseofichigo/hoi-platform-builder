@@ -1,7 +1,7 @@
 import type {
   HandoffStage,
   HandoffStageId,
-} from "@/lib/worked-examples/invoice-ocr/m10";
+} from "@/lib/assess/content/types";
 
 export interface HandoffStageNote {
   owner: string;

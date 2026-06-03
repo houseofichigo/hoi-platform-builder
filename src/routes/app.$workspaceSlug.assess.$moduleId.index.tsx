@@ -105,7 +105,7 @@ function ModuleOverview() {
             <p>{m.description}</p>
             <p>
               The core assignment is deliberately generic so the method transfers across functions.
-              The applied track shows the same module through Invoice OCR without changing your course progress.
+              The capstone preview shows the same module through Invoice OCR without changing your course progress.
             </p>
           </CourseSection>
 

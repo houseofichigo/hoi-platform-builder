@@ -1,4 +1,4 @@
-import type { DocumentationLayer } from "@/lib/worked-examples/invoice-ocr/m10";
+import type { DocumentationLayer } from "@/lib/assess/content/types";
 
 interface Props {
   layers: readonly DocumentationLayer[];

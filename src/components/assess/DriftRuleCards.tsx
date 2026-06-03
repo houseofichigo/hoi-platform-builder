@@ -1,7 +1,7 @@
 import type {
   DriftRule,
   DriftTypeId,
-} from "@/lib/worked-examples/invoice-ocr/m11";
+} from "@/lib/assess/content/types";
 
 export interface DriftRuleState {
   detection: string;

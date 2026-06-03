@@ -1,7 +1,7 @@
 import type {
   DeploymentPlanScaffold,
   PlanSection,
-} from "@/lib/worked-examples/invoice-ocr/m08";
+} from "@/lib/assess/content/types";
 
 interface Props {
   sections: readonly PlanSection[];

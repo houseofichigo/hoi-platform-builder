@@ -12,11 +12,11 @@ import { Step } from "@/components/assess/Step";
 import { PrototypeSurfaceMap } from "@/components/assess/PrototypeSurfaceMap";
 import { AgentRequirementCards } from "@/components/assess/AgentRequirementCards";
 import {
-  M05_OCR_CONTENT,
+  M05_COURSE_CONTENT,
   getM05PrototypeBriefScaffold,
   type PrototypeSurfaceId,
   type PrototypeRequirementId,
-} from "@/lib/worked-examples/invoice-ocr/m05";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 02 · M05 · PROTOTYPING WITH NO-CODE";
 const TOTAL_STEPS = 3;
@@ -315,11 +315,11 @@ export function M05Work() {
 
   // ============ STEP 1 — Surfaces ============
   if (step === 1) {
-    const s = M05_OCR_CONTENT.step1;
+    const s = M05_COURSE_CONTENT.step1;
     const allAcked = isScopeComplete(scope);
     return (
       <Step
-        storyHeader={M05_OCR_CONTENT.storyHeader}
+        storyHeader={M05_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 3"
         title={s.title}
@@ -334,9 +334,9 @@ export function M05Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <PrototypeSurfaceMap surfaces={M05_OCR_CONTENT.surfaces} />
+            <PrototypeSurfaceMap surfaces={M05_COURSE_CONTENT.surfaces} />
             <ul className="space-y-2">
-              {M05_OCR_CONTENT.surfaces.map((s2) => (
+              {M05_COURSE_CONTENT.surfaces.map((s2) => (
                 <li key={s2.id}>
                   <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
                     <input
@@ -372,7 +372,7 @@ export function M05Work() {
 
   // ============ STEP 2 — Generated brief, review & accept ============
   if (step === 2) {
-    const s = M05_OCR_CONTENT.step2;
+    const s = M05_COURSE_CONTENT.step2;
     const briefReady = brief.brief.trim().length > 0 && brief.acknowledged;
     return (
       <Step
@@ -468,7 +468,7 @@ export function M05Work() {
   }
 
   // ============ STEP 3 — Walkthrough chips + requirement capabilities ============
-  const s = M05_OCR_CONTENT.step3;
+  const s = M05_COURSE_CONTENT.step3;
   const totalFindings = Object.values(requirements.walkthroughFindings).reduce(
     (n, arr) => n + (arr?.length ?? 0),
     0,
@@ -520,7 +520,7 @@ export function M05Work() {
             <p className="text-sm font-medium text-navy">
               Walkthrough — select findings (at least 3 total across prompts).
             </p>
-            {M05_OCR_CONTENT.walkthroughPrompts.map((p) => {
+            {M05_COURSE_CONTENT.walkthroughPrompts.map((p) => {
               const selected = requirements.walkthroughFindings[p.id] ?? [];
               return (
                 <div key={p.id} className="rounded-md border border-chalk bg-white px-4 py-3 space-y-2">
@@ -579,8 +579,8 @@ export function M05Work() {
             <p className="text-sm font-medium text-navy">
               Agent requirement cards — pick ≥ 2 capabilities per card.
             </p>
-            <AgentRequirementCards cards={M05_OCR_CONTENT.defaultRequirementCards} />
-            {M05_OCR_CONTENT.defaultRequirementCards.map((c) => {
+            <AgentRequirementCards cards={M05_COURSE_CONTENT.defaultRequirementCards} />
+            {M05_COURSE_CONTENT.defaultRequirementCards.map((c) => {
               const selected = requirements.capabilities[c.id] ?? [];
               return (
                 <div key={c.id} className="rounded-md border border-chalk bg-white px-4 py-3 space-y-2">
@@ -651,7 +651,7 @@ export function M05Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M05_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M05_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

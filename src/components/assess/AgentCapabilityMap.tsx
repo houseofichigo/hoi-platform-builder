@@ -1,4 +1,4 @@
-import type { AgentCapability } from "@/lib/worked-examples/invoice-ocr/m06";
+import type { AgentCapability } from "@/lib/assess/content/types";
 
 interface AgentCapabilityMapProps {
   capabilities: readonly AgentCapability[];

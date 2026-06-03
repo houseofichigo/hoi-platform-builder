@@ -1,4 +1,4 @@
-import type { AgentRequirementCard } from "@/lib/worked-examples/invoice-ocr/m05";
+import type { AgentRequirementCard } from "@/lib/assess/content/types";
 
 interface AgentRequirementCardsProps {
   cards: readonly AgentRequirementCard[];

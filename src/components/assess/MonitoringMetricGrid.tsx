@@ -1,7 +1,7 @@
 import type {
   MonitoringCategoryId,
   MonitoringMetric,
-} from "@/lib/worked-examples/invoice-ocr/m11";
+} from "@/lib/assess/content/types";
 
 interface Props {
   metrics: readonly MonitoringMetric[];

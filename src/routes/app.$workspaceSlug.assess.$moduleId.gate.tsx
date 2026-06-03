@@ -5,9 +5,9 @@ import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
 import { Gate, type GateCriterion } from "@/components/assess/Gate";
 import { GateCompletionActions } from "@/components/assess/GateCompletionActions";
-import { M04_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m04";
-import { M06_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m06";
-import { M09_OCR_CONTENT } from "@/lib/worked-examples/invoice-ocr/m09";
+import { M04_COURSE_CONTENT } from "@/lib/assess/content/course1";
+import { M06_COURSE_CONTENT } from "@/lib/assess/content/course1";
+import { M09_COURSE_CONTENT } from "@/lib/assess/content/course1";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/gate")({
   component: ModuleGate,
@@ -39,19 +39,19 @@ function ModuleGate() {
   const isM09Gate3 = m.id === "m09" && m.gateNumber === 3;
 
   const criteria: GateCriterion[] = isM04Gate1
-    ? M04_OCR_CONTENT.gateReadinessCriteria.map((c) => ({
+    ? M04_COURSE_CONTENT.gateReadinessCriteria.map((c) => ({
         id: c.id,
         question: c.question,
         helper: c.label,
       }))
     : isM06Gate2
-      ? M06_OCR_CONTENT.gate2Criteria.map((c) => ({
+      ? M06_COURSE_CONTENT.gate2Criteria.map((c) => ({
           id: c.id,
           question: c.question,
           helper: c.label,
         }))
       : isM09Gate3
-        ? M09_OCR_CONTENT.gate3Criteria.map((c) => ({
+        ? M09_COURSE_CONTENT.gate3Criteria.map((c) => ({
             id: c.id,
             question: c.question,
             helper: c.label,

@@ -1,4 +1,4 @@
-import type { OCRBlock } from "@/lib/worked-examples/invoice-ocr/m02";
+import type { OCRBlock } from "@/lib/assess/content/types";
 
 interface OCRBlockWalkthroughProps {
   block: OCRBlock;

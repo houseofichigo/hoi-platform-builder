@@ -193,7 +193,7 @@ export function OnboardingChecklist() {
           ))}
         </ul>
         <p className="px-1 pt-3 text-[12px] italic text-slate">
-          More applied tracks coming soon. Your team can build a custom case in your engagement.
+          More capstone cases are coming soon. Your team can build a custom case in your engagement.
         </p>
       </section>
 
@@ -201,9 +201,9 @@ export function OnboardingChecklist() {
       <Dialog open={exampleOpen} onOpenChange={setExampleOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Pick your applied track</DialogTitle>
+            <DialogTitle>Pick your capstone preview</DialogTitle>
             <DialogDescription>
-              The core course stays generic. Applied tracks show the same method in a concrete
+              The core course stays generic. Capstone previews show the same method in a concrete
               workflow, starting with Invoice OCR for Accounts Payable. You can change this later
               in workspace settings.
             </DialogDescription>

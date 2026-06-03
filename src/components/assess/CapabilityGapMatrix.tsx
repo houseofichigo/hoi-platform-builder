@@ -1,7 +1,7 @@
 import type {
   CapabilityGap,
   CapabilityGapId,
-} from "@/lib/worked-examples/invoice-ocr/m12";
+} from "@/lib/assess/content/types";
 
 export interface CapabilityGapState {
   notes: string;

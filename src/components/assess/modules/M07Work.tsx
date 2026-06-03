@@ -13,12 +13,12 @@ import { StackLayerInventory } from "@/components/assess/StackLayerInventory";
 import { ToolCriteriaMatrix } from "@/components/assess/ToolCriteriaMatrix";
 import { ADRSectionEditor } from "@/components/assess/ADRSectionEditor";
 import {
-  M07_OCR_CONTENT,
+  M07_COURSE_CONTENT,
   getM07ToolDecisionScaffold,
   type ToolCriterionId,
   type StackDecision,
   type ToolDecisionScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m07";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 03 · M07 · TOOLS & PLATFORMS";
 const TOTAL_STEPS = 4;
@@ -67,7 +67,7 @@ function emptyEvidence(): Evidence {
 }
 function emptyInventory(): StackInventory {
   const out: StackInventory = {};
-  for (const layer of M07_OCR_CONTENT.stackLayers) {
+  for (const layer of M07_COURSE_CONTENT.stackLayers) {
     out[layer.id] = { tool: "", gap: "" };
   }
   return out;
@@ -151,7 +151,7 @@ export function M07Work() {
     if (inventoryOut.value && typeof inventoryOut.value === "object") {
       const merged = emptyInventory();
       const v = inventoryOut.value as Partial<StackInventory>;
-      for (const layer of M07_OCR_CONTENT.stackLayers) {
+      for (const layer of M07_COURSE_CONTENT.stackLayers) {
         const entry = v[layer.id];
         if (entry && typeof entry === "object") {
           merged[layer.id] = {
@@ -273,14 +273,14 @@ export function M07Work() {
 
   // ===== STEP 1 — inventory =====
   if (step === 1) {
-    const s = M07_OCR_CONTENT.step1;
-    const allFilled = M07_OCR_CONTENT.stackLayers.every(
+    const s = M07_COURSE_CONTENT.step1;
+    const allFilled = M07_COURSE_CONTENT.stackLayers.every(
       (l) => inventory[l.id]?.tool.trim() !== "",
     );
 
     return (
       <Step
-        storyHeader={M07_OCR_CONTENT.storyHeader}
+        storyHeader={M07_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -295,9 +295,9 @@ export function M07Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <StackLayerInventory layers={M07_OCR_CONTENT.stackLayers} />
+            <StackLayerInventory layers={M07_COURSE_CONTENT.stackLayers} />
             <div className="space-y-4">
-              {M07_OCR_CONTENT.stackLayers.map((layer) => (
+              {M07_COURSE_CONTENT.stackLayers.map((layer) => (
                 <div key={layer.id} className="rounded-md border border-chalk bg-white px-3 py-3 space-y-2">
                   <p className="eyebrow-muted">{layer.label.toUpperCase()}</p>
                   <div className="grid gap-2 md:grid-cols-2">
@@ -355,7 +355,7 @@ export function M07Work() {
 
   // ===== STEP 2 — comparison =====
   if (step === 2) {
-    const s = M07_OCR_CONTENT.step2;
+    const s = M07_COURSE_CONTENT.step2;
     const allScored = CRITERION_IDS.every(
       (id) =>
         comparison.scores.pilot_stack[id] >= 1 &&
@@ -384,7 +384,7 @@ export function M07Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <ToolCriteriaMatrix criteria={M07_OCR_CONTENT.criteria} />
+            <ToolCriteriaMatrix criteria={M07_COURSE_CONTENT.criteria} />
 
             <div className="space-y-1">
               <p className="eyebrow-muted">ALTERNATIVE STACK NAME</p>
@@ -402,7 +402,7 @@ export function M07Work() {
             </div>
 
             <div className="space-y-3">
-              {M07_OCR_CONTENT.criteria.map((c) => (
+              {M07_COURSE_CONTENT.criteria.map((c) => (
                 <div key={c.id} className="rounded-md border border-chalk bg-white px-3 py-3 space-y-2">
                   <div className="flex items-baseline justify-between gap-2">
                     <p className="text-sm font-medium text-navy">{c.label}</p>
@@ -483,7 +483,7 @@ export function M07Work() {
 
   // ===== STEP 3 — ADR =====
   if (step === 3) {
-    const s = M07_OCR_CONTENT.step3;
+    const s = M07_COURSE_CONTENT.step3;
     const allFilled =
       adr.context.trim() !== "" &&
       adr.options.trim() !== "" &&
@@ -508,7 +508,7 @@ export function M07Work() {
         }
         yourVersion={
           <ADRSectionEditor
-            sections={M07_OCR_CONTENT.adrSections}
+            sections={M07_COURSE_CONTENT.adrSections}
             value={adr}
             onChange={(next) => {
               setAdr(next);
@@ -530,7 +530,7 @@ export function M07Work() {
   }
 
   // ===== STEP 4 — decision =====
-  const s = M07_OCR_CONTENT.step4;
+  const s = M07_COURSE_CONTENT.step4;
   const constraintsOk =
     decision.decision !== "constrain" || decision.constraints.trim().length > 0;
   const canComplete = decision.decision !== "" && constraintsOk;
@@ -552,7 +552,7 @@ export function M07Work() {
       yourVersion={
         <div className="space-y-6">
           <div className="grid gap-2 md:grid-cols-3">
-            {M07_OCR_CONTENT.decisionOptions.map((opt) => {
+            {M07_COURSE_CONTENT.decisionOptions.map((opt) => {
               const selected = decision.decision === opt.id;
               return (
                 <button
@@ -612,7 +612,7 @@ export function M07Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M07_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M07_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

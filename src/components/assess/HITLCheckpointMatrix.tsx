@@ -1,4 +1,4 @@
-import type { HitlCheckpoint } from "@/lib/worked-examples/invoice-ocr/m06";
+import type { HitlCheckpoint } from "@/lib/assess/content/types";
 
 interface HITLCheckpointMatrixProps {
   checkpoints: readonly HitlCheckpoint[];

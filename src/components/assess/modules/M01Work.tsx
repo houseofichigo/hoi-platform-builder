@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { PromptBlock } from "@/components/assess/PromptBlock";
 import { TokenizerLab } from "@/components/assess/TokenizerLab";
-import { M01_OCR_CONTENT, getM01DangerousTaskOptions } from "@/lib/worked-examples/invoice-ocr/m01";
+import { M01_COURSE_CONTENT, getM01DangerousTaskOptions } from "@/lib/assess/content/course1";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 
@@ -94,7 +94,7 @@ export function M01Work() {
     if (reflection.isLoading) return;
     if (reflection.value !== undefined) return;
     (async () => {
-      const seeds = M01_OCR_CONTENT.seeds["m01.reflection"];
+      const seeds = M01_COURSE_CONTENT.seeds["m01.reflection"];
       const { error } = await supabase.from("assess_outputs").upsert(
         {
           workspace_id: workspace.id,
@@ -202,10 +202,10 @@ export function M01Work() {
 
   // ============ STEP 1 ============
   if (step === 1) {
-    const s = M01_OCR_CONTENT.step1;
+    const s = M01_COURSE_CONTENT.step1;
     return (
       <Step
-        storyHeader={M01_OCR_CONTENT.storyHeader}
+        storyHeader={M01_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 3"
         title={s.title}
@@ -235,7 +235,7 @@ export function M01Work() {
 
   // ============ STEP 2 ============
   if (step === 2) {
-    const s = M01_OCR_CONTENT.step2;
+    const s = M01_COURSE_CONTENT.step2;
     const exps = s.experiments;
     return (
       <Step
@@ -326,7 +326,7 @@ export function M01Work() {
   }
 
   // ============ STEP 3 — METHOD NOTE ============
-  const m = M01_OCR_CONTENT.methodNote;
+  const m = M01_COURSE_CONTENT.methodNote;
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}

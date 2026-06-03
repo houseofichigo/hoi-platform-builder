@@ -28,10 +28,10 @@ function UseCaseProfileOnboarding() {
       <div className="mx-auto max-w-[640px] py-8">
         <p className="eyebrow-muted">USE-CASE PROFILE</p>
         <h1 className="h-display-md mt-3">
-          Pick an applied track <span className="accent-italic">first.</span>
+          Pick a capstone preview <span className="accent-italic">first.</span>
         </h1>
         <p className="lead mt-4 max-w-[60ch] text-[15px]">
-          This optional profile depends on which applied track your team wants to personalize.
+          This optional profile depends on which capstone case your team wants to personalize.
           Choose one from the onboarding checklist, then come back here.
         </p>
         <Link
@@ -93,7 +93,7 @@ function UseCaseProfileOnboarding() {
         <p className="lead mt-4 max-w-[60ch] text-[15px]">
           {isComplete
             ? "Update the details below. Applied track previews and generated examples can use the new values."
-            : "A few specifics about how your team runs this workflow. The core course stays generic; this context only personalizes the applied track. Edit any time from settings."}
+            : "A few specifics about how your team runs this workflow. The core course stays generic; this context only personalizes the capstone preview. Edit any time from settings."}
         </p>
       </div>
 

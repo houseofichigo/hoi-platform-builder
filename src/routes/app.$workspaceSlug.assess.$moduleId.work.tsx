@@ -63,7 +63,7 @@ function ModuleWork() {
       {!showingCompletion && appliedStep && (
         <div className="rounded-md border border-terracotta/25 bg-terracotta/5 px-4 py-3 text-[13px] text-navy flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span>
-            Want to see this method applied to Invoice OCR? Open the read-only applied track step.
+            Want to see this method applied to Invoice OCR? Open the read-only capstone preview.
           </span>
           <Link
             to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"

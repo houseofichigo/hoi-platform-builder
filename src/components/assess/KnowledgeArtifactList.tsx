@@ -1,4 +1,4 @@
-import type { KnowledgeArtifact } from "@/lib/worked-examples/invoice-ocr/m04";
+import type { KnowledgeArtifact } from "@/lib/assess/content/types";
 
 interface KnowledgeArtifactListProps {
   artifacts: readonly KnowledgeArtifact[];

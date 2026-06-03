@@ -1,4 +1,4 @@
-import type { ArchitectureChoice, ArchitectureChoiceId } from "@/lib/worked-examples/invoice-ocr/m08";
+import type { ArchitectureChoice, ArchitectureChoiceId } from "@/lib/assess/content/types";
 
 interface Props {
   choices: readonly ArchitectureChoice[];

@@ -2,7 +2,7 @@ import type {
   FrameworkElement,
   PromptAssignment,
   SixElementScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m03";
+} from "@/lib/assess/content/types";
 
 export interface PromptEntryFormValue extends SixElementScaffold {
   injectionRisk: string;

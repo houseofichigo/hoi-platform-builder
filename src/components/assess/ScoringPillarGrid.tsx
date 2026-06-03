@@ -1,4 +1,4 @@
-import type { PillarId, ScoringPillar } from "@/lib/worked-examples/invoice-ocr/m09";
+import type { PillarId, ScoringPillar } from "@/lib/assess/content/types";
 
 interface Props {
   pillars: readonly ScoringPillar[];

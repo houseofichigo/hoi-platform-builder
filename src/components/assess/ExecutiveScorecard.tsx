@@ -1,4 +1,4 @@
-import type { ExecutiveScorecardMetric } from "@/lib/worked-examples/invoice-ocr/m12";
+import type { ExecutiveScorecardMetric } from "@/lib/assess/content/types";
 
 interface Props {
   metrics: readonly ExecutiveScorecardMetric[];

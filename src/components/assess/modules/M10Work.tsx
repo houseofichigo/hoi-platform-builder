@@ -17,11 +17,11 @@ import {
   type HandoffStageNote,
 } from "@/components/assess/HandoffStagePlan";
 import {
-  M10_OCR_CONTENT,
+  M10_COURSE_CONTENT,
   getM10DocumentationScaffold,
   type DocumentationLayerId,
   type HandoffStageId,
-} from "@/lib/worked-examples/invoice-ocr/m10";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 04 · M10 · DOCUMENTATION & ADOPTION";
 const TOTAL_STEPS = 3;
@@ -256,13 +256,13 @@ export function M10Work() {
 
   // ===== STEP 1 — documentation outline =====
   if (step === 1) {
-    const s = M10_OCR_CONTENT.step1;
+    const s = M10_COURSE_CONTENT.step1;
     const allAcked = LAYER_IDS.every((id) => outline.acknowledged[id] === true);
     const canContinue = allAcked;
 
     return (
       <Step
-        storyHeader={M10_OCR_CONTENT.storyHeader}
+        storyHeader={M10_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 3"
         title={s.title}
@@ -278,7 +278,7 @@ export function M10Work() {
         yourVersion={
           <div className="space-y-6">
             <DocumentationLayerMap
-              layers={M10_OCR_CONTENT.documentationLayers}
+              layers={M10_COURSE_CONTENT.documentationLayers}
               acknowledged={outline.acknowledged}
               onToggle={(id) => {
                 const next: OutlineOutput = {
@@ -328,11 +328,11 @@ export function M10Work() {
 
   // ===== STEP 2 — system card + playbook =====
   if (step === 2) {
-    const s = M10_OCR_CONTENT.step2;
-    const allCardAck = M10_OCR_CONTENT.systemCardSections.every(
+    const s = M10_COURSE_CONTENT.step2;
+    const allCardAck = M10_COURSE_CONTENT.systemCardSections.every(
       (sec) => playbook.systemCardAck[sec.id],
     );
-    const allPlaybookAck = M10_OCR_CONTENT.playbookRoutines.every(
+    const allPlaybookAck = M10_COURSE_CONTENT.playbookRoutines.every(
       (r) => playbook.playbookAck[r.id],
     );
     const canContinue = allCardAck && allPlaybookAck;
@@ -354,7 +354,7 @@ export function M10Work() {
         yourVersion={
           <div className="space-y-8">
             <SystemCardEditor
-              sections={M10_OCR_CONTENT.systemCardSections}
+              sections={M10_COURSE_CONTENT.systemCardSections}
               value={playbook.systemCard}
               onChange={(v) => {
                 const next = { ...playbook, systemCard: v };
@@ -372,7 +372,7 @@ export function M10Work() {
               }}
             />
             <PlaybookRoutineList
-              routines={M10_OCR_CONTENT.playbookRoutines}
+              routines={M10_COURSE_CONTENT.playbookRoutines}
               value={playbook.operatingPlaybook}
               onChange={(v) => {
                 const next = { ...playbook, operatingPlaybook: v };
@@ -405,7 +405,7 @@ export function M10Work() {
   }
 
   // ===== STEP 3 — five-stage handoff =====
-  const s = M10_OCR_CONTENT.step3;
+  const s = M10_COURSE_CONTENT.step3;
   const allStagesNoted = STAGE_IDS.every((id) => {
     const n = handoff.notes[id];
     return (
@@ -434,7 +434,7 @@ export function M10Work() {
       yourVersion={
         <div className="space-y-6">
           <HandoffStagePlan
-            stages={M10_OCR_CONTENT.handoffStages}
+            stages={M10_COURSE_CONTENT.handoffStages}
             notes={handoff.notes}
             onChange={(id, note) => {
               const next: HandoffOutput = {
@@ -460,7 +460,7 @@ export function M10Work() {
           </label>
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M10_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M10_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

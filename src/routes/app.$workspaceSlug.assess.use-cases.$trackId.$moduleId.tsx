@@ -18,14 +18,14 @@ function UseCaseTrackStepPage() {
   if (!track || !isValidModuleId(moduleId)) {
     return (
       <div className="rounded-md border border-chalk bg-white p-6">
-        <p className="eyebrow-muted">USE CASE TRACK</p>
-        <h1 className="mt-2 font-display text-[34px] text-navy">Track step not found.</h1>
+        <p className="eyebrow-muted">CAPSTONE CASE</p>
+        <h1 className="mt-2 font-display text-[34px] text-navy">Capstone step not found.</h1>
         <Link
           to="/app/$workspaceSlug/assess/use-cases"
           params={{ workspaceSlug: slug }}
           className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta"
         >
-          Back to use case tracks <ArrowRight className="h-3.5 w-3.5" />
+          Back to capstone library <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     );
@@ -49,7 +49,7 @@ function UseCaseTrackStepPage() {
             </Link>
           </p>
           <h1 className="mt-6 font-display text-[40px] text-navy">{module.title}</h1>
-          <p className="lead mt-3">This applied track step is coming soon.</p>
+          <p className="lead mt-3">This capstone step is coming soon.</p>
         </header>
       </div>
     );

@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "check:assess-outputs": "bun scripts/check-assess-output-keys.ts",
+    "check:assess-boundaries": "bun scripts/check-assess-core-boundaries.ts",
     "check:build-outputs": "bun scripts/check-build-output-keys.ts",
     "check:imports": "bun scripts/check-import-integrity.ts",
     "check:phase2": "bun scripts/verify-phase2-schema.ts",

@@ -15,12 +15,12 @@ import { KnowledgeArtifactList } from "@/components/assess/KnowledgeArtifactList
 import { RAGGovernanceCards } from "@/components/assess/RAGGovernanceCards";
 import { AssistantTestCaseList } from "@/components/assess/AssistantTestCaseList";
 import {
-  M04_OCR_CONTENT,
+  M04_COURSE_CONTENT,
   getM04AssistantScaffold,
   type KnowledgeArtifactId,
   type RagDimensionId,
   type AssistantTestId,
-} from "@/lib/worked-examples/invoice-ocr/m04";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 02 · M04 · AI ASSISTANTS & RAG";
 const TOTAL_STEPS = 5;
@@ -55,7 +55,7 @@ const TEST_IDS: readonly AssistantTestId[] = [
   "uncertainty",
   "injection_refusal",
 ];
-const READINESS_IDS = M04_OCR_CONTENT.gateReadinessCriteria.map((c) => c.id);
+const READINESS_IDS = M04_COURSE_CONTENT.gateReadinessCriteria.map((c) => c.id);
 
 function buildKnowledgeDefaults(): KnowledgeOutput {
   return {
@@ -72,7 +72,7 @@ function buildGovernanceDefaults(): GovernanceOutput {
 function buildTestDefaults(): TestResultsOutput {
   const out = {} as TestResultsOutput;
   for (const id of TEST_IDS) {
-    const tc = M04_OCR_CONTENT.testCases.find((t) => t.id === id)!;
+    const tc = M04_COURSE_CONTENT.testCases.find((t) => t.id === id)!;
     out[id] = { verdicts: tc.passCriteria.map(() => "" as TestVerdict), note: "" };
   }
   return out;
@@ -272,10 +272,10 @@ export function M04Work() {
 
   // ============ STEP 1 — Architecture ============
   if (step === 1) {
-    const s = M04_OCR_CONTENT.step1;
+    const s = M04_COURSE_CONTENT.step1;
     return (
       <Step
-        storyHeader={M04_OCR_CONTENT.storyHeader}
+        storyHeader={M04_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 5"
         title={s.title}
@@ -290,7 +290,7 @@ export function M04Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <AssistantArchitectureMap blocks={M04_OCR_CONTENT.architectureBlocks} />
+            <AssistantArchitectureMap blocks={M04_COURSE_CONTENT.architectureBlocks} />
 
             <div className="space-y-4">
               <p className="eyebrow-muted">PROFILE-DRIVEN SCAFFOLD — COPY INTO YOUR ASSISTANT</p>
@@ -326,7 +326,7 @@ export function M04Work() {
 
   // ============ STEP 2 — Knowledge base ============
   if (step === 2) {
-    const s = M04_OCR_CONTENT.step2;
+    const s = M04_COURSE_CONTENT.step2;
     const allProduced = isKnowledgeComplete(knowledge);
 
     return (
@@ -345,9 +345,9 @@ export function M04Work() {
         }
         yourVersion={
           <div className="space-y-4">
-            <KnowledgeArtifactList artifacts={M04_OCR_CONTENT.knowledgeArtifacts} />
+            <KnowledgeArtifactList artifacts={M04_COURSE_CONTENT.knowledgeArtifacts} />
             <ul className="space-y-2">
-              {M04_OCR_CONTENT.knowledgeArtifacts.map((a) => (
+              {M04_COURSE_CONTENT.knowledgeArtifacts.map((a) => (
                 <li key={a.id}>
                   <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
                     <input
@@ -388,7 +388,7 @@ export function M04Work() {
 
   // ============ STEP 3 — RAG governance ============
   if (step === 3) {
-    const s = M04_OCR_CONTENT.step3;
+    const s = M04_COURSE_CONTENT.step3;
     const allChosen = isGovernanceComplete(governance);
 
     return (
@@ -407,14 +407,14 @@ export function M04Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <RAGGovernanceCards dimensions={M04_OCR_CONTENT.ragGovernance} />
+            <RAGGovernanceCards dimensions={M04_COURSE_CONTENT.ragGovernance} />
 
             <div className="space-y-3">
               <p className="text-sm font-medium text-navy">
                 Pick the posture you will operate with for each dimension.
               </p>
               <ul className="space-y-2">
-                {M04_OCR_CONTENT.ragGovernance.map((d) => (
+                {M04_COURSE_CONTENT.ragGovernance.map((d) => (
                   <li
                     key={d.id}
                     className="rounded-md border border-chalk bg-white px-3 py-2 flex flex-wrap items-center gap-3"
@@ -464,7 +464,7 @@ export function M04Work() {
 
   // ============ STEP 4 — Tests ============
   if (step === 4) {
-    const s = M04_OCR_CONTENT.step4;
+    const s = M04_COURSE_CONTENT.step4;
     const allVerdicts = isTestsComplete(tests);
 
     return (
@@ -483,13 +483,13 @@ export function M04Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <AssistantTestCaseList cases={M04_OCR_CONTENT.testCases} />
+            <AssistantTestCaseList cases={M04_COURSE_CONTENT.testCases} />
 
             <div className="space-y-4">
               <p className="text-sm font-medium text-navy">
                 Record a verdict against each pass criterion.
               </p>
-              {M04_OCR_CONTENT.testCases.map((tc) => {
+              {M04_COURSE_CONTENT.testCases.map((tc) => {
                 const entry = tests[tc.id];
                 return (
                   <div
@@ -575,7 +575,7 @@ export function M04Work() {
   }
 
   // ============ STEP 5 — Readiness dossier ============
-  const s = M04_OCR_CONTENT.step5;
+  const s = M04_COURSE_CONTENT.step5;
   const dossierReady = isReadinessComplete(readiness);
 
   return (
@@ -602,7 +602,7 @@ export function M04Work() {
           </div>
 
           <ul className="space-y-3">
-            {M04_OCR_CONTENT.gateReadinessCriteria.map((c) => (
+            {M04_COURSE_CONTENT.gateReadinessCriteria.map((c) => (
               <li
                 key={c.id}
                 className="rounded-md border border-chalk bg-white px-4 py-3 space-y-2"
@@ -657,7 +657,7 @@ export function M04Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M04_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M04_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

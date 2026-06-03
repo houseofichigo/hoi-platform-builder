@@ -1,4 +1,4 @@
-import type { PlaybookRoutine } from "@/lib/worked-examples/invoice-ocr/m10";
+import type { PlaybookRoutine } from "@/lib/assess/content/types";
 
 interface Props {
   routines: readonly PlaybookRoutine[];

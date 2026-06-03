@@ -1,4 +1,4 @@
-import type { PilotMetric } from "@/lib/worked-examples/invoice-ocr/m06";
+import type { PilotMetric } from "@/lib/assess/content/types";
 
 interface PilotMetricListProps {
   metrics: readonly PilotMetric[];

@@ -17,10 +17,10 @@ import {
 } from "@/components/assess/AutomationMapEditor";
 import { PortfolioRankingTable } from "@/components/assess/PortfolioRankingTable";
 import {
-  M09_OCR_CONTENT,
+  M09_COURSE_CONTENT,
   getM09PortfolioScaffold,
   type PillarId,
-} from "@/lib/worked-examples/invoice-ocr/m09";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 03 · M09 · PORTFOLIO SCORING";
 const TOTAL_STEPS = 5;
@@ -75,7 +75,7 @@ function emptyPillarScores(): Record<PillarId, number> {
 }
 
 function seedCandidates(): CandidatesOutput {
-  return M09_OCR_CONTENT.candidateTemplates.map((t) => ({
+  return M09_COURSE_CONTENT.candidateTemplates.map((t) => ({
     id: t.id,
     name: t.name,
     description: t.description,
@@ -86,7 +86,7 @@ function seedCandidates(): CandidatesOutput {
 function seedScores(candidates: CandidatesOutput): ScoresOutput {
   const out: ScoresOutput = {};
   for (const c of candidates) {
-    const template = M09_OCR_CONTENT.candidateTemplates.find((t) => t.id === c.id);
+    const template = M09_COURSE_CONTENT.candidateTemplates.find((t) => t.id === c.id);
     out[c.id] = {
       scores: emptyPillarScores(),
       reasonCodes: template ? [...template.defaultReasonCodes] : [],
@@ -99,7 +99,7 @@ function seedAutomationMaps(candidates: CandidatesOutput): AutomationMapsOutput 
   const out: AutomationMapsOutput = {};
   for (const c of candidates) {
     const m: AutomationMap = {};
-    for (const s of M09_OCR_CONTENT.automationStepTemplates) {
+    for (const s of M09_COURSE_CONTENT.automationStepTemplates) {
       m[s.id] = { level: "", humanControl: "" };
     }
     out[c.id] = m;
@@ -206,7 +206,7 @@ export function M09Work() {
           id:
             typeof c.id === "string" && c.id.length > 0
               ? c.id
-              : (M09_OCR_CONTENT.candidateTemplates[i]?.id ?? `c${i}`),
+              : (M09_COURSE_CONTENT.candidateTemplates[i]?.id ?? `c${i}`),
           name: typeof c.name === "string" ? c.name : "",
           description: typeof c.description === "string" ? c.description : "",
           owner: typeof c.owner === "string" ? c.owner : "",
@@ -254,7 +254,7 @@ export function M09Work() {
       for (const c of candidates) {
         const m = v[c.id];
         if (m) {
-          for (const s of M09_OCR_CONTENT.automationStepTemplates) {
+          for (const s of M09_COURSE_CONTENT.automationStepTemplates) {
             const e = m[s.id];
             if (e) {
               const lvl = e.level;
@@ -346,7 +346,7 @@ export function M09Work() {
             : null,
           topRankLocal?.constraints ? `Constraints: ${topRankLocal.constraints}` : null,
           topMapLocal
-            ? `Automation posture: ${M09_OCR_CONTENT.automationStepTemplates
+            ? `Automation posture: ${M09_COURSE_CONTENT.automationStepTemplates
                 .map(
                   (tpl) =>
                     `${tpl.label}=${topMapLocal[tpl.id]?.level || "—"}${
@@ -396,14 +396,14 @@ export function M09Work() {
 
   // ===== STEP 1 — capture candidates =====
   if (step === 1) {
-    const s = M09_OCR_CONTENT.step1;
+    const s = M09_COURSE_CONTENT.step1;
     const allFilled = candidates.every(
       (c) => c.name.trim() !== "" && c.owner.trim() !== "",
     );
 
     return (
       <Step
-        storyHeader={M09_OCR_CONTENT.storyHeader}
+        storyHeader={M09_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 5"
         title={s.title}
@@ -493,7 +493,7 @@ export function M09Work() {
 
   // ===== STEP 2 — scoring =====
   if (step === 2) {
-    const s = M09_OCR_CONTENT.step2;
+    const s = M09_COURSE_CONTENT.step2;
     const allScored = candidates.every((c) => {
       const sc = scores[c.id];
       if (!sc) return false;
@@ -530,7 +530,7 @@ export function M09Work() {
                     </p>
                   </div>
                   <ScoringPillarGrid
-                    pillars={M09_OCR_CONTENT.pillars}
+                    pillars={M09_COURSE_CONTENT.pillars}
                     value={sc.scores}
                     onChange={(pid, n) => {
                       const next: ScoresOutput = {
@@ -547,7 +547,7 @@ export function M09Work() {
                   <div className="space-y-1">
                     <p className="eyebrow-muted">REASON CODES</p>
                     <ReasonCodePicker
-                      codes={M09_OCR_CONTENT.reasonCodes}
+                      codes={M09_COURSE_CONTENT.reasonCodes}
                       selected={sc.reasonCodes}
                       onToggle={(id) => {
                         const has = sc.reasonCodes.includes(id);
@@ -583,11 +583,11 @@ export function M09Work() {
 
   // ===== STEP 3 — automation maps =====
   if (step === 3) {
-    const s = M09_OCR_CONTENT.step3;
+    const s = M09_COURSE_CONTENT.step3;
     const allMapped = candidates.every((c) => {
       const m = maps[c.id];
       if (!m) return false;
-      return M09_OCR_CONTENT.automationStepTemplates.every((t) => {
+      return M09_COURSE_CONTENT.automationStepTemplates.every((t) => {
         const e = m[t.id];
         return !!e && e.level !== "";
       });
@@ -615,7 +615,7 @@ export function M09Work() {
                 <div key={c.id} className="space-y-2">
                   <p className="eyebrow-muted">{c.name.toUpperCase()}</p>
                   <AutomationMapEditor
-                    steps={M09_OCR_CONTENT.automationStepTemplates}
+                    steps={M09_COURSE_CONTENT.automationStepTemplates}
                     value={m}
                     onChange={(stepId, entry) => {
                       const next: AutomationMapsOutput = {
@@ -646,7 +646,7 @@ export function M09Work() {
 
   // ===== STEP 4 — ranking =====
   if (step === 4) {
-    const s = M09_OCR_CONTENT.step4;
+    const s = M09_COURSE_CONTENT.step4;
     const rows = candidates.map((c) => ({
       id: c.id,
       name: c.name,
@@ -714,7 +714,7 @@ export function M09Work() {
   }
 
   // ===== STEP 5 — Gate 3 dossier =====
-  const s = M09_OCR_CONTENT.step5;
+  const s = M09_COURSE_CONTENT.step5;
   const top = candidates.find((c) => c.id === readiness.topCandidateId)
     ?? candidates.find((c) => ranking[c.id]?.rank === 1);
   const topScores = top ? scores[top.id] : undefined;
@@ -734,7 +734,7 @@ export function M09Work() {
           : null,
         topRank?.constraints ? `Constraints: ${topRank.constraints}` : null,
         topMap
-          ? `Automation posture: ${M09_OCR_CONTENT.automationStepTemplates
+          ? `Automation posture: ${M09_COURSE_CONTENT.automationStepTemplates
               .map(
                 (tpl) =>
                   `${tpl.label}=${topMap[tpl.id]?.level || "—"}${
@@ -807,7 +807,7 @@ export function M09Work() {
             <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
               <p className="eyebrow-muted">AUTOMATION POSTURE — {top.name.toUpperCase()}</p>
               <ul className="text-[12px] text-navy">
-                {M09_OCR_CONTENT.automationStepTemplates.map((tpl) => (
+                {M09_COURSE_CONTENT.automationStepTemplates.map((tpl) => (
                   <li key={tpl.id}>
                     <span className="font-medium">{tpl.label}:</span>{" "}
                     {topMap[tpl.id]?.level || "—"}
@@ -823,7 +823,7 @@ export function M09Work() {
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
             <p className="eyebrow-muted">GATE 3 CRITERIA</p>
             <ul className="list-disc pl-5 text-[12px] text-slate">
-              {M09_OCR_CONTENT.gate3Criteria.map((c) => (
+              {M09_COURSE_CONTENT.gate3Criteria.map((c) => (
                 <li key={c.id}>
                   <span className="font-medium text-navy">{c.label}:</span> {c.question}
                 </li>
@@ -875,7 +875,7 @@ export function M09Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M09_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M09_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

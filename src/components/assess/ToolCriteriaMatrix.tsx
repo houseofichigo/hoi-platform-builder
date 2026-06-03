@@ -1,4 +1,4 @@
-import type { ToolCriterion } from "@/lib/worked-examples/invoice-ocr/m07";
+import type { ToolCriterion } from "@/lib/assess/content/types";
 
 interface Props {
   criteria: readonly ToolCriterion[];

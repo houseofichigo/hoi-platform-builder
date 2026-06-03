@@ -1,4 +1,4 @@
-import type { PromptLadderRung } from "@/lib/worked-examples/invoice-ocr/m03";
+import type { PromptLadderRung } from "@/lib/assess/content/types";
 
 interface PromptLadderProps {
   rungs: readonly PromptLadderRung[];

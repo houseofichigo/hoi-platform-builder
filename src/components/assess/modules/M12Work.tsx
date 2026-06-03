@@ -19,11 +19,11 @@ import {
 import { ExecutiveScorecard } from "@/components/assess/ExecutiveScorecard";
 import { ExecutiveSummaryEditor } from "@/components/assess/ExecutiveSummaryEditor";
 import {
-  M12_OCR_CONTENT,
+  M12_COURSE_CONTENT,
   getM12StrategyScaffold,
   type CapabilityGapId,
   type RoadmapHorizonId,
-} from "@/lib/worked-examples/invoice-ocr/m12";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 04 · M12 · AI STRATEGY & ROADMAP";
 const TOTAL_STEPS = 4;
@@ -282,13 +282,13 @@ export function M12Work() {
 
   // ===== STEP 1 — roadmap sequencing =====
   if (step === 1) {
-    const s = M12_OCR_CONTENT.step1;
+    const s = M12_COURSE_CONTENT.step1;
     const nowCount = (roadmap.initiatives.now ?? []).length;
     const canContinue = nowCount >= 1;
 
     return (
       <Step
-        storyHeader={M12_OCR_CONTENT.storyHeader}
+        storyHeader={M12_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -303,7 +303,7 @@ export function M12Work() {
         }
         yourVersion={
           <RoadmapHorizonPlanner
-            horizons={M12_OCR_CONTENT.horizons}
+            horizons={M12_COURSE_CONTENT.horizons}
             initiatives={roadmap.initiatives}
             rationale={roadmap.rationale}
             onAdd={(horizon, label) => {
@@ -354,7 +354,7 @@ export function M12Work() {
 
   // ===== STEP 2 — capability gaps =====
   if (step === 2) {
-    const s = M12_OCR_CONTENT.step2;
+    const s = M12_COURSE_CONTENT.step2;
     const allFilled = true;
 
     return (
@@ -373,7 +373,7 @@ export function M12Work() {
         }
         yourVersion={
           <CapabilityGapMatrix
-            gaps={M12_OCR_CONTENT.capabilityGaps}
+            gaps={M12_COURSE_CONTENT.capabilityGaps}
             state={gaps.gaps}
             onChange={(id, nextGap) => {
               const next: GapsOutput = {
@@ -399,8 +399,8 @@ export function M12Work() {
 
   // ===== STEP 3 — executive scorecard =====
   if (step === 3) {
-    const s = M12_OCR_CONTENT.step3;
-    const selectedMetrics = M12_OCR_CONTENT.scorecardMetrics.filter(
+    const s = M12_COURSE_CONTENT.step3;
+    const selectedMetrics = M12_COURSE_CONTENT.scorecardMetrics.filter(
       (m) => scorecard.selected[m.id],
     );
     const allHaveTargets = selectedMetrics.every(
@@ -424,7 +424,7 @@ export function M12Work() {
         }
         yourVersion={
           <ExecutiveScorecard
-            metrics={M12_OCR_CONTENT.scorecardMetrics}
+            metrics={M12_COURSE_CONTENT.scorecardMetrics}
             selected={scorecard.selected}
             targets={scorecard.targets}
             onToggle={(id) => {
@@ -459,8 +459,8 @@ export function M12Work() {
   }
 
   // ===== STEP 4 — executive summary + next pilot =====
-  const s = M12_OCR_CONTENT.step4;
-  const selectedCriteria = M12_OCR_CONTENT.nextPilotCriteria.filter(
+  const s = M12_COURSE_CONTENT.step4;
+  const selectedCriteria = M12_COURSE_CONTENT.nextPilotCriteria.filter(
     (c) => summary.nextPilot[c.id],
   ).length;
   const canContinue = summary.acknowledged && selectedCriteria >= 3;
@@ -488,7 +488,7 @@ export function M12Work() {
               setSummary(next);
               summaryOut.setValue.mutate(next);
             }}
-            criteria={M12_OCR_CONTENT.nextPilotCriteria}
+            criteria={M12_COURSE_CONTENT.nextPilotCriteria}
             selected={summary.nextPilot}
             onToggle={(id) => {
               const next: SummaryOutput = {
@@ -507,7 +507,7 @@ export function M12Work() {
           />
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M12_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M12_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

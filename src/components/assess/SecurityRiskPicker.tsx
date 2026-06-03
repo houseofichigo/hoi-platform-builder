@@ -1,4 +1,4 @@
-import type { SecurityRisk } from "@/lib/worked-examples/invoice-ocr/m08";
+import type { SecurityRisk } from "@/lib/assess/content/types";
 
 interface Props {
   risks: readonly SecurityRisk[];

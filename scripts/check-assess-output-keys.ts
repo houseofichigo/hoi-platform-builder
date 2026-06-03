@@ -11,7 +11,7 @@
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { ARTIFACTS, OUTPUT_KEY_ALIASES } from "../src/lib/assess/completion";
+import { ARTIFACTS, OUTPUT_KEY_ALIASES } from "../src/lib/assess/completion.ts";
 
 const MODULES_DIR = join(process.cwd(), "src/components/assess/modules");
 

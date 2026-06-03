@@ -20,12 +20,12 @@ import {
 } from "@/components/assess/DriftRuleCards";
 import { RescoringCriteriaList } from "@/components/assess/RescoringCriteriaList";
 import {
-  M11_OCR_CONTENT,
+  M11_COURSE_CONTENT,
   getM11MonitoringPlanScaffold,
   type DriftTypeId,
   type MonitoringCategoryId,
   type MonitoringPlanScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m11";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 04 · M11 · MONITORING & QUALITY";
 const TOTAL_STEPS = 4;
@@ -277,8 +277,8 @@ export function M11Work() {
 
   // ===== STEP 1 — metrics =====
   if (step === 1) {
-    const s = M11_OCR_CONTENT.step1;
-    const selectedMetrics = M11_OCR_CONTENT.metrics.filter(
+    const s = M11_COURSE_CONTENT.step1;
+    const selectedMetrics = M11_COURSE_CONTENT.metrics.filter(
       (m) => metrics.selected[m.id],
     );
     const coverage = CATEGORIES.every((cat) =>
@@ -287,7 +287,7 @@ export function M11Work() {
 
     return (
       <Step
-        storyHeader={M11_OCR_CONTENT.storyHeader}
+        storyHeader={M11_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -302,7 +302,7 @@ export function M11Work() {
         }
         yourVersion={
           <MonitoringMetricGrid
-            metrics={M11_OCR_CONTENT.metrics}
+            metrics={M11_COURSE_CONTENT.metrics}
             selected={metrics.selected}
             owners={metrics.owners}
             onToggle={(id) => {
@@ -337,8 +337,8 @@ export function M11Work() {
 
   // ===== STEP 2 — alerts =====
   if (step === 2) {
-    const s = M11_OCR_CONTENT.step2;
-    const enabledRules = M11_OCR_CONTENT.alertRules.filter(
+    const s = M11_COURSE_CONTENT.step2;
+    const enabledRules = M11_COURSE_CONTENT.alertRules.filter(
       (r) => alerts.rules[r.id]?.enabled,
     );
     const enoughRules = enabledRules.length >= 4;
@@ -363,7 +363,7 @@ export function M11Work() {
         }
         yourVersion={
           <AlertRuleTable
-            rules={M11_OCR_CONTENT.alertRules}
+            rules={M11_COURSE_CONTENT.alertRules}
             state={alerts.rules}
             onChange={(id, next) => {
               const updated: AlertsOutput = {
@@ -389,7 +389,7 @@ export function M11Work() {
 
   // ===== STEP 3 — drift =====
   if (step === 3) {
-    const s = M11_OCR_CONTENT.step3;
+    const s = M11_COURSE_CONTENT.step3;
     const allFilled = DRIFT_IDS.every((id) => {
       const r = drift.rules[id];
       return r && r.detection.trim() !== "" && r.response.trim() !== "";
@@ -411,7 +411,7 @@ export function M11Work() {
         }
         yourVersion={
           <DriftRuleCards
-            rules={M11_OCR_CONTENT.driftRules}
+            rules={M11_COURSE_CONTENT.driftRules}
             state={drift.rules}
             onChange={(id, next) => {
               const updated: DriftOutput = {
@@ -436,8 +436,8 @@ export function M11Work() {
   }
 
   // ===== STEP 4 — monitoring plan + re-scoring =====
-  const s = M11_OCR_CONTENT.step4;
-  const selectedCriteria = M11_OCR_CONTENT.rescoringCriteria.filter(
+  const s = M11_COURSE_CONTENT.step4;
+  const selectedCriteria = M11_COURSE_CONTENT.rescoringCriteria.filter(
     (c) => rescoring.criteria[c.id],
   ).length;
   const canContinue = selectedCriteria >= 3;
@@ -459,7 +459,7 @@ export function M11Work() {
       yourVersion={
         <div className="space-y-6">
           <RescoringCriteriaList
-            criteria={M11_OCR_CONTENT.rescoringCriteria}
+            criteria={M11_COURSE_CONTENT.rescoringCriteria}
             selected={rescoring.criteria}
             onToggle={(id) => {
               const next: RescoringOutput = {
@@ -502,7 +502,7 @@ export function M11Work() {
           </details>
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M11_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M11_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

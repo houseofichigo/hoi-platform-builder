@@ -1,4 +1,4 @@
-import type { ADRSection, ToolDecisionScaffold } from "@/lib/worked-examples/invoice-ocr/m07";
+import type { ADRSection, ToolDecisionScaffold } from "@/lib/assess/content/types";
 
 interface Props {
   sections: readonly ADRSection[];

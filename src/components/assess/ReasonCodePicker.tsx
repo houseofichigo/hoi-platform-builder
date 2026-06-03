@@ -1,4 +1,4 @@
-import type { ReasonCode } from "@/lib/worked-examples/invoice-ocr/m09";
+import type { ReasonCode } from "@/lib/assess/content/types";
 
 interface Props {
   codes: readonly ReasonCode[];

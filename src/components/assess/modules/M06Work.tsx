@@ -14,12 +14,12 @@ import { IntegrationPlanTable } from "@/components/assess/IntegrationPlanTable";
 import { HITLCheckpointMatrix } from "@/components/assess/HITLCheckpointMatrix";
 import { PilotMetricList } from "@/components/assess/PilotMetricList";
 import {
-  M06_OCR_CONTENT,
+  M06_COURSE_CONTENT,
   getM06AgentScaffold,
   type IntegrationId,
   type HitlCheckpointId,
   type PilotMetricId,
-} from "@/lib/worked-examples/invoice-ocr/m06";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 02 · M06 · AI AGENTS & PILOT";
 const TOTAL_STEPS = 5;
@@ -96,11 +96,11 @@ function buildPilotDefaults(): PilotPlanOutput {
     window: "Two-week controlled pilot window with a fixed review date.",
     rollbackOwner: "Named AP lead or pilot owner.",
     targets: {
-      accuracy: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "accuracy")?.target ?? "",
-      cycle_time: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "cycle_time")?.target ?? "",
-      hitl_rate: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "hitl_rate")?.target ?? "",
-      exception_rate: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "exception_rate")?.target ?? "",
-      audit_completeness: M06_OCR_CONTENT.pilotMetrics.find((m) => m.id === "audit_completeness")?.target ?? "",
+      accuracy: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "accuracy")?.target ?? "",
+      cycle_time: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "cycle_time")?.target ?? "",
+      hitl_rate: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "hitl_rate")?.target ?? "",
+      exception_rate: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "exception_rate")?.target ?? "",
+      audit_completeness: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "audit_completeness")?.target ?? "",
     },
   };
 }
@@ -328,7 +328,7 @@ export function M06Work() {
 
   // ============ STEP 1 — Design ============
   if (step === 1) {
-    const s = M06_OCR_CONTENT.step1;
+    const s = M06_COURSE_CONTENT.step1;
     const allFilled =
       design.agentGoal.trim() !== "" &&
       design.workflow.trim() !== "" &&
@@ -346,7 +346,7 @@ export function M06Work() {
 
     return (
       <Step
-        storyHeader={M06_OCR_CONTENT.storyHeader}
+        storyHeader={M06_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 5"
         title={s.title}
@@ -361,7 +361,7 @@ export function M06Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <AgentCapabilityMap capabilities={M06_OCR_CONTENT.capabilities} />
+            <AgentCapabilityMap capabilities={M06_COURSE_CONTENT.capabilities} />
             <div className="space-y-4">
               {fields.map((f) => (
                 <div key={f.key} className="space-y-1">
@@ -395,7 +395,7 @@ export function M06Work() {
 
   // ============ STEP 2 — Integration plan ============
   if (step === 2) {
-    const s = M06_OCR_CONTENT.step2;
+    const s = M06_COURSE_CONTENT.step2;
     const allChosen = INTEGRATION_IDS.every((id) => integration[id] !== "");
 
     return (
@@ -414,11 +414,11 @@ export function M06Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <IntegrationPlanTable integrations={M06_OCR_CONTENT.integrations} />
+            <IntegrationPlanTable integrations={M06_COURSE_CONTENT.integrations} />
             <div className="space-y-2">
               <p className="text-sm font-medium text-navy">Pick a planned status for each integration.</p>
               <ul className="space-y-2">
-                {M06_OCR_CONTENT.integrations.map((i) => (
+                {M06_COURSE_CONTENT.integrations.map((i) => (
                   <li
                     key={i.id}
                     className="rounded-md border border-chalk bg-white px-3 py-2 flex flex-wrap items-center gap-3"
@@ -466,7 +466,7 @@ export function M06Work() {
 
   // ============ STEP 3 — HITL policy ============
   if (step === 3) {
-    const s = M06_OCR_CONTENT.step3;
+    const s = M06_COURSE_CONTENT.step3;
     const allChosen = HITL_IDS.every((id) => hitl[id] !== "");
     const requiredOk =
       hitl.payment_or_sync === "required" && hitl.exception === "required";
@@ -488,13 +488,13 @@ export function M06Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <HITLCheckpointMatrix checkpoints={M06_OCR_CONTENT.hitlCheckpoints} />
+            <HITLCheckpointMatrix checkpoints={M06_COURSE_CONTENT.hitlCheckpoints} />
             <div className="space-y-2">
               <p className="text-sm font-medium text-navy">
                 Set severity. Payment/sync and exception must be required.
               </p>
               <ul className="space-y-2">
-                {M06_OCR_CONTENT.hitlCheckpoints.map((c) => (
+                {M06_COURSE_CONTENT.hitlCheckpoints.map((c) => (
                   <li
                     key={c.id}
                     className="rounded-md border border-chalk bg-white px-3 py-2 flex flex-wrap items-center gap-3"
@@ -548,7 +548,7 @@ export function M06Work() {
 
   // ============ STEP 4 — Pilot plan ============
   if (step === 4) {
-    const s = M06_OCR_CONTENT.step4;
+    const s = M06_COURSE_CONTENT.step4;
     const baseFilled =
       pilot.population.trim() !== "" &&
       pilot.window.trim() !== "" &&
@@ -578,7 +578,7 @@ export function M06Work() {
         }
         yourVersion={
           <div className="space-y-6">
-            <PilotMetricList metrics={M06_OCR_CONTENT.pilotMetrics} />
+            <PilotMetricList metrics={M06_COURSE_CONTENT.pilotMetrics} />
 
             <div className="rounded-md border border-chalk bg-mist/40 p-4 text-[13px] leading-relaxed text-navy">
               We pre-filled the pilot plan from the reference pattern. Review the defaults,
@@ -606,7 +606,7 @@ export function M06Work() {
 
             <div className="space-y-3">
               <p className="text-sm font-medium text-navy">Set a target value for each metric.</p>
-              {M06_OCR_CONTENT.pilotMetrics.map((m) => (
+              {M06_COURSE_CONTENT.pilotMetrics.map((m) => (
                 <div key={m.id} className="space-y-1">
                   <p className="eyebrow-muted">TARGET · {m.label.toUpperCase()}</p>
                   <textarea
@@ -642,7 +642,7 @@ export function M06Work() {
   }
 
   // ============ STEP 5 — Readiness dossier ============
-  const s = M06_OCR_CONTENT.step5;
+  const s = M06_COURSE_CONTENT.step5;
   const canComplete = readiness.dossierReviewed && readiness.gate2Ready;
 
   return (
@@ -670,7 +670,7 @@ export function M06Work() {
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
             <p className="eyebrow-muted">INTEGRATION POSTURE</p>
             <ul className="text-[12px] text-navy">
-              {M06_OCR_CONTENT.integrations.map((i) => (
+              {M06_COURSE_CONTENT.integrations.map((i) => (
                 <li key={i.id}>
                   <span className="font-medium">{i.system}:</span>{" "}
                   {integration[i.id] || "—"}
@@ -682,7 +682,7 @@ export function M06Work() {
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
             <p className="eyebrow-muted">HITL POLICY</p>
             <ul className="text-[12px] text-navy">
-              {M06_OCR_CONTENT.hitlCheckpoints.map((c) => (
+              {M06_COURSE_CONTENT.hitlCheckpoints.map((c) => (
                 <li key={c.id}>
                   <span className="font-medium">{c.id.replace(/_/g, " ")}:</span>{" "}
                   {hitl[c.id] || "—"}
@@ -697,7 +697,7 @@ export function M06Work() {
             <p className="text-[12px] text-navy"><span className="font-medium">Window:</span> {pilot.window || "—"}</p>
             <p className="text-[12px] text-navy"><span className="font-medium">Rollback owner:</span> {pilot.rollbackOwner || "—"}</p>
             <ul className="text-[12px] text-navy mt-1">
-              {M06_OCR_CONTENT.pilotMetrics.map((m) => (
+              {M06_COURSE_CONTENT.pilotMetrics.map((m) => (
                 <li key={m.id}>
                   <span className="font-medium">{m.label}:</span> {pilot.targets[m.id] || "—"}
                 </li>
@@ -708,7 +708,7 @@ export function M06Work() {
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
             <p className="eyebrow-muted">GATE 2 CRITERIA</p>
             <ul className="list-disc pl-5 text-[12px] text-slate">
-              {M06_OCR_CONTENT.gate2Criteria.map((c) => (
+              {M06_COURSE_CONTENT.gate2Criteria.map((c) => (
                 <li key={c.id}>
                   <span className="font-medium text-navy">{c.label}:</span> {c.question}
                 </li>
@@ -745,7 +745,7 @@ export function M06Work() {
 
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M06_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M06_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

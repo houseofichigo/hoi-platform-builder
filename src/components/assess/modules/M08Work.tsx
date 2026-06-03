@@ -14,12 +14,12 @@ import { SecurityRiskPicker } from "@/components/assess/SecurityRiskPicker";
 import { CostModelTable, type CostRow } from "@/components/assess/CostModelTable";
 import { DeploymentPlanEditor } from "@/components/assess/DeploymentPlanEditor";
 import {
-  M08_OCR_CONTENT,
+  M08_COURSE_CONTENT,
   getM08DeploymentPlanScaffold,
   type ArchitectureChoiceId,
   type CostCategoryId,
   type DeploymentPlanScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m08";
+} from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 03 · M08 · DEPLOYMENT PLANNING";
 const TOTAL_STEPS = 4;
@@ -250,13 +250,13 @@ export function M08Work() {
 
   // ===== STEP 1 — architecture =====
   if (step === 1) {
-    const s = M08_OCR_CONTENT.step1;
+    const s = M08_COURSE_CONTENT.step1;
     const allChosen = ARCHITECTURE_IDS.every((id) => architecture.choices[id] !== "");
     const canContinue = allChosen;
 
     return (
       <Step
-        storyHeader={M08_OCR_CONTENT.storyHeader}
+        storyHeader={M08_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 4"
         title={s.title}
@@ -272,7 +272,7 @@ export function M08Work() {
         yourVersion={
           <div className="space-y-6">
             <ArchitectureChoiceGrid
-              choices={M08_OCR_CONTENT.architectureChoices}
+              choices={M08_COURSE_CONTENT.architectureChoices}
               value={architecture.choices}
               onSelect={(id, option) => {
                 const next: ArchitectureOutput = {
@@ -313,7 +313,7 @@ export function M08Work() {
 
   // ===== STEP 2 — security risks =====
   if (step === 2) {
-    const s = M08_OCR_CONTENT.step2;
+    const s = M08_COURSE_CONTENT.step2;
     const exactlyThree = security.selected.length === 3;
     const allMitigated =
       exactlyThree &&
@@ -339,7 +339,7 @@ export function M08Work() {
               Selected {security.selected.length} of 3. Pick the three you would defend first.
             </p>
             <SecurityRiskPicker
-              risks={M08_OCR_CONTENT.securityRisks}
+              risks={M08_COURSE_CONTENT.securityRisks}
               selected={security.selected}
               mitigations={security.mitigations}
               onToggle={(id) => {
@@ -381,7 +381,7 @@ export function M08Work() {
 
   // ===== STEP 3 — cost model =====
   if (step === 3) {
-    const s = M08_OCR_CONTENT.step3;
+    const s = M08_COURSE_CONTENT.step3;
     const allValid = COST_IDS.every((id) => {
       const row = cost[id];
       return row && row.volume >= 0 && row.unitCost >= 0;
@@ -405,7 +405,7 @@ export function M08Work() {
         }
         yourVersion={
           <CostModelTable
-            categories={M08_OCR_CONTENT.costCategories}
+            categories={M08_COURSE_CONTENT.costCategories}
             value={cost}
             onChange={(id, row) => {
               const next = { ...cost, [id]: row };
@@ -428,7 +428,7 @@ export function M08Work() {
   }
 
   // ===== STEP 4 — integration plan =====
-  const s = M08_OCR_CONTENT.step4;
+  const s = M08_COURSE_CONTENT.step4;
   const allFilled =
     plan.architecture.trim() !== "" &&
     plan.dataFlow.trim() !== "" &&
@@ -454,7 +454,7 @@ export function M08Work() {
       yourVersion={
         <div className="space-y-6">
           <DeploymentPlanEditor
-            sections={M08_OCR_CONTENT.planSections}
+            sections={M08_COURSE_CONTENT.planSections}
             value={plan}
             onChange={(next) => {
               setPlan(next);
@@ -463,7 +463,7 @@ export function M08Work() {
           />
           <div className="card bg-mist/40 space-y-1">
             <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M08_OCR_CONTENT.methodNote}</p>
+            <p className="text-[14px] text-navy">{M08_COURSE_CONTENT.methodNote}</p>
           </div>
         </div>
       }

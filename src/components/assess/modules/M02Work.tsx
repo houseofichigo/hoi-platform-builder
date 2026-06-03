@@ -17,10 +17,11 @@ import {
   getM02ContextualRuleOptions,
 } from "@/lib/worked-examples/invoice-ocr/m02";
 
-const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS";
+const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
 const TOTAL_STEPS = 4;
 
 type StepNum = 1 | 2 | 3 | 4;
+type GateStatus = "pass" | "partial" | "blocked" | "";
 
 interface TestSetShape {
   clean: number;
@@ -28,7 +29,18 @@ interface TestSetShape {
   adversarial: number;
 }
 
+interface GateReadinessShape {
+  status: GateStatus;
+  checks: string[];
+  reasonCodes: string[];
+}
+
 const DEFAULT_TEST_SET: TestSetShape = { clean: 5, edge: 5, adversarial: 5 };
+const DEFAULT_GATE_READINESS: GateReadinessShape = {
+  status: "",
+  checks: [],
+  reasonCodes: [],
+};
 
 export function M02Work() {
   const { user } = useAuth();
@@ -43,12 +55,19 @@ export function M02Work() {
   const contextualRulesOut = useAssessOutput<string[]>("m02.contextual_rules");
   const testSetOut = useAssessOutput<TestSetShape>("m02.test_set");
   const gapsOut = useAssessOutput<string[]>("m02.gaps");
+  const knowledgeEntriesOut = useAssessOutput<string[]>("m02.knowledge_entries");
+  const retrievalTestsOut = useAssessOutput<string[]>("m02.retrieval_tests");
+  const gateReadinessOut = useAssessOutput<GateReadinessShape>("m02.gate1_readiness");
 
   const [step, setStep] = useState<StepNum>(1);
   const [internalSel, setInternalSel] = useState<string[]>([]);
   const [contextualSel, setContextualSel] = useState<string[]>([]);
   const [testSet, setTestSet] = useState<TestSetShape>(DEFAULT_TEST_SET);
   const [gapsSel, setGapsSel] = useState<string[]>([]);
+  const [knowledgeEntrySel, setKnowledgeEntrySel] = useState<string[]>([]);
+  const [retrievalTestSel, setRetrievalTestSel] = useState<string[]>([]);
+  const [gateReadiness, setGateReadiness] =
+    useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
 
   const [hydrated, setHydrated] = useState({
     step: false,
@@ -56,6 +75,9 @@ export function M02Work() {
     contextual: false,
     testSet: false,
     gaps: false,
+    knowledgeEntries: false,
+    retrievalTests: false,
+    gateReadiness: false,
   });
 
   const profileContext = useMemo(
@@ -154,6 +176,35 @@ export function M02Work() {
     setHydrated((h) => ({ ...h, gaps: true }));
   }, [hydrated.gaps, gapsOut.isLoading, gapsOut.value]);
 
+  useEffect(() => {
+    if (hydrated.knowledgeEntries || knowledgeEntriesOut.isLoading) return;
+    if (Array.isArray(knowledgeEntriesOut.value)) {
+      setKnowledgeEntrySel(knowledgeEntriesOut.value);
+    }
+    setHydrated((h) => ({ ...h, knowledgeEntries: true }));
+  }, [hydrated.knowledgeEntries, knowledgeEntriesOut.isLoading, knowledgeEntriesOut.value]);
+
+  useEffect(() => {
+    if (hydrated.retrievalTests || retrievalTestsOut.isLoading) return;
+    if (Array.isArray(retrievalTestsOut.value)) {
+      setRetrievalTestSel(retrievalTestsOut.value);
+    }
+    setHydrated((h) => ({ ...h, retrievalTests: true }));
+  }, [hydrated.retrievalTests, retrievalTestsOut.isLoading, retrievalTestsOut.value]);
+
+  useEffect(() => {
+    if (hydrated.gateReadiness || gateReadinessOut.isLoading) return;
+    if (gateReadinessOut.value && typeof gateReadinessOut.value === "object") {
+      const v = gateReadinessOut.value as Partial<GateReadinessShape>;
+      setGateReadiness({
+        status: v.status ?? "",
+        checks: Array.isArray(v.checks) ? v.checks : [],
+        reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes : [],
+      });
+    }
+    setHydrated((h) => ({ ...h, gateReadiness: true }));
+  }, [hydrated.gateReadiness, gateReadinessOut.isLoading, gateReadinessOut.value]);
+
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
 
@@ -167,6 +218,9 @@ export function M02Work() {
   const completeM02 = async () => {
     if (!user || !workspace) return;
     await gapsOut.setValue.mutateAsync(gapsSel);
+    await knowledgeEntriesOut.setValue.mutateAsync(knowledgeEntrySel);
+    await retrievalTestsOut.setValue.mutateAsync(retrievalTestSel);
+    await gateReadinessOut.setValue.mutateAsync(gateReadiness);
     const { error } = await supabase.from("assess_progress").upsert(
       {
         workspace_id: workspace.id,
@@ -194,7 +248,7 @@ export function M02Work() {
 
   if (!workspace) return null;
 
-  // ============ STEP 1 — Internal data ============
+  // ============ STEP 1 — Internal knowledge ============
   if (step === 1) {
     const s = M02_OCR_CONTENT.step1;
     return (
@@ -213,13 +267,13 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR INTERNAL-DATA MAP</p>
+              <p className="eyebrow">THE OCR INTERNAL-KNOWLEDGE MAP</p>
               <OCRBlockWalkthrough block={M02_OCR_CONTENT.internalSources} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
               <p className="text-sm font-medium text-navy">
-                Which internal data sources exist in {workspace.name}? (pick all that apply)
+                Which internal knowledge sources exist in {workspace.name}? (pick all that apply)
               </p>
               <ul className="space-y-2">
                 {internalSourceOptions.map((opt) => (
@@ -273,7 +327,7 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR CONTEXTUAL-RULES MAP</p>
+              <p className="eyebrow">THE OCR CONTEXTUAL-KNOWLEDGE MAP</p>
               <OCRBlockWalkthrough block={M02_OCR_CONTENT.contextualRules} />
             </div>
 
@@ -341,7 +395,7 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR TEST SET</p>
+              <p className="eyebrow">THE OCR TASK-SPECIFIC KNOWLEDGE SET</p>
               <OCRBlockWalkthrough block={M02_OCR_CONTENT.testSet} />
             </div>
 
@@ -396,10 +450,23 @@ export function M02Work() {
 
   // ============ STEP 4 — Three-layer map + gaps + complete ============
   const s = M02_OCR_CONTENT.step4;
+  const requiredKnowledgeEntries = M02_OCR_CONTENT.knowledgeEntryOptions.length;
+  const requiredRetrievalTests = M02_OCR_CONTENT.retrievalTestOptions.length;
+  const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
+    const next = { ...gateReadiness, ...patch };
+    setGateReadiness(next);
+    gateReadinessOut.setValue.mutate(next);
+  };
+  const canCompleteM02 =
+    knowledgeEntrySel.length >= requiredKnowledgeEntries &&
+    retrievalTestSel.length >= requiredRetrievalTests &&
+    !!gateReadiness.status &&
+    gapsSel.length > 0;
+
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
-      stepLabel="STEP 4 of 4 · METHOD NOTE"
+      stepLabel="STEP 4 of 4 · KNOWLEDGE BASE BLUEPRINT"
       title={s.title}
       why={<p>{s.why}</p>}
       example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -412,17 +479,17 @@ export function M02Work() {
         <div className="space-y-8">
           {/* Three-layer synthesis card */}
           <div className="card border-l-[3px] border-l-terracotta space-y-5">
-            <p className="eyebrow">YOUR THREE-LAYER DATA MAP — {workspace.name.toUpperCase()}</p>
+            <p className="eyebrow">YOUR THREE-LAYER KNOWLEDGE MAP — {workspace.name.toUpperCase()}</p>
 
             <LayerRow
               num="01"
-              label="Internal data"
+              label="Internal knowledge"
               items={internalSel}
               empty="No internal sources selected yet — go back to Step 1."
             />
             <LayerRow
               num="02"
-              label="Contextual data"
+              label="Contextual knowledge"
               items={contextualSel}
               empty="No contextual rules selected yet — go back to Step 2."
             />
@@ -431,11 +498,89 @@ export function M02Work() {
               <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
                 LAYER 03
               </span>
-              <p className="text-sm font-medium text-navy mt-1">Task-specific data</p>
+              <p className="text-sm font-medium text-navy mt-1">Task-specific knowledge</p>
               <p className="text-[13px] text-graphite">
-                {testSet.clean} clean · {testSet.edge} edge · {testSet.adversarial} adversarial = {testSetTotal} invoices total
+                {testSet.clean} clean · {testSet.edge} edge · {testSet.adversarial} adversarial = {testSetTotal} examples and boundary cases total
               </p>
             </div>
+          </div>
+
+          <ChecklistSection
+            title="Create five knowledge-entry categories"
+            hint="A knowledge entry needs title, source, owner, rule/fact/example, tags, sensitivity, status, and refresh rule."
+            items={M02_OCR_CONTENT.knowledgeEntryOptions}
+            selected={knowledgeEntrySel}
+            onToggle={(opt) => {
+              const next = toggle(knowledgeEntrySel, opt);
+              setKnowledgeEntrySel(next);
+              knowledgeEntriesOut.setValue.mutate(next);
+            }}
+            footer={`${knowledgeEntrySel.length}/${requiredKnowledgeEntries} selected — select all five entry categories.`}
+          />
+
+          <ChecklistSection
+            title="Write five retrieval test questions"
+            hint="Each test should name the expected entry, expected source, and expected limitation."
+            items={M02_OCR_CONTENT.retrievalTestOptions}
+            selected={retrievalTestSel}
+            onToggle={(opt) => {
+              const next = toggle(retrievalTestSel, opt);
+              setRetrievalTestSel(next);
+              retrievalTestsOut.setValue.mutate(next);
+            }}
+            footer={`${retrievalTestSel.length}/${requiredRetrievalTests} selected — select all five retrieval tests.`}
+          />
+
+          <div className="border-t border-chalk pt-6 space-y-4">
+            <div>
+              <p className="text-sm font-medium text-navy">Gate 1 data + knowledge readiness status</p>
+              <p className="mt-1 text-[12px] italic text-slate">
+                Gate 1 is passed by evidence, not intention. Choose the status that matches your current evidence.
+              </p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                { id: "pass", label: "PASS", body: "All checks satisfied with evidence." },
+                { id: "partial", label: "PARTIAL", body: "Most checks satisfied; gaps have owners and timelines." },
+                { id: "blocked", label: "BLOCKED", body: "Critical gaps remain without a resolution path." },
+              ].map((status) => (
+                <button
+                  key={status.id}
+                  type="button"
+                  onClick={() => updateGateReadiness({ status: status.id as GateStatus })}
+                  className={`rounded-md border p-3 text-left transition-colors ${
+                    gateReadiness.status === status.id
+                      ? "border-terracotta bg-terracotta/5"
+                      : "border-chalk bg-white hover:bg-mist/40"
+                  }`}
+                >
+                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
+                    {status.label}
+                  </span>
+                  <span className="mt-1 block text-[12px] leading-relaxed text-graphite">
+                    {status.body}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <ChecklistSection
+              title="Evidence checks satisfied"
+              hint="Select the checks you can currently support with evidence."
+              items={M02_OCR_CONTENT.gateReadinessChecks}
+              selected={gateReadiness.checks}
+              onToggle={(opt) => updateGateReadiness({ checks: toggle(gateReadiness.checks, opt) })}
+              footer={`${gateReadiness.checks.length}/${M02_OCR_CONTENT.gateReadinessChecks.length} checks selected.`}
+            />
+
+            <ChecklistSection
+              title="Reason codes to carry forward"
+              hint="Use reason codes to make gaps traceable before Build."
+              items={M02_OCR_CONTENT.gateReasonCodes}
+              selected={gateReadiness.reasonCodes}
+              onToggle={(opt) => updateGateReadiness({ reasonCodes: toggle(gateReadiness.reasonCodes, opt) })}
+              footer={`${gateReadiness.reasonCodes.length} reason codes selected.`}
+            />
           </div>
 
           {/* Gaps multi-select */}
@@ -478,8 +623,8 @@ export function M02Work() {
         </div>
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-      canContinue={gapsSel.length > 0}
-      disabledReason="Pick at least one gap."
+      canContinue={canCompleteM02}
+      disabledReason="Select all five knowledge entries, all five retrieval tests, a readiness status, and at least one gap."
       nextLabel="Complete M02"
       onBack={() => goToStep(3)}
       onContinue={completeM02}
@@ -512,6 +657,47 @@ function TestSetField({
         }}
         className="mt-2 w-full rounded border border-chalk bg-paper px-2 py-1.5 text-[14px] text-navy outline-none focus:border-terracotta"
       />
+    </div>
+  );
+}
+
+function ChecklistSection({
+  title,
+  hint,
+  items,
+  selected,
+  onToggle,
+  footer,
+}: {
+  title: string;
+  hint: string;
+  items: readonly string[];
+  selected: string[];
+  onToggle: (item: string) => void;
+  footer: string;
+}) {
+  return (
+    <div className="border-t border-chalk pt-6 space-y-3">
+      <div>
+        <p className="text-sm font-medium text-navy">{title}</p>
+        <p className="mt-1 text-[12px] italic text-slate">{hint}</p>
+      </div>
+      <ul className="space-y-2">
+        {items.map((item) => (
+          <li key={item}>
+            <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
+              <input
+                type="checkbox"
+                checked={selected.includes(item)}
+                onChange={() => onToggle(item)}
+                className="mt-1 h-4 w-4 accent-terracotta"
+              />
+              <span>{item}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+      <p className="text-[12px] italic text-slate">{footer}</p>
     </div>
   );
 }

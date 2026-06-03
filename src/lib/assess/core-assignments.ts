@@ -96,14 +96,14 @@ export const CORE_ASSIGNMENTS: Record<ModuleId, CoreAssignmentStep> = {
   m02: {
     moduleId: "m02",
     recommendedCaseId: "support-ticket-triage",
-    title: "Build a three-layer data map",
+    title: "Build a three-layer knowledge base blueprint",
     summary:
-      "Map internal sources, contextual rules, task-specific examples, owners, access, quality, sensitivity, and gaps for support ticket triage.",
+      "Map internal, contextual, and task-specific knowledge; define source-backed entries with metadata; write retrieval tests; and record Gate 1 readiness gaps.",
     structuredOutputs: [
-      "internal source inventory",
-      "contextual rule list",
-      "task-specific examples and edge cases",
-      "gap register",
+      "three-layer source map",
+      "five knowledge-entry categories",
+      "retrieval test questions",
+      "Gate 1 readiness checks and gaps",
     ],
   },
   m03: {

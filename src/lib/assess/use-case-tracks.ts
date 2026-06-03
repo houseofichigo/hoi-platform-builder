@@ -73,17 +73,17 @@ export const USE_CASE_TRACKS: UseCaseTrack[] = [
       },
       m02: {
         moduleId: "m02",
-        title: "OCR three-layer data map",
+        title: "OCR knowledge base blueprint",
         summary:
-          "Map the AP policies, supplier records, accounting schema, invoice samples, VAT rules, and edge cases that OCR needs.",
-        conceptApplied: "Internal, contextual, and task-specific knowledge with ownership, quality, access, and sensitivity.",
-        exampleArtifact: "Invoice OCR data map and gap list.",
+          "Map the AP policies, supplier records, accounting schema, invoice samples, VAT rules, and edge cases, then turn them into governed knowledge entries and retrieval tests.",
+        conceptApplied: "Internal, contextual, and task-specific knowledge with metadata, ownership, access, sensitivity, refresh rules, and retrieval quality.",
+        exampleArtifact: "Invoice OCR knowledge base blueprint and Gate 1 readiness gaps.",
         sourceOutputs: [
           "AP policy and approval rules",
           "supplier master and accounting schema",
           "clean, messy, and edge-case invoice examples",
         ],
-        recommendedAction: "Compare this to your M02 generic data map to see how the three layers transfer.",
+        recommendedAction: "Compare this to your M02 generic knowledge base blueprint to see how the three layers transfer.",
       },
       m03: {
         moduleId: "m03",

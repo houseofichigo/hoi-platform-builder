@@ -35,12 +35,12 @@ export const M02_OCR_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Data Readiness. Before you prompt, before you build, you map the data. Three layers: what lives inside the company, what rules live outside it, and the test set that proves the system works. Today's job: walk that map for the OCR case.",
+    "Data Readiness & Knowledge Base Preparation. Before you prompt, before you build, you map the sources and turn them into trusted knowledge the AI can retrieve. Today's job: build the three-layer knowledge base blueprint.",
 
   step1: {
-    title: "Internal data — what already lives inside the company",
+    title: "Internal knowledge — what already lives inside the company",
     why:
-      "Internal data is the fields your systems of record already hold — invoices, suppliers, POs, chart of accounts. Before you ask a model to do anything, you map which of these the system can read, who owns each one, how clean it is, and what access you have.",
+      "Internal knowledge is the governed meaning inside your systems of record — invoices, suppliers, POs, chart of accounts, policies, and schemas. Before you ask a model to do anything, you map which sources the system can read, who owns each one, how current it is, and what metadata makes it retrievable.",
     example:
       "For OCR, the AP system already holds supplier master, invoice archive, chart of accounts, and (sometimes) PO data. Each one has an owner, an access path, and a quality profile.",
     whatToNotice: [
@@ -48,14 +48,14 @@ export const M02_OCR_CONTENT = {
       "Quality is not the same as completeness — clean records can still be wrong",
       "Access path matters as much as access itself — API beats CSV export beats screen scrape",
     ],
-    produces: "Layer 01 — internal data sources",
-    nextLabel: "Step 2 — contextual data",
+    produces: "Layer 01 — internal knowledge sources",
+    nextLabel: "Step 2 — contextual knowledge",
   },
 
   step2: {
-    title: "Contextual data — the rules the system must respect",
+    title: "Contextual knowledge — the rules the system must respect",
     why:
-      "Contextual data is the external rules the assistant must respect — laws, mandates, industry-specific requirements. They never live in your database; they live in regulation, contracts, and internal policy. Miss one and you ship a non-compliant system.",
+      "Contextual knowledge is the external and internal rule layer the assistant must respect — laws, mandates, industry requirements, contracts, and operating policy. Miss one and you ship a non-compliant system.",
     example:
       "For OCR in the EU, the rules are: e-invoicing invoice requirements, EU AI Act governance classification, GDPR for supplier contacts, ISO 42001 data governance, internal AP policy, and supplier contract terms.",
     whatToNotice: [
@@ -63,14 +63,14 @@ export const M02_OCR_CONTENT = {
       "Internal policy counts as contextual data — even if no regulator enforces it",
       "Cross-border invoices add residency and transfer rules — they don't just add VAT lines",
     ],
-    produces: "Layer 02 — contextual rules and regimes",
-    nextLabel: "Step 3 — task-specific data",
+    produces: "Layer 02 — contextual knowledge and regimes",
+    nextLabel: "Step 3 — task-specific knowledge",
   },
 
   step3: {
-    title: "Task-specific data — the test set that proves the system works",
+    title: "Task-specific knowledge — examples and boundary cases",
     why:
-      "Task-specific data is the deliberately-chosen examples that prove your system actually works. Not the production stream — a curated set of clean cases, edge cases, and adversarial cases. This is the data you point at every prompt iteration in M03 and every evaluation run in M11.",
+      "Task-specific knowledge is the deliberately-chosen examples and boundary cases that prove your system actually works. Not the production stream — a curated set of clean cases, edge cases, adversarial cases, expected outputs, and known limitations.",
     example:
       "A minimum viable OCR test set is 15 invoices: 5 clean (textbook layouts, single page, EU suppliers), 5 edge cases (missing PO reference, foreign currency, multi-page, hand-written annotation, duplicate of a prior month), 5 adversarial (typo'd amounts, swapped VAT rate, invented supplier name, manipulated total, scan-quality stress test).",
     whatToNotice: [
@@ -78,23 +78,65 @@ export const M02_OCR_CONTENT = {
       "Adversarial cases are not 'errors' — they're tests of refusal, not of accuracy",
       "Test-set size matters less than coverage of the failure modes you've seen before",
     ],
-    produces: "Layer 03 — task-specific test set",
-    nextLabel: "Step 4 — three-layer map + gaps",
+    produces: "Layer 03 — task-specific examples, edge cases, and expected behavior",
+    nextLabel: "Step 4 — knowledge base blueprint",
   },
 
   step4: {
-    title: "The three-layer data map — and the gaps you need to fill",
+    title: "Knowledge base blueprint — entries, retrieval tests, and readiness",
     why:
-      "The map is now in front of you: internal, contextual, task-specific. The methodology insight is that every team has gaps — sources without named owners, rules without documented consequences, test sets without adversarial cases. M02 is not done when you've listed the layers. It's done when you've named the gaps.",
+      "The source map tells us what exists. The knowledge base tells the AI what to use. M02 is complete when sources are mapped, knowledge entries are structured with metadata, retrieval tests are written, and Gate 1 gaps are named.",
     example:
-      "Common gaps: supplier master with no named owner; VAT rules for cross-border cases not documented; no adversarial cases in the test archive; no audit trail on who edited the chart of accounts last quarter.",
+      "A strong entry is not just 'AP policy'. It is an entry such as 'Approval threshold above EUR 5,000' with source, owner, rule, tags, sensitivity, status, and refresh rule. Then you test whether the AI can retrieve it.",
     whatToNotice: [
-      "A gap you can name is a gap you can close — every layer has them",
-      "Some gaps block Build (no data owner = no Gate 1 pass)",
-      "Some gaps only block Scale (no adversarial test set = fine for pilot, lethal at production volume)",
+      "A knowledge base is structured, searchable, source-backed, versioned, permission-aware, and governed",
+      "Retrieval tests prove whether the AI can find the right knowledge at the right time",
+      "Gate 1 is passed by evidence, not intention: missing owners, metadata, access, or tests become reason codes",
     ],
-    produces: "Three-layer data map → completes M02",
+    produces: "Three-layer knowledge base blueprint → completes M02",
   },
+
+  knowledgeEntryOptions: [
+    "Schema or field requirement — required fields, format, validation rule, applies_to, source, owner",
+    "Internal policy rule — threshold, approval path, exception owner, source policy, refresh rule",
+    "External regulation or standard — VAT, e-invoicing, retention, cross-border, or sector rule",
+    "Task-specific edge case — missing VAT, duplicate invoice, foreign currency, low-res scan, no PO",
+    "Quality or safety rule — manual review trigger, confidence boundary, sensitive data handling, stop condition",
+  ] as const,
+
+  retrievalTestOptions: [
+    "What fields are mandatory for this workflow?",
+    "What rule applies if VAT or a required field is missing?",
+    "Which items require manager or human review?",
+    "What source confirms this rule?",
+    "Which edge cases require manual review instead of automation?",
+  ] as const,
+
+  gateReadinessChecks: [
+    "Data layers identified",
+    "Knowledge base scope defined",
+    "Trusted sources selected",
+    "Ownership defined",
+    "Metadata added",
+    "Quality checks documented",
+    "Access governed",
+    "Privacy and residency known",
+    "Boundary cases curated",
+    "Retrieval test questions written",
+    "Refresh process defined",
+    "Gaps and blockers listed",
+  ] as const,
+
+  gateReasonCodes: [
+    "NO_OWNER",
+    "NO_SOURCE",
+    "NO_METADATA",
+    "NO_ACCESS",
+    "RULES_UNDOCUMENTED",
+    "NO_BOUNDARY_CASES",
+    "NO_RETRIEVAL_TEST",
+    "SENSITIVE_DATA_BLOCKED",
+  ] as const,
 
   internalSources: {
     intro:
@@ -401,7 +443,7 @@ export const M02_OCR_CONTENT = {
   },
 
   methodNote:
-    "Every data layer has a gap. Naming it is the first deliverable. M02 is not done when the layers are listed — it's done when the gaps are named.",
+    "The data map tells us what exists. The knowledge base tells the AI what to use. M02 is done when the knowledge is source-backed, metadata-rich, testable, and governed.",
 } as const;
 
 // ── Profile-driven content functions ────────────────────────────────────────

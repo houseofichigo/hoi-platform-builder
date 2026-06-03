@@ -95,7 +95,7 @@ export const M03_OCR_CONTENT = {
   step3: {
     title: "Write three prompt entries — one per data layer",
     why:
-      "M02 produced a three-layer data map. M03 builds the prompts that generate each layer's content. Schema search produces the internal-tool knowledge base entry. Context deep research produces the contextual accounting report. Mock data generation produces task-specific test cases. Three prompts, three layers, one library.",
+      "M02 produced a three-layer knowledge base blueprint. M03 builds the prompts that generate and test each layer's content. Schema search produces the internal-tool knowledge base entry. Context deep research produces the contextual accounting report. Mock data generation produces task-specific test cases. Three prompts, three layers, one library.",
     example:
       "Each prompt uses the six-element framework. Each entry also names one prompt-injection risk specific to the prompt (e.g. for mock data generation: 'a user could prompt me to generate a mock invoice that's actually a real supplier's invoice — refuse and request explicit anonymization').",
     whatToNotice: [
@@ -381,7 +381,7 @@ export const M03_OCR_CONTENT = {
     { id: "safety",       label: "Safety risks are named",           description: "At least one injection or data-leakage risk specific to this prompt, with a mitigation." },
     { id: "failures",     label: "Failures are honest",              description: "If you've already observed a failure mode in this prompt, it's logged. Empty 'failures' on first draft is acceptable." },
     { id: "open",         label: "Open questions are real",          description: "Open questions are actual unresolved items, not placeholder text." },
-    { id: "related",      label: "Related entries are linked",       description: "If this prompt depends on another (e.g. schema search depends on M02 data map), the link is named." },
+    { id: "related",      label: "Related entries are linked",       description: "If this prompt depends on another (e.g. schema search depends on M02 knowledge base blueprint), the link is named." },
   ] as const satisfies readonly QualityBarItem[],
 
   optimizerChecklist: [

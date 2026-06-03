@@ -11,14 +11,13 @@ import { PromptBlock } from "@/components/assess/PromptBlock";
 import { TokenizerLab } from "@/components/assess/TokenizerLab";
 import { M01_COURSE_CONTENT, getM01DangerousTaskOptions } from "@/lib/assess/content/course1";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 
 const TOKEN_OBSERVATIONS = [
   "Longer context increases cost.",
   "Instructions count as tokens too.",
   "Examples count as tokens too.",
   "Output length affects cost.",
-  "Messy OCR can increase token usage.",
+  "Messy source text can increase token usage.",
   "Repeated context can waste budget.",
 ] as const;
 
@@ -45,7 +44,6 @@ export function M01Work() {
   const qc = useQueryClient();
 
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const progress = useAssessProgress("m01");
   const reflection = useAssessOutput<string[]>("m01.reflection");
@@ -148,15 +146,11 @@ export function M01Work() {
     () =>
       getM01DangerousTaskOptions({
         companyName: workspace?.name,
-        accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
         country: workspaceProfile.data?.country as string | undefined,
-        invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-        vatContext: useCaseProfile.data?.vat_context as string | undefined,
       }),
     [
       workspace?.name,
       workspaceProfile.data,
-      useCaseProfile.data,
     ],
   );
 

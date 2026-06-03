@@ -1,16 +1,16 @@
 import {
-  M01_OCR_CONTENT,
+  M01_COURSE_CONTENT,
   getM01DangerousTaskOptions,
-} from "@/lib/worked-examples/invoice-ocr/m01";
+} from "./m01";
 import {
-  M02_OCR_CONTENT,
+  M02_COURSE_CONTENT,
   getM02ContextualRuleOptions,
   getM02InternalSourceOptions,
-} from "@/lib/worked-examples/invoice-ocr/m02";
+} from "./m02";
 import {
-  M03_OCR_CONTENT,
+  M03_COURSE_CONTENT,
   getM03PromptScaffolds,
-} from "@/lib/worked-examples/invoice-ocr/m03";
+} from "./m03";
 import {
   M04_OCR_CONTENT,
   getM04AssistantScaffold,
@@ -49,13 +49,15 @@ import {
 } from "@/lib/worked-examples/invoice-ocr/m12";
 
 export type * from "./types";
+export type {
+  ScaffoldKey,
+  SixElementScaffold,
+} from "./m03";
 
 // Temporary adapter for Course 1 while the module-by-module v6 assignment
 // rewrite lands. Core UI imports from this boundary instead of the applied
 // Invoice OCR files directly, so future content swaps stay localized here.
-export const M01_COURSE_CONTENT = M01_OCR_CONTENT;
-export const M02_COURSE_CONTENT = M02_OCR_CONTENT;
-export const M03_COURSE_CONTENT = M03_OCR_CONTENT;
+export { M01_COURSE_CONTENT, M02_COURSE_CONTENT, M03_COURSE_CONTENT };
 export const M04_COURSE_CONTENT = M04_OCR_CONTENT;
 export const M05_COURSE_CONTENT = M05_OCR_CONTENT;
 export const M06_COURSE_CONTENT = M06_OCR_CONTENT;

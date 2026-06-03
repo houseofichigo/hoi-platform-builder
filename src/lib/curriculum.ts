@@ -171,7 +171,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build the Prompt Contract for three different task types — one extraction, one classification, one guardrail — each on a different business task. Document each as a library entry with test suite and automation layer decision.',
     outcome: 'Three Prompt Contracts with reusable library entries, test suites, and automation layer decisions.',
-    assignmentAlignment: 'Current app assignment still uses the earlier three-layer prompt set: schema search, context deep research, and mock data generation. Rewrite this assignment next to match the v6 task-type Prompt Contract.',
+    assignmentAlignment: 'Current app assignment now uses the v6 task-type Prompt Contract framing: extraction, classification, and guardrail contracts with quality-bar review.',
   },
   {
     id: 'm04', num: 4, title: 'AI Assistants & RAG',

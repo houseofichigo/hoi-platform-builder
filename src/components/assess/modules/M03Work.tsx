@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { PromptLadder } from "@/components/assess/PromptLadder";
@@ -19,7 +18,7 @@ import {
   type SixElementScaffold,
 } from "@/lib/assess/content/course1";
 
-const CHAPTER_LABEL = "PHASE 01 · M03 · PROMPT ENGINEERING";
+const CHAPTER_LABEL = "PHASE 01 · M03 · PROMPT-DRIVEN AUTOMATION";
 const TOTAL_STEPS = 4;
 
 type StepNum = 1 | 2 | 3 | 4;
@@ -75,7 +74,6 @@ export function M03Work() {
 
   const progress = useAssessProgress("m03");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const architectureOut = useAssessOutput<ArchitectureOutput>("m03.architecture");
   const ladderOut = useAssessOutput<boolean>("m03.ladder_understood");
@@ -85,12 +83,9 @@ export function M03Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffoldDefaults = useMemo(() => getM03PromptScaffolds(profileContext), [profileContext]);
@@ -381,7 +376,7 @@ export function M03Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={architectureMatches}
-        disabledReason="Pick User prompt + Search for the reference prompt."
+        disabledReason={`Pick ${ref.correctPlacement} prompt + ${ref.correctTaskType} for the reference prompt.`}
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await architectureOut.setValue.mutateAsync({

@@ -6,10 +6,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
-import { OCRBlockWalkthrough } from "@/components/assess/OCRBlockWalkthrough";
+import { KnowledgeBlockWalkthrough } from "@/components/assess/KnowledgeBlockWalkthrough";
 import { SeededBadge } from "@/components/assess/SeededBadge";
 import {
   M02_COURSE_CONTENT,
@@ -49,7 +48,6 @@ export function M02Work() {
 
   const progress = useAssessProgress("m02");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const internalSourcesOut = useAssessOutput<string[]>("m02.internal_sources");
   const contextualRulesOut = useAssessOutput<string[]>("m02.contextual_rules");
@@ -83,12 +81,9 @@ export function M02Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const internalSourceOptions = useMemo(
@@ -267,8 +262,8 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR INTERNAL-KNOWLEDGE MAP</p>
-              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.internalSources} />
+              <p className="eyebrow">THE INTERNAL-KNOWLEDGE MAP</p>
+              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.internalSources} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -327,8 +322,8 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR CONTEXTUAL-KNOWLEDGE MAP</p>
-              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.contextualRules} />
+              <p className="eyebrow">THE CONTEXTUAL-KNOWLEDGE MAP</p>
+              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.contextualRules} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -395,8 +390,8 @@ export function M02Work() {
         yourVersion={
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="eyebrow">THE OCR TASK-SPECIFIC KNOWLEDGE SET</p>
-              <OCRBlockWalkthrough block={M02_COURSE_CONTENT.testSet} />
+              <p className="eyebrow">THE TASK-SPECIFIC KNOWLEDGE SET</p>
+              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.testSet} />
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
@@ -432,7 +427,7 @@ export function M02Work() {
               </div>
 
               <p className="text-[12px] italic text-slate">
-                {testSetTotal} invoices total
+                {testSetTotal} examples total
                 {testSetTotal < 3 ? " — need at least 3 to continue." : " — minimum reached."}
               </p>
             </div>
@@ -533,9 +528,9 @@ export function M02Work() {
 
           <div className="border-t border-chalk pt-6 space-y-4">
             <div>
-              <p className="text-sm font-medium text-navy">Gate 1 data + knowledge readiness status</p>
+              <p className="text-sm font-medium text-navy">Data + knowledge readiness status</p>
               <p className="mt-1 text-[12px] italic text-slate">
-                Gate 1 is passed by evidence, not intention. Choose the status that matches your current evidence.
+                Readiness is based on evidence, not intention. Choose the status that matches your current evidence.
               </p>
             </div>
             <div className="grid gap-2 sm:grid-cols-3">

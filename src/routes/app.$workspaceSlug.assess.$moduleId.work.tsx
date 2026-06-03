@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
-import { useAssessProgress } from "@/hooks/useAssess";
+import { AssessRetakeProvider, useAssessProgress } from "@/hooks/useAssess";
 import { ModuleCompletionActions } from "@/components/assess/ModuleCompletionActions";
 import { getActiveUseCaseTrack, getUseCaseTrackStep } from "@/lib/assess/use-case-tracks";
 import { M01Work } from "@/components/assess/modules/M01Work";
@@ -28,14 +29,25 @@ function ModuleWork() {
   const m = getModule(moduleId as ModuleId)!;
   const slug = workspace.slug;
   const { data: progress } = useAssessProgress(m.id);
+  const [retaking, setRetaking] = useState(false);
+  const [retakeBaselineCompletedAt, setRetakeBaselineCompletedAt] = useState<string | null>(null);
   const studied = progress?.studied ?? false;
   const assignmentComplete = (progress?.status ?? "not_started") === "complete";
+  const showingCompletion = assignmentComplete && !retaking;
   const appliedTrack = getActiveUseCaseTrack();
   const appliedStep = getUseCaseTrackStep(appliedTrack.slug, m.id);
 
+  useEffect(() => {
+    if (!retaking || !assignmentComplete) return;
+    if (progress?.completed_at && progress.completed_at !== retakeBaselineCompletedAt) {
+      setRetaking(false);
+      setRetakeBaselineCompletedAt(null);
+    }
+  }, [assignmentComplete, progress?.completed_at, retakeBaselineCompletedAt, retaking]);
+
   return (
     <div className="space-y-8">
-      {!assignmentComplete && !studied && (
+      {!showingCompletion && !studied && (
         <div className="rounded-md border border-chalk bg-mist/40 px-4 py-3 text-[13px] text-navy flex items-center justify-between gap-4">
           <span>Tip: review the slides before starting this assignment.</span>
           <Link
@@ -48,7 +60,7 @@ function ModuleWork() {
         </div>
       )}
 
-      {!assignmentComplete && appliedStep && (
+      {!showingCompletion && appliedStep && (
         <div className="rounded-md border border-terracotta/25 bg-terracotta/5 px-4 py-3 text-[13px] text-navy flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span>
             Want to see this method applied to Invoice OCR? Open the read-only applied track step.
@@ -63,10 +75,35 @@ function ModuleWork() {
         </div>
       )}
 
-      {assignmentComplete ? (
-        <ModuleCompletionActions module={m} workspaceSlug={slug} />
+      {retaking && assignmentComplete && (
+        <div className="rounded-md border border-terracotta/25 bg-terracotta/5 px-4 py-3 text-[13px] text-navy flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Retake mode is open. Your completed status stays saved while you review or update this assignment.
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setRetaking(false);
+              setRetakeBaselineCompletedAt(null);
+            }}
+            className="font-medium text-terracotta hover:opacity-80 whitespace-nowrap"
+          >
+            Exit retake →
+          </button>
+        </div>
+      )}
+
+      {showingCompletion ? (
+        <ModuleCompletionActions
+          module={m}
+          workspaceSlug={slug}
+          onRetake={() => {
+            setRetakeBaselineCompletedAt(progress?.completed_at ?? null);
+            setRetaking(true);
+          }}
+        />
       ) : (
-        <>
+        <AssessRetakeProvider moduleId={m.id}>
           {(() => {
             switch (moduleId) {
               case "m01":
@@ -121,7 +158,7 @@ function ModuleWork() {
           >
             ← Back to overview
           </Link>
-        </>
+        </AssessRetakeProvider>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { createContext, useContext, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,10 +44,35 @@ export interface AssessProgressRow {
   completed_at: string | null;
 }
 
+interface AssessRetakeOverride {
+  moduleId: ModuleId;
+  initialStep: number;
+  preserveCompletion: boolean;
+}
+
+const AssessRetakeContext = createContext<AssessRetakeOverride | null>(null);
+
+export function AssessRetakeProvider({
+  moduleId,
+  children,
+}: {
+  moduleId: ModuleId;
+  children: ReactNode;
+}) {
+  return (
+    <AssessRetakeContext.Provider
+      value={{ moduleId, initialStep: 1, preserveCompletion: true }}
+    >
+      {children}
+    </AssessRetakeContext.Provider>
+  );
+}
+
 export function useAssessProgress(moduleId: ModuleId) {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
   const qc = useQueryClient();
+  const retakeOverride = useContext(AssessRetakeContext);
 
   const query = useQuery({
     enabled: !!user && !!workspace,
@@ -63,6 +89,20 @@ export function useAssessProgress(moduleId: ModuleId) {
       return (data as AssessProgressRow | null) ?? null;
     },
   });
+
+  const shouldPreserveCompletion =
+    retakeOverride?.moduleId === moduleId &&
+    retakeOverride.preserveCompletion &&
+    query.data?.status === "complete";
+
+  const effectiveData =
+    shouldPreserveCompletion && query.data
+      ? {
+          ...query.data,
+          status: "in_progress" as const,
+          current_step: query.data.current_step ?? retakeOverride.initialStep,
+        }
+      : query.data;
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["assess-progress", workspace?.id, user?.id, moduleId] });
@@ -110,7 +150,7 @@ export function useAssessProgress(moduleId: ModuleId) {
       await upsert({
         current_step: step,
         max_step_reached: step,
-        status: "in_progress",
+        status: shouldPreserveCompletion ? "complete" : "in_progress",
         started_at: query.data?.started_at ?? new Date().toISOString(),
       });
     },
@@ -127,7 +167,7 @@ export function useAssessProgress(moduleId: ModuleId) {
     onSuccess: invalidate,
   });
 
-  return { ...query, setStudied, setStep, markComplete };
+  return { ...query, data: effectiveData, setStudied, setStep, markComplete };
 }
 
 export function useAssessAllProgress() {

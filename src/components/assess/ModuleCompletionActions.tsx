@@ -4,9 +4,10 @@ import { getNextModule, type ModuleMeta } from "@/lib/curriculum";
 interface ModuleCompletionActionsProps {
   module: ModuleMeta;
   workspaceSlug: string;
+  onRetake?: () => void;
 }
 
-export function ModuleCompletionActions({ module, workspaceSlug }: ModuleCompletionActionsProps) {
+export function ModuleCompletionActions({ module, workspaceSlug, onRetake }: ModuleCompletionActionsProps) {
   const nextModule = getNextModule(module.id);
 
   return (
@@ -17,7 +18,7 @@ export function ModuleCompletionActions({ module, workspaceSlug }: ModuleComplet
       </h2>
       <p className="mt-3 max-w-[60ch] text-[14px] leading-relaxed text-graphite">
         Your progress has been saved. Choose whether to continue now or return to the
-        course overview.
+        course overview. You can also retake the assignment to review or update your saved work.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -54,6 +55,15 @@ export function ModuleCompletionActions({ module, workspaceSlug }: ModuleComplet
         >
           Back to Course Overview
         </Link>
+        {onRetake && (
+          <button
+            type="button"
+            onClick={onRetake}
+            className="btn-ichigo btn-ichigo-outline"
+          >
+            Retake assignment
+          </button>
+        )}
       </div>
     </section>
   );

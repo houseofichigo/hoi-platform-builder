@@ -3,8 +3,10 @@ import { ArrowRight, BookOpen, CheckCircle2, Clock, FileText, Flag, Layers, Play
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
-import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
+import { useAssessProgress } from "@/hooks/useAssess";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
+import { getActiveUseCaseTrack, getUseCaseTrackStep } from "@/lib/assess/use-case-tracks";
+import { getCoreAssignment, getCoreAssignmentCase } from "@/lib/assess/core-assignments";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/")({
   component: ModuleOverview,
@@ -14,12 +16,15 @@ function ModuleOverview() {
   const { moduleId } = Route.useParams();
   const { workspace } = useWorkspace();
   const navigate = useNavigate();
-  const { data: worked } = useWorkedExample();
 
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
   const course = getModuleCourse(m.id);
   const moduleMedia = getModuleMedia(m.id);
+  const appliedTrack = getActiveUseCaseTrack();
+  const appliedStep = getUseCaseTrackStep(appliedTrack.slug, m.id);
+  const coreAssignment = getCoreAssignment(m.id);
+  const coreCase = getCoreAssignmentCase(coreAssignment.recommendedCaseId);
   const { data: progress } = useAssessProgress(m.id);
   const slug = workspace.slug;
 
@@ -98,7 +103,10 @@ function ModuleOverview() {
         <main className="space-y-10">
           <CourseSection icon={BookOpen} eyebrow="ABOUT THIS MODULE" title="Why this matters">
             <p>{m.description}</p>
-            {worked && <p>{worked.contextBlurb}</p>}
+            <p>
+              The core assignment is deliberately generic so the method transfers across functions.
+              The applied track shows the same module through Invoice OCR without changing your course progress.
+            </p>
           </CourseSection>
 
           <CourseSection icon={CheckCircle2} eyebrow="OBJECTIVES" title="What you will learn">
@@ -141,7 +149,7 @@ function ModuleOverview() {
               <LessonCard
                 label="Study"
                 title="Read the lesson"
-                body={`A guided reader built from the module concepts, the worked example, and the assignment preview.`}
+                body={`A guided reader built from the module concepts, generic assignment case, and applied-track reference.`}
                 to="/app/$workspaceSlug/assess/$moduleId/study"
                 slug={slug}
                 moduleId={m.id}
@@ -162,6 +170,15 @@ function ModuleOverview() {
                   to="/app/$workspaceSlug/assess/$moduleId/gate"
                   slug={slug}
                   moduleId={m.id}
+                />
+              )}
+              {appliedStep && (
+                <AppliedTrackCard
+                  slug={slug}
+                  moduleId={m.id}
+                  trackId={appliedTrack.slug}
+                  title="See the OCR version"
+                  body={appliedStep.summary}
                 />
               )}
             </div>
@@ -190,18 +207,31 @@ function ModuleOverview() {
           )}
           <div className="rounded-md border border-chalk bg-white p-5">
             <p className="eyebrow-muted">WHAT YOU'LL BUILD</p>
-            <p className="mt-3 text-[14px] leading-relaxed text-navy">{m.assignment}</p>
+            <p className="mt-3 text-[14px] font-semibold text-navy">{coreAssignment.title}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-graphite">{coreAssignment.summary}</p>
+            {coreCase && (
+              <p className="mt-3 rounded-md border border-chalk bg-paper p-3 text-[12px] leading-relaxed text-slate">
+                Recommended generic case: <span className="font-medium text-navy">{coreCase.title}</span>
+              </p>
+            )}
           </div>
           <div className="rounded-md border border-terracotta/25 bg-terracotta/5 p-5">
             <p className="eyebrow text-terracotta">PRODUCES</p>
             <p className="mt-3 text-[14px] leading-relaxed text-navy">{m.outcome}</p>
           </div>
-          {worked && (
+          {appliedStep && (
             <div className="rounded-md border border-chalk bg-white p-5">
-              <p className="eyebrow-muted">MODULE DEMO</p>
-              <p className="mt-3 text-[14px] font-semibold text-navy">{worked.name}</p>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{worked.industry}</p>
-              <p className="mt-3 text-[13px] leading-relaxed text-graphite">{worked.contextBlurb}</p>
+              <p className="eyebrow-muted">APPLIED TRACK</p>
+              <p className="mt-3 text-[14px] font-semibold text-navy">{appliedTrack.title}</p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{appliedTrack.function}</p>
+              <p className="mt-3 text-[13px] leading-relaxed text-graphite">{appliedStep.conceptApplied}</p>
+              <Link
+                to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
+                params={{ workspaceSlug: slug, trackId: appliedTrack.slug, moduleId: m.id }}
+                className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
+              >
+                Open OCR step <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
           )}
           {m.prereq && (
@@ -253,6 +283,35 @@ function ModuleOverview() {
         </button>
       </footer>
     </div>
+  );
+}
+
+function AppliedTrackCard({
+  slug,
+  moduleId,
+  trackId,
+  title,
+  body,
+}: {
+  slug: string;
+  moduleId: ModuleId;
+  trackId: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <Link
+      to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
+      params={{ workspaceSlug: slug, trackId, moduleId }}
+      className="rounded-md border border-terracotta/25 bg-terracotta/5 p-4 transition-colors hover:border-terracotta/50"
+    >
+      <p className="eyebrow text-terracotta">Applied track</p>
+      <h3 className="mt-2 text-[16px] font-semibold text-navy">{title}</h3>
+      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-graphite">{body}</p>
+      <span className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta">
+        Open <ArrowRight className="h-3.5 w-3.5" />
+      </span>
+    </Link>
   );
 }
 

@@ -4,9 +4,10 @@ import { ArrowRight, BookOpen, Check, FileText, Lightbulb, PlayCircle, Sparkles 
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
-import { useAssessProgress, useWorkedExample } from "@/hooks/useAssess";
+import { useAssessProgress } from "@/hooks/useAssess";
 import { TokenizerLab } from "@/components/assess/TokenizerLab";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
+import { getActiveUseCaseTrack, getUseCaseTrackStep } from "@/lib/assess/use-case-tracks";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/study")({
   component: ModuleStudy,
@@ -16,11 +17,12 @@ function ModuleStudy() {
   const { moduleId } = Route.useParams();
   const { workspace } = useWorkspace();
   const navigate = useNavigate();
-  const { data: worked } = useWorkedExample();
   if (!workspace || !isValidModuleId(moduleId)) return null;
   const m = getModule(moduleId as ModuleId)!;
   const course = getModuleCourse(m.id);
   const moduleMedia = getModuleMedia(m.id);
+  const appliedTrack = getActiveUseCaseTrack();
+  const appliedStep = getUseCaseTrackStep(appliedTrack.slug, m.id);
   const { data: progress, setStudied } = useAssessProgress(m.id);
   const slug = workspace.slug;
   const studied = progress?.studied ?? false;
@@ -98,15 +100,20 @@ function ModuleStudy() {
             </ul>
           </ReaderSection>
 
-          {worked && (
-            <ReaderSection icon={PlayCircle} title={`Practice with ${worked.shortName}`}>
-              <p>{worked.contextBlurb}</p>
+          {appliedStep && (
+            <ReaderSection icon={PlayCircle} title={`Applied reference: ${appliedTrack.title}`}>
+              <p>{appliedStep.summary}</p>
               <p>
-                In this module, use the demo as a controlled practice case:
-                keep the business context stable, notice which decisions are repeatable,
-                and capture the evidence pattern. The final certification capstone applies
-                the same method to a participant-chosen workflow.
+                This is not the core assignment. Use it as a reference to see how the same method
+                behaves in a finance workflow, then complete the generic assignment for your course artifact.
               </p>
+              <Link
+                to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
+                params={{ workspaceSlug: slug, trackId: appliedTrack.slug, moduleId: m.id }}
+                className="inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
+              >
+                Open OCR step <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </ReaderSection>
           )}
 

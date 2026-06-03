@@ -13,7 +13,6 @@ import {
   getCourseModules,
   getModule,
   type AssessCourseMeta,
-  type CapstoneCaseMeta,
   type ModuleId,
   type ModuleMeta,
 } from "@/lib/curriculum";
@@ -23,20 +22,19 @@ import {
   useWorkedExample,
   type AssessProgressRow,
 } from "@/hooks/useAssess";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
+import { USE_CASE_TRACKS, type UseCaseTrack } from "@/lib/assess/use-case-tracks";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
 });
 
-type CourseTab = "courses" | "curriculum" | "capstones" | "artifacts" | "gates" | "about";
+type CourseTab = "courses" | "curriculum" | "useCases" | "artifacts" | "gates" | "about";
 
 function AssessHome() {
   const { workspace } = useWorkspace();
   const { data: progress } = useAssessAllProgress();
   const { data: worked } = useWorkedExample();
-  const { isComplete: useCaseComplete, isLoading: useCaseLoading } = useUseCaseProfile();
   const [tab, setTab] = useState<CourseTab>("courses");
   const course = getCourse(DEFAULT_ASSESS_COURSE_ID)!;
   const courseModules = useMemo(() => getCourseModules(course.id), [course.id]);
@@ -79,30 +77,7 @@ function AssessHome() {
         totalModules={courseModules.length}
       />
 
-      {!worked && (
-        <NoticeCard
-          eyebrow="SETUP NEEDED"
-          title="Pick the module demo before starting Assess."
-          body="The module demo gives every assignment a shared practice thread. The certification capstone is separate and can be chosen later from the Capstone Library."
-          actionLabel="Go to onboarding"
-          to="/app/$workspaceSlug"
-          slug={slug}
-        />
-      )}
-
-      {worked && !useCaseLoading && !useCaseComplete && (
-        <NoticeCard
-          eyebrow="ONE QUICK STEP BEFORE YOU START"
-          title={`Tell us how your team runs ${worked.shortName}.`}
-          body="Six profile questions personalize the examples, systems, data assumptions, and governance prompts throughout Assess."
-          actionLabel="Set up use-case profile"
-          to="/app/$workspaceSlug/onboarding/use-case-profile"
-          slug={slug}
-          search={{ return_to: `/app/${slug}/assess` }}
-        />
-      )}
-
-      {worked && (useCaseLoading || useCaseComplete) && progress?.m12?.status === "complete" && (
+      {progress?.m12?.status === "complete" && (
         <NoticeCard
           eyebrow="PROGRAM COMPLETION READY"
           title="Review your artifacts, gates, and certification readiness."
@@ -118,7 +93,7 @@ function AssessHome() {
           {([
             ["courses", "Courses"],
             ["curriculum", "Current course"],
-            ["capstones", "Capstone Library"],
+            ["useCases", "Use Case Tracks"],
             ["artifacts", "Artifacts"],
             ["gates", "Gates"],
             ["about", "About"],
@@ -152,8 +127,8 @@ function AssessHome() {
             <CurriculumPanel slug={slug} progress={progress ?? {}} />
           </div>
         )}
-        {tab === "capstones" && (
-          <CapstonePanel course={course} />
+        {tab === "useCases" && (
+          <UseCaseTracksPanel slug={slug} />
         )}
         {tab === "artifacts" && (
           <ArtifactsPanel slug={slug} progress={progress ?? {}} />
@@ -268,9 +243,9 @@ function CourseHero({
               <dd className="text-right font-medium text-navy">{course.level} · {course.duration}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-slate">Module demo</dt>
+              <dt className="text-slate">Applied track</dt>
               <dd className="text-right font-medium text-navy">
-                {workedName ? `${workedName}${workedIndustry ? ` · ${workedIndustry}` : ""}` : "Not selected"}
+                {workedName ? `${workedName}${workedIndustry ? ` · ${workedIndustry}` : ""}` : "Optional"}
               </dd>
             </div>
           </dl>
@@ -343,6 +318,13 @@ function CourseShelf({
                 className="btn-ichigo btn-ichigo-outline"
               >
                 Resume
+              </Link>
+              <Link
+                to="/app/$workspaceSlug/assess/use-cases"
+                params={{ workspaceSlug: slug }}
+                className="btn-ichigo btn-ichigo-outline"
+              >
+                Use case tracks
               </Link>
             </div>
           </div>
@@ -623,48 +605,70 @@ function GatesPanel({
   );
 }
 
-function CapstonePanel({ course }: { course: AssessCourseMeta }) {
+function UseCaseTracksPanel({ slug }: { slug: string }) {
   return (
     <section className="space-y-6">
       <div className="rounded-md border border-chalk bg-white p-6">
-        <p className="eyebrow text-terracotta">CAPSTONE LIBRARY</p>
+        <p className="eyebrow text-terracotta">USE CASE TRACKS</p>
         <h2 className="mt-3 font-display text-[34px] leading-tight text-navy">
-          Six cases. One method.
+          One method. Many applied cases.
         </h2>
         <p className="mt-3 max-w-[76ch] text-[15px] leading-relaxed text-graphite">
-          The twelve modules teach the transferable method. The capstone track applies every artifact
-          pattern end-to-end to one chosen workflow. Selection is preview-only for now; persistence and
-          capstone assignments will come after the module assignments are finalized.
+          The twelve modules teach the transferable method. Use case tracks apply that same
+          Scope → Build → Govern → Scale arc to a specific workflow. Invoice OCR is active as a
+          read-only applied track; formal track completion will be added after the core assignments are finalized.
         </p>
+        <Link
+          to="/app/$workspaceSlug/assess/use-cases"
+          params={{ workspaceSlug: slug }}
+          className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
+        >
+          Open use case tracks <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        {course.capstoneCases.map((capstone) => (
-          <CapstoneCard key={capstone.id} capstone={capstone} />
+        {USE_CASE_TRACKS.map((track) => (
+          <UseCaseTrackCard key={track.id} track={track} slug={slug} />
         ))}
       </div>
     </section>
   );
 }
 
-function CapstoneCard({ capstone }: { capstone: CapstoneCaseMeta }) {
+function UseCaseTrackCard({ track, slug }: { track: UseCaseTrack; slug: string }) {
+  const active = track.status === "active";
   return (
     <article className="rounded-md border border-chalk bg-white p-5">
-      <p className="eyebrow-muted">{capstone.function}</p>
-      <h3 className="mt-2 font-display text-[24px] leading-tight text-navy">{capstone.title}</h3>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow-muted">{track.function}</p>
+          <h3 className="mt-2 font-display text-[24px] leading-tight text-navy">{track.title}</h3>
+        </div>
+        <span className={`rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${active ? "bg-terracotta/10 text-terracotta" : "bg-mist text-slate"}`}>
+          {active ? "Active" : "Preview"}
+        </span>
+      </div>
       <dl className="mt-4 space-y-3 text-[13px] leading-relaxed">
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Workflow</dt>
-          <dd className="mt-1 text-graphite">{capstone.workflow}</dd>
+          <dd className="mt-1 text-graphite">{track.workflow}</dd>
         </div>
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Agent pattern</dt>
-          <dd className="mt-1 text-graphite">{capstone.agent}</dd>
+          <dd className="mt-1 text-graphite">{track.agentPattern}</dd>
         </div>
         <div>
           <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">Why it matters</dt>
-          <dd className="mt-1 text-navy">{capstone.why}</dd>
+          <dd className="mt-1 text-navy">{track.why}</dd>
         </div>
       </dl>
+      <Link
+        to="/app/$workspaceSlug/assess/use-cases/$trackId"
+        params={{ workspaceSlug: slug, trackId: track.slug }}
+        className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
+      >
+        {active ? "Preview track" : "View preview"} <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
     </article>
   );
 }
@@ -677,10 +681,9 @@ function AboutPanel({ course, workedName }: { course: AssessCourseMeta; workedNa
         <p>{course.description}</p>
         <p>{course.methodology}</p>
         <p>
-          The current module demo
-          {workedName ? `, ${workedName},` : ""} keeps practice concrete while the method stays
-          universal. The final certification capstone is chosen separately and applies the same
-          Scope → Build → Govern → Scale pattern to a real workflow.
+          Core assignments stay generic and transferable. Applied use case tracks
+          {workedName ? `, including ${workedName},` : ""} show how the same method transfers into
+          a specific workflow for Tier 02-style capstone evidence.
         </p>
         <p>{course.certification.assessment}</p>
         <div className="grid gap-3 md:grid-cols-2">

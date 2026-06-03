@@ -28,11 +28,11 @@ function UseCaseProfileOnboarding() {
       <div className="mx-auto max-w-[640px] py-8">
         <p className="eyebrow-muted">USE-CASE PROFILE</p>
         <h1 className="h-display-md mt-3">
-          Pick a worked example <span className="accent-italic">first.</span>
+          Pick an applied track <span className="accent-italic">first.</span>
         </h1>
         <p className="lead mt-4 max-w-[60ch] text-[15px]">
-          The use-case profile depends on which worked example your team is using. Choose one from
-          the onboarding checklist, then come back here.
+          This optional profile depends on which applied track your team wants to personalize.
+          Choose one from the onboarding checklist, then come back here.
         </p>
         <Link
           to="/app/$workspaceSlug"
@@ -87,13 +87,13 @@ function UseCaseProfileOnboarding() {
           {isComplete ? (
             <>Edit your <span className="accent-italic">{workedExample.entityName} profile.</span></>
           ) : (
-            <>Tell us about your <span className="accent-italic">{workedExample.entityName}.</span></>
+            <>Personalize your <span className="accent-italic">{workedExample.entityName} track.</span></>
           )}
         </h1>
         <p className="lead mt-4 max-w-[60ch] text-[15px]">
           {isComplete
-            ? "Update the details below. Assignments and prompts will use the new values."
-            : "A few specifics about how your team runs this workflow. Every example, prompt, and system message in the training will be generated from these values — no fictional setup. Edit any time from settings."}
+            ? "Update the details below. Applied track previews and generated examples can use the new values."
+            : "A few specifics about how your team runs this workflow. The core course stays generic; this context only personalizes the applied track. Edit any time from settings."}
         </p>
       </div>
 

@@ -83,8 +83,10 @@ export function OnboardingChecklist() {
     }
   };
 
-  const pct = Math.round((data.completedCount / data.totalCount) * 100);
+  const pct = data.totalCount > 0 ? Math.round((data.completedCount / data.totalCount) * 100) : 100;
   const greetingName = data.firstName ?? "there";
+  const nextRequiredItem = data.items.find((i) => !i.optional && !i.complete);
+  const nextOptionalItem = data.items.find((i) => i.optional && !i.complete);
 
   return (
     <>
@@ -118,8 +120,10 @@ export function OnboardingChecklist() {
               </p>
               <p className="mt-1 text-[12px] text-graphite">
                 {data.completedCount === data.totalCount
-                  ? "You're all set — happy building!"
-                  : `Next: ${data.items.find((i) => !i.complete)?.title ?? "Keep going"}`}
+                  ? nextOptionalItem
+                    ? `You're set for the core course. Optional: ${nextOptionalItem.title}`
+                    : "You're all set — happy building!"
+                  : `Next: ${nextRequiredItem?.title ?? "Keep going"}`}
               </p>
             </div>
             <p className="text-[28px] font-semibold leading-none text-terracotta tabular-nums">
@@ -148,7 +152,14 @@ export function OnboardingChecklist() {
                 {item.complete && <Check className="h-3 w-3" strokeWidth={3} />}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[15px] font-medium text-navy">{item.title}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[15px] font-medium text-navy">{item.title}</p>
+                  {item.optional && !item.complete && (
+                    <span className="rounded-full bg-mist px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.16em] text-slate">
+                      Optional
+                    </span>
+                  )}
+                </div>
                 <p className="text-[13px] text-graphite">{item.description}</p>
               </div>
               <div className="shrink-0">
@@ -182,18 +193,19 @@ export function OnboardingChecklist() {
           ))}
         </ul>
         <p className="px-1 pt-3 text-[12px] italic text-slate">
-          More worked examples coming soon. Your team can build a custom case in your engagement.
+          More applied tracks coming soon. Your team can build a custom case in your engagement.
         </p>
       </section>
 
-      {/* Worked Example modal */}
+      {/* Applied track modal */}
       <Dialog open={exampleOpen} onOpenChange={setExampleOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Pick your worked example</DialogTitle>
+            <DialogTitle>Pick your applied track</DialogTitle>
             <DialogDescription>
-              The platform runs on a single worked example carried through every module. Pick the
-              one most relevant to your team. You can change it later in workspace settings.
+              The core course stays generic. Applied tracks show the same method in a concrete
+              workflow, starting with Invoice OCR for Accounts Payable. You can change this later
+              in workspace settings.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2 max-h-[50vh] overflow-y-auto py-2">
@@ -250,7 +262,7 @@ export function OnboardingChecklist() {
               onClick={() => {
                 updateWorkedExample.mutate(selectedExample, {
                   onSuccess: () => {
-                    toast.success("Worked example saved");
+                    toast.success("Applied track saved");
                     setExampleOpen(false);
                   },
                   onError: (e) => toast.error((e as Error).message),

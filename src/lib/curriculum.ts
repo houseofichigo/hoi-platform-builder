@@ -132,7 +132,7 @@ export const MODULES: ModuleMeta[] = [
       { term: 'Contextual data', definition: 'External rules and regulations the assistant must respect — laws, mandates, industry-specific requirements.' },
       { term: 'Task-specific data', definition: 'The examples used to test the system — clean cases, edge cases, difficult formats.' },
     ],
-    assignment: 'Inventory the internal records, the regulatory and process rules, and a deliberate set of edge-case examples for the worked example.',
+    assignment: 'Build a three-layer data map for a generic candidate process. Document ownership, access, quality, sensitivity, and known gaps.',
     outcome: 'A three-layer data map you can hand to any builder — and a list of the gaps that need filling before Build.',
   },
   {
@@ -193,7 +193,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build a grounded assistant on a small reference dataset. Run the five-query test set, document RAG governance, and apply Gate 1 with a named PASS / PARTIAL / FAIL decision and reason codes if not PASS.',
     outcome: 'Assistant blueprint, source checklist, five test outputs, RAG governance notes, and Gate 1 decision.',
-    assignmentAlignment: 'Current app assignment has the assistant/RAG evidence flow but still frames the source pack around the invoice OCR worked example. Add explicit v6 reason-code language during the assignment-content pass.',
+    assignmentAlignment: 'Current app assignment has the assistant/RAG evidence flow but still needs the generic reference-dataset framing and explicit v6 reason-code language during the assignment-content pass.',
   },
   {
     id: 'm05', num: 5, title: 'Prototyping with No-Code',
@@ -212,13 +212,13 @@ export const MODULES: ModuleMeta[] = [
     ],
     keySections: [
       'No-code landscape: Lovable, Bubble, Retool',
-      'Four components of the OCR prototype',
+      'Four components of a review workflow prototype',
       'What the prototype fakes vs. what is real',
       'Sandbox boundaries and the path to Gate 2',
     ],
     concepts: [
       { term: 'Prototype', definition: 'A working interface that demonstrates a workflow, not a production system. It uses mock data, simplified logic, and explicit visual cues.' },
-      { term: 'Four surfaces', definition: 'Upload, review, approve, audit: the minimum interface loop for AI-supported invoice processing.' },
+      { term: 'Four surfaces', definition: 'Intake, review, decision, audit: the minimum interface loop for AI-supported workflow review.' },
       { term: 'Sandbox governance', definition: 'Prototype rules: mock data only, no real PII, no production integrations, no hidden automation, and clear labels when outputs are simulated.' },
       { term: 'Agent requirements', definition: 'The gap between what the prototype fakes and what the real agent must do with tools, memory, approvals, and auditability.' },
     ],
@@ -499,7 +499,7 @@ export const COURSES: AssessCourseMeta[] = [
       m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
     },
     methodology:
-      'A universal AI systems method taught through transferable module assignments. The module demo stays simple; certification proves transfer by applying the full method to a participant-chosen capstone case.',
+      'A universal AI systems method taught through transferable module assignments. Applied use-case tracks stay separate; certification proves transfer by applying the full method to a participant-chosen capstone case.',
     artifacts: [
       'The Foundation — readiness self-assessment, data map, prompt library.',
       'The System — assistant, prototype, agent with pilot metrics.',

@@ -21,6 +21,7 @@ export interface ChecklistItem {
   complete: boolean;
   actionLabel: string;
   actionDisabled?: boolean;
+  optional?: boolean;
 }
 
 export interface ChecklistState {
@@ -133,19 +134,21 @@ export function useOnboardingChecklist() {
         },
         {
           id: "example",
-          title: "Choose your worked example",
+          title: "Choose an applied track",
           description:
-            "The platform runs on a single worked example carried through every module. Pick the one most relevant to your team.",
+            "Optional: preview the capstone-style workflow you want to use after the core course. Invoice OCR is the first active track.",
           complete: exampleComplete,
-          actionLabel: "Pick example",
+          actionLabel: "Pick track",
+          optional: true,
         },
         {
           id: "use_case_profile",
-          title: "Set up your use-case profile",
+          title: "Personalize the applied track",
           description:
-            "A few specifics about how your team runs this worked example. Every prompt and system message is generated from these values.",
+            "Optional: add your team context for the applied track. Core assignments stay generic and do not require this setup.",
           complete: useCaseProfileComplete,
-          actionLabel: "Set up use-case profile",
+          actionLabel: "Add track context",
+          optional: true,
         },
         {
           id: "invite",
@@ -172,6 +175,7 @@ export function useOnboardingChecklist() {
       ];
 
       const firstName = profile?.full_name?.trim().split(/\s+/)[0] ?? null;
+      const requiredItems = items.filter((i) => !i.optional);
 
       return {
         shouldRender,
@@ -182,8 +186,8 @@ export function useOnboardingChecklist() {
         firstName,
         workedExample: ws?.worked_example ?? null,
         items,
-        completedCount: items.filter((i) => i.complete).length,
-        totalCount: items.length,
+        completedCount: requiredItems.filter((i) => i.complete).length,
+        totalCount: requiredItems.length,
       };
     },
   });

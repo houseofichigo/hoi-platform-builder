@@ -649,31 +649,11 @@ export function M02Work() {
             </div>
 
             <UseCaseLayerPreview useCase={selectedUseCase} />
-
-            <QuizSection
-              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
-              title="Five quick checks"
-              quiz={M02_STEP_QUIZZES.step1}
-              state={knowledgeCheck.step1}
-              status={step1QuizStatus}
-              namePrefix="m02-step1"
-              onAnswer={(questionId, option, multi) => setQuizAnswer("step1", questionId, option, multi)}
-              onCheck={() => checkQuiz("step1")}
-              onRetry={() => retryQuiz("step1")}
-            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && step1QuizStatus.quizPassed}
-        disabledReason={
-          !selectedUseCase
-            ? "Choose one business use case."
-            : !step1QuizStatus.allAnswered
-              ? "Answer all five checks before continuing."
-              : !step1QuizStatus.quizChecked
-                ? "Click Check answers before continuing."
-                : "You need at least 3 correct answers before continuing."
-        }
+        canContinue={!!selectedUseCase}
+        disabledReason={!selectedUseCase ? "Choose one business use case." : undefined}
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await selectedCaseOut.setValue.mutateAsync(selectedCaseId);

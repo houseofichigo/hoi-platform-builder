@@ -1,32 +1,50 @@
-## Add a "Check answers" step to the Six quick checks
+## Problem
 
-Today the quiz in `M01Work.tsx` only tracks that each question has *an* answer — it never tells the learner if they're right. Add a confirm/grade step so they have to check before continuing.
+You just added a **Check answers** flow to the Six quick checks in Step 1 (token quiz). The Hallucination Hunt quiz in Step 2 (Q1–Q6 of SCEPTICISM_QUIZ in `M01Work.tsx`) still uses the old behavior: learners pick answers, no grading happens, and Continue unlocks as soon as every question has a selection. That's what "still the old one" is referring to.
 
-## Behaviour
+## Plan
 
-1. Add a **Check answers** button below the 6 questions (disabled until all are answered).
-2. On click, mark each question as correct / incorrect and show inline feedback:
-   - Q1–Q5 (single choice): one correct option. After checking, the chosen option turns green if correct, red if wrong, and the correct option is highlighted. A one-line explanation appears.
-   - Q6 (multi, "which tasks in your work…"): subjective — no right/wrong. Show a neutral "Thanks — this is a reflection question" note and count it as automatically valid.
-3. Show a results summary: "X of 5 correct" + a "Try again" button that clears the graded state (keeps or clears answers — see open question).
-4. Gate the **Continue** button: `canContinue` only becomes true once the learner has clicked Check answers AND scored ≥ 4 / 5 on the gradable questions (Q6 always counts as done). Below the threshold the disabledReason becomes "Review the highlighted answers and try again."
+Apply the same Check-answers pattern to the Hallucination Hunt quiz.
 
-## Implementation notes (technical)
+### 1. Add `correct` + `explanation` to SCEPTICISM_QUIZ
 
-- File: `src/components/assess/modules/M01Work.tsx` only. No content-file changes besides adding a `correct` field.
-- Extend `TOKEN_QUIZ` entries with a `correct` field: a string for single-choice, omitted for the multi Q6. Add a short `explanation` string per gradable question.
-- Add to the persisted `tokenAwareness` state: `quizChecked: boolean` (so refresh keeps the graded view). Bump nothing else.
-- Replace `quizComplete` in the `stepComplete` calc with `quizPassed` derived from `quizChecked && correctCount >= 4`.
-- Render logic in the quiz block:
-  - Before check: current radio/checkbox UI.
-  - After check: lock inputs (`disabled`), color the option rows (`border-emerald-500/60 bg-emerald-500/5` for correct, `border-danger/40 bg-danger/5` for wrong-picked), show ✓ / ✗ icon + `explanation` line under each gradable question.
-- "Try again" resets `quizChecked` to false (and optionally clears `quizAnswers`).
+Q1–Q6 are all single-choice and all have an objectively right answer. Proposed keys + one-line explanations:
 
-## Out of scope
+- **Q1** → "Plausible, confident information that is incorrect or fabricated" — Hallucinations are confident, plausible-sounding fabrications, not random noise or refusals.
+- **Q2** → "The specific figures may be fabricated until verified" — Precise numbers without sources are the classic hallucination signature; treat as unverified.
+- **Q3** → "The model may be inventing rather than retrieving a stable fact" — Drift across fresh chats signals generation, not retrieval of a stable fact.
+- **Q4** → "I do not have specific information; share a source and I can help" — An honest abstain with a request for a source carries the lowest fabrication risk.
+- **Q5** → "Run the Hallucination Audit prompt on the draft" — A structured audit catches fabricated claims; asking the model to self-check or trusting tone does not.
+- **Q6** → "They are trained and evaluated in ways that reward attempting answers over abstaining" — Training/eval incentives push models toward attempting answers rather than abstaining.
 
-- No changes to other modules' quizzes.
-- No new design tokens — reuse existing `terracotta`, `danger`, and add inline emerald utility classes (already used elsewhere in the app).
+### 2. Track `quizChecked` on `ScepticismLog`
 
-## Open question
+Add `quizChecked?: boolean` to the `ScepticismLog` interface and to the initial state. When the learner edits any quiz answer via `setScepticismQuizAnswer`, set `quizChecked: false` so they re-confirm.
 
-When the learner clicks **Try again**, should their previous answers stay selected (so they only fix the wrong ones) or be cleared entirely? Default in this plan: **keep answers**, just remove the graded styling.
+### 3. Add Check answers / Try again buttons
+
+Below the 6 questions, render:
+- **Check answers** button — disabled until every Q1–Q6 has an answer. On click, set `quizChecked: true`.
+- After checking, render a results line: "X of 6 correct" plus a **Try again** button that sets `quizChecked: false` (answers preserved, styling clears).
+
+### 4. Graded styling per question
+
+When `quizChecked` is true, for each question:
+- Selected option turns green if correct, red if wrong.
+- Correct option is highlighted (green border / check icon) so the learner sees the right answer.
+- One-line "Why:" explanation appears below.
+- Inputs disabled until Try again is clicked.
+
+### 5. Gate Continue on score
+
+Replace the existing `quizComplete` check in `stepComplete` with `quizPassed = quizChecked && correctCount >= 5` (5 of 6 — same spirit as the 4/5 threshold on the token quiz, scaled to 6 gradable questions). Update `disabledReason` to walk through: "Answer all six, then confirm…" → "Click Check answers" → "Review highlighted answers and try again" → existing reasons for exercises / risk tasks / acknowledgement.
+
+### Out of scope
+
+- Q7 (risk-task multi-select) — stays as a reflection question, no grading, still required to have ≥1 selection.
+- The Part A exercise checkboxes, examples, prompt techniques — unchanged.
+- Other modules' quizzes.
+
+### Technical notes
+
+All edits are inside `src/components/assess/modules/M01Work.tsx`. No schema changes — `quizChecked` lives inside the existing `m01.scepticism_log` JSON output. No new design tokens.

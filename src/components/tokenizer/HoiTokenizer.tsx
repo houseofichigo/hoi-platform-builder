@@ -345,7 +345,7 @@ function TokenVisualization({ encoded }: { encoded: EncodedText }) {
       </div>
 
       <div
-        className="min-h-[120px] rounded-md border border-chalk bg-paper p-4 font-mono text-[14px] leading-[2.1] text-navy"
+        className="min-h-[120px] overflow-hidden break-words [overflow-wrap:anywhere] rounded-md border border-chalk bg-paper p-4 font-mono text-[14px] leading-[2.1] text-navy"
         aria-label="Tokenized text. Each coloured segment is one token. Focus a token to hear its token ID."
       >
         {encoded.tokens.length === 0 ? (
@@ -374,8 +374,8 @@ function TokenChip({ token, color }: { token: EncodedToken; color: string }) {
       tabIndex={0}
       title={`Token ID ${token.id}`}
       aria-label={`Token ID ${token.id}: ${describeToken(token.text)}`}
-      className="mx-[1px] rounded-sm px-1 py-0.5 outline-none ring-terracotta focus:ring-2"
-      style={{ backgroundColor: color, whiteSpace: "pre-wrap" }}
+      className="mx-[1px] rounded-sm px-1 py-0.5 outline-none ring-terracotta focus:ring-2 [overflow-wrap:anywhere]"
+      style={{ backgroundColor: color, whiteSpace: "pre-wrap", wordBreak: "break-word" }}
     >
       {visibleTokenText(token.text)}
     </span>
@@ -494,7 +494,6 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
 function visibleTokenText(text: string) {
   if (!text) return "∅";
   return text
-    .replace(/ /g, "\u00A0")
     .replace(/\t/g, "⇥")
     .replace(/\n/g, "↵\n");
 }

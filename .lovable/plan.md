@@ -1,16 +1,32 @@
-## Plan: Clear stale bundle for `/app/.../assess/m02/work`
+## Add a "Check answers" step to the Six quick checks
 
-### Diagnosis
-- `AssessRetakeProvider` is correctly exported from `src/hooks/useAssess.tsx` (line 55).
-- `src/routes/app.$workspaceSlug.assess.$moduleId.work.tsx` imports and uses it correctly.
-- TypeScript passes clean — the error in the browser is from a stale cached module, not real source code.
+Today the quiz in `M01Work.tsx` only tracks that each question has *an* answer — it never tells the learner if they're right. Add a confirm/grade step so they have to check before continuing.
 
-### Steps
-1. Restart the Vite dev server (`code--restart_dev_server`) to flush HMR state.
-2. Ask you to **hard-refresh** the preview tab (Cmd/Ctrl+Shift+R) to drop the cached bundle.
-3. Re-navigate to `/app/house-of-ichigo/assess/m02/work` and confirm the page loads.
+## Behaviour
 
-### If the error returns after hard refresh
-Investigate deeper — likely candidates: a circular import between `useAssess.tsx` and one of the `MxxWork` components, or a runtime throw inside `M02Work` masked as a missing-export error by Vite.
+1. Add a **Check answers** button below the 6 questions (disabled until all are answered).
+2. On click, mark each question as correct / incorrect and show inline feedback:
+   - Q1–Q5 (single choice): one correct option. After checking, the chosen option turns green if correct, red if wrong, and the correct option is highlighted. A one-line explanation appears.
+   - Q6 (multi, "which tasks in your work…"): subjective — no right/wrong. Show a neutral "Thanks — this is a reflection question" note and count it as automatically valid.
+3. Show a results summary: "X of 5 correct" + a "Try again" button that clears the graded state (keeps or clears answers — see open question).
+4. Gate the **Continue** button: `canContinue` only becomes true once the learner has clicked Check answers AND scored ≥ 4 / 5 on the gradable questions (Q6 always counts as done). Below the threshold the disabledReason becomes "Review the highlighted answers and try again."
 
-No code changes in this plan.
+## Implementation notes (technical)
+
+- File: `src/components/assess/modules/M01Work.tsx` only. No content-file changes besides adding a `correct` field.
+- Extend `TOKEN_QUIZ` entries with a `correct` field: a string for single-choice, omitted for the multi Q6. Add a short `explanation` string per gradable question.
+- Add to the persisted `tokenAwareness` state: `quizChecked: boolean` (so refresh keeps the graded view). Bump nothing else.
+- Replace `quizComplete` in the `stepComplete` calc with `quizPassed` derived from `quizChecked && correctCount >= 4`.
+- Render logic in the quiz block:
+  - Before check: current radio/checkbox UI.
+  - After check: lock inputs (`disabled`), color the option rows (`border-emerald-500/60 bg-emerald-500/5` for correct, `border-danger/40 bg-danger/5` for wrong-picked), show ✓ / ✗ icon + `explanation` line under each gradable question.
+- "Try again" resets `quizChecked` to false (and optionally clears `quizAnswers`).
+
+## Out of scope
+
+- No changes to other modules' quizzes.
+- No new design tokens — reuse existing `terracotta`, `danger`, and add inline emerald utility classes (already used elsewhere in the app).
+
+## Open question
+
+When the learner clicks **Try again**, should their previous answers stay selected (so they only fix the wrong ones) or be cleared entirely? Default in this plan: **keep answers**, just remove the graded styling.

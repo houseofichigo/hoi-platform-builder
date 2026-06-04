@@ -394,18 +394,16 @@ export function M01Work() {
     });
   };
 
-  const setScepticismQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+  const setScepticismQuizAnswer = (questionId: string, value: string) => {
     const current = scepticismLog.quizAnswers;
-    const currentValue = current[questionId];
-    const nextValue = multi
-      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
-      : value;
     updateScepticismLog({
       ...scepticismLog,
       quizAnswers: {
         ...current,
-        [questionId]: nextValue,
+        [questionId]: value,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 

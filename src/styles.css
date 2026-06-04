@@ -91,6 +91,14 @@
   --warning: #F59E0B;
   --danger: #DC2626;
 
+  /* Token visualisation palette */
+  --token-c1: #DBEAFE;
+  --token-c2: #FED7AA;
+  --token-c3: #D1FAE5;
+  --token-c4: #FDE68A;
+  --token-c5: #E9D5FF;
+  --token-c6: #FBCFE8;
+
   /* Fonts */
   --font-display: "Fraunces", Georgia, serif;
   --font-sans: "Inter Tight", system-ui, sans-serif;

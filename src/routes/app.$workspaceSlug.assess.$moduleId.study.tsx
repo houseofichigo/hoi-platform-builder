@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
-import { TokenizerLab } from "@/components/assess/TokenizerLab";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/study")({
@@ -96,20 +95,6 @@ function ModuleStudy() {
               ))}
             </ul>
           </ReaderSection>
-
-          {m.id === "m01" && (
-            <section className="rounded-md border border-chalk bg-white p-5">
-              <div className="mb-4 max-w-[68ch]">
-                <p className="eyebrow-muted">TRY IT · TOKENIZER LAB</p>
-                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">Tokens, length, and cost</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-                  LLMs charge by tokens, not words. Paste text or pick a preset to see how volume
-                  drives estimated cost and why context size matters.
-                </p>
-              </div>
-              <TokenizerLab />
-            </section>
-          )}
 
           <ReaderSection icon={FileText} title="Assignment preview">
             <p>{m.assignment}</p>

@@ -4,7 +4,7 @@ export const M01_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "LLM Fundamentals. A language model is not a database or a reasoning engine by default. It predicts likely text, follows patterns, and can sound confident when it is wrong. Today's job: feel that behavior directly, then decide where confidence without evidence would be dangerous.",
+    "LLM Fundamentals. Before we talk about how language models fail or how to control them, we need to understand how they see. A model does not read words like you do. It processes tokens: fragments of text, one at a time.",
 
   seeds: {
     "m01.reflection": [
@@ -14,6 +14,54 @@ export const M01_COURSE_CONTENT = {
   },
 
   step1: {
+    title: "How the Model Sees",
+    why:
+      "Tokens are the unit of cost, memory, and generation. Once you can see token boundaries, model behavior starts to make practical sense: weird counting failures, decimal mistakes, multilingual cost, and context-window limits.",
+    example:
+      "The model does not predict the next word. It predicts the next token. A token can be a whole word, part of a word, punctuation, whitespace, a number fragment, or a chunk of code.",
+    whatToNotice: [
+      "Common short words often become one token; rare names and typos split into pieces",
+      "Numbers, dates, phone numbers, and decimals are processed as fragments, not exact values",
+      "The same meaning can cost more tokens in French or Arabic than in English",
+      "Character-level precision needs extra help: tools, explicit reasoning, or validation code",
+    ],
+    produces: "The Foundation, section 0 (tokenisation notes)",
+    nextLabel: "Step 2 - Hallucination hunt",
+    exercises: [
+      {
+        id: "words",
+        title: "A1 - Your name, your company, your words",
+        instruction:
+          "Try your first name, last name, company name, job title, hello, anthropomorphism, and your name with a typo.",
+      },
+      {
+        id: "numbers",
+        title: "A2 - Numbers, dates, and precision",
+        instruction:
+          "Try long numbers, phone numbers, dates, currency, 3.9 vs 3.11, and s-t-r-a-w-b-e-r-r-y.",
+      },
+      {
+        id: "language_tax",
+        title: "A3 - The language tax",
+        instruction:
+          "Open the Language Tax tab and compare English, French, and Arabic token counts.",
+      },
+      {
+        id: "examples",
+        title: "Examples in the wild",
+        instruction:
+          "Review the strawberry problem, decimal comparison, and why familiar brand names can sound more fluent.",
+      },
+      {
+        id: "work_implications",
+        title: "What it means for your work",
+        instruction:
+          "Connect tokens to money, memory, fragile exact tasks, and multilingual planning.",
+      },
+    ],
+  },
+
+  step2: {
     title: "Hallucination Hunt",
     why:
       "Ask the same support-policy question twice: once without evidence, once with the relevant policy text or search allowed. Notice what changes when the model has grounding.",
@@ -25,7 +73,7 @@ export const M01_COURSE_CONTENT = {
       "A useful answer should say what it knows, what source it used, and what remains uncertain",
     ],
     produces: "The Foundation, section 1 (scepticism log)",
-    nextLabel: "Step 2 - Parameter playground",
+    nextLabel: "Step 3 - Parameter playground",
     prompts: {
       withoutSearch:
         "Do not use web search or any external sources.\n\nA customer bought a subscription, used it for 19 days, and now asks for a full refund. Should we approve it? Answer as if you are a support agent.",
@@ -34,7 +82,7 @@ export const M01_COURSE_CONTENT = {
     },
   },
 
-  step2: {
+  step3: {
     title: "Parameter Playground",
     why: "Same question, different generation behavior. Three parameters: temperature, top-k, top-p.",
     example:
@@ -45,7 +93,7 @@ export const M01_COURSE_CONTENT = {
       "Operational systems usually need repeatability more than variety",
     ],
     produces: "The Foundation, section 2 (parameter notes)",
-    nextLabel: "Method note -> marks M01 complete",
+    nextLabel: "Complete method note",
     experiments: {
       temperature: {
         label: "Temperature - randomness control",

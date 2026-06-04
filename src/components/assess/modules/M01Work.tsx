@@ -470,26 +470,68 @@ export function M01Work() {
                 {TOKEN_QUIZ.map((question, index) => {
                   const current = quizAnswers[question.id];
                   const multi = question.type === "multi";
+                  const gradable = !multi && "correct" in question;
+                  const correctAnswer = gradable ? (question as { correct: string }).correct : null;
+                  const explanation = gradable
+                    ? (question as { explanation?: string }).explanation
+                    : null;
+                  const isAnswered = multi
+                    ? Array.isArray(current) && current.length > 0
+                    : typeof current === "string" && current.length > 0;
+                  const showGrading = quizChecked && gradable && isAnswered;
+                  const isCorrect = showGrading && current === correctAnswer;
                   return (
-                    <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
-                      <p className="text-[14px] font-semibold text-navy">
-                        Q{index + 1}. {question.question}
-                      </p>
+                    <div
+                      key={question.id}
+                      className={`rounded-md border bg-paper p-4 ${
+                        showGrading
+                          ? isCorrect
+                            ? "border-emerald-500/60 bg-emerald-500/5"
+                            : "border-danger/40 bg-danger/5"
+                          : "border-chalk"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-[14px] font-semibold text-navy">
+                          Q{index + 1}. {question.question}
+                        </p>
+                        {showGrading && (
+                          <span
+                            className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
+                              isCorrect ? "text-emerald-700" : "text-danger"
+                            }`}
+                          >
+                            {isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-3 space-y-2">
                         {question.options.map((option) => {
                           const checked = multi
                             ? Array.isArray(current) && current.includes(option)
                             : current === option;
+                          const isOptionCorrect = gradable && option === correctAnswer;
+                          const isOptionWrongPick = showGrading && checked && !isCorrect;
+                          const rowClass = showGrading
+                            ? isOptionCorrect
+                              ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
+                              : isOptionWrongPick
+                                ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
+                                : "rounded-md border border-transparent px-2 py-1"
+                            : "";
                           return (
                             <label
                               key={option}
-                              className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                              className={`flex items-start gap-2 text-[14px] text-graphite ${
+                                quizChecked ? "cursor-default" : "cursor-pointer"
+                              } ${rowClass}`}
                             >
                               <input
                                 type={multi ? "checkbox" : "radio"}
                                 name={`m01-token-${question.id}`}
                                 checked={checked}
                                 onChange={() => setQuizAnswer(question.id, option, multi)}
+                                disabled={quizChecked}
                                 className="mt-1 h-4 w-4 accent-terracotta"
                               />
                               <span>{option}</span>
@@ -497,9 +539,55 @@ export function M01Work() {
                           );
                         })}
                       </div>
+                      {showGrading && explanation && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                          <span className="font-semibold text-navy">Why: </span>
+                          {explanation}
+                        </p>
+                      )}
+                      {quizChecked && multi && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                          This is a reflection question — there is no single right answer.
+                        </p>
+                      )}
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+                {quizChecked ? (
+                  <>
+                    <p className="text-[14px] text-navy">
+                      You got <span className="font-semibold">{correctCount} of {gradableQuestions.length}</span>{" "}
+                      correct.{" "}
+                      {quizPassed
+                        ? "Nice — you can continue."
+                        : `You need at least ${passThreshold} correct. Adjust your answers and check again.`}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRetryQuiz}
+                      className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
+                    >
+                      Try again
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[13px] text-slate">
+                      Answer all six, then confirm to see which are correct before moving on.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCheckAnswers}
+                      disabled={!allAnswered}
+                      className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-terracotta/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Check answers
+                    </button>
+                  </>
+                )}
               </div>
             </section>
 
@@ -524,7 +612,7 @@ export function M01Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={stepComplete}
-        disabledReason="Complete the exercises, answer the quiz, and confirm the token lesson."
+        disabledReason={disabledReason}
         nextLabel={s.nextLabel}
         onContinue={() => goToStep(2)}
       />

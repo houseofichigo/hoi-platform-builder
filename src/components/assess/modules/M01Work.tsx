@@ -346,6 +346,7 @@ export function M01Work() {
             : {},
         riskSelections: Array.isArray(v.riskSelections) ? v.riskSelections : [],
         acknowledged: !!v.acknowledged,
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedScepticism(true);

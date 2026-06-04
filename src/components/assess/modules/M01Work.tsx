@@ -308,14 +308,43 @@ export function M01Work() {
     const requiredExerciseIds = s.exercises.map((exercise) => exercise.id);
     const checkedExercises = tokenAwareness.exerciseChecks ?? [];
     const quizAnswers = tokenAwareness.quizAnswers ?? {};
-    const quizComplete = TOKEN_QUIZ.every((question) => {
+    const allAnswered = TOKEN_QUIZ.every((question) => {
       const value = quizAnswers[question.id];
       return question.type === "multi"
         ? Array.isArray(value) && value.length > 0
         : typeof value === "string" && value.length > 0;
     });
+    const gradableQuestions = TOKEN_QUIZ.filter(
+      (q): q is typeof q & { correct: string } => q.type === "single" && "correct" in q,
+    );
+    const correctCount = gradableQuestions.reduce(
+      (acc, q) => (quizAnswers[q.id] === q.correct ? acc + 1 : acc),
+      0,
+    );
+    const passThreshold = 4;
+    const quizChecked = !!tokenAwareness.quizChecked;
+    const quizPassed = quizChecked && correctCount >= passThreshold;
     const exercisesComplete = requiredExerciseIds.every((id) => checkedExercises.includes(id));
-    const stepComplete = exercisesComplete && quizComplete && tokenAwareness.acknowledged;
+    const stepComplete = exercisesComplete && quizPassed && tokenAwareness.acknowledged;
+
+    const handleCheckAnswers = () => {
+      updateTokenAwareness({ ...tokenAwareness, quizChecked: true });
+    };
+    const handleRetryQuiz = () => {
+      updateTokenAwareness({ ...tokenAwareness, quizChecked: false });
+    };
+
+    const disabledReason = !exercisesComplete
+      ? "Complete the exercises, answer the quiz, and confirm the token lesson."
+      : !allAnswered
+        ? "Answer all six questions, then check your answers."
+        : !quizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !quizPassed
+            ? "Review the highlighted answers and try again."
+            : !tokenAwareness.acknowledged
+              ? "Confirm the token lesson acknowledgement to continue."
+              : "Complete the exercises, answer the quiz, and confirm the token lesson.";
 
     return (
       <Step

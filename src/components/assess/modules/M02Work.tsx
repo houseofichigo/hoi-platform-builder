@@ -759,30 +759,14 @@ export function M02Work() {
                 before Build.
               </p>
             </div>
-
-            <QuizSection
-              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
-              title="Five quick checks"
-              quiz={M02_STEP_QUIZZES.step2}
-              state={knowledgeCheck.step2}
-              status={step2QuizStatus}
-              namePrefix="m02-step2"
-              onAnswer={(questionId, option, multi) => setQuizAnswer("step2", questionId, option, multi)}
-              onCheck={() => checkQuiz("step2")}
-              onRetry={() => retryQuiz("step2")}
-            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && gapsSel.length > 0 && step2QuizStatus.quizPassed}
+        canContinue={!!selectedUseCase && gapsSel.length > 0}
         disabledReason={
           gapsSel.length === 0
             ? "Name at least one readiness gap before moving to the blueprint."
-            : !step2QuizStatus.allAnswered
-              ? "Answer all five checks before continuing."
-              : !step2QuizStatus.quizChecked
-                ? "Click Check answers before continuing."
-                : "You need at least 3 correct answers before continuing."
+            : undefined
         }
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}

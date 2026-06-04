@@ -88,12 +88,99 @@ const TOKEN_QUIZ = [
   },
 ] as const;
 
+type QuizQuestion = {
+  id: string;
+  type: "single" | "multi";
+  question: string;
+  options: readonly string[];
+};
+
+const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
+  {
+    id: "q1",
+    type: "single",
+    question: "What is the most accurate description of an AI hallucination?",
+    options: [
+      "Random or nonsensical output",
+      "Plausible, confident information that is incorrect or fabricated",
+      "Information from before the model's training cutoff",
+      "An honest refusal to answer",
+    ],
+  },
+  {
+    id: "q2",
+    type: "single",
+    question:
+      "A teammate gets a precise market-size estimate from AI without sources. What is the safest assumption?",
+    options: [
+      "The AI accessed official market data",
+      "The numbers are approximate but directionally correct",
+      "The specific figures may be fabricated until verified",
+      "Specific numbers are usually accurate",
+    ],
+  },
+  {
+    id: "q3",
+    type: "single",
+    question:
+      "You ask the same question three times in fresh chats and details shift. What does this signal?",
+    options: [
+      "The AI is offering creative perspectives",
+      "The model may be inventing rather than retrieving a stable fact",
+      "Your prompt must have changed each time",
+      "The answer is probably becoming more accurate",
+    ],
+  },
+  {
+    id: "q4",
+    type: "single",
+    question: "Which response has the lowest hallucination risk?",
+    options: [
+      "Based on industry patterns, the company likely has around 200 employees",
+      "The latest report found a specific adoption percentage",
+      "I do not have specific information; share a source and I can help",
+      "The company was founded in 2015 by a named person",
+    ],
+  },
+  {
+    id: "q5",
+    type: "single",
+    question:
+      "You receive an AI-generated client proposal draft. What should you do before sending?",
+    options: [
+      "Run the Hallucination Audit prompt on the draft",
+      "Ask the AI if anything is wrong",
+      "Trust it if it sounds professional",
+      "Only check spelling and tone",
+    ],
+  },
+  {
+    id: "q6",
+    type: "single",
+    question:
+      "Why do models often produce confident wrong answers instead of saying they do not know?",
+    options: [
+      "They believe their answers are correct",
+      "They are trained and evaluated in ways that reward attempting answers over abstaining",
+      "Engineers forgot to add an I do not know response",
+      "Humans rarely admit uncertainty",
+    ],
+  },
+] as const;
+
 interface TokenAwareness {
   observations: string[];
   strategies: string[];
   acknowledged: boolean;
   exerciseChecks?: string[];
   quizAnswers?: Record<string, string | string[]>;
+}
+
+interface ScepticismLog {
+  exerciseChecks: string[];
+  quizAnswers: Record<string, string | string[]>;
+  riskSelections: string[];
+  acknowledged: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";
@@ -109,6 +196,7 @@ export function M01Work() {
   const reflection = useAssessOutput<string[]>("m01.reflection");
   const methodNote = useAssessOutput<string[]>("m01.method_note");
   const tokenAwarenessOut = useAssessOutput<TokenAwareness>("m01.token_awareness");
+  const scepticismLogOut = useAssessOutput<ScepticismLog>("m01.scepticism_log");
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [reflectionSel, setReflectionSel] = useState<string[]>([]);
@@ -120,9 +208,16 @@ export function M01Work() {
     exerciseChecks: [],
     quizAnswers: {},
   });
+  const [scepticismLog, setScepticismLog] = useState<ScepticismLog>({
+    exerciseChecks: [],
+    quizAnswers: {},
+    riskSelections: [],
+    acknowledged: false,
+  });
   const [hydratedReflection, setHydratedReflection] = useState(false);
   const [hydratedNote, setHydratedNote] = useState(false);
   const [hydratedToken, setHydratedToken] = useState(false);
+  const [hydratedScepticism, setHydratedScepticism] = useState(false);
   const [hydratedStep, setHydratedStep] = useState(false);
 
   // Hydrate current step from progress
@@ -209,6 +304,23 @@ export function M01Work() {
     setHydratedToken(true);
   }, [hydratedToken, tokenAwarenessOut.isLoading, tokenAwarenessOut.value]);
 
+  useEffect(() => {
+    if (hydratedScepticism || scepticismLogOut.isLoading) return;
+    const v = scepticismLogOut.value;
+    if (v && typeof v === "object") {
+      setScepticismLog({
+        exerciseChecks: Array.isArray(v.exerciseChecks) ? v.exerciseChecks : [],
+        quizAnswers:
+          v.quizAnswers && typeof v.quizAnswers === "object" && !Array.isArray(v.quizAnswers)
+            ? v.quizAnswers
+            : {},
+        riskSelections: Array.isArray(v.riskSelections) ? v.riskSelections : [],
+        acknowledged: !!v.acknowledged,
+      });
+    }
+    setHydratedScepticism(true);
+  }, [hydratedScepticism, scepticismLogOut.isLoading, scepticismLogOut.value]);
+
   const dangerousTaskOptions = useMemo(
     () =>
       getM01DangerousTaskOptions({
@@ -229,6 +341,11 @@ export function M01Work() {
     tokenAwarenessOut.setValue.mutate(next);
   };
 
+  const updateScepticismLog = (next: ScepticismLog) => {
+    setScepticismLog(next);
+    scepticismLogOut.setValue.mutate(next);
+  };
+
   const setQuizAnswer = (questionId: string, value: string, multi: boolean) => {
     const current = tokenAwareness.quizAnswers ?? {};
     const currentValue = current[questionId];
@@ -237,6 +354,21 @@ export function M01Work() {
       : value;
     updateTokenAwareness({
       ...tokenAwareness,
+      quizAnswers: {
+        ...current,
+        [questionId]: nextValue,
+      },
+    });
+  };
+
+  const setScepticismQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+    const current = scepticismLog.quizAnswers;
+    const currentValue = current[questionId];
+    const nextValue = multi
+      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
+      : value;
+    updateScepticismLog({
+      ...scepticismLog,
       quizAnswers: {
         ...current,
         [questionId]: nextValue,
@@ -254,6 +386,7 @@ export function M01Work() {
     await reflection.setValue.mutateAsync(reflectionSel);
     await methodNote.setValue.mutateAsync(noteSel);
     await tokenAwarenessOut.setValue.mutateAsync(tokenAwareness);
+    await scepticismLogOut.setValue.mutateAsync(scepticismLog);
     // Upsert progress as complete with current_step cleared
     const { error } = await supabase.from("assess_progress").upsert(
       {
@@ -485,6 +618,23 @@ export function M01Work() {
   // ============ STEP 2 ============
   if (step === 2) {
     const s = M01_COURSE_CONTENT.step2;
+    const checkedExercises = scepticismLog.exerciseChecks;
+    const quizAnswers = scepticismLog.quizAnswers;
+    const exercisesComplete = s.exercises.every((exercise) =>
+      checkedExercises.includes(exercise.id),
+    );
+    const quizComplete = SCEPTICISM_QUIZ.every((question) => {
+      const value = quizAnswers[question.id];
+      return question.type === "multi"
+        ? Array.isArray(value) && value.length > 0
+        : typeof value === "string" && value.length > 0;
+    });
+    const stepComplete =
+      exercisesComplete &&
+      quizComplete &&
+      scepticismLog.riskSelections.length > 0 &&
+      scepticismLog.acknowledged;
+
     return (
       <Step
         chapterLabel={CHAPTER_LABEL}
@@ -498,17 +648,264 @@ export function M01Work() {
           </ul>
         }
         yourVersion={
-          <div className="space-y-6">
-            <PromptBlock label="Prompt 1 — Without web search" text={s.prompts.withoutSearch} />
-            <PromptBlock label="Prompt 2 — With source grounding" text={s.prompts.withSearch} />
-            <p className="rounded-md border border-chalk bg-paper p-4 text-[13px] leading-relaxed text-slate">
-              Run both prompts in your LLM of choice. Compare confidence, source use,
-              uncertainty, and whether the answer becomes easier to audit.
-            </p>
+          <div className="space-y-8">
+            <section className="rounded-md border border-chalk bg-paper p-5">
+              <p className="eyebrow-muted">WHERE THIS IS HEADING</p>
+              <p className="mt-3 text-[15px] leading-relaxed text-graphite">{s.intro}</p>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {s.headingPoints.map((point) => (
+                  <div key={point} className="rounded-md border border-chalk bg-white p-3">
+                    <p className="text-[13px] font-semibold leading-relaxed text-navy">{point}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div>
+                <p className="eyebrow-muted">PART A · FEEL THE PROBLEM</p>
+                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                  Three ways hallucinations show up
+                </h3>
+              </div>
+              <div className="space-y-4">
+                {s.exercises.map((exercise) => {
+                  const checked = checkedExercises.includes(exercise.id);
+                  return (
+                    <div key={exercise.id} className="rounded-md border border-chalk bg-white p-5">
+                      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+                        <div>
+                          <h4 className="text-[17px] font-semibold text-navy">{exercise.title}</h4>
+                          <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+                            {exercise.description}
+                          </p>
+                        </div>
+                        <label className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-chalk bg-paper px-3 py-1.5 text-[12px] font-medium text-navy">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => {
+                              updateScepticismLog({
+                                ...scepticismLog,
+                                exerciseChecks: toggle(checkedExercises, exercise.id),
+                              });
+                            }}
+                            className="h-4 w-4 accent-terracotta"
+                          />
+                          Done
+                        </label>
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        {exercise.prompts.map((prompt) => (
+                          <CopyPromptCard
+                            key={prompt.label}
+                            label={prompt.label}
+                            text={prompt.text}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="mt-4 grid gap-4 md:grid-cols-[1fr_220px]">
+                        <div>
+                          <p className="eyebrow-muted">WHAT TO LOOK FOR</p>
+                          <ul className="mt-2 space-y-2">
+                            {exercise.lookFor.map((item) => (
+                              <li key={item} className="flex gap-2 text-[13px] leading-relaxed text-graphite">
+                                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta" />
+                                <span>{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        {(exercise.sourceUrl || exercise.note) && (
+                          <div className="rounded-md border border-chalk bg-paper p-3">
+                            {exercise.sourceUrl && (
+                              <a
+                                href={exercise.sourceUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[12px] font-semibold text-terracotta hover:underline"
+                              >
+                                {exercise.sourceLabel ?? "Open source"} →
+                              </a>
+                            )}
+                            {exercise.note && (
+                              <p className="mt-2 text-[12px] leading-relaxed text-slate">
+                                {exercise.note}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div>
+                <p className="eyebrow-muted">EXAMPLES IN THE WILD</p>
+                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                  Verified patterns beyond your exercise
+                </h3>
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                {s.examples.map((example) => (
+                  <div key={example.title} className="rounded-md border border-chalk bg-paper p-4">
+                    <h4 className="text-[15px] font-semibold text-navy">{example.title}</h4>
+                    <p className="mt-2 text-[13px] leading-relaxed text-graphite">{example.body}</p>
+                    <p className="mt-3 text-[12px] leading-relaxed text-slate">{example.why}</p>
+                    <a
+                      href={example.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-block text-[12px] font-semibold text-terracotta hover:underline"
+                    >
+                      {example.sourceLabel} →
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div>
+                <p className="eyebrow-muted">PART B · FIX THE PROBLEM</p>
+                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                  Two prompts to use this week
+                </h3>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {s.promptTechniques.map((technique) => (
+                  <div key={technique.title} className="rounded-md border border-chalk bg-white p-5">
+                    <h4 className="text-[16px] font-semibold text-navy">{technique.title}</h4>
+                    <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+                      {technique.useWhen}
+                    </p>
+                    <CopyPromptCard label="Prompt glimpse" text={technique.glimpse} compact />
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-md border border-chalk bg-paper p-4">
+                <p className="eyebrow-muted">MORE IN THE PROMPT LIBRARY</p>
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
+                  {s.libraryPrompts.map((prompt) => (
+                    <div key={prompt.title} className="rounded-md border border-chalk bg-white p-3">
+                      <p className="text-[14px] font-semibold text-navy">{prompt.title}</p>
+                      <p className="mt-1 text-[12px] leading-relaxed text-slate">{prompt.useWhen}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div>
+                <p className="eyebrow-muted">PART C · CHECK YOUR UNDERSTANDING</p>
+                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                  Six checks and one work-risk reflection
+                </h3>
+              </div>
+              <div className="space-y-4">
+                {SCEPTICISM_QUIZ.map((question, index) => {
+                  const current = quizAnswers[question.id];
+                  const multi = question.type === "multi";
+                  return (
+                    <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
+                      <p className="text-[14px] font-semibold text-navy">
+                        Q{index + 1}. {question.question}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {question.options.map((option) => {
+                          const checked = multi
+                            ? Array.isArray(current) && current.includes(option)
+                            : current === option;
+                          return (
+                            <label
+                              key={option}
+                              className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                            >
+                              <input
+                                type={multi ? "checkbox" : "radio"}
+                                name={`m01-scepticism-${question.id}`}
+                                checked={checked}
+                                onChange={() => setScepticismQuizAnswer(question.id, option, multi)}
+                                className="mt-1 h-4 w-4 accent-terracotta"
+                              />
+                              <span>{option}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className="rounded-md border border-chalk bg-paper p-4">
+                  <p className="text-[14px] font-semibold text-navy">
+                    Q7. Which tasks in your work have the highest risk if AI hallucinates?
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {s.riskTasks.map((task) => (
+                      <label
+                        key={task}
+                        className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={scepticismLog.riskSelections.includes(task)}
+                          onChange={() => {
+                            updateScepticismLog({
+                              ...scepticismLog,
+                              riskSelections: toggle(scepticismLog.riskSelections, task),
+                            });
+                          }}
+                          className="mt-1 h-4 w-4 accent-terracotta"
+                        />
+                        <span>{task}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[12px] italic text-slate">
+                    Pick at least one. Accuracy risk is highest when verification is slow and consequences are real.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-md border border-chalk bg-paper p-4">
+                <p className="eyebrow-muted">WHY THIS MATTERS</p>
+                <p className="mt-3 text-[14px] leading-relaxed text-graphite">
+                  Step 1 showed the mechanism: likely tokens. Step 2 adds the operating habit:
+                  verified sources, consistency checks, and audit prompts before AI output reaches work.
+                </p>
+              </div>
+              <label className="flex cursor-pointer items-start gap-3 rounded-md border border-terracotta/25 bg-terracotta/5 p-4 text-[14px] text-navy">
+                <input
+                  type="checkbox"
+                  checked={scepticismLog.acknowledged}
+                  onChange={(event) => {
+                    updateScepticismLog({
+                      ...scepticismLog,
+                      acknowledged: event.target.checked,
+                    });
+                  }}
+                  className="mt-1 h-4 w-4 accent-terracotta"
+                />
+                <span>
+                  I understand that I am the verification layer: confidence is not evidence,
+                  grounding helps, and high-stakes outputs need audit habits.
+                </span>
+              </label>
+            </section>
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue
+        canContinue={stepComplete}
+        disabledReason="Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}
@@ -634,6 +1031,45 @@ export function M01Work() {
       onBack={() => goToStep(2)}
       onContinue={completeM01}
     />
+  );
+}
+
+function CopyPromptCard({
+  label,
+  text,
+  compact,
+}: {
+  label: string;
+  text: string;
+  compact?: boolean;
+}) {
+  const copy = () => {
+    if (!navigator.clipboard) {
+      toast.error("Copy is not available in this browser.");
+      return;
+    }
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast.success("Prompt copied."))
+      .catch(() => toast.error("Could not copy the prompt."));
+  };
+
+  return (
+    <div className={`rounded-md border border-chalk bg-paper ${compact ? "mt-4 p-3" : "p-4"}`}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{label}</p>
+        <button
+          type="button"
+          onClick={copy}
+          className="rounded-full border border-chalk bg-white px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-slate hover:border-terracotta hover:text-terracotta"
+        >
+          Copy
+        </button>
+      </div>
+      <pre className="mt-3 whitespace-pre-wrap rounded-md bg-white p-3 font-mono text-[12px] leading-relaxed text-navy">
+        {text}
+      </pre>
+    </div>
   );
 }
 

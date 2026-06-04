@@ -64,22 +64,160 @@ export const M01_COURSE_CONTENT = {
   step2: {
     title: "Hallucination Hunt",
     why:
-      "Ask the same support-policy question twice: once without evidence, once with the relevant policy text or search allowed. Notice what changes when the model has grounding.",
+      "You saw in Step 1 that the model generates likely token continuations. Now you will see the consequence: when it lacks evidence, it may keep producing plausible-looking output instead of stopping.",
     example:
-      "A customer asks whether a refund is allowed after a product was opened. Without a policy source, the model may invent a confident answer. With approved guidance, the answer becomes more bounded and easier to audit.",
+      "The risky hallucination in business work is rarely nonsense. It is a confident estimate, policy answer, citation, or synthesis that sounds professional enough to paste into a deck.",
     whatToNotice: [
       "Confidence is independent of correctness",
-      "Grounding reduces invention but does not remove the need to check the source",
-      "A useful answer should say what it knows, what source it used, and what remains uncertain",
+      "Hallucinations are often unstable across fresh conversations",
+      "Grounding moves an answer from invention toward reference, but the source still needs checking",
+      "The technology is improving, so the failure mode is moving from obvious to subtle",
     ],
     produces: "The Foundation, section 1 (scepticism log)",
     nextLabel: "Step 3 - Parameter playground",
-    prompts: {
-      withoutSearch:
-        "Do not use web search or any external sources.\n\nA customer bought a subscription, used it for 19 days, and now asks for a full refund. Should we approve it? Answer as if you are a support agent.",
-      withSearch:
-        "Use the provided policy text or web search if available.\n\nA customer bought a subscription, used it for 19 days, and now asks for a full refund. Should we approve it? Answer as if you are a support agent. Cite the policy rule you used and name any uncertainty.",
-    },
+    intro:
+      "Models are getting better at refusing obvious traps, especially when they have tools like search or retrieval. The professional risk is shifting toward subtle hallucinations: plausible estimates, mixed facts, overconfident summaries, and well-hedged answers that are wrong in substance.",
+    headingPoints: [
+      "Hallucinations are moving, not disappearing.",
+      "Capability varies across tools, plans, model versions, and enterprise deployments.",
+      "The structural cause remains: the model is trained to produce likely answers, not to be a perfect truth checkpoint.",
+    ],
+    exercises: [
+      {
+        id: "confident_analyst",
+        title: "A1 - The confident analyst",
+        description:
+          "Ask for a specific current business fact without web search, then verify it yourself. Notice whether the model invents a plausible quantitative answer.",
+        prompts: [
+          {
+            label: "Prompt - no web search",
+            text:
+              "Without using web search: how many direct commercial flights per week are there between Montpellier and Tunis? Include likely airlines and seasonal variation.",
+          },
+        ],
+        lookFor: [
+          "Did the model provide a specific weekly number?",
+          "Did it hedge the precision while still inventing the substance?",
+          "After a live check, does the public schedule support the answer?",
+        ],
+        sourceLabel: "Verify live schedule",
+        sourceUrl: "https://www.flightsfrom.com/MPL-TUN",
+        note:
+          "Current public schedule checks may show one direct weekly flight, but flight schedules change. The lesson is to verify live instead of trusting a confident estimate.",
+      },
+      {
+        id: "consistency_test",
+        title: "A2 - The consistency test",
+        description:
+          "Ask the same current-fact question in three fresh chats. Real facts should not move between conversations.",
+        prompts: [
+          {
+            label: "Prompt - fresh chat 1/2/3",
+            text:
+              "Without using web search: how many direct commercial flights per week between Montpellier and Tunis, on which airlines? Be specific.",
+          },
+        ],
+        lookFor: [
+          "Do the weekly numbers shift?",
+          "Do the named airlines change?",
+          "Does confidence stay high even when details move?",
+        ],
+      },
+      {
+        id: "grounded_ungrounded",
+        title: "A3 - Grounded vs. ungrounded",
+        description:
+          "Compare a policy answer with and without source material. Grounding should make the answer easier to audit, not magically perfect.",
+        prompts: [
+          {
+            label: "Prompt 1 - no source material",
+            text:
+              "Do not use web search or any external sources.\n\nA customer bought a subscription, used it for 19 days, and now asks for a full refund. Should we approve it? Answer as if you are a support agent.",
+          },
+          {
+            label: "Prompt 2 - with source material",
+            text:
+              "Use only the policy text below to answer. If the policy does not cover this situation, say so.\n\nREFUND POLICY:\n- Full refund: within 14 days of purchase, regardless of usage.\n- Partial refund (50%): between 15 and 30 days, if usage is under 5 hours total.\n- No refund: after 30 days, or if usage exceeds 5 hours before day 30.\n\nQuestion: A customer bought a subscription, used it for 19 days, and now asks for a full refund. Should we approve it? Cite the specific policy rule you applied and name anything that is still uncertain.",
+          },
+        ],
+        lookFor: [
+          "Without a source, what policy did the model assume?",
+          "With a source, did it cite the partial-refund rule?",
+          "Did it identify the missing usage-hours information?",
+        ],
+      },
+    ],
+    examples: [
+      {
+        title: "The fabricated dissertation",
+        sourceLabel: "OpenAI - Why language models hallucinate",
+        sourceUrl: "https://openai.com/index/why-language-models-hallucinate/",
+        body:
+          "OpenAI describes a chatbot giving three different dissertation titles and three different birthdays for a real person. None were correct.",
+        why:
+          "The instability is the signal. If you only ask once, you can walk away with one confident falsehood.",
+      },
+      {
+        title: "The customer support agent that misread policy",
+        sourceLabel: "OpenAI Cookbook - hallucination guardrails",
+        sourceUrl: "https://cookbook.openai.com/examples/developing_hallucination_guardrails",
+        body:
+          "The Cookbook uses refund-policy examples to show why support agents need hallucination checks and source-grounded evaluation.",
+        why:
+          "Grounding helps, but support answers still need auditing against the actual policy.",
+      },
+      {
+        title: "Mata v. Avianca",
+        sourceLabel: "Mata v. Avianca reference",
+        sourceUrl: "https://www.section1983.org/cases/mata-v-avianca-inc/",
+        body:
+          "In 2023, lawyers were sanctioned after submitting AI-generated legal citations that referred to nonexistent cases.",
+        why:
+          "This is the cautionary case for professional verification: plausible citations are not evidence.",
+      },
+    ],
+    promptTechniques: [
+      {
+        title: "Hallucination Audit",
+        useWhen:
+          "Use after high-stakes generation: client proposals, policy answers, financial summaries, or research claims.",
+        glimpse:
+          "Act as a hallucination auditor. Extract every factual claim, mark each LOW / MEDIUM / HIGH risk, flag numbers/dates/names/citations, and rewrite using only supported claims.",
+      },
+      {
+        title: "Hallucination Prevention",
+        useWhen:
+          "Use before generating reports, recommendations, summaries, or client-facing content where accuracy matters.",
+        glimpse:
+          "Do not guess. Separate verified facts from assumptions. Do not invent citations, names, dates, statistics, or examples. End with What should be verified.",
+      },
+    ],
+    libraryPrompts: [
+      {
+        title: "Citation Audit",
+        useWhen: "Every claim needs a source and every citation must support the attached claim.",
+      },
+      {
+        title: "Source-Only Lock",
+        useWhen: "The model must answer from a specific document and avoid outside knowledge.",
+      },
+      {
+        title: "Quote-First Grounding",
+        useWhen: "You have a long document and want exact quotes before the model answers.",
+      },
+      {
+        title: "Claim Extraction Table",
+        useWhen: "You need to review AI-generated work into supported, unsupported, contradicted, and verify buckets.",
+      },
+    ],
+    riskTasks: [
+      "Summarising a legal contract, policy document, or regulated procedure",
+      "Producing market sizing, competitive analysis, or quantitative forecasts",
+      "Quoting statistics, percentages, citations, or research findings in client documents",
+      "Generating step-by-step procedures or compliance checklists",
+      "Answering customers or employees on behalf of the company without approved sources",
+      "Triggering workflow actions where reversal is hard or sensitive",
+    ],
   },
 
   step3: {

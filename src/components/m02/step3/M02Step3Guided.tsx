@@ -36,9 +36,6 @@ interface GateReadinessShape {
 
 interface M02Step3GuidedProps {
   selectedUseCase: M02UseCase;
-  internalSources: string[];
-  contextualRules: string[];
-  taskSources: string[];
   namedGaps: string[];
   step3State: M02Step3State | undefined;
   generatedBlueprint: M02GeneratedBlueprint | null | undefined;
@@ -124,9 +121,6 @@ const PANEL_DEFINITIONS = [
 
 export function M02Step3Guided({
   selectedUseCase,
-  internalSources,
-  contextualRules,
-  taskSources,
   namedGaps,
   step3State,
   generatedBlueprint,
@@ -150,14 +144,13 @@ export function M02Step3Guided({
       <div className="space-y-6">
         <Step3Header selectedUseCase={selectedUseCase} onChangeUseCase={onChangeUseCase} />
         <section className="rounded-lg border border-chalk bg-white p-6">
-          <p className="eyebrow">REFERENCE BLUEPRINT COMING SOON</p>
+          <p className="eyebrow">REFERENCE BLUEPRINT UNAVAILABLE</p>
           <h4 className="mt-2 font-display text-2xl text-navy">
-            {selectedUseCase.title} is mapped, but the generated Step 3 blueprint is not written yet.
+            {selectedUseCase.title} is mapped, but the generated Step 3 blueprint could not load.
           </h4>
           <p className="mt-3 text-[14px] leading-relaxed text-graphite">
-            For v1, the full guided blueprint is available for Supplier Onboarding. Customer
-            Support, HR, Sales Quote, and RFP Response will use the same structure once their
-            reference content is authored.
+            Choose another use case and return to this step. If this keeps happening, the blueprint
+            registry needs to be checked.
           </p>
           <button
             type="button"
@@ -215,9 +208,9 @@ export function M02Step3Guided({
       state,
       namedGaps,
       selectedSources: {
-        internal: internalSources,
-        contextual: contextualRules,
-        taskSpecific: taskSources,
+        internal: [],
+        contextual: [],
+        taskSpecific: [],
       },
     });
     onGeneratedBlueprintChange(generated);

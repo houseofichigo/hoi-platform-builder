@@ -5,22 +5,20 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
-import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
-import { SeededBadge } from "@/components/assess/SeededBadge";
 import { M02Step3Guided } from "@/components/m02/step3/M02Step3Guided";
 import {
   M02_DEFAULT_USE_CASE_ID,
   M02_COURSE_CONTENT,
   M02_USE_CASES,
   getM02UseCase,
-  getM02InternalSourceOptions,
-  getM02ContextualRuleOptions,
 } from "@/lib/assess/content/course1";
 import type { M02UseCase, M02UseCaseSource } from "@/lib/assess/content/course1";
+import { getM02Blueprint } from "@/data/m02/blueprints";
 import {
   createDefaultM02Step3State,
+  type M02BlueprintData,
   type M02GeneratedBlueprint,
   type M02Step3State,
 } from "@/data/m02/blueprintSchema";
@@ -58,7 +56,6 @@ export function M02Work() {
   const qc = useQueryClient();
 
   const progress = useAssessProgress("m02");
-  const workspaceProfile = useWorkspaceProfile();
 
   const internalSourcesOut = useAssessOutput<string[]>("m02.internal_sources");
   const contextualRulesOut = useAssessOutput<string[]>("m02.contextual_rules");
@@ -81,9 +78,7 @@ export function M02Work() {
   const [retrievalTestSel, setRetrievalTestSel] = useState<string[]>([]);
   const [gateReadiness, setGateReadiness] =
     useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
-  const [customInternalSource, setCustomInternalSource] = useState("");
-  const [customContextualRule, setCustomContextualRule] = useState("");
-  const [customTaskSource, setCustomTaskSource] = useState("");
+  const [customGap, setCustomGap] = useState("");
 
   const [hydrated, setHydrated] = useState({
     step: false,
@@ -97,28 +92,11 @@ export function M02Work() {
     gateReadiness: false,
   });
 
-  const profileContext = useMemo(
-    () => ({
-      companyName: workspace?.name,
-      country: workspaceProfile.data?.country as string | undefined,
-    }),
-    [workspace?.name, workspaceProfile.data],
-  );
-
-  const internalSourceOptions = useMemo(
-    () => getM02InternalSourceOptions(profileContext, selectedCaseId),
-    [profileContext, selectedCaseId],
-  );
-  const contextualRuleOptions = useMemo(
-    () => getM02ContextualRuleOptions(profileContext, selectedCaseId),
-    [profileContext, selectedCaseId],
-  );
   const selectedUseCase = useMemo(
     () => getM02UseCase(selectedCaseId),
     [selectedCaseId],
   );
-  const taskSourceOptions = selectedUseCase.taskSpecificSources.map((source) => source.title);
-  const taskSourceSel = testSet.sources ?? [];
+  const selectedBlueprint = getM02Blueprint(selectedCaseId);
 
   // Hydrate step from progress
   useEffect(() => {
@@ -245,8 +223,6 @@ export function M02Work() {
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
 
-  const testSetTotal = testSet.clean + testSet.edge + testSet.adversarial;
-
   const selectUseCase = (caseId: string) => {
     if (caseId !== selectedCaseId) {
       const hasStep3Work =
@@ -261,19 +237,11 @@ export function M02Work() {
       kbBlueprintOut.setValue.mutate(null);
       setGateReadiness(DEFAULT_GATE_READINESS);
       gateReadinessOut.setValue.mutate(DEFAULT_GATE_READINESS);
+      setGapsSel([]);
+      gapsOut.setValue.mutate([]);
     }
     setSelectedCaseId(caseId);
     selectedCaseOut.setValue.mutate(caseId);
-  };
-
-  const updateTestSet = (patch: Partial<TestSetShape>) => {
-    const next = { ...testSet, ...patch };
-    setTestSet(next);
-    testSetOut.setValue.mutate(next);
-  };
-
-  const updateTaskSources = (nextSources: string[]) => {
-    updateTestSet({ sources: nextSources });
   };
 
   const addCustomSelection = (
@@ -360,9 +328,9 @@ export function M02Work() {
                 documents, files, rules, and examples must it be allowed to use?
               </p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                Supplier Onboarding is the complete reference blueprint for this version. You can
-                still explore other business cases, but their generated Step 3 blueprints will be
-                added after the Supplier pattern is locked.
+                Choose the business process you want to use as your lens. HOI now provides a
+                complete generated reference blueprint for each listed use case, so you can compare
+                how the same knowledge-base pattern changes by workflow.
               </p>
             </div>
 
@@ -424,6 +392,7 @@ export function M02Work() {
   // ============ STEP 2 — Readiness gaps ============
   if (step === 2) {
     const s = M02_COURSE_CONTENT.step2;
+    const gapOptions = Array.from(new Set([...selectedUseCase.commonGaps, ...M02_COURSE_CONTENT.gapOptions]));
     return (
       <Step
         chapterLabel={CHAPTER_LABEL}
@@ -438,8 +407,6 @@ export function M02Work() {
         }
         yourVersion={
           <div className="space-y-8">
-            <ExamplesInTheWild items={M02_COURSE_CONTENT.step2.examplesInTheWild} />
-
             <div className="card border-l-[3px] border-l-terracotta space-y-3">
               <p className="eyebrow">SELECTED USE CASE</p>
               <h4 className="font-display text-xl text-navy">{selectedUseCase.title}</h4>
@@ -455,126 +422,27 @@ export function M02Work() {
               </button>
             </div>
 
-            <SourcePickerSection
-              layerNum="01"
-              title="Internal knowledge"
-              intro="Pick the documents, systems, or records that tell the AI what exists inside the business."
-              sourceOptions={selectedUseCase.internalSources}
-              fallbackOptions={internalSourceOptions}
-              selected={internalSel}
-              onToggle={(opt) => {
-                const next = toggle(internalSel, opt);
-                setInternalSel(next);
-                internalSourcesOut.setValue.mutate(next);
-              }}
-              customValue={customInternalSource}
-              onCustomChange={setCustomInternalSource}
-              onAddCustom={() =>
-                addCustomSelection(
-                  customInternalSource,
-                  internalSel,
-                  setInternalSel,
-                  (next) => internalSourcesOut.setValue.mutate(next),
-                  () => setCustomInternalSource(""),
-                )
-              }
-              footer={`${internalSel.length} selected - pick at least one source.`}
-            />
-
-            <SourcePickerSection
-              layerNum="02"
-              title="Contextual knowledge"
-              intro="Pick the policies, procedures, boundaries, or source-precedence rules that govern the answer."
-              sourceOptions={selectedUseCase.contextualRules}
-              fallbackOptions={contextualRuleOptions}
-              selected={contextualSel}
-              onToggle={(opt) => {
-                const next = toggle(contextualSel, opt);
-                setContextualSel(next);
-                contextualRulesOut.setValue.mutate(next);
-              }}
-              customValue={customContextualRule}
-              onCustomChange={setCustomContextualRule}
-              onAddCustom={() =>
-                addCustomSelection(
-                  customContextualRule,
-                  contextualSel,
-                  setContextualSel,
-                  (next) => contextualRulesOut.setValue.mutate(next),
-                  () => setCustomContextualRule(""),
-                )
-              }
-              footer={`${contextualSel.length} selected - pick at least one rule or boundary.`}
-            />
-
-            <SourcePickerSection
-              layerNum="03"
-              title="Task-specific knowledge"
-              intro="Pick the examples that prove how this use case should behave in real work."
-              sourceOptions={selectedUseCase.taskSpecificSources}
-              fallbackOptions={taskSourceOptions}
-              selected={taskSourceSel}
-              onToggle={(opt) => updateTaskSources(toggle(taskSourceSel, opt))}
-              customValue={customTaskSource}
-              onCustomChange={setCustomTaskSource}
-              onAddCustom={() =>
-                addCustomSelection(
-                  customTaskSource,
-                  taskSourceSel,
-                  updateTaskSources,
-                  () => undefined,
-                  () => setCustomTaskSource(""),
-                )
-              }
-              footer={`${taskSourceSel.length} selected - pick at least one example source.`}
-            />
-
-            <div className="border-t border-chalk pt-6 space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="eyebrow">MINIMUM TEST SET SHAPE</p>
-                  <p className="mt-2 text-sm font-medium text-navy">
-                    How many examples should the blueprint plan to curate?
-                  </p>
-                </div>
-                <SeededBadge seeded={testSetOut.seeded} touched={testSetOut.touched} />
-              </div>
-              <p className="text-[12px] italic text-slate">
-                Keep it light. M02 needs a blueprint for the examples you will curate, not a
-                production-ready evaluation set.
-              </p>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <TestSetField
-                  label="Clean cases"
-                  hint="Baseline examples the process should handle"
-                  value={testSet.clean}
-                  onChange={(v) => updateTestSet({ clean: Math.max(0, v) })}
-                />
-                <TestSetField
-                  label="Edge cases"
-                  hint="Ambiguous or incomplete cases"
-                  value={testSet.edge}
-                  onChange={(v) => updateTestSet({ edge: Math.max(0, v) })}
-                />
-                <TestSetField
-                  label="Adversarial cases"
-                  hint="Refusal, escalation, or abuse tests"
-                  value={testSet.adversarial}
-                  onChange={(v) => updateTestSet({ adversarial: Math.max(0, v) })}
-                />
-              </div>
-
-              <p className="text-[12px] italic text-slate">
-                {testSetTotal} examples total
-                {testSetTotal < 3 ? " - need at least 3 to continue." : " - minimum reached."}
+            <div className="card bg-mist/40 space-y-2">
+              <p className="eyebrow-muted">WHAT YOU ARE DOING HERE</p>
+              <p className="text-[14px] leading-relaxed text-graphite">
+                You are not building the KB yet. You are spotting what your business would need
+                before Build. HOI will show the reference blueprint in Step 3; your job here is to
+                notice where your own documents, owners, examples, or rules would be incomplete.
               </p>
             </div>
 
+            {selectedBlueprint ? (
+              <BlueprintReferenceMap blueprint={selectedBlueprint} />
+            ) : (
+              <UseCaseLayerPreview useCase={selectedUseCase} />
+            )}
+
+            <ExamplesInTheWild items={M02_COURSE_CONTENT.step2.examplesInTheWild} />
+
             <ChecklistSection
-              title="Readiness gaps to name before Build"
-              hint="This is a readiness diagnosis, not a confession of failure. A good blueprint names the gaps before Build starts."
-              items={[...selectedUseCase.commonGaps, ...M02_COURSE_CONTENT.gapOptions]}
+              title="Which gaps would be real in your business?"
+              hint="Pick at least one. These become the Governance Register inputs in Step 3."
+              items={gapOptions}
               selected={gapsSel}
               onToggle={(opt) => {
                 const next = toggle(gapsSel, opt);
@@ -584,39 +452,44 @@ export function M02Work() {
               footer={`${gapsSel.length} selected - pick at least one gap.`}
             />
 
-            <ChecklistSection
-              title="Reason codes to carry into Gate 1"
-              hint="Select the codes that explain the gaps. These become required if your final readiness status is PARTIAL or BLOCKED."
-              items={M02_COURSE_CONTENT.gateReasonCodes}
-              selected={gateReadiness.reasonCodes}
-              onToggle={(opt) => {
-                const next = toggle(gateReadiness.reasonCodes, opt);
-                setGateReadiness({ ...gateReadiness, reasonCodes: next });
-                gateReadinessOut.setValue.mutate({ ...gateReadiness, reasonCodes: next });
-              }}
-              footer={`${gateReadiness.reasonCodes.length} reason codes selected.`}
-            />
+            <div className="flex flex-col gap-2 rounded-md border border-chalk bg-white p-3 sm:flex-row">
+              <input
+                type="text"
+                value={customGap}
+                onChange={(event) => setCustomGap(event.target.value)}
+                placeholder="Add a gap specific to your business..."
+                className="min-w-0 flex-1 rounded border border-chalk bg-paper px-3 py-2 text-[13px] text-navy outline-none focus:border-terracotta"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  addCustomSelection(
+                    customGap,
+                    gapsSel,
+                    setGapsSel,
+                    (next) => gapsOut.setValue.mutate(next),
+                    () => setCustomGap(""),
+                  )
+                }
+                className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
+              >
+                Add gap
+              </button>
+            </div>
 
             <div className="card bg-mist/40 space-y-2">
-              <p className="eyebrow-muted">QUICK CHECK</p>
+              <p className="eyebrow-muted">WHAT CARRIES FORWARD</p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                If a source has no clear owner, the reason code is <strong>NO_OWNER</strong>.
-                If the source exists but has no version, review date, or source trace, use
-                <strong> NO_METADATA</strong>. If the team cannot safely access it, use
-                <strong> NO_ACCESS</strong>.
+                Step 3 will show the full HOI blueprint for {selectedUseCase.title}. Your selected
+                gaps will appear in the generated Governance Register as open items to address
+                before Build.
               </p>
             </div>
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={
-          internalSel.length > 0 &&
-          contextualSel.length > 0 &&
-          taskSourceSel.length > 0 &&
-          testSetTotal >= 3 &&
-          gapsSel.length > 0
-        }
-        disabledReason="Pick at least one source for each layer, keep at least 3 test examples, and name one readiness gap."
+        canContinue={!!selectedUseCase && gapsSel.length > 0}
+        disabledReason="Name at least one readiness gap before moving to the blueprint."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}
@@ -648,9 +521,6 @@ export function M02Work() {
       yourVersion={
         <M02Step3Guided
           selectedUseCase={selectedUseCase}
-          internalSources={internalSel}
-          contextualRules={contextualSel}
-          taskSources={taskSourceSel}
           namedGaps={gapsSel}
           step3State={step3StateOut.value}
           generatedBlueprint={kbBlueprintOut.value}
@@ -744,6 +614,73 @@ function UseCaseLayerPreview({ useCase }: { useCase: M02UseCase }) {
   );
 }
 
+function BlueprintReferenceMap({ blueprint }: { blueprint: M02BlueprintData }) {
+  return (
+    <div className="border-t border-chalk pt-6 space-y-6">
+      <div>
+        <p className="eyebrow">REFERENCE MAP · {blueprint.useCaseName.toUpperCase()}</p>
+        <h4 className="mt-2 font-display text-xl text-navy">
+          What a complete knowledge base would need
+        </h4>
+        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+          {blueprint.dataMap.intro}
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {blueprint.dataMap.locations.map((location) => (
+          <div key={location.information} className="rounded-md border border-chalk bg-white p-4">
+            <p className="text-sm font-medium text-navy">{location.information}</p>
+            <dl className="mt-3 space-y-2 text-[12px] text-graphite">
+              <div>
+                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Lives in</dt>
+                <dd>{location.livesIn}</dd>
+              </div>
+              <div>
+                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Owner</dt>
+                <dd>{location.owner}</dd>
+              </div>
+              <div>
+                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Movement</dt>
+                <dd>{location.movement}</dd>
+              </div>
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-3">
+        {blueprint.knowledgeLayers.layers.map((layer, index) => (
+          <div key={layer.name} className="rounded-md border border-chalk bg-white p-4">
+            <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+              LAYER {index + 1}
+            </span>
+            <h5 className="mt-3 font-display text-base text-navy">{layer.name} knowledge</h5>
+            <p className="mt-1 text-[12px] leading-relaxed text-slate">{layer.description}</p>
+            <ul className="mt-3 space-y-2">
+              {layer.sources.map((source) => (
+                <li key={`${source.item}-${source.from}`} className="text-[13px] text-graphite">
+                  <strong className="text-navy">{source.item}</strong>
+                  <span className="block text-[12px] text-slate">from {source.from}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-md border border-chalk bg-mist/40 p-4">
+        <p className="eyebrow-muted">WHAT TO CHECK IN YOUR BUSINESS</p>
+        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+          Look for missing owners, stale sources, unclear permissions, weak examples, or rules that
+          live informally in messages. You only need to name the gaps now; the full operating
+          blueprint comes next.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function LayerPreviewCard({
   num,
   title,
@@ -770,148 +707,6 @@ function LayerPreviewCard({
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function SourcePickerSection({
-  layerNum,
-  title,
-  intro,
-  sourceOptions,
-  fallbackOptions,
-  selected,
-  onToggle,
-  customValue,
-  onCustomChange,
-  onAddCustom,
-  footer,
-}: {
-  layerNum: string;
-  title: string;
-  intro: string;
-  sourceOptions: readonly M02UseCaseSource[];
-  fallbackOptions: readonly string[];
-  selected: string[];
-  onToggle: (item: string) => void;
-  customValue: string;
-  onCustomChange: (value: string) => void;
-  onAddCustom: () => void;
-  footer: string;
-}) {
-  const optionTitles = sourceOptions.map((source) => source.title);
-  const extraOptions = fallbackOptions.filter((option) => !optionTitles.includes(option));
-
-  return (
-    <div className="border-t border-chalk pt-6 space-y-4">
-      <div>
-        <p className="eyebrow">LAYER {layerNum} · {title}</p>
-        <p className="mt-2 text-sm font-medium text-navy">{intro}</p>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        {sourceOptions.map((source) => {
-          const checked = selected.includes(source.title);
-          return (
-            <label
-              key={source.title}
-              className={`cursor-pointer rounded-md border p-4 transition-colors ${
-                checked ? "border-terracotta bg-terracotta/5" : "border-chalk bg-white hover:bg-mist/40"
-              }`}
-            >
-              <div className="flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggle(source.title)}
-                  className="mt-1 h-4 w-4 accent-terracotta"
-                />
-                <div>
-                  <p className="text-sm font-medium text-navy">{source.title}</p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-graphite">
-                    {source.description}
-                  </p>
-                  <p className="mt-2 text-[11px] text-slate">
-                    Examples: {source.examples.join(", ")}
-                  </p>
-                  <p className="mt-2 text-[11px] italic text-slate">
-                    If missing: {source.gapIfMissing}
-                  </p>
-                </div>
-              </div>
-            </label>
-          );
-        })}
-      </div>
-
-      {extraOptions.length > 0 && (
-        <div className="rounded-md border border-chalk bg-mist/30 p-4">
-          <p className="eyebrow-muted">MORE OPTIONS</p>
-          <ul className="mt-3 grid gap-2 md:grid-cols-2">
-            {extraOptions.map((option) => (
-              <li key={option}>
-                <label className="flex cursor-pointer items-start gap-2 text-[13px] text-navy">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(option)}
-                    onChange={() => onToggle(option)}
-                    className="mt-1 h-4 w-4 accent-terracotta"
-                  />
-                  <span>{option}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2 rounded-md border border-chalk bg-white p-3 sm:flex-row">
-        <input
-          type="text"
-          value={customValue}
-          onChange={(event) => onCustomChange(event.target.value)}
-          placeholder="Add another source, document, file, or rule..."
-          className="min-w-0 flex-1 rounded border border-chalk bg-paper px-3 py-2 text-[13px] text-navy outline-none focus:border-terracotta"
-        />
-        <button
-          type="button"
-          onClick={onAddCustom}
-          className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
-        >
-          Add source
-        </button>
-      </div>
-
-      <p className="text-[12px] italic text-slate">{footer}</p>
-    </div>
-  );
-}
-
-function TestSetField({
-  label,
-  hint,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="rounded-md border border-chalk bg-white p-3">
-      <p className="text-sm font-medium text-navy">{label}</p>
-      <p className="text-[12px] text-slate">{hint}</p>
-      <input
-        type="number"
-        min={0}
-        value={value}
-        onChange={(e) => {
-          const n = Number.parseInt(e.target.value, 10);
-          onChange(Number.isFinite(n) ? n : 0);
-        }}
-        className="mt-2 w-full rounded border border-chalk bg-paper px-2 py-1.5 text-[14px] text-navy outline-none focus:border-terracotta"
-      />
     </div>
   );
 }
@@ -953,38 +748,6 @@ function ChecklistSection({
         ))}
       </ul>
       <p className="text-[12px] italic text-slate">{footer}</p>
-    </div>
-  );
-}
-
-function LayerRow({
-  num,
-  label,
-  items,
-  empty,
-}: {
-  num: string;
-  label: string;
-  items: string[];
-  empty: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-        LAYER {num}
-      </span>
-      <p className="text-sm font-medium text-navy mt-1">{label}</p>
-      {items.length === 0 ? (
-        <p className="text-[13px] italic text-slate">{empty}</p>
-      ) : (
-        <ul className="space-y-1">
-          {items.map((it) => (
-            <li key={it} className="text-[13px] text-graphite">
-              · {it}
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

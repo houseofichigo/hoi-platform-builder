@@ -548,19 +548,19 @@ export const M02_COURSE_CONTENT = {
       },
     ],
     produces: "Selected use case and three-layer source map preview",
-    nextLabel: "Step 2 - pick sources and gaps",
+    nextLabel: "Step 2 - review readiness gaps",
   },
 
   step2: {
-    title: "Pick the sources and find the gaps",
+    title: "Review the map and name the gaps",
     why:
-      "Now turn the example map into your own source map. Pick the documents, files, systems, policies, and examples that would make the selected use case AI-ready, then name what is still missing.",
+      "Now compare HOI's reference map to your own business. You are not building the KB yet. You are spotting what your business would need before Build: owners, current sources, access rules, examples, and review boundaries.",
     example:
-      "A support workflow might have a product brochure, FAQ, resolved tickets, and a refund policy, but still be blocked by missing owners, stale articles, no escalation rule, or no edge-case examples.",
+      "A support workflow may need product docs, FAQs, tickets, refund rules, escalation paths, and privacy boundaries. The readiness question is not 'can I list sources?' It is 'which of these would be missing, stale, ownerless, or risky in my business?'",
     whatToNotice: [
-      "A missing owner is a readiness problem even when the document exists",
-      "A source without metadata is hard to retrieve, audit, or refresh",
-      "Reason codes turn vague concerns into Gate 1 evidence",
+      "Step 2 is diagnosis, not curation",
+      "A missing owner is a readiness gap even when the document exists",
+      "The gaps you name become the Governance Register in the generated blueprint",
     ],
     examplesInTheWild: [
       {
@@ -580,16 +580,16 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
       },
     ],
-    produces: "Selected sources for each layer, readiness gaps, and Gate 1 reason-code candidates",
+    produces: "Readiness gaps for the selected use case",
     nextLabel: "Step 3 - build the blueprint",
   },
 
   step3: {
     title: "Build the KB blueprint",
     why:
-      "The final M02 deliverable is a generated operating blueprint, not another curation exercise. HOI shows the seven components of a working knowledge base, applied to a concrete use case, then turns the reference into a document your team can use.",
+      "The final M02 deliverable is a generated operating blueprint, not another curation exercise. HOI now shows the complete reference blueprint for your chosen use case, then turns it into a document your team can use.",
     example:
-      "For Supplier Onboarding, the blueprint includes a data map, layered knowledge sources, atomic entries, metadata, source precedence, access rules, retrieval tests, and AI-facing instructions.",
+      "For each use case, the blueprint includes a data map, layered knowledge sources, atomic entries, metadata, source precedence, access rules, retrieval tests, and AI-facing instructions.",
     whatToNotice: [
       "The learner is not expected to invent the operating standard from scratch",
       "A strong blueprint explains what the AI can retrieve, what it must cite, and when it must stop",

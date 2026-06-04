@@ -1,50 +1,38 @@
-## Problem
+## Goal
 
-You just added a **Check answers** flow to the Six quick checks in Step 1 (token quiz). The Hallucination Hunt quiz in Step 2 (Q1–Q6 of SCEPTICISM_QUIZ in `M01Work.tsx`) still uses the old behavior: learners pick answers, no grading happens, and Continue unlocks as soon as every question has a selection. That's what "still the old one" is referring to.
+Bring the Step 3 "Parameter Playground" quiz (Q1–Q6) up to the same Check-answers / Try again grading flow that Step 2 (Hallucination Hunt) now has. Q7 (multi-select reflection about the learner's own work) stays ungraded — it's a reflection, not a knowledge check.
 
-## Plan
+## Scope
 
-Apply the same Check-answers pattern to the Hallucination Hunt quiz.
+All edits inside `src/components/assess/modules/M01Work.tsx` and the `PARAMETER_QUIZ` constant. No schema changes, no other steps touched.
 
-### 1. Add `correct` + `explanation` to SCEPTICISM_QUIZ
+## Changes
 
-Q1–Q6 are all single-choice and all have an objectively right answer. Proposed keys + one-line explanations:
+1. **`PARAMETER_QUIZ`** — Add `correct` + one-line `explanation` to each of the six single-choice questions in Step 3 (Q1–Q6). Q7 stays as the open multi-select reflection and is rendered separately.
 
-- **Q1** → "Plausible, confident information that is incorrect or fabricated" — Hallucinations are confident, plausible-sounding fabrications, not random noise or refusals.
-- **Q2** → "The specific figures may be fabricated until verified" — Precise numbers without sources are the classic hallucination signature; treat as unverified.
-- **Q3** → "The model may be inventing rather than retrieving a stable fact" — Drift across fresh chats signals generation, not retrieval of a stable fact.
-- **Q4** → "I do not have specific information; share a source and I can help" — An honest abstain with a request for a source carries the lowest fabrication risk.
-- **Q5** → "Run the Hallucination Audit prompt on the draft" — A structured audit catches fabricated claims; asking the model to self-check or trusting tone does not.
-- **Q6** → "They are trained and evaluated in ways that reward attempting answers over abstaining" — Training/eval incentives push models toward attempting answers rather than abstaining.
+2. **`ParameterNotes` interface** — Add `quizChecked?: boolean`.
 
-### 2. Track `quizChecked` on `ScepticismLog`
+3. **`setParameterQuizAnswer`** — When the learner edits any of the six graded answers, set `quizChecked: false` so they must re-confirm. Editing Q7 does not flip the flag.
 
-Add `quizChecked?: boolean` to the `ScepticismLog` interface and to the initial state. When the learner edits any quiz answer via `setScepticismQuizAnswer`, set `quizChecked: false` so they re-confirm.
+4. **Handlers** — Add `handleCheckParameters` and `handleRetryParameters` that toggle `quizChecked` (mirrors the Step 2 implementation).
 
-### 3. Add Check answers / Try again buttons
+5. **Pass threshold** — `parameterQuizPassed = quizChecked && correctCount >= 5` (5 / 6, same ratio as Step 2's 4 / 5).
 
-Below the 6 questions, render:
-- **Check answers** button — disabled until every Q1–Q6 has an answer. On click, set `quizChecked: true`.
-- After checking, render a results line: "X of 6 correct" plus a **Try again** button that sets `quizChecked: false` (answers preserved, styling clears).
+6. **Continue gating** — Replace the current `parameterQuizComplete` check inside `parameterStepComplete` with `parameterQuizPassed`. Update `disabledReason` to walk through: "Answer all six checks" → "Click Check answers" → "Review highlighted answers and try again" → existing reasons for control matches / Part B checks / Q7 / acknowledgement.
 
-### 4. Graded styling per question
+7. **Quiz rendering (Q1–Q6 loop, ~lines 1497–1529)** — When `quizChecked` is true:
+   - Green border + ✓ on correct, red border + ✗ on incorrect
+   - "Why: …" explanation under each graded question
+   - Inputs disabled until Try again
+8. **Buttons under the six questions** — "Check answers" (disabled until all 6 answered) and "Try again" (only when `!parameterQuizPassed && quizChecked`), plus an "X of 6 correct" result line. Same visual treatment as Step 2.
 
-When `quizChecked` is true, for each question:
-- Selected option turns green if correct, red if wrong.
-- Correct option is highlighted (green border / check icon) so the learner sees the right answer.
-- One-line "Why:" explanation appears below.
-- Inputs disabled until Try again is clicked.
+## Out of scope
 
-### 5. Gate Continue on score
+- Q7 reflection (kept ungraded)
+- Part A dial cards, Part B task guide, control-match exercise, prompt-controls section
+- Method note section
+- Any other module
 
-Replace the existing `quizComplete` check in `stepComplete` with `quizPassed = quizChecked && correctCount >= 5` (5 of 6 — same spirit as the 4/5 threshold on the token quiz, scaled to 6 gradable questions). Update `disabledReason` to walk through: "Answer all six, then confirm…" → "Click Check answers" → "Review highlighted answers and try again" → existing reasons for exercises / risk tasks / acknowledgement.
+## Verification
 
-### Out of scope
-
-- Q7 (risk-task multi-select) — stays as a reflection question, no grading, still required to have ≥1 selection.
-- The Part A exercise checkboxes, examples, prompt techniques — unchanged.
-- Other modules' quizzes.
-
-### Technical notes
-
-All edits are inside `src/components/assess/modules/M01Work.tsx`. No schema changes — `quizChecked` lives inside the existing `m01.scepticism_log` JSON output. No new design tokens.
+Run `tsc --noEmit` after the edit; spot-check the rendered Step 3 in the preview to confirm grading + gating behave like Step 2.

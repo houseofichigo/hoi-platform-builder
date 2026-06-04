@@ -4,81 +4,134 @@ export const M02_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Data Readiness & Knowledge Base Preparation. Before you prompt, before you build, you map the sources and turn them into trusted knowledge the AI can retrieve. Today's job: build a three-layer knowledge base blueprint for a candidate process.",
+    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: build a three-layer knowledge base blueprint for a general support or customer-operations process.",
 
   step1: {
-    title: "Internal knowledge - what already lives inside the company",
+    title: "Map the knowledge layers",
     why:
-      "Internal knowledge is the governed meaning inside your systems of record: records, histories, policies, schemas, labels, and workflow data. Before asking a model to act, map what the system can read, who owns it, how current it is, and what metadata makes it retrievable.",
+      "Before a model can answer, route, summarize, or draft reliably, it needs more than documents. It needs the internal sources, the contextual rules, and the task-specific examples that make a business process understandable.",
     example:
-      "For support ticket triage, the internal layer may include ticket history, customer profile, product catalog, SLA rules, routing queues, and prior resolution notes.",
+      "For support or customer-operations triage, the three layers might include ticket records and customer context, policy and privacy rules, plus clean, edge, and adversarial examples that show the right behavior.",
     whatToNotice: [
-      "Every internal data source needs a named owner - 'IT' is not enough",
-      "Quality is not the same as completeness - complete records can still be stale or wrong",
-      "Access path matters as much as access itself - API beats CSV export beats manual lookup",
+      "The model cannot use knowledge that has no source, owner, or access path",
+      "Business rules are part of the knowledge layer, not decoration around it",
+      "Task-specific examples are how you prove the system can handle the real workflow",
     ],
-    produces: "Layer 01 - internal knowledge sources",
-    nextLabel: "Step 2 - contextual knowledge",
+    examplesInTheWild: [
+      {
+        label: "VISIBILITY EXAMPLE",
+        title: "CompStat turned scattered signals into operating knowledge",
+        body:
+          "The useful shift was not just more data. It was shared categories, ownership, cadence, and visibility so teams could act on patterns instead of anecdotes.",
+      },
+      {
+        label: "METADATA EXAMPLE",
+        title: "Netflix-style metadata shows why labels matter",
+        body:
+          "Recommendations work because content is described in structured ways. AI workflows need the same discipline: source, category, owner, status, and context.",
+      },
+    ],
+    produces: "Three-layer source map: internal sources, contextual rules, and task-specific examples",
+    nextLabel: "Step 2 - find readiness gaps",
   },
 
   step2: {
-    title: "Contextual knowledge - the rules the system must respect",
+    title: "Find the readiness gaps",
     why:
-      "Contextual knowledge is the rule layer around the process: laws, industry requirements, contracts, operating policies, escalation rules, and risk boundaries. Miss one and the AI may produce an answer that is fluent but unusable.",
+      "A knowledge map is only useful if it reveals what is missing. In M02, gaps are not blockers by themselves. Hidden gaps are the risk; named gaps become reason codes you can govern.",
     example:
-      "For support triage, contextual rules may include GDPR, customer terms, escalation policy, security policy, refund policy, sector rules, and tone-of-voice guidance.",
+      "A support triage process may have ticket history and a policy page, but still be blocked by unclear ownership, stale metadata, missing edge cases, or no rule for which source wins when evidence conflicts.",
     whatToNotice: [
-      "Contextual rules have a regime and a consequence if ignored",
-      "Internal policy counts as contextual knowledge even if no regulator enforces it",
-      "When data crosses tools or vendors, residency and processor rules become part of the design",
+      "A missing owner is a readiness problem even when the document exists",
+      "A source without metadata is hard to retrieve, audit, or refresh",
+      "Reason codes make gaps portable into Gate 1 and the Build phase",
     ],
-    produces: "Layer 02 - contextual knowledge and regimes",
-    nextLabel: "Step 3 - task-specific knowledge",
+    produces: "Readiness gaps and Gate 1 reason-code candidates",
+    nextLabel: "Step 3 - build the blueprint",
   },
 
   step3: {
-    title: "Task-specific knowledge - examples and boundary cases",
+    title: "Build the KB blueprint",
     why:
-      "Task-specific knowledge is the curated evidence that proves the AI can handle this task: clean examples, edge cases, adversarial cases, expected outputs, and known limitations.",
+      "The final M02 deliverable is a blueprint, not a production knowledge base. You will define five demonstrative entry categories, choose five retrieval tests, confirm evidence checks, and decide the Gate 1 readiness status.",
     example:
-      "A minimum viable support-triage test set might include 5 clean tickets, 5 edge tickets with ambiguous routing, and 5 adversarial tickets with prompt injection, legal risk, or unsafe disclosure attempts.",
+      "A strong blueprint entry is not just 'refund policy'. It is 'Refund window after product use' with a source, owner, layer, rule/fact/example, and a retrieval question that proves the AI can find it.",
     whatToNotice: [
-      "Edge cases are the ones that fail silently in production - explicitly bait them",
-      "Adversarial cases test refusal and escalation, not just accuracy",
-      "Test-set size matters less than coverage of the failure modes you already know",
+      "Five demonstrative entries are enough to prove the structure without overbuilding",
+      "Retrieval tests show whether the knowledge can actually be found and used",
+      "PASS, PARTIAL, or BLOCKED should be based on evidence, not optimism",
     ],
-    produces: "Layer 03 - task-specific examples, edge cases, and expected behavior",
-    nextLabel: "Step 4 - knowledge base blueprint",
-  },
-
-  step4: {
-    title: "Knowledge base blueprint - entries, retrieval tests, and readiness",
-    why:
-      "The source map tells us what exists. The knowledge base tells the AI what to use. M02 is complete when sources are mapped, entries are structured with metadata, retrieval tests are written, and gaps are named.",
-    example:
-      "A strong entry is not just 'refund policy'. It is an entry such as 'Refund window after product use' with source, owner, rule, tags, sensitivity, status, refresh rule, and a retrieval test.",
-    whatToNotice: [
-      "A knowledge base is structured, searchable, source-backed, versioned, permission-aware, and governed",
-      "Retrieval tests prove whether the AI can find the right knowledge at the right time",
-      "Readiness is based on evidence, not intention: missing owners, metadata, access, or tests become reason codes",
-    ],
-    produces: "Three-layer knowledge base blueprint -> completes M02",
+    produces: "Three-layer KB blueprint with entries, retrieval tests, gaps, and Gate 1 readiness",
+    nextLabel: "Complete M02",
   },
 
   knowledgeEntryOptions: [
-    "Schema or field requirement - required fields, format, validation rule, applies_to, source, owner",
-    "Internal policy rule - threshold, escalation path, exception owner, source policy, refresh rule",
-    "External regulation or standard - privacy, retention, sector, contract, or residency rule",
-    "Task-specific edge case - ambiguous request, missing data, conflicting rule, unsafe request, duplicate case",
-    "Quality or safety rule - manual review trigger, confidence boundary, sensitive data handling, stop condition",
+    "Source-backed fact or record - the business data the AI is allowed to use",
+    "Internal policy rule - threshold, escalation path, exception owner, source policy",
+    "External rule or contract boundary - privacy, retention, sector, customer, or residency rule",
+    "Task-specific edge case - ambiguous request, missing data, conflicting rule, or unsafe request",
+    "Quality or safety rule - manual review trigger, confidence boundary, stop condition, or sensitive-data handling",
   ] as const,
 
   retrievalTestOptions: [
-    "What fields or facts are mandatory for this workflow?",
-    "What rule applies if required information is missing or conflicting?",
-    "Which items require manager, specialist, or human review?",
-    "What source confirms this answer?",
-    "Which edge cases require refusal or escalation instead of automation?",
+    "When a user asks a standard question, which entry should the AI retrieve first?",
+    "If required information is missing or conflicting, what rule should the AI apply?",
+    "Which request should trigger manager, specialist, or human review?",
+    "What source confirms the answer, and what source should be ignored if it conflicts?",
+    "Which edge case requires refusal or escalation instead of automation?",
+  ] as const,
+
+  requiredMetadata: [
+    "Title",
+    "Layer or category",
+    "Source",
+    "Owner",
+    "Rule, fact, or example the AI may use",
+  ] as const,
+
+  advancedMetadata: [
+    "Source location",
+    "Version or review date",
+    "Sensitivity",
+    "Allowed AI use",
+    "Tags",
+    "Review status",
+    "Refresh frequency",
+  ] as const,
+
+  glossaryDefinitions: [
+    {
+      term: "Data readiness",
+      definition: "The evidence that a process has usable sources, owners, quality checks, access rules, and known gaps before AI is introduced.",
+    },
+    {
+      term: "Knowledge base",
+      definition: "A structured, source-backed layer of business knowledge that an AI system can retrieve, cite, and use within agreed boundaries.",
+    },
+    {
+      term: "Metadata",
+      definition: "The labels around a knowledge entry: source, owner, version, sensitivity, status, and refresh rule. Metadata is what makes knowledge governable.",
+    },
+    {
+      term: "Data map",
+      definition: "A view of where useful information lives, who owns it, how it moves, and whether it can be accessed safely.",
+    },
+    {
+      term: "Lineage",
+      definition: "The trace from original source to AI use. Lineage helps the team explain where an answer came from and what changed it.",
+    },
+    {
+      term: "Sensitivity",
+      definition: "The handling level for a source or entry, based on privacy, commercial risk, legal exposure, or internal confidentiality.",
+    },
+    {
+      term: "Retrieval test",
+      definition: "A question designed to prove whether the AI can find the right entry, use the right source, and respect the right limitation.",
+    },
+    {
+      term: "Reason code",
+      definition: "A short label for why readiness is partial or blocked, such as NO_OWNER, NO_METADATA, or NO_ACCESS.",
+    },
   ] as const,
 
   gateReadinessChecks: [

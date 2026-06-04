@@ -8,7 +8,6 @@ import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
-import { KnowledgeBlockWalkthrough } from "@/components/assess/KnowledgeBlockWalkthrough";
 import { SeededBadge } from "@/components/assess/SeededBadge";
 import {
   M02_COURSE_CONTENT,
@@ -17,9 +16,9 @@ import {
 } from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
-type StepNum = 1 | 2 | 3 | 4;
+type StepNum = 1 | 2 | 3;
 type GateStatus = "pass" | "partial" | "blocked" | "";
 
 interface TestSetShape {
@@ -103,7 +102,7 @@ export function M02Work() {
       setStep(TOTAL_STEPS as StepNum);
     } else {
       const cs = progress.data?.current_step;
-      if (cs && cs >= 1 && cs <= TOTAL_STEPS) setStep(cs as StepNum);
+      if (cs && cs >= 1) setStep(Math.min(cs, TOTAL_STEPS) as StepNum);
     }
     setHydrated((h) => ({ ...h, step: true }));
   }, [hydrated.step, progress.isLoading, progress.data?.current_step, progress.data?.status]);
@@ -113,7 +112,8 @@ export function M02Work() {
     if (progress.isLoading) return;
     const status = progress.data?.status;
     if (!status || status === "not_started") {
-      progress.setStep.mutate(progress.data?.current_step ?? 1);
+      const nextStep = Math.min(Math.max(progress.data?.current_step ?? 1, 1), TOTAL_STEPS) as StepNum;
+      progress.setStep.mutate(nextStep);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress.isLoading]);
@@ -243,14 +243,21 @@ export function M02Work() {
 
   if (!workspace) return null;
 
-  // ============ STEP 1 — Internal knowledge ============
+  // ============ STEP 1 — Three-layer knowledge map ============
   if (step === 1) {
     const s = M02_COURSE_CONTENT.step1;
+
+    const updateTestSet = (key: keyof TestSetShape, value: number) => {
+      const next = { ...testSet, [key]: Math.max(0, value) };
+      setTestSet(next);
+      testSetOut.setValue.mutate(next);
+    };
+
     return (
       <Step
         storyHeader={M02_COURSE_CONTENT.storyHeader}
         chapterLabel={CHAPTER_LABEL}
-        stepLabel="STEP 1 of 4"
+        stepLabel="STEP 1 of 3"
         title={s.title}
         why={<p>{s.why}</p>}
         example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -261,12 +268,32 @@ export function M02Work() {
         }
         yourVersion={
           <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="eyebrow">THE INTERNAL-KNOWLEDGE MAP</p>
-              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.internalSources} />
+            <div className="card bg-mist/40 space-y-2">
+              <p className="eyebrow-muted">WHERE THIS IS HEADING</p>
+              <p className="text-[14px] leading-relaxed text-graphite">
+                In M01 you saw that models generate fluent text without an internal truth check.
+                M02 asks the next business question: what knowledge must exist before AI can
+                answer, route, or draft anything useful?
+              </p>
+              <p className="text-[14px] leading-relaxed text-graphite">
+                Use support or customer-operations triage as the default case: enough policy,
+                customer context, edge cases, and governance to make the method concrete without
+                locking the course to one industry.
+              </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {M02_COURSE_CONTENT.step1.examplesInTheWild.map((item) => (
+                <div key={item.title} className="rounded-md border border-chalk bg-white p-4">
+                  <p className="eyebrow-muted">{item.label}</p>
+                  <h4 className="mt-2 font-display text-base text-navy">{item.title}</h4>
+                  <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.body}</p>
+                </div>
+              ))}
             </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
+              <p className="eyebrow">LAYER 01 · INTERNAL KNOWLEDGE</p>
               <p className="text-sm font-medium text-navy">
                 Which internal knowledge sources exist in {workspace.name}? (pick all that apply)
               </p>
@@ -293,42 +320,11 @@ export function M02Work() {
                 {internalSel.length} selected — pick at least one to continue.
               </p>
             </div>
-          </div>
-        }
-        produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={internalSel.length > 0}
-        disabledReason="Pick at least one internal source."
-        nextLabel={s.nextLabel}
-        onContinue={() => goToStep(2)}
-      />
-    );
-  }
-
-  // ============ STEP 2 — Contextual rules ============
-  if (step === 2) {
-    const s = M02_COURSE_CONTENT.step2;
-    return (
-      <Step
-        chapterLabel={CHAPTER_LABEL}
-        stepLabel="STEP 2 of 4"
-        title={s.title}
-        why={<p>{s.why}</p>}
-        example={<p className="text-[14px] text-navy">{s.example}</p>}
-        whatToNotice={
-          <ul className="list-disc pl-5 text-[14px] text-navy">
-            {s.whatToNotice.map((w) => <li key={w}>{w}</li>)}
-          </ul>
-        }
-        yourVersion={
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="eyebrow">THE CONTEXTUAL-KNOWLEDGE MAP</p>
-              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.contextualRules} />
-            </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
+              <p className="eyebrow">LAYER 02 · CONTEXTUAL KNOWLEDGE</p>
               <p className="text-sm font-medium text-navy">
-                Which contextual rules apply at {workspace.name}? (pick all that apply)
+                Which rules and boundaries apply at {workspace.name}? (pick all that apply)
               </p>
               <ul className="space-y-2">
                 {contextualRuleOptions.map((opt) => (
@@ -353,74 +349,38 @@ export function M02Work() {
                 {contextualSel.length} selected — pick at least one to continue.
               </p>
             </div>
-          </div>
-        }
-        produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={contextualSel.length > 0}
-        disabledReason="Pick at least one contextual rule."
-        nextLabel={s.nextLabel}
-        onBack={() => goToStep(1)}
-        onContinue={() => goToStep(3)}
-      />
-    );
-  }
-
-  // ============ STEP 3 — Task-specific test set ============
-  if (step === 3) {
-    const s = M02_COURSE_CONTENT.step3;
-
-    const updateTestSet = (key: keyof TestSetShape, value: number) => {
-      const next = { ...testSet, [key]: Math.max(0, value) };
-      setTestSet(next);
-      testSetOut.setValue.mutate(next);
-    };
-
-    return (
-      <Step
-        chapterLabel={CHAPTER_LABEL}
-        stepLabel="STEP 3 of 4"
-        title={s.title}
-        why={<p>{s.why}</p>}
-        example={<p className="text-[14px] text-navy">{s.example}</p>}
-        whatToNotice={
-          <ul className="list-disc pl-5 text-[14px] text-navy">
-            {s.whatToNotice.map((w) => <li key={w}>{w}</li>)}
-          </ul>
-        }
-        yourVersion={
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <p className="eyebrow">THE TASK-SPECIFIC KNOWLEDGE SET</p>
-              <KnowledgeBlockWalkthrough block={M02_COURSE_CONTENT.testSet} />
-            </div>
 
             <div className="border-t border-chalk pt-6 space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-navy">
-                  Your test set composition for {workspace.name}
-                </p>
+                <div>
+                  <p className="eyebrow">LAYER 03 · TASK-SPECIFIC KNOWLEDGE</p>
+                  <p className="mt-2 text-sm font-medium text-navy">
+                    Your minimum test-set shape for {workspace.name}
+                  </p>
+                </div>
                 <SeededBadge seeded={testSetOut.seeded} touched={testSetOut.touched} />
               </div>
               <p className="text-[12px] italic text-slate">
-                Adjust the counts to match what your team can realistically curate. Minimum total: 3.
+                Keep it light for now. M02 needs a blueprint for the examples you will curate,
+                not a production-ready evaluation set.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <TestSetField
                   label="Clean cases"
-                  hint="Textbook layouts, baseline accuracy"
+                  hint="Baseline examples the process should handle"
                   value={testSet.clean}
                   onChange={(v) => updateTestSet("clean", v)}
                 />
                 <TestSetField
                   label="Edge cases"
-                  hint="Known failure modes from production"
+                  hint="Ambiguous or incomplete cases"
                   value={testSet.edge}
                   onChange={(v) => updateTestSet("edge", v)}
                 />
                 <TestSetField
                   label="Adversarial cases"
-                  hint="Tests of refusal, not accuracy"
+                  hint="Refusal, escalation, or abuse tests"
                   value={testSet.adversarial}
                   onChange={(v) => updateTestSet("adversarial", v)}
                 />
@@ -434,17 +394,127 @@ export function M02Work() {
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={testSetTotal >= 3}
-        disabledReason="Total must be at least 3."
+        canContinue={internalSel.length > 0 && contextualSel.length > 0 && testSetTotal >= 3}
+        disabledReason="Pick at least one internal source, one contextual rule, and at least 3 test examples."
         nextLabel={s.nextLabel}
-        onBack={() => goToStep(2)}
-        onContinue={() => goToStep(4)}
+        onContinue={() => goToStep(2)}
       />
     );
   }
 
-  // ============ STEP 4 — Three-layer map + gaps + complete ============
-  const s = M02_COURSE_CONTENT.step4;
+  // ============ STEP 2 — Readiness gaps ============
+  if (step === 2) {
+    const s = M02_COURSE_CONTENT.step2;
+    return (
+      <Step
+        chapterLabel={CHAPTER_LABEL}
+        stepLabel="STEP 2 of 3"
+        title={s.title}
+        why={<p>{s.why}</p>}
+        example={<p className="text-[14px] text-navy">{s.example}</p>}
+        whatToNotice={
+          <ul className="list-disc pl-5 text-[14px] text-navy">
+            {s.whatToNotice.map((w) => <li key={w}>{w}</li>)}
+          </ul>
+        }
+        yourVersion={
+          <div className="space-y-8">
+            <div className="card border-l-[3px] border-l-terracotta space-y-5">
+              <p className="eyebrow">YOUR THREE-LAYER MAP SO FAR — {workspace.name.toUpperCase()}</p>
+
+              <LayerRow
+                num="01"
+                label="Internal knowledge"
+                items={internalSel}
+                empty="No internal sources selected yet — go back to Step 1."
+              />
+              <LayerRow
+                num="02"
+                label="Contextual knowledge"
+                items={contextualSel}
+                empty="No contextual rules selected yet — go back to Step 1."
+              />
+
+              <div className="space-y-1">
+                <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+                  LAYER 03
+                </span>
+                <p className="mt-1 text-sm font-medium text-navy">Task-specific knowledge</p>
+                <p className="text-[13px] text-graphite">
+                  {testSet.clean} clean · {testSet.edge} edge · {testSet.adversarial} adversarial =
+                  {" "}{testSetTotal} examples and boundary cases total
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-chalk pt-6 space-y-3">
+              <p className="text-sm font-medium text-navy">
+                Which gaps do you recognise in this process? (pick all that apply)
+              </p>
+              <p className="text-[12px] italic text-slate">
+                This is a readiness diagnosis, not a confession of failure. A good blueprint names
+                the gaps before Build starts.
+              </p>
+              <ul className="space-y-2">
+                {M02_COURSE_CONTENT.gapOptions.map((opt) => (
+                  <li key={opt}>
+                    <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
+                      <input
+                        type="checkbox"
+                        checked={gapsSel.includes(opt)}
+                        onChange={() => {
+                          const next = toggle(gapsSel, opt);
+                          setGapsSel(next);
+                          gapsOut.setValue.mutate(next);
+                        }}
+                        className="mt-1 h-4 w-4 accent-terracotta"
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[12px] italic text-slate">
+                {gapsSel.length} selected — pick at least one to continue.
+              </p>
+            </div>
+
+            <ChecklistSection
+              title="Reason codes to carry into Gate 1"
+              hint="Select the codes that explain the gaps. These become required if your final readiness status is PARTIAL or BLOCKED."
+              items={M02_COURSE_CONTENT.gateReasonCodes}
+              selected={gateReadiness.reasonCodes}
+              onToggle={(opt) => {
+                const next = toggle(gateReadiness.reasonCodes, opt);
+                setGateReadiness({ ...gateReadiness, reasonCodes: next });
+                gateReadinessOut.setValue.mutate({ ...gateReadiness, reasonCodes: next });
+              }}
+              footer={`${gateReadiness.reasonCodes.length} reason codes selected.`}
+            />
+
+            <div className="card bg-mist/40 space-y-2">
+              <p className="eyebrow-muted">QUICK CHECK</p>
+              <p className="text-[14px] leading-relaxed text-graphite">
+                If a source has no clear owner, the reason code is <strong>NO_OWNER</strong>.
+                If the source exists but has no version, review date, or source trace, use
+                <strong> NO_METADATA</strong>. If the team cannot safely access it, use
+                <strong> NO_ACCESS</strong>.
+              </p>
+            </div>
+          </div>
+        }
+        produces={<p className="text-[14px] text-navy">{s.produces}</p>}
+        canContinue={gapsSel.length > 0}
+        disabledReason="Pick at least one readiness gap."
+        nextLabel={s.nextLabel}
+        onBack={() => goToStep(1)}
+        onContinue={() => goToStep(3)}
+      />
+    );
+  }
+
+  // ============ STEP 3 — Three-layer blueprint + complete ============
+  const s = M02_COURSE_CONTENT.step3;
   const requiredKnowledgeEntries = M02_COURSE_CONTENT.knowledgeEntryOptions.length;
   const requiredRetrievalTests = M02_COURSE_CONTENT.retrievalTestOptions.length;
   const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
@@ -452,16 +522,28 @@ export function M02Work() {
     setGateReadiness(next);
     gateReadinessOut.setValue.mutate(next);
   };
+  const suggestedGateStatus: Exclude<GateStatus, ""> =
+    internalSel.length === 0 ||
+    contextualSel.length === 0 ||
+    testSetTotal < 3 ||
+    knowledgeEntrySel.length < requiredKnowledgeEntries ||
+    retrievalTestSel.length < requiredRetrievalTests
+      ? "blocked"
+      : gapsSel.length > 0 || gateReadiness.reasonCodes.length > 0
+        ? "partial"
+        : "pass";
+  const needsReasonCode = gateReadiness.status !== "" && gateReadiness.status !== "pass";
   const canCompleteM02 =
     knowledgeEntrySel.length >= requiredKnowledgeEntries &&
     retrievalTestSel.length >= requiredRetrievalTests &&
     !!gateReadiness.status &&
-    gapsSel.length > 0;
+    gapsSel.length > 0 &&
+    (!needsReasonCode || gateReadiness.reasonCodes.length > 0);
 
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
-      stepLabel="STEP 4 of 4 · KNOWLEDGE BASE BLUEPRINT"
+      stepLabel="STEP 3 of 3 · KNOWLEDGE BASE BLUEPRINT"
       title={s.title}
       why={<p>{s.why}</p>}
       example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -486,7 +568,7 @@ export function M02Work() {
               num="02"
               label="Contextual knowledge"
               items={contextualSel}
-              empty="No contextual rules selected yet — go back to Step 2."
+              empty="No contextual rules selected yet — go back to Step 1."
             />
 
             <div className="space-y-1">
@@ -501,8 +583,8 @@ export function M02Work() {
           </div>
 
           <ChecklistSection
-            title="Create five knowledge-entry categories"
-            hint="A knowledge entry needs title, source, owner, rule/fact/example, tags, sensitivity, status, and refresh rule."
+            title="Create five demonstrative knowledge-entry categories"
+            hint="Required metadata only: title, layer/category, source, owner, and rule/fact/example. Advanced metadata can be added later."
             items={M02_COURSE_CONTENT.knowledgeEntryOptions}
             selected={knowledgeEntrySel}
             onToggle={(opt) => {
@@ -513,9 +595,28 @@ export function M02Work() {
             footer={`${knowledgeEntrySel.length}/${requiredKnowledgeEntries} selected — select all five entry categories.`}
           />
 
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-md border border-chalk bg-white p-4">
+              <p className="eyebrow-muted">REQUIRED METADATA</p>
+              <ul className="mt-3 space-y-1 text-[13px] text-graphite">
+                {M02_COURSE_CONTENT.requiredMetadata.map((item) => (
+                  <li key={item}>· {item}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-md border border-chalk bg-mist/40 p-4">
+              <p className="eyebrow-muted">OPTIONAL ADVANCED METADATA</p>
+              <ul className="mt-3 space-y-1 text-[13px] text-graphite">
+                {M02_COURSE_CONTENT.advancedMetadata.map((item) => (
+                  <li key={item}>· {item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
           <ChecklistSection
-            title="Write five retrieval test questions"
-            hint="Each test should name the expected entry, expected source, and expected limitation."
+            title="Choose five retrieval test questions"
+            hint="Use these templates now. Later you can edit each one for the exact process and source."
             items={M02_COURSE_CONTENT.retrievalTestOptions}
             selected={retrievalTestSel}
             onToggle={(opt) => {
@@ -530,7 +631,9 @@ export function M02Work() {
             <div>
               <p className="text-sm font-medium text-navy">Data + knowledge readiness status</p>
               <p className="mt-1 text-[12px] italic text-slate">
-                Readiness is based on evidence, not intention. Choose the status that matches your current evidence.
+                Based on the current blueprint, the suggested status is{" "}
+                <strong className="uppercase text-terracotta">{suggestedGateStatus}</strong>.
+                Confirm the status your team should carry into Gate 1.
               </p>
             </div>
             <div className="grid gap-2 sm:grid-cols-3">
@@ -558,6 +661,13 @@ export function M02Work() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => updateGateReadiness({ status: suggestedGateStatus })}
+              className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-left text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
+            >
+              Use suggested status: {suggestedGateStatus.toUpperCase()}
+            </button>
 
             <ChecklistSection
               title="Evidence checks satisfied"
@@ -570,7 +680,7 @@ export function M02Work() {
 
             <ChecklistSection
               title="Reason codes to carry forward"
-              hint="Use reason codes to make gaps traceable before Build."
+              hint="Required for PARTIAL or BLOCKED. Reason codes make gaps traceable before Build."
               items={M02_COURSE_CONTENT.gateReasonCodes}
               selected={gateReadiness.reasonCodes}
               onToggle={(opt) => updateGateReadiness({ reasonCodes: toggle(gateReadiness.reasonCodes, opt) })}
@@ -578,36 +688,32 @@ export function M02Work() {
             />
           </div>
 
-          {/* Gaps multi-select */}
+          <div className="card bg-mist/40 space-y-2">
+            <p className="eyebrow-muted">BLUEPRINT, NOT PRODUCTION KB</p>
+            <p className="text-[14px] leading-relaxed text-graphite">
+              This is a defendable structure with five demonstrative entries. The production
+              knowledge base can grow later; M02 only needs enough evidence to decide whether the
+              process is safe to take into Build.
+            </p>
+            <p className="text-[12px] italic text-slate">
+              Named gaps from Step 2: {gapsSel.length > 0 ? gapsSel.join("; ") : "none selected yet"}
+            </p>
+          </div>
+
           <div className="border-t border-chalk pt-6 space-y-3">
-            <p className="text-sm font-medium text-navy">
-              Which gaps do you recognise in your own world? (pick all that apply)
-            </p>
-            <p className="text-[12px] italic text-slate">
-              At least one. M02 is done when the gaps are named, not when the layers are listed.
-            </p>
-            <ul className="space-y-2">
-              {M02_COURSE_CONTENT.gapOptions.map((opt) => (
-                <li key={opt}>
-                  <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
-                    <input
-                      type="checkbox"
-                      checked={gapsSel.includes(opt)}
-                      onChange={() => {
-                        const next = toggle(gapsSel, opt);
-                        setGapsSel(next);
-                        gapsOut.setValue.mutate(next);
-                      }}
-                      className="mt-1 h-4 w-4 accent-terracotta"
-                    />
-                    <span>{opt}</span>
-                  </label>
-                </li>
+            <p className="text-sm font-medium text-navy">Language to keep straight</p>
+            <div className="grid gap-2 md:grid-cols-2">
+              {M02_COURSE_CONTENT.glossaryDefinitions.map((item) => (
+                <div key={item.term} className="rounded-md border border-chalk bg-white p-3">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
+                    {item.term}
+                  </p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-graphite">
+                    {item.definition}
+                  </p>
+                </div>
               ))}
-            </ul>
-            <p className="text-[12px] italic text-slate">
-              {gapsSel.length} selected — pick at least one to complete M02.
-            </p>
+            </div>
           </div>
 
           {/* Method-note callout */}
@@ -619,9 +725,13 @@ export function M02Work() {
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
       canContinue={canCompleteM02}
-      disabledReason="Select all five knowledge entries, all five retrieval tests, a readiness status, and at least one gap."
+      disabledReason={
+        needsReasonCode && gateReadiness.reasonCodes.length === 0
+          ? "Add at least one reason code for PARTIAL or BLOCKED."
+          : "Select all five entry categories, all five retrieval tests, a readiness status, and at least one gap."
+      }
       nextLabel="Complete M02"
-      onBack={() => goToStep(3)}
+      onBack={() => goToStep(2)}
       onContinue={completeM02}
     />
   );

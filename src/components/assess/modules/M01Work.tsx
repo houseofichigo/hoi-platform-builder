@@ -259,6 +259,8 @@ export function M01Work() {
         ...current,
         [questionId]: nextValue,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 

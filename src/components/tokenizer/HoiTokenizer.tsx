@@ -13,6 +13,12 @@ import {
   type LanguageTaxPreset,
 } from "@/lib/tokenizer/presets";
 import { estimateTokenCost, formatEur } from "@/lib/tokenizer/pricing";
+import {
+  DEFAULT_TOKENIZER_MODEL_LENS_ID,
+  TOKENIZER_MODEL_LENSES,
+  type TokenizerModelLens,
+  type TokenizerModelLensId,
+} from "@/lib/tokenizer/model-lenses";
 
 const TOKEN_COLORS = [
   "var(--token-c1)",
@@ -43,7 +49,17 @@ export function HoiTokenizer({
   defaultMode = "single",
 }: HoiTokenizerProps) {
   const [mode, setMode] = useState<TokenizerMode>(defaultMode);
+  const [modelLensId, setModelLensId] = useState<TokenizerModelLensId>(
+    DEFAULT_TOKENIZER_MODEL_LENS_ID,
+  );
   const [encoding, setEncoding] = useState<TokenizerEncoding>("o200k_base");
+  const modelLens = TOKENIZER_MODEL_LENSES[modelLensId];
+
+  const handleModelLensChange = (nextId: TokenizerModelLensId) => {
+    const nextLens = TOKENIZER_MODEL_LENSES[nextId];
+    setModelLensId(nextId);
+    setEncoding(nextLens.encoding);
+  };
 
   return (
     <section className="space-y-5 rounded-lg border border-chalk bg-white p-5 md:p-6">
@@ -61,20 +77,23 @@ export function HoiTokenizer({
 
         <label className="min-w-[230px] space-y-1">
           <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
-            Encoding
+            Model lens
           </span>
           <select
-            value={encoding}
-            onChange={(event) => setEncoding(event.target.value as TokenizerEncoding)}
+            value={modelLensId}
+            onChange={(event) =>
+              handleModelLensChange(event.target.value as TokenizerModelLensId)
+            }
             className="w-full rounded-md border border-chalk bg-paper px-3 py-2 text-[13px] text-navy outline-none focus:border-terracotta"
           >
-            {Object.entries(TOKENIZER_ENCODINGS).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value.label}
+            {Object.values(TOKENIZER_MODEL_LENSES).map((lens) => (
+              <option key={lens.id} value={lens.id}>
+                {lens.label}
               </option>
             ))}
           </select>
           <p className="text-[11px] leading-relaxed text-slate">
+            Counting engine: {TOKENIZER_ENCODINGS[encoding].label}.{" "}
             {TOKENIZER_ENCODINGS[encoding].helper}
           </p>
         </label>
@@ -89,6 +108,8 @@ export function HoiTokenizer({
         </ModeButton>
       </div>
 
+      <ModelLensPanel lens={modelLens} />
+
       {mode === "single" ? (
         <SingleInputTokenizer
           compact={compact}
@@ -101,11 +122,64 @@ export function HoiTokenizer({
 
       <p className="rounded-md border border-chalk bg-paper p-3 text-[11px] leading-relaxed text-slate">
         The HOI Tokenizer uses OpenAI-class tokenizers via the open-source
-        js-tiktoken library. It is representative of how many current frontier
-        models split text, but Claude and other providers do not tokenize identically.
-        Use it to build intuition, not to invoice clients.
+        js-tiktoken library. It is representative for learning how many current
+        frontier systems split text, but Claude, Gemini, and other providers do
+        not tokenize identically. Use it to build intuition, not to invoice clients.
       </p>
     </section>
+  );
+}
+
+function ModelLensPanel({ lens }: { lens: TokenizerModelLens }) {
+  return (
+    <section className="rounded-md border border-chalk bg-paper p-4">
+      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+        <div>
+          <p className="eyebrow-muted">WHAT CHANGES BY MODEL?</p>
+          <h4 className="mt-1 text-[17px] font-semibold text-navy">{lens.shortLabel}</h4>
+          <p className="mt-2 max-w-[70ch] text-[13px] leading-relaxed text-graphite">
+            {lens.accuracy}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          {lens.sources.map((source) => (
+            <a
+              key={source.url}
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full border border-chalk bg-white px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-slate transition-colors hover:border-terracotta hover:text-terracotta"
+            >
+              {source.label}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {lens.warning && (
+        <p className="mt-3 rounded-md border border-warning/30 bg-warning/10 p-3 text-[12px] leading-relaxed text-navy">
+          {lens.warning}
+        </p>
+      )}
+
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <LensFact label="Chat UI" value={lens.chatUi} />
+        <LensFact label="Developer/API" value={lens.developerApi} />
+        <LensFact label="Parameters" value={lens.parameterGuidance} />
+        <LensFact label="Cost/context" value={lens.contextCostReminder} />
+      </div>
+    </section>
+  );
+}
+
+function LensFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-chalk bg-white p-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+        {label}
+      </p>
+      <p className="mt-2 text-[12px] leading-relaxed text-graphite">{value}</p>
+    </div>
   );
 }
 

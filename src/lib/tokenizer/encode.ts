@@ -2,12 +2,12 @@ import { Tiktoken, type TiktokenBPE } from "js-tiktoken/lite";
 
 export const TOKENIZER_ENCODINGS = {
   o200k_base: {
-    label: "GPT-5.x / GPT-4o class",
+    label: "OpenAI current (o200k_base)",
     helper:
-      "Representative of current OpenAI-class tokenizers. Claude tokenization is conceptually similar, not identical.",
+      "Representative for OpenAI-class learning estimates. Other providers tokenize differently.",
   },
   cl100k_base: {
-    label: "GPT-4 / GPT-3.5 class — legacy",
+    label: "OpenAI legacy (cl100k_base)",
     helper: "Useful for comparing older tokenizer behavior.",
   },
 } as const;

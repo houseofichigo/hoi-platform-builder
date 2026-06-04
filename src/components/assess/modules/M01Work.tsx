@@ -653,7 +653,7 @@ export function M01Work() {
             <section className="space-y-3">
               <p className="text-[17px] leading-relaxed text-graphite">
                 Use the embedded HOI Tokenizer for the exercises below. Type your own examples,
-                switch encodings, and open the Language Tax tab to compare English, French, and Arabic.
+                switch model lenses, and open the Language Tax tab to compare English, French, and Arabic.
               </p>
               <Suspense
                 fallback={

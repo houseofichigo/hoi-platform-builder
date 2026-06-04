@@ -104,14 +104,7 @@ const TOKEN_QUIZ = [
   },
 ] as const;
 
-type QuizQuestion = {
-  id: string;
-  type: "single" | "multi";
-  question: string;
-  options: readonly string[];
-};
-
-const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
+const SCEPTICISM_QUIZ = [
   {
     id: "q1",
     type: "single",
@@ -122,6 +115,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Information from before the model's training cutoff",
       "An honest refusal to answer",
     ],
+    correct: "Plausible, confident information that is incorrect or fabricated",
+    explanation:
+      "Hallucinations are confident, plausible-sounding fabrications — not random noise or honest refusals.",
   },
   {
     id: "q2",
@@ -134,6 +130,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "The specific figures may be fabricated until verified",
       "Specific numbers are usually accurate",
     ],
+    correct: "The specific figures may be fabricated until verified",
+    explanation:
+      "Precise numbers without sources are the classic hallucination signature — treat them as unverified.",
   },
   {
     id: "q3",
@@ -146,6 +145,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Your prompt must have changed each time",
       "The answer is probably becoming more accurate",
     ],
+    correct: "The model may be inventing rather than retrieving a stable fact",
+    explanation:
+      "Drift across fresh chats signals generation, not retrieval of a stable fact.",
   },
   {
     id: "q4",
@@ -157,6 +159,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "I do not have specific information; share a source and I can help",
       "The company was founded in 2015 by a named person",
     ],
+    correct: "I do not have specific information; share a source and I can help",
+    explanation:
+      "An honest abstain with a request for a source carries the lowest fabrication risk.",
   },
   {
     id: "q5",
@@ -169,6 +174,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Trust it if it sounds professional",
       "Only check spelling and tone",
     ],
+    correct: "Run the Hallucination Audit prompt on the draft",
+    explanation:
+      "A structured audit catches fabricated claims — asking the model to self-check or trusting tone does not.",
   },
   {
     id: "q6",
@@ -181,6 +189,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Engineers forgot to add an I do not know response",
       "Humans rarely admit uncertainty",
     ],
+    correct: "They are trained and evaluated in ways that reward attempting answers over abstaining",
+    explanation:
+      "Training and evaluation incentives push models toward attempting answers rather than abstaining.",
   },
 ] as const;
 
@@ -198,6 +209,7 @@ interface ScepticismLog {
   quizAnswers: Record<string, string | string[]>;
   riskSelections: string[];
   acknowledged: boolean;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";
@@ -334,6 +346,7 @@ export function M01Work() {
             : {},
         riskSelections: Array.isArray(v.riskSelections) ? v.riskSelections : [],
         acknowledged: !!v.acknowledged,
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedScepticism(true);
@@ -381,18 +394,16 @@ export function M01Work() {
     });
   };
 
-  const setScepticismQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+  const setScepticismQuizAnswer = (questionId: string, value: string) => {
     const current = scepticismLog.quizAnswers;
-    const currentValue = current[questionId];
-    const nextValue = multi
-      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
-      : value;
     updateScepticismLog({
       ...scepticismLog,
       quizAnswers: {
         ...current,
-        [questionId]: nextValue,
+        [questionId]: value,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 
@@ -760,17 +771,43 @@ export function M01Work() {
     const exercisesComplete = s.exercises.every((exercise) =>
       checkedExercises.includes(exercise.id),
     );
-    const quizComplete = SCEPTICISM_QUIZ.every((question) => {
+    const allAnswered = SCEPTICISM_QUIZ.every((question) => {
       const value = quizAnswers[question.id];
-      return question.type === "multi"
-        ? Array.isArray(value) && value.length > 0
-        : typeof value === "string" && value.length > 0;
+      return typeof value === "string" && value.length > 0;
     });
+    const correctCount = SCEPTICISM_QUIZ.reduce(
+      (acc, q) => (quizAnswers[q.id] === q.correct ? acc + 1 : acc),
+      0,
+    );
+    const passThreshold = 5;
+    const quizChecked = !!scepticismLog.quizChecked;
+    const quizPassed = quizChecked && correctCount >= passThreshold;
     const stepComplete =
       exercisesComplete &&
-      quizComplete &&
+      quizPassed &&
       scepticismLog.riskSelections.length > 0 &&
       scepticismLog.acknowledged;
+
+    const handleCheckScepticism = () => {
+      updateScepticismLog({ ...scepticismLog, quizChecked: true });
+    };
+    const handleRetryScepticism = () => {
+      updateScepticismLog({ ...scepticismLog, quizChecked: false });
+    };
+
+    const scepticismDisabledReason = !exercisesComplete
+      ? "Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit."
+      : !allAnswered
+        ? "Answer all six questions, then check your answers."
+        : !quizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !quizPassed
+            ? "Review the highlighted answers and try again."
+            : scepticismLog.riskSelections.length === 0
+              ? "Pick at least one work-risk task."
+              : !scepticismLog.acknowledged
+                ? "Confirm the verification habit to continue."
+                : "Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit.";
 
     return (
       <Step
@@ -948,27 +985,59 @@ export function M01Work() {
               <div className="space-y-4">
                 {SCEPTICISM_QUIZ.map((question, index) => {
                   const current = quizAnswers[question.id];
-                  const multi = question.type === "multi";
+                  const isAnswered = typeof current === "string" && current.length > 0;
+                  const showGrading = quizChecked && isAnswered;
+                  const isCorrect = showGrading && current === question.correct;
                   return (
-                    <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
-                      <p className="text-[14px] font-semibold text-navy">
-                        Q{index + 1}. {question.question}
-                      </p>
+                    <div
+                      key={question.id}
+                      className={`rounded-md border bg-paper p-4 ${
+                        showGrading
+                          ? isCorrect
+                            ? "border-emerald-500/60 bg-emerald-500/5"
+                            : "border-danger/40 bg-danger/5"
+                          : "border-chalk"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-[14px] font-semibold text-navy">
+                          Q{index + 1}. {question.question}
+                        </p>
+                        {showGrading && (
+                          <span
+                            className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
+                              isCorrect ? "text-emerald-700" : "text-danger"
+                            }`}
+                          >
+                            {isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-3 space-y-2">
                         {question.options.map((option) => {
-                          const checked = multi
-                            ? Array.isArray(current) && current.includes(option)
-                            : current === option;
+                          const checked = current === option;
+                          const isOptionCorrect = option === question.correct;
+                          const isOptionWrongPick = showGrading && checked && !isCorrect;
+                          const rowClass = showGrading
+                            ? isOptionCorrect
+                              ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
+                              : isOptionWrongPick
+                                ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
+                                : "rounded-md border border-transparent px-2 py-1"
+                            : "";
                           return (
                             <label
                               key={option}
-                              className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                              className={`flex items-start gap-2 text-[14px] text-graphite ${
+                                quizChecked ? "cursor-default" : "cursor-pointer"
+                              } ${rowClass}`}
                             >
                               <input
-                                type={multi ? "checkbox" : "radio"}
+                                type="radio"
                                 name={`m01-scepticism-${question.id}`}
                                 checked={checked}
-                                onChange={() => setScepticismQuizAnswer(question.id, option, multi)}
+                                onChange={() => setScepticismQuizAnswer(question.id, option)}
+                                disabled={quizChecked}
                                 className="mt-1 h-4 w-4 accent-terracotta"
                               />
                               <span>{option}</span>
@@ -976,9 +1045,50 @@ export function M01Work() {
                           );
                         })}
                       </div>
+                      {showGrading && question.explanation && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                          <span className="font-semibold text-navy">Why: </span>
+                          {question.explanation}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
+
+                <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+                  {quizChecked ? (
+                    <>
+                      <p className="text-[14px] text-navy">
+                        You got <span className="font-semibold">{correctCount} of {SCEPTICISM_QUIZ.length}</span>{" "}
+                        correct.{" "}
+                        {quizPassed
+                          ? "Nice — you can continue."
+                          : `You need at least ${passThreshold} correct. Adjust your answers and check again.`}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleRetryScepticism}
+                        className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
+                      >
+                        Try again
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[13px] text-slate">
+                        Answer all six, then confirm to see which are correct before moving on.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleCheckScepticism}
+                        disabled={!allAnswered}
+                        className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-terracotta/90 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Check answers
+                      </button>
+                    </>
+                  )}
+                </div>
 
                 <div className="rounded-md border border-chalk bg-paper p-4">
                   <p className="text-[14px] font-semibold text-navy">
@@ -1042,7 +1152,7 @@ export function M01Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={stepComplete}
-        disabledReason="Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit."
+        disabledReason={scepticismDisabledReason}
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}

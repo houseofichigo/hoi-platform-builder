@@ -28,7 +28,6 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
       const JSZip = (await import("jszip")).default;
       const {
         getCrossPlatformReferencePDF,
-        getPricingTrackerXLSX,
         getPromptsLibraryMarkdown,
         getSetupGuidePDF,
         getSkillMarkdown,
@@ -43,13 +42,6 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
 
       const setupGuide = await getSetupGuidePDF(data);
       if (setupGuide) zip.file("setup-guide.pdf", setupGuide);
-
-      try {
-        zip.file("pricing-tracker.xlsx", await getPricingTrackerXLSX());
-      } catch (error) {
-        console.error(error);
-        zip.file("pricing-tracker-missing.txt", "The pricing tracker template could not be fetched. Re-run npm run build:m03-assets and try again.");
-      }
 
       zip.file("cross-platform-reference.pdf", await getCrossPlatformReferencePDF());
       const blob = await zip.generateAsync({ type: "blob" });
@@ -73,4 +65,3 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
     </div>
   );
 }
-

@@ -71,10 +71,9 @@ export function PlaybookGenerator({
         disabled={!canGenerate}
         onClick={generate}
       >
-        Generate the Automation Playbook for Competitor Pricing Monitor →
+        Generate the M03 Prompt Automation Playbook →
       </button>
       {!canGenerate && <p className="text-center text-[12px] italic text-slate">{disabledReason}</p>}
     </div>
   );
 }
-

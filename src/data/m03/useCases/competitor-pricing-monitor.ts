@@ -1,5 +1,5 @@
 import type { PlatformRungVariant, RungSpec, UseCaseBlueprint } from "../m03Schema";
-import { competitorPricingMonitorSkill, skillToChatGPTFormat } from "../skillTemplate";
+import { promptImproverSkill, skillToChatGPTFormat } from "../skillTemplate";
 
 const promptContractArtifact = `GOAL
 Compare the pricing pages of selected competitors and extract plan names, prices, limits, target segment, notable disclaimers, and source URLs.
@@ -64,156 +64,176 @@ QUALITY CHECKS
 OWNER: Strategy / Sales Ops
 VERSION: 0.1`;
 
-const promptPlusFileArtifact = `Compare last month's pricing data in the attached tracker with current public pricing pages for the same competitors. Identify changes in prices, plans, or limits.
+const promptPlusFileArtifact = `Summarize the attached meeting notes and extract the actions the team needs to follow up on.
 
-Return a change log with:
-- Competitor
-- Plan
-- Field changed
-- Old value
-- New value
-- Source URL
-- Last checked date
+Use only the attached file. Do not infer decisions that are not written in the notes.
+
+Return a table with:
+- Action item
+- Owner
+- Due date
+- Source quote or note section
 - Confidence
+- Open question
 
-Do not infer hidden prices. If a page is unavailable, mark "Page unavailable" and explain what could not be checked.`;
+If an owner or due date is missing, write "Needs confirmation" instead of guessing.`;
 
-const connectorArtifact = `Read the pricing tracker from my connected workspace source and compare it with current public pricing pages for the listed competitors.
+const connectorArtifact = `Use my Gmail connector to review emails from the last 7 days with the label or search query: {label_or_search_query}.
 
-Use only the tracker I name and official pricing pages. If you need to write back to the connected source, stop and ask for confirmation first.
+Goal: identify messages that need a reply, a follow-up, or human review.
+
+Rules:
+- Read only Gmail messages matching the label or query I provide.
+- Do not send, draft, archive, delete, label, forward, or mark messages read.
+- Cite the email subject, sender, and date for every recommendation.
+- If the message contains sensitive HR, legal, medical, financial, or security content, mark "Human review required".
 
 Return:
-- Change log
-- Source URLs
-- Last checked dates
-- Rows that require human review
-- Any source or access problems encountered`;
+- Priority
+- Sender
+- Subject
+- Why it matters
+- Recommended next action
+- Evidence from the email
+- Human review flag`;
 
-const searchArtifact = `Using web search, find the current official pricing pages for [competitor list].
+const searchArtifact = `Use web search to find the current official policy or regulation page for: {policy_or_requirement}.
 
-For each competitor, extract:
-- Plan name
-- Monthly price
-- Annual price
-- Key features
-- Limits
-- Disclaimers
-- Source URL
-- Access date
+Use only primary or official sources such as government, regulator, standards body, or the organization's own policy page. Do not rely on blogs, summaries, forum posts, or vendor explainers as authority.
 
-Use only official pricing pages. If a pricing page requires login or is not publicly accessible, mark it "Not publicly available" and do not infer the price from third-party sources.`;
+Return:
+- Current rule or requirement
+- Official source URL
+- Last updated date if visible
+- Who it applies to
+- What changed or what must be checked
+- Confidence
+- Follow-up question for a human owner
 
-const deepResearchArtifact = `Produce a defensible market positioning brief for our product in the [market segment] category.
+If official sources conflict, show both and explain the conflict.`;
+
+const deepResearchArtifact = `Produce a vendor landscape brief for {tool_category} for a team deciding whether to shortlist vendors.
 
 Include:
-1. Competitive pricing landscape across [competitor list]
-2. Plan structure patterns
-3. Pricing trends over the last 6 months
-4. Gaps and opportunities in current market positioning
-5. Recommendations for our pricing review
+1. The main vendor categories in this market
+2. 6-8 representative vendors
+3. Common buying criteria
+4. Differentiators and tradeoffs
+5. Risks, lock-in considerations, and data/security concerns
+6. A shortlist recommendation for three different buyer profiles
 
-For every claim, cite a primary source. Surface conflicts between sources. Flag any claims that are inference rather than direct evidence.`;
+For every claim, cite sources. Separate direct evidence from inference. Surface source conflicts and missing information.`;
 
-const agentModeArtifact = `Visit the public pricing pages for [competitor list]. For each:
-1. Navigate to the official pricing page.
-2. Extract plan names, monthly prices, annual prices, key features, limits, and last-updated date if visible.
-3. Return structured data in a table.
+const agentModeArtifact = `Use agent mode to perform a read-only QA walkthrough of this sandbox or demo website: {sandbox_url}.
+
+Goal: identify broken navigation, unclear labels, obvious layout issues, and missing expected information.
 
 CONSTRAINTS
-- Do not click "Sign up", "Contact sales", "Request demo", or any conversion form.
-- Do not fill any forms.
-- Do not navigate beyond the pricing page itself unless I approve it.
-- If a page requires login, mark "Not publicly accessible" and move on.
-- Take screenshots or capture source links for verification where the platform supports it.
-- Ask for human confirmation before any action that would be visible to the competitor.`;
+- Stay on the sandbox/demo site I provide.
+- Do not sign in, create accounts, submit forms, purchase anything, send messages, or trigger external actions.
+- Do not click ads, payment links, social share buttons, or contact links.
+- If a page asks for personal data or credentials, stop and report it.
+- Take screenshots or capture URLs where the platform supports it.
+- Ask for confirmation before any click that could change data or be visible externally.
 
-const scheduledPromptArtifact = `Every Monday at 9:00 AM, check the official pricing pages for [competitor list]. Compare with last week's data in the attached or connected pricing tracker.
+Return:
+- Page or URL
+- Issue observed
+- Evidence
+- Severity
+- Suggested fix
+- Whether human review is required`;
 
-If any prices, plans, features, limits, or disclaimers changed, summarize the changes in a table. If no changes are detected, send "No pricing changes detected this week."
+const scheduledPromptArtifact = `Every Friday at 4:00 PM, prepare a weekly team digest for {team_name}.
+
+Use only the sources I explicitly connect or provide for this scheduled prompt, such as a calendar, project board, or weekly notes document.
+
+Return:
+1. Completed work
+2. Blocked items
+3. Decisions needed
+4. Upcoming deadlines
+5. People who need follow-up
+6. Suggested Monday priorities
 
 QUALITY CHECKS
-- Every changed value is cited with source URL and check date.
-- If a page is unreachable, note "Page unavailable" rather than inferring no change.
-- Confidence level is included for each change.
-- Any unclear source, layout change, or hidden price is flagged for human review.`;
+- Cite the source for every item.
+- Do not create tasks, send messages, or edit calendars.
+- If a source is unavailable, write "Source unavailable" and continue.
+- Flag anything sensitive or unclear for human review.`;
 
 const chatgptFile: PlatformRungVariant = {
   whereToFindIt: "Click the paperclip or plus icon next to the message input.",
   stepByStepInstructions: [
-    "Download the pricing tracker template.",
     "Open ChatGPT in your browser.",
-    "Attach the tracker file.",
+    "Attach a meeting notes file or a short sample notes document.",
     "Paste the Prompt + File artifact.",
-    "Run the prompt and review the change log.",
+    "Run the prompt and review the action table.",
   ],
   expectedOutcome:
-    "ChatGPT uses the file as grounded context and returns a structured change log. If search is enabled, it can cross-check current public pages.",
+    "ChatGPT uses the file as grounded context and returns action items with owners, evidence, and missing-detail flags.",
   tipsAndCautions: [
-    "Check your workspace data settings before uploading sensitive commercial data.",
-    "Enable search if freshness matters.",
+    "Check workspace data settings before uploading sensitive notes.",
+    "Ask for source quotes when the output will drive team follow-up.",
   ],
 };
 
 const claudeFile: PlatformRungVariant = {
   whereToFindIt: "Click the attachment icon or drag the file into the conversation.",
   stepByStepInstructions: [
-    "Download the pricing tracker template.",
     "Open Claude.",
-    "Attach the tracker file.",
+    "Attach a meeting notes file or a short sample notes document.",
     "Paste the Prompt + File artifact.",
-    "Ask Claude to return only sourced changes and missing-data flags.",
+    "Ask Claude to return only actions grounded in the file.",
   ],
   expectedOutcome:
-    "Claude analyzes the file and returns a grounded pricing comparison with structured uncertainty.",
+    "Claude analyzes the notes and returns a grounded action list with uncertainty where details are missing.",
   tipsAndCautions: [
-    "For very large trackers, upload only the relevant sheet or export a smaller file.",
-    "Ask for source evidence instead of accepting a summary alone.",
+    "For long notes, upload the relevant section first.",
+    "Ask for evidence instead of accepting a summary alone.",
   ],
 };
 
 const geminiFile: PlatformRungVariant = {
   whereToFindIt: "Use the upload or add-files control in Gemini.",
   stepByStepInstructions: [
-    "Download the pricing tracker template.",
     "Open Gemini.",
-    "Upload the tracker or add it from Drive if your account supports it.",
+    "Upload meeting notes or add them from Drive if your account supports it.",
     "Paste the Prompt + File artifact.",
-    "Review the resulting table and source handling.",
+    "Review the resulting action table and source handling.",
   ],
-  expectedOutcome: "Gemini analyzes the spreadsheet and returns a structured summary.",
+  expectedOutcome: "Gemini analyzes the notes and returns a structured follow-up summary.",
   tipsAndCautions: [
     "Workspace admins may control which apps and uploads are available.",
-    "Confirm whether Gemini is using the uploaded file, Drive, or web results.",
+    "Confirm whether Gemini is using the uploaded file, Drive, or general knowledge.",
   ],
 };
 
 const mistralFile: PlatformRungVariant = {
   whereToFindIt: "Use the file upload option in Mistral/Vibe chat.",
   stepByStepInstructions: [
-    "Download the pricing tracker template.",
     "Open Mistral/Vibe.",
-    "Attach the tracker file.",
+    "Attach a meeting notes file or a short sample notes document.",
     "Paste the Prompt + File artifact.",
-    "Ask for a change log with confidence and source fields.",
+    "Ask for an action list with confidence and source fields.",
   ],
-  expectedOutcome: "Mistral/Vibe uses the uploaded file as context and returns analysis.",
+  expectedOutcome: "Mistral/Vibe uses the uploaded file as context and returns a follow-up plan.",
   tipsAndCautions: [
     "Use descriptive filenames so the AI can reference the right file clearly.",
-    "For spreadsheets, ask for a table rather than prose.",
+    "For notes, ask for source quotes rather than prose-only summaries.",
   ],
 };
 
 const copilotFile: PlatformRungVariant = {
   whereToFindIt: "Use Add content in Microsoft Copilot or reference a OneDrive file.",
   stepByStepInstructions: [
-    "Download the pricing tracker template.",
     "Open Microsoft Copilot or Microsoft 365 Copilot Chat.",
-    "Upload the tracker or reference it from OneDrive.",
+    "Upload meeting notes or reference a OneDrive/Teams notes file.",
     "Paste the Prompt + File artifact.",
-    "Review citations, file references, and confidence levels.",
+    "Review citations, file references, and missing-detail flags.",
   ],
   expectedOutcome:
-    "Copilot analyzes the file or referenced Microsoft 365 content and returns a structured comparison.",
+    "Copilot analyzes the file or referenced Microsoft 365 content and returns a structured action list.",
   tipsAndCautions: [
     "Local file paths are not enough in Microsoft 365 Copilot; use uploaded or cloud-hosted files.",
     "Work and school accounts may have different file rules from consumer Copilot.",
@@ -352,26 +372,26 @@ const rungs: RungSpec[] = [
     rungName: "Skill",
     capability: "A packaged, named, auto-triggering instruction set.",
     whyItMatters:
-      "Skills remove the need to remember and paste the full prompt. The method becomes something the AI can load when the task matches.",
+      "Skills remove the need to improve the same kind of prompt by hand every time. The improvement method becomes something the AI can load when the task matches.",
     whatToNotice:
-      "A Skill is organizational memory. It needs a good trigger, direct instructions, a quality bar, and clear situations where it should not run.",
+      "A Skill is organizational memory. The description and triggers decide when it activates, while the instructions decide how consistently it improves prompts.",
     conceptDefinition:
-      "A Skill packages the reusable prompt as named instructions with triggers, safety constraints, and quality checks. ChatGPT, Claude, and Mistral/Vibe have documented Skill-like surfaces in scope for this module.",
+      "A Skill packages a reusable method as named instructions with triggers, safety constraints, and quality checks. In this example, the Prompt Improver Skill turns rough prompts into stronger Prompt Contracts.",
     failureMode:
-      "The Skill triggers on the wrong task, fails to trigger on the right task, or applies outdated rules automatically.",
+      "The Skill triggers on the wrong task, changes the user's intent, removes needed review gates, or writes a polished prompt that still lacks evidence rules.",
     governanceWeight: 3,
-    promptOrArtifact: skillToChatGPTFormat(competitorPricingMonitorSkill),
+    promptOrArtifact: skillToChatGPTFormat(promptImproverSkill),
     platformVariants: {
       chatgpt: {
         whereToFindIt: "Profile menu -> Skills.",
         stepByStepInstructions: [
           "Open the Skills area if it is enabled for your plan.",
           "Create a new Skill.",
-          "Paste the Competitor Pricing Monitor Skill content.",
+          "Paste the Prompt Improver Skill content.",
           "Review any scan or workspace warning.",
-          "Save, install, and test with a matching request.",
+          "Save, install, and test with: 'Improve this prompt for a weekly project update.'",
         ],
-        expectedOutcome: "ChatGPT can automatically use the Skill when a competitor pricing task matches.",
+        expectedOutcome: "ChatGPT can automatically use the Skill when a prompt-improvement request matches.",
         tipsAndCautions: [
           "ChatGPT Skills are plan-gated beta at verification time.",
           "Review generated or imported Skills before enabling them for a team.",
@@ -384,7 +404,7 @@ const rungs: RungSpec[] = [
           "Include the Skill name and description in frontmatter.",
           "Paste the Skill body into the markdown file.",
           "Upload or add the Skill in Claude.",
-          "Test activation with a competitor pricing request.",
+          "Test activation with a rough prompt-improvement request.",
         ],
         expectedOutcome: "Claude can discover and use the Skill when the request matches its description.",
         tipsAndCautions: [
@@ -397,9 +417,9 @@ const rungs: RungSpec[] = [
         stepByStepInstructions: [
           "Open Vibe Work.",
           "Create a new Skill if Skills are enabled for your plan or workspace.",
-          "Paste the Competitor Pricing Monitor method, quality bar, and safety constraints.",
+          "Paste the Prompt Improver method, quality bar, and safety constraints.",
           "Save the Skill.",
-          "Test it with a recurring competitive watch request.",
+          "Test it with a rough prompt that needs a reusable structure.",
         ],
         expectedOutcome: "Vibe Work applies the repeatable method to matching tasks.",
         tipsAndCautions: [
@@ -423,7 +443,6 @@ const rungs: RungSpec[] = [
       "The AI may use an outdated file, miss content in a large file, or expose sensitive information to a tool that should not receive it.",
     governanceWeight: 3,
     promptOrArtifact: promptPlusFileArtifact,
-    artifactDownloadPath: "/downloads/m03/pricing-tracker.xlsx",
     platformVariants: {
       chatgpt: chatgptFile,
       claude: claudeFile,
@@ -441,22 +460,22 @@ const rungs: RungSpec[] = [
     whatToNotice:
       "Connectors increase usefulness and risk at the same time. Access governance becomes part of prompt quality.",
     conceptDefinition:
-      "Prompt + Connector means the AI can retrieve data from approved apps such as Drive, SharePoint, Notion, Gmail, Slack, or other workspace systems.",
+      "Prompt + Connector means the AI can retrieve data from approved apps such as Gmail, Drive, SharePoint, Notion, Slack, or other workspace systems.",
     failureMode:
-      "The AI may access too much, pick the wrong file, rely on stale indexed content, or attempt a write action without proper approval.",
+      "The AI may access too much, select the wrong messages, expose sensitive content, or attempt a write action without proper approval.",
     governanceWeight: 4,
     promptOrArtifact: connectorArtifact,
     platformVariants: {
       chatgpt: {
         whereToFindIt: "Apps or connectors in ChatGPT settings and tools.",
         stepByStepInstructions: [
-          "Enable the relevant app or connector if your plan and workspace allow it.",
-          "Confirm the source scope and permissions.",
-          "Reference the connected tracker by name.",
+          "Enable the Gmail app or connector if your plan and workspace allow it.",
+          "Confirm the Gmail scope is read-only for this exercise.",
+          "Name the label or search query to inspect.",
           "Paste the connector artifact.",
-          "Approve only read actions unless a human confirms a write.",
+          "Approve only read actions.",
         ],
-        expectedOutcome: "ChatGPT retrieves the tracker from the connected source and summarizes changes.",
+        expectedOutcome: "ChatGPT retrieves matching Gmail messages and returns a triage table.",
         tipsAndCautions: [
           "OpenAI now uses the term apps for many connector experiences.",
           "Deep Research may use connected apps read-only; agent mode has separate controls.",
@@ -465,13 +484,13 @@ const rungs: RungSpec[] = [
       claude: {
         whereToFindIt: "Settings -> Connectors, Integrations, or the plus menu in chat.",
         stepByStepInstructions: [
-          "Enable the relevant connector or integration.",
-          "Authenticate the source.",
+          "Enable Gmail if it is available in your workspace connector list.",
+          "Authenticate the source with the narrowest practical scope.",
           "Confirm whether the connector is native, remote MCP, or workspace-managed.",
           "Paste the connector artifact.",
-          "Review any approval request before allowing actions.",
+          "Review any approval request before allowing access.",
         ],
-        expectedOutcome: "Claude retrieves approved workspace context and returns a structured update.",
+        expectedOutcome: "Claude retrieves approved email context and returns a structured triage summary.",
         tipsAndCautions: [
           "Research may invoke connected tools during investigation.",
           "Disable connector tools that can write when you only need read access.",
@@ -480,28 +499,28 @@ const rungs: RungSpec[] = [
       gemini: {
         whereToFindIt: "Google Workspace apps in Gemini.",
         stepByStepInstructions: [
-          "Sign in with the Google account that has access to the relevant Drive files.",
+          "Sign in with the Google account that has access to the Gmail messages.",
           "Make sure Workspace apps are enabled by the administrator if this is a work account.",
-          "Reference the Drive file or workspace source explicitly.",
+          "Reference Gmail and the label or search query explicitly.",
           "Paste the connector artifact.",
-          "Check which sources Gemini used before relying on the answer.",
+          "Check which email sources Gemini used before relying on the answer.",
         ],
-        expectedOutcome: "Gemini reads from Google Workspace sources and returns a sourced update.",
+        expectedOutcome: "Gemini reads from Gmail or Google Workspace context and returns a sourced triage table.",
         tipsAndCautions: [
           "Workspace app availability varies by account type, edition, location, language, and admin settings.",
-          "Ask Gemini to show source links for every pricing claim.",
+          "Ask Gemini to show source references for every recommendation.",
         ],
       },
       mistral: {
         whereToFindIt: "Vibe Work or Le Chat -> Connectors.",
         stepByStepInstructions: [
           "Open the Connectors area.",
-          "Connect the relevant service such as Gmail, Google Drive, Notion, Slack, or SharePoint if available.",
+          "Connect Gmail if it is available for your workspace.",
           "Enable the connector in the task or conversation.",
           "Paste the connector artifact.",
           "Approve sensitive connector actions only after review.",
         ],
-        expectedOutcome: "Mistral/Vibe retrieves data through connected tools and returns a governed update.",
+        expectedOutcome: "Mistral/Vibe retrieves email context through connected tools and returns a governed triage summary.",
         tipsAndCautions: [
           "Knowledge connectors may index files; regular connectors may fetch data in real time.",
           "Review per-function permissions before pre-authorizing actions.",
@@ -511,12 +530,13 @@ const rungs: RungSpec[] = [
         whereToFindIt: "Microsoft 365 Copilot Chat, Copilot Search, or admin-enabled connectors.",
         stepByStepInstructions: [
           "Sign in with the Microsoft 365 account that has access to the source.",
-          "Reference SharePoint, OneDrive, Teams, or a connector-backed source.",
+          "Use Outlook as the Microsoft 365 equivalent if Gmail is not connected.",
+          "Reference the mailbox folder, sender, or search query.",
           "Paste the connector artifact.",
           "Check citations and permission-filtered sources.",
-          "Escalate connector setup to an admin if the source is outside Microsoft 365.",
+          "Escalate Gmail connector setup to an admin if the source is outside Microsoft 365.",
         ],
-        expectedOutcome: "Copilot retrieves Microsoft 365 or connector-indexed content and returns cited results.",
+        expectedOutcome: "Copilot retrieves mailbox or connector-indexed content and returns cited triage results.",
         tipsAndCautions: [
           "Microsoft 365 Copilot connectors are often admin-configured.",
           "Connector content respects source permissions, but poor source ownership still creates risk.",
@@ -529,19 +549,19 @@ const rungs: RungSpec[] = [
     rungName: "Prompt + Search",
     capability: "The AI searches the web for current information before responding.",
     whyItMatters:
-      "Search handles freshness. Public pricing pages can change any week, while training data is not a live source.",
+      "Search handles freshness. Policies, regulations, and public requirements can change, while training data is not a live source.",
     whatToNotice:
       "Search introduces source quality questions: which domains count, how recent is recent enough, and what happens when sources conflict.",
     conceptDefinition:
       "Prompt + Search asks the AI to retrieve current web information and cite sources before answering.",
     failureMode:
-      "The AI may use third-party blogs, stale summaries, forum posts, or conflicting search results without explaining the conflict.",
+      "The AI may use third-party summaries, stale pages, forum posts, or conflicting search results without explaining the conflict.",
     governanceWeight: 3,
     promptOrArtifact: searchArtifact,
     platformVariants: {
       chatgpt: {
         whereToFindIt: "Select Search or type /search.",
-        stepByStepInstructions: ["Turn on Search.", "Paste the search artifact.", "Run it.", "Open and check the cited pricing pages."],
+        stepByStepInstructions: ["Turn on Search.", "Paste the search artifact.", "Run it.", "Open and check the cited official sources."],
         expectedOutcome: "ChatGPT returns current web-sourced results with links.",
       },
       claude: {
@@ -556,7 +576,7 @@ const rungs: RungSpec[] = [
       },
       mistral: {
         whereToFindIt: "Enable web search or web access.",
-        stepByStepInstructions: ["Turn on web access.", "Paste the search artifact.", "Run it.", "Review official URLs."],
+        stepByStepInstructions: ["Turn on web access.", "Paste the search artifact.", "Run it.", "Review official URLs and dates."],
         expectedOutcome: "Mistral/Vibe returns web-sourced findings.",
       },
       copilot: {
@@ -571,7 +591,7 @@ const rungs: RungSpec[] = [
     rungName: "Prompt + Deep Research",
     capability: "The AI runs an extended research process and produces a sourced report.",
     whyItMatters:
-      "Deep Research is for synthesis, not quick lookup. It turns pricing monitoring into a defensible market-positioning brief.",
+      "Deep Research is for synthesis, not quick lookup. It turns scattered vendor information into a defensible landscape brief.",
     whatToNotice:
       "The artifact changes from a table to a report. That means review criteria change too.",
     conceptDefinition:
@@ -590,7 +610,7 @@ const rungs: RungSpec[] = [
           "Wait for the report.",
           "Check the sources-used section before acting on recommendations.",
         ],
-        expectedOutcome: "A structured market-positioning brief with citations and a research trail.",
+        expectedOutcome: "A structured vendor landscape brief with citations and a research trail.",
         tipsAndCautions: [
           "Deep Research usage varies by plan and geography.",
           "Use Search for quick facts and Deep Research for defensible synthesis.",
@@ -636,7 +656,7 @@ const rungs: RungSpec[] = [
         expectedOutcome: "A multi-step public-web research report with citations.",
         tipsAndCautions: [
           "Mistral marks Deep Research as beta at verification time.",
-          "Keep quick pricing lookups on the Search rung.",
+          "Keep quick policy lookups on the Search rung.",
         ],
       },
       copilot: {
@@ -674,16 +694,16 @@ const rungs: RungSpec[] = [
         whereToFindIt: "Select Agent mode or type /agent.",
         stepByStepInstructions: [
           "Start Agent mode.",
-          "Use a sandbox pricing page for the first run.",
+          "Use a sandbox or demo website for the first run.",
           "Paste the agent artifact.",
           "Watch the browser steps.",
-          "Interrupt if the agent clicks beyond public pricing pages.",
+          "Interrupt if the agent approaches sign-in, forms, payment, contact, or external actions.",
         ],
-        expectedOutcome: "ChatGPT agent browses public pricing pages, extracts data, and pauses for confirmations when needed.",
+        expectedOutcome: "ChatGPT agent performs a read-only QA walkthrough and pauses for confirmations when needed.",
         tipsAndCautions: [
           "Agent mode is available only on eligible paid plans.",
           "Operator functionality is integrated into ChatGPT agent mode.",
-          "Do not allow sign-ups, forms, demo requests, or competitor contact.",
+          "Do not allow sign-ups, forms, purchases, messages, or external contact.",
           "Use screenshots and source links for verification.",
         ],
       },
@@ -694,7 +714,7 @@ const rungs: RungSpec[] = [
           "Start Gemini Agent.",
           "Use a sandbox URL first.",
           "Paste the agent artifact.",
-          "Take control if the browser approaches any gated or conversion action.",
+          "Take control if the browser approaches any gated, form, payment, or external action.",
         ],
         expectedOutcome: "Gemini Agent can perform supervised multi-step browser tasks where the feature is available.",
         tipsAndCautions: [
@@ -708,7 +728,7 @@ const rungs: RungSpec[] = [
           "Open Microsoft 365 Copilot.",
           "Open Researcher if your license and administrator allow it.",
           "Select Computer Use if the Frontier feature is enabled.",
-          "Use a sandbox page first.",
+          "Use a sandbox or demo page first.",
           "Review every confirmation request before allowing action.",
         ],
         expectedOutcome: "Researcher can interact with websites and tools in a supervised virtual environment.",
@@ -740,7 +760,7 @@ const rungs: RungSpec[] = [
         stepByStepInstructions: [
           "Create a new task from the prompt or use the task scheduling control.",
           "Paste the scheduled prompt artifact.",
-          "Set Monday at 9:00 AM or your preferred cadence.",
+          "Set Friday at 4:00 PM or your preferred cadence.",
           "Confirm notification settings.",
           "Review the first run manually.",
         ],
@@ -840,6 +860,6 @@ export const competitorPricingMonitor: UseCaseBlueprint = {
     examples:
       "Include one example row for a competitor with transparent public pricing and one example row for a competitor with hidden enterprise pricing.",
   },
-  skillSpec: competitorPricingMonitorSkill,
+  skillSpec: promptImproverSkill,
   rungs,
 };

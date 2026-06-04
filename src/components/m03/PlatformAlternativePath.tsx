@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import type { Platform, PromptContract, SkillSpec } from "@/data/m03/m03Schema";
 import { platforms } from "@/data/m03/platforms";
-import { competitorPricingMonitorSkill } from "@/data/m03/skillTemplate";
+import { promptImproverSkill } from "@/data/m03/skillTemplate";
 import { PLATFORM_EQUIVALENTS } from "./m03Display";
 import {
   downloadPromptContractAsMarkdown,
@@ -21,7 +21,7 @@ export function PlatformAlternativePath({
 }: PlatformAlternativePathProps) {
   const platformConfig = platforms[platform];
   const equivalent = PLATFORM_EQUIVALENTS[platform] ?? "productised assistants";
-  const markdown = promptContractToMarkdown(promptContract, "Competitor Pricing Monitor Prompt Contract");
+  const markdown = promptContractToMarkdown(promptContract, "Reusable Prompt Contract");
 
   return (
     <section className="card space-y-5">
@@ -57,7 +57,7 @@ export function PlatformAlternativePath({
           type="button"
           className="btn-ichigo btn-ichigo-outline"
           onClick={() =>
-            downloadPromptContractAsMarkdown(promptContract, "competitor-pricing-monitor")
+            downloadPromptContractAsMarkdown(promptContract, "m03-reusable-prompt-contract")
           }
         >
           Download as .md
@@ -65,7 +65,7 @@ export function PlatformAlternativePath({
         <button
           type="button"
           className="btn-ichigo btn-ichigo-secondary"
-          onClick={() => onSave(competitorPricingMonitorSkill)}
+          onClick={() => onSave(promptImproverSkill)}
         >
           I've saved the contract →
         </button>
@@ -73,4 +73,3 @@ export function PlatformAlternativePath({
     </section>
   );
 }
-

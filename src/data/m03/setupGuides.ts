@@ -7,7 +7,7 @@ export type SetupGuide = {
 export const setupGuides: Record<string, SetupGuide> = {
   chatgpt: {
     platformName: "ChatGPT",
-    title: "How to install your Competitor Pricing Monitor Skill in ChatGPT",
+    title: "How to install your Prompt Improver Skill in ChatGPT",
     sections: [
       {
         heading: "Step 1 - Open the Skills interface",
@@ -27,13 +27,13 @@ export const setupGuides: Record<string, SetupGuide> = {
       },
       {
         heading: "Step 5 - Test it",
-        body: "Open a new chat and type: 'Compare competitor pricing for [your list].' Confirm that the Skill applies the Prompt Contract and quality bar.",
+        body: "Open a new chat and type: 'Improve this prompt for a weekly project update.' Confirm that the Skill preserves intent while adding structure, source rules, and a quality bar.",
       },
     ],
   },
   claude: {
     platformName: "Claude",
-    title: "How to install your Competitor Pricing Monitor Skill in Claude",
+    title: "How to install your Prompt Improver Skill in Claude",
     sections: [
       {
         heading: "Step 1 - Open Claude Skills",
@@ -53,13 +53,13 @@ export const setupGuides: Record<string, SetupGuide> = {
       },
       {
         heading: "Step 5 - Test it",
-        body: "Open a new conversation and ask Claude to update a competitor pricing tracker. Confirm that the Skill applies the source and safety constraints.",
+        body: "Open a new conversation and ask Claude to improve a rough work prompt. Confirm that the Skill applies source and safety constraints.",
       },
     ],
   },
   mistral: {
     platformName: "Mistral / Vibe",
-    title: "How to install your Competitor Pricing Monitor Skill in Mistral Vibe",
+    title: "How to install your Prompt Improver Skill in Mistral Vibe",
     sections: [
       {
         heading: "Step 1 - Open Vibe Work",
@@ -71,13 +71,12 @@ export const setupGuides: Record<string, SetupGuide> = {
       },
       {
         heading: "Step 3 - Attach references if allowed",
-        body: "If your workspace supports Skill reference files, attach the approved competitor list or pricing tracker template.",
+        body: "If your workspace supports Skill reference files, attach an approved prompt style guide or examples of strong Prompt Contracts.",
       },
       {
         heading: "Step 4 - Test activation",
-        body: "Ask for a competitive pricing review and confirm the Skill activates only for the intended task.",
+        body: "Ask for prompt improvement and confirm the Skill activates only for the intended task.",
       },
     ],
   },
 };
-

@@ -33,7 +33,7 @@ export const platforms: Record<Platform, PlatformConfig> = {
       "Go to Settings, then Skills.",
       "Create or upload a Skill package that includes the SKILL.md file.",
       "Confirm the name, description, triggers, and any supporting files.",
-      "Enable the Skill and test it with a pricing-monitor request.",
+      "Enable the Skill and test it with a prompt-improvement request.",
     ],
   },
   gemini: {
@@ -59,7 +59,7 @@ export const platforms: Record<Platform, PlatformConfig> = {
       "Open the Skills area or create a Skill from the Work interface.",
       "Paste the Skill method and quality bar into the Skill instructions.",
       "Attach any reference files if your workspace allows them.",
-      "Save the Skill and run a competitor pricing request to test activation.",
+      "Save the Skill and run a prompt-improvement request to test activation.",
     ],
   },
   copilot: {

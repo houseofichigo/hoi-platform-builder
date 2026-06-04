@@ -4,7 +4,6 @@ import { platforms } from "@/data/m03/platforms";
 
 interface VaguePromptTesterProps {
   platform?: Platform;
-  useCaseSelected: boolean;
   prompt: string;
   value?: VaguePromptTestResult;
   onChange: (value: VaguePromptTestResult) => void;
@@ -31,20 +30,18 @@ const emptyResult: VaguePromptTestResult = {
     inventedDetails: false,
     couldDefend: false,
   },
-  pastedResult: "",
 };
 
 export function VaguePromptTester({
   platform,
-  useCaseSelected,
   prompt,
   value,
   onChange,
 }: VaguePromptTesterProps) {
-  if (!platform || !useCaseSelected) {
+  if (!platform) {
     return (
       <section className="card bg-mist/40">
-        <p className="text-[14px] text-slate">Choose your platform and use case above to test the baseline.</p>
+        <p className="text-[14px] text-slate">Choose your platform above to test the baseline.</p>
       </section>
     );
   }
@@ -64,8 +61,8 @@ export function VaguePromptTester({
       <header className="space-y-2">
         <p className="eyebrow">Test the vague prompt in your AI</p>
         <p className="text-[14px] leading-relaxed text-graphite">
-          Open {platformConfig.displayName} in a new tab. Copy this prompt, paste it, run it, then
-          come back and tell us what you got.
+          Open {platformConfig.displayName} in a new tab. Copy this prompt, run it, then
+          come back and mark what you observed.
         </p>
       </header>
 
@@ -110,23 +107,6 @@ export function VaguePromptTester({
         ))}
       </div>
 
-      <label className="block space-y-2">
-        <span className="text-sm font-medium text-navy">
-          Optional: paste what the AI gave you
-        </span>
-        <textarea
-          value={result.pastedResult ?? ""}
-          maxLength={2000}
-          rows={6}
-          onChange={(e) => onChange({ ...result, pastedResult: e.target.value })}
-          className="input-ichigo min-h-[140px]"
-          placeholder="Paste the AI response here..."
-        />
-        <span className="block text-right font-mono text-[11px] text-slate">
-          {(result.pastedResult ?? "").length} / 2000
-        </span>
-      </label>
     </section>
   );
 }
-

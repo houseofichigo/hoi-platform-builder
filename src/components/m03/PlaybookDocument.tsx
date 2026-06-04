@@ -2,7 +2,8 @@ import type { AutomationPlaybookData } from "@/data/m03/m03Schema";
 import { getRungsForPlatform, isRungAvailable } from "@/data/m03/capabilityMatrix";
 import { platforms } from "@/data/m03/platforms";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
-import { GOVERNANCE_GAP_LABELS, formatPromptValue, RUNG_LABELS } from "./m03Display";
+import { genericSkillCreationMetaPrompt, promptImproverSkill, skillToChatGPTFormat } from "@/data/m03/skillTemplate";
+import { GOVERNANCE_GAP_LABELS, RUNG_LABELS } from "./m03Display";
 import { promptContractToMarkdown } from "./skillDownload";
 
 export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
@@ -19,33 +20,28 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
       className="mx-auto max-w-[780px] rounded-lg border border-chalk bg-white p-6 md:p-8 space-y-8"
     >
       <header className="space-y-2">
-        <p className="eyebrow">M03 Automation Playbook</p>
-        <h2 className="font-display text-3xl text-navy">{useCase.displayName}</h2>
+        <p className="eyebrow">M03 Prompt Automation Playbook</p>
+        <h2 className="font-display text-3xl text-navy">Shareable Prompt Library</h2>
         <p className="text-[13px] text-slate">
           Generated {new Date(data.generatedAt).toLocaleString()} · {platform.displayName}
         </p>
       </header>
 
-      <DocumentSection label="Section 1" title="Setup">
+      <DocumentSection label="Section 1" title="How to use this library">
         <dl className="grid gap-3 text-[14px] md:grid-cols-2">
-          <SpecItem label="Use case" value={useCase.displayName} />
+          <SpecItem label="Chapter" value="M03 Prompt-driven automation" />
           <SpecItem label="Platform" value={platform.displayName} />
           <SpecItem label="Available rungs" value={`${getRungsForPlatform(data.platform).length} of 10`} />
           <SpecItem label="Rungs walked" value={data.rungsCovered.join(", ")} />
         </dl>
         <div className="mt-5">
-          <p className="eyebrow-muted">Vague prompt test results</p>
+          <p className="eyebrow-muted">Baseline example</p>
           <p className="mt-2 font-mono text-[13px] text-ink">"{useCase.vaguePrompt}"</p>
           <ul className="mt-3 grid gap-1 text-[13px] text-navy md:grid-cols-2">
             {Object.entries(data.vagueResults.observations).map(([key, value]) => (
               <li key={key}>{value ? "✓" : "✗"} {observationLabel(key)}</li>
             ))}
           </ul>
-          {data.vagueResults.pastedResult && (
-            <pre className="mt-4 whitespace-pre-wrap rounded-md bg-mist p-4 font-mono text-[12px] text-ink">
-              {data.vagueResults.pastedResult}
-            </pre>
-          )}
         </div>
       </DocumentSection>
 
@@ -55,13 +51,23 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         </pre>
       </DocumentSection>
 
-      <DocumentSection label="Section 3" title="Your Skill">
+      <DocumentSection label="Section 3" title="Skill-building meta-prompt">
+        <p className="text-[14px] leading-relaxed text-graphite">
+          Use this meta-prompt when you already have a good Prompt Contract and want the AI to turn
+          it into a reusable Skill.
+        </p>
+        <pre className="mt-4 whitespace-pre-wrap rounded-md bg-mist p-4 font-mono text-[12px] leading-relaxed text-ink">
+          {genericSkillCreationMetaPrompt}
+        </pre>
+      </DocumentSection>
+
+      <DocumentSection label="Section 4" title="Prompt Improver Skill example">
         {["chatgpt", "claude", "mistral"].includes(data.platform) ? (
           <>
-            <h4 className="font-display text-lg text-navy">{data.skillSpec.name}</h4>
-            <p className="text-[14px] text-graphite">{data.skillSpec.description}</p>
+            <h4 className="font-display text-lg text-navy">{promptImproverSkill.name}</h4>
+            <p className="text-[14px] text-graphite">{promptImproverSkill.description}</p>
             <pre className="mt-4 whitespace-pre-wrap rounded-md bg-mist p-4 font-mono text-[12px] leading-relaxed text-ink">
-              {data.skillSpec.instructions}
+              {skillToChatGPTFormat(promptImproverSkill)}
             </pre>
             <ol className="mt-4 list-decimal space-y-1 pl-5 text-[13px] text-navy">
               {(platform.skillInstallSteps ?? []).map((step) => (
@@ -72,20 +78,19 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         ) : (
           <div className="rounded-md border border-chalk bg-mist/40 p-4">
             <p className="text-[14px] text-navy">
-              In {platform.displayName}, use this Prompt Contract as a saved template. M04 covers
-              the platform's productised equivalents for Skill-like capability.
+              In {platform.displayName}, use the meta-prompt and Prompt Contract as saved
+              templates. M04 covers the platform's productised equivalents for Skill-like capability.
             </p>
             <pre className="mt-4 whitespace-pre-wrap font-mono text-[12px] text-ink">
-              {promptContractToMarkdown(data.promptContract, "Reusable Prompt Contract")}
+              {skillToChatGPTFormat(promptImproverSkill)}
             </pre>
           </div>
         )}
       </DocumentSection>
 
-      <DocumentSection label="Section 4" title="The Ladder Map">
+      <DocumentSection label="Section 5" title="Prompt library by automation rung">
         <div className="space-y-5">
           {walkedRungs.map((rung) => {
-            const result = data.rungWalkthrough[rung.rungNumber];
             return (
               <div key={rung.rungNumber} className="rounded-md border border-chalk p-4">
                 <p className="eyebrow-muted">Rung {rung.rungNumber}</p>
@@ -97,10 +102,6 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
                 <pre className="mt-3 whitespace-pre-wrap rounded-md bg-mist p-3 font-mono text-[11px] text-ink">
                   {rung.promptOrArtifact}
                 </pre>
-                <p className="mt-3 text-[12px] text-slate">
-                  Tested: {formatPromptValue(result?.tested)} · Relevant for team:{" "}
-                  {formatPromptValue(result?.relevantForTeam)}
-                </p>
               </div>
             );
           })}
@@ -131,7 +132,7 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         </div>
       </DocumentSection>
 
-      <DocumentSection label="Section 5" title="Decisions and Governance Gaps">
+      <DocumentSection label="Section 6" title="Readiness note">
         <div className="space-y-3 text-[14px] text-navy">
           <p><span className="font-medium">Current rung:</span> Rung {data.reflectionAnswers.currentRung} — {current?.rungName ?? RUNG_LABELS[data.reflectionAnswers.currentRung]}</p>
           <p><span className="font-medium">Target rung:</span> Rung {data.reflectionAnswers.targetRung} — {target?.rungName ?? RUNG_LABELS[data.reflectionAnswers.targetRung]}</p>
@@ -149,9 +150,8 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         </div>
         <div className="mt-5 space-y-3 text-[14px] leading-relaxed text-graphite">
           <p>
-            This Playbook gives you a structured Prompt Contract, a reusable Skill or template, a
-            platform-aware ladder map, and the governance controls needed before you climb higher.
-            It is designed to be used directly with your AI platform, not stored as theory.
+            This Playbook is designed as a shareable prompt library: copy the artifact that matches
+            the rung you need, then adapt the variables and source rules to your team's work.
           </p>
           <p>
             M04 adds the productised assistant layer: Custom GPT-style builders, Gems, Mistral
@@ -201,4 +201,3 @@ function observationLabel(key: string): string {
   };
   return labels[key] ?? key;
 }
-

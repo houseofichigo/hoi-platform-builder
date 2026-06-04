@@ -52,7 +52,7 @@ export function ClosingReflectionPanel({
       <header className="space-y-2">
         <p className="eyebrow">You have walked the ladder for {platformConfig.displayName}</p>
         <p className="text-[14px] text-graphite">
-          You saw these rungs applied to Competitor Pricing Monitor:
+          You saw these rungs through curated examples:
         </p>
         <ul className="grid gap-1 text-[13px] text-navy md:grid-cols-2">
           {revealedRungs.map((rung) => (
@@ -194,4 +194,3 @@ function RungChoice({
     </fieldset>
   );
 }
-

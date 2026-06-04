@@ -1,10 +1,8 @@
-import { useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Platform, PromptContract, SkillSpec } from "@/data/m03/m03Schema";
 import { platforms } from "@/data/m03/platforms";
-import { skillCreationMetaPrompt } from "@/data/m03/skillTemplate";
+import { genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
 import { promptContractToMarkdown } from "./skillDownload";
-import { SkillQualityChecklist } from "./SkillQualityChecklist";
 
 interface SkillBuilderAIAssistedProps {
   platform: Platform;
@@ -17,29 +15,24 @@ export function SkillBuilderAIAssisted({
   promptContract,
   onSave,
 }: SkillBuilderAIAssistedProps) {
-  const [output, setOutput] = useState("");
-  const [showChecklist, setShowChecklist] = useState(false);
-  const topRef = useRef<HTMLDivElement>(null);
   const platformConfig = platforms[platform];
-  const metaPrompt = skillCreationMetaPrompt.replace(
-    "{{PROMPT_CONTRACT}}",
-    promptContractToMarkdown(promptContract, "Prompt Contract"),
-  );
+  const promptContractMarkdown = promptContractToMarkdown(promptContract, "Prompt Contract");
 
   return (
-    <div ref={topRef} className="space-y-5">
+    <div className="space-y-5">
       <header className="space-y-2">
         <p className="eyebrow-muted">AI-assisted path</p>
         <p className="text-[14px] text-graphite">
-          Copy the meta-prompt into {platformConfig.displayName}. It will convert the Prompt
-          Contract into a reusable Skill specification.
+          Copy this meta-prompt into {platformConfig.displayName}. It will turn any strong Prompt
+          Contract into a reusable Skill specification. Use the Prompt Contract above as your first
+          example, then reuse the same meta-prompt for your own work.
         </p>
       </header>
 
       <div className="rounded-md border border-chalk bg-mist p-4">
         <p className="eyebrow-muted">Meta-prompt</p>
         <pre className="mt-3 max-h-[320px] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-ink">
-          {metaPrompt}
+          {genericSkillCreationMetaPrompt}
         </pre>
       </div>
 
@@ -48,7 +41,7 @@ export function SkillBuilderAIAssisted({
           type="button"
           className="btn-ichigo btn-ichigo-primary"
           onClick={async () => {
-            await navigator.clipboard.writeText(metaPrompt);
+            await navigator.clipboard.writeText(genericSkillCreationMetaPrompt);
             toast.success("Meta-prompt copied.");
           }}
         >
@@ -64,42 +57,18 @@ export function SkillBuilderAIAssisted({
         </a>
       </div>
 
-      <label className="block space-y-2">
-        <span className="text-sm font-medium text-navy">Paste the AI output below</span>
-        <textarea
-          value={output}
-          rows={10}
-          maxLength={8000}
-          onChange={(e) => {
-            setOutput(e.target.value);
-            setShowChecklist(false);
-          }}
-          className="input-ichigo font-mono text-[12px]"
-          placeholder="Paste the generated Skill here..."
-        />
-      </label>
+      <details className="rounded-md border border-chalk bg-white p-4">
+        <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.18em] text-terracotta">
+          Prompt Contract example to paste into the meta-prompt
+        </summary>
+        <pre className="mt-3 max-h-[260px] overflow-auto whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-ink">
+          {promptContractMarkdown}
+        </pre>
+      </details>
 
-      <button
-        type="button"
-        className="btn-ichigo btn-ichigo-secondary"
-        disabled={output.trim().length < 200}
-        onClick={() => setShowChecklist(true)}
-      >
-        Verify Skill quality →
+      <button type="button" className="btn-ichigo btn-ichigo-secondary" onClick={() => onSave(promptImproverSkill)}>
+        I understand the meta-prompt →
       </button>
-
-      {showChecklist && (
-        <SkillQualityChecklist
-          platform={platform}
-          rawSkillText={output}
-          onSave={onSave}
-          onRegenerate={() => {
-            setShowChecklist(false);
-            topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-        />
-      )}
     </div>
   );
 }
-

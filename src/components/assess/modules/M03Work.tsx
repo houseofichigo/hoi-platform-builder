@@ -30,7 +30,7 @@ type LadderWalkthroughOutput = Record<number, LadderRungResult>;
 
 function hasAnyObservation(value?: VaguePromptTestResult): boolean {
   if (!value) return false;
-  return Object.values(value.observations).some(Boolean) || Boolean(value.pastedResult?.trim());
+  return Object.values(value.observations).some(Boolean);
 }
 
 function hasReflectionAnswers(
@@ -264,26 +264,24 @@ export function M03Work() {
         stepLabel="STEP 1 of 3"
         title="Choose your tools and test the baseline"
         why={<p>Prompt-driven automation starts with the tool your team already uses.</p>}
-        example={<p className="text-[14px] text-navy">Competitor Pricing Monitor is the running case for M03.</p>}
+        example={<p className="text-[14px] text-navy">M03 uses curated examples so each automation rung shows a different capability.</p>}
         whatToNotice={<p>Vague intent creates vague output. Structure comes next.</p>}
         yourVersion={
           <M03Step1
             platform={platform}
-            useCaseId={useCaseId}
             vaguePromptTest={vaguePromptTest}
             hasLaterProgress={Boolean(structuredPrompt || Object.keys(ladderWalkthrough).length)}
             m02BridgeLabel={m02UseCaseOut.value}
             onPlatformChange={updatePlatform}
-            onUseCaseChange={updateUseCase}
             onVaguePromptChange={(value) => {
               setVaguePromptTest(value);
               vagueOut.setValue.mutate(value);
             }}
           />
         }
-        produces={<p className="text-[14px] text-navy">m03.platform, m03.use_case, and m03.vague_prompt_test</p>}
-        canContinue={Boolean(platform && useCaseId && hasAnyObservation(vaguePromptTest))}
-        disabledReason="Choose your platform, use case, and test the vague prompt to continue."
+        produces={<p className="text-[14px] text-navy">m03.platform and m03.vague_prompt_test</p>}
+        canContinue={Boolean(platform && hasAnyObservation(vaguePromptTest))}
+        disabledReason="Choose your platform and test the vague prompt to continue."
         nextLabel="Continue to Step 2"
         onContinue={() => goToStep(2)}
       />
@@ -302,7 +300,7 @@ export function M03Work() {
         stepLabel="STEP 2 of 3"
         title="From vague prompt to reusable Skill"
         why={<p>A Prompt Contract makes source rules, output shape, and quality checks explicit.</p>}
-        example={<p className="text-[14px] text-navy">The same pricing task becomes a reusable team asset.</p>}
+        example={<p className="text-[14px] text-navy">A good Prompt Contract can become a reusable Skill-building pattern.</p>}
         whatToNotice={<p>Reuse is a governance move, not just a convenience move.</p>}
         yourVersion={
           <M03Step2

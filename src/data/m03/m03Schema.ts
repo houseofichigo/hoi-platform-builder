@@ -94,7 +94,6 @@ export type VaguePromptTestResult = {
     inventedDetails: boolean;
     couldDefend: boolean;
   };
-  pastedResult?: string;
 };
 
 export type LadderRungResult = {

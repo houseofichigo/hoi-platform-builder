@@ -125,10 +125,10 @@ export function LadderRungPanel({
             <div className="rounded-lg border border-danger/30 bg-danger/5 p-4 space-y-2">
               <p className="eyebrow text-danger">Safety framing</p>
               <p className="text-[13px] leading-relaxed text-navy">
-                For your first run, use a sandbox pricing page instead of a live competitor site.
+                For your first run, use a sandbox or demo website instead of a live business system.
                 Agentic browsing can be misdirected by page content, and any form click can become a
-                visible business action. Keep human gates on every write, signup, demo request, or
-                contact action.
+                visible business action. Keep human gates on every write, sign-in, purchase, message,
+                or contact action.
               </p>
             </div>
           )}

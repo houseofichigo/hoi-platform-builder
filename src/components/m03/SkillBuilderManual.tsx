@@ -19,7 +19,8 @@ export function SkillBuilderManual({ platform, skill, onSave }: SkillBuilderManu
       <header className="space-y-2">
         <p className="eyebrow-muted">Manual path</p>
         <p className="text-[14px] text-graphite">
-          This is the canonical Competitor Pricing Monitor Skill, ready to install.
+          This is a polished Prompt Improver Skill. It shows what good Skill instructions look like:
+          clear activation, direct method, quality checks, and boundaries for when not to use it.
         </p>
       </header>
 
@@ -56,4 +57,3 @@ export function SkillBuilderManual({ platform, skill, onSave }: SkillBuilderManu
     </div>
   );
 }
-

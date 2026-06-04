@@ -12,6 +12,7 @@ import { platforms } from "@/data/m03/platforms";
 import { setupGuides } from "@/data/m03/setupGuides";
 import { crossPlatformReference } from "@/data/m03/crossPlatformReference";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
+import { genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
 import { GOVERNANCE_GAP_LABELS } from "./m03Display";
 
 const styles = StyleSheet.create({
@@ -85,14 +86,14 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
     <Document>
       <Page size="A4" style={styles.cover}>
         <Text style={styles.eyebrow}>House of Ichigo · M03</Text>
-        <Text style={styles.title}>Automation Playbook</Text>
-        <Text style={styles.subtitle}>{competitorPricingMonitor.displayName}</Text>
+        <Text style={styles.title}>M03 Prompt Automation Playbook</Text>
+        <Text style={styles.subtitle}>Shareable Prompt Library</Text>
         <Text style={styles.body}>Platform: {platform.displayName}</Text>
         <Text style={styles.body}>Generated: {new Date(data.generatedAt).toLocaleString()}</Text>
       </Page>
       <Page size="A4" style={styles.page}>
-        <PDFSection title="1. Setup">
-          <Text style={styles.body}>Use case: {competitorPricingMonitor.displayName}</Text>
+        <PDFSection title="1. How to use this library">
+          <Text style={styles.body}>Chapter: M03 Prompt-driven automation</Text>
           <Text style={styles.body}>Platform: {platform.displayName}</Text>
           <Text style={styles.body}>Rungs walked: {data.rungsCovered.join(", ")}</Text>
           <Text style={styles.monoBlock}>Vague prompt: {competitorPricingMonitor.vaguePrompt}</Text>
@@ -103,14 +104,17 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
           <Text style={styles.body}>Rules: {data.promptContract.rules.join("; ")}</Text>
           <Text style={styles.body}>Quality bar: {data.promptContract.qualityBar.join("; ")}</Text>
         </PDFSection>
-        <PDFSection title="3. Skill or Template">
-          <Text style={styles.body}>{data.skillSpec.name}</Text>
-          <Text style={styles.body}>{data.skillSpec.description}</Text>
-          <Text style={styles.monoBlock}>{data.skillSpec.instructions}</Text>
+        <PDFSection title="3. Skill-building meta-prompt">
+          <Text style={styles.monoBlock}>{genericSkillCreationMetaPrompt}</Text>
+        </PDFSection>
+        <PDFSection title="4. Prompt Improver Skill">
+          <Text style={styles.body}>{promptImproverSkill.name}</Text>
+          <Text style={styles.body}>{promptImproverSkill.description}</Text>
+          <Text style={styles.monoBlock}>{promptImproverSkill.instructions}</Text>
         </PDFSection>
       </Page>
       <Page size="A4" style={styles.page}>
-        <PDFSection title="4. Ladder Map">
+        <PDFSection title="5. Prompt library by automation rung">
           {walked.map((rung) => (
             <View key={rung.rungNumber} style={styles.section}>
               <Text style={styles.eyebrow}>Rung {rung.rungNumber}</Text>
@@ -123,7 +127,7 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
         </PDFSection>
       </Page>
       <Page size="A4" style={styles.page}>
-        <PDFSection title="5. Decisions and Governance Gaps">
+        <PDFSection title="6. Readiness Note">
           <Text style={styles.body}>Current rung: {data.reflectionAnswers.currentRung}</Text>
           <Text style={styles.body}>Target rung: {data.reflectionAnswers.targetRung}</Text>
           <Text style={styles.body}>
@@ -133,7 +137,7 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
           <Text style={styles.body}>Reasoning: {data.readinessExplanation}</Text>
         </PDFSection>
         <Text style={styles.footer}>
-          M03 Automation Playbook · {platform.displayName} · {competitorPricingMonitor.displayName}
+          M03 Prompt Automation Playbook · {platform.displayName}
         </Text>
       </Page>
     </Document>
@@ -148,4 +152,3 @@ function PDFSection({ title, children }: { title: string; children: React.ReactN
     </View>
   );
 }
-

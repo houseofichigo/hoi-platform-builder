@@ -2,28 +2,23 @@ import type { Platform, VaguePromptTestResult } from "@/data/m03/m03Schema";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
 import { CapabilityMatrixView } from "@/components/m03/CapabilityMatrixView";
 import { PlatformPicker } from "@/components/m03/PlatformPicker";
-import { UseCasePicker } from "@/components/m03/UseCasePicker";
 import { VaguePromptTester } from "@/components/m03/VaguePromptTester";
 
 interface Step1Props {
   platform?: Platform;
-  useCaseId?: string;
   vaguePromptTest?: VaguePromptTestResult;
   hasLaterProgress?: boolean;
   m02BridgeLabel?: string;
   onPlatformChange: (platform: Platform) => void;
-  onUseCaseChange: (useCaseId: string) => void;
   onVaguePromptChange: (value: VaguePromptTestResult) => void;
 }
 
 export function M03Step1({
   platform,
-  useCaseId,
   vaguePromptTest,
   hasLaterProgress,
   m02BridgeLabel,
   onPlatformChange,
-  onUseCaseChange,
   onVaguePromptChange,
 }: Step1Props) {
   return (
@@ -36,7 +31,7 @@ export function M03Step1({
         </p>
         {m02BridgeLabel && (
           <p className="mt-3 text-[12px] text-slate">
-            From your M02 selection: {m02BridgeLabel}. You can change the M03 use case below if needed.
+            From your M02 selection: {m02BridgeLabel}. M03 now uses curated examples across the automation ladder so you can see different capabilities.
           </p>
         )}
       </div>
@@ -47,10 +42,8 @@ export function M03Step1({
         hasLaterProgress={hasLaterProgress}
       />
       <CapabilityMatrixView highlightedPlatform={platform} />
-      <UseCasePicker value={useCaseId} onChange={onUseCaseChange} />
       <VaguePromptTester
         platform={platform}
-        useCaseSelected={useCaseId === competitorPricingMonitor.id}
         prompt={competitorPricingMonitor.vaguePrompt}
         value={vaguePromptTest}
         onChange={onVaguePromptChange}
@@ -58,4 +51,3 @@ export function M03Step1({
     </div>
   );
 }
-

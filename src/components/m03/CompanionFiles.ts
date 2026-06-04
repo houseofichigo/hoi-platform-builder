@@ -1,11 +1,16 @@
 import type { AutomationPlaybookData, PromptContract } from "@/data/m03/m03Schema";
-import { skillToChatGPTFormat, skillToClaudeMarkdown } from "@/data/m03/skillTemplate";
+import {
+  genericSkillCreationMetaPrompt,
+  promptImproverSkill,
+  skillToChatGPTFormat,
+  skillToClaudeMarkdown,
+} from "@/data/m03/skillTemplate";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
 import { promptContractToMarkdown } from "./skillDownload";
 
 export function getSkillMarkdown(data: AutomationPlaybookData): string {
-  if (data.platform === "claude") return skillToClaudeMarkdown(data.skillSpec);
-  if (data.platform === "chatgpt" || data.platform === "mistral") return skillToChatGPTFormat(data.skillSpec);
+  if (data.platform === "claude") return skillToClaudeMarkdown(promptImproverSkill);
+  if (data.platform === "chatgpt" || data.platform === "mistral") return skillToChatGPTFormat(promptImproverSkill);
   return promptContractToMarkdown(data.promptContract, "Reusable Prompt Contract");
 }
 
@@ -15,21 +20,25 @@ export async function getSetupGuidePDF(data: AutomationPlaybookData): Promise<Bl
   return generateSetupGuidePDF(data.platform);
 }
 
-export async function getPricingTrackerXLSX(): Promise<Blob> {
-  const response = await fetch("/downloads/m03/pricing-tracker.xlsx");
-  if (!response.ok) throw new Error("Pricing tracker template was not found.");
-  return response.blob();
-}
-
 export async function getCrossPlatformReferencePDF(): Promise<Blob> {
   const { generateCrossPlatformReferencePDF } = await import("./PlaybookPDFRenderer");
   return generateCrossPlatformReferencePDF();
 }
 
 export function getPromptsLibraryMarkdown(data: AutomationPlaybookData): string {
-  let md = `# M03 Prompts Library - Competitor Pricing Monitor\n\n`;
+  let md = `# M03 Prompt Automation Playbook\n\n`;
   md += `Generated for ${data.platform} on ${data.generatedAt}\n\n`;
-  md += `Every prompt you saw in M03, ready to paste.\n\n`;
+  md += `A shareable prompt library for the M03 automation ladder. Copy the artifact that matches the rung you need, replace variables in braces, and keep the source and safety rules intact.\n\n`;
+
+  md += `## Skill-building meta-prompt\n\n`;
+  md += "```text\n";
+  md += genericSkillCreationMetaPrompt;
+  md += "\n```\n\n";
+
+  md += `## Prompt Improver Skill example\n\n`;
+  md += "```markdown\n";
+  md += skillToChatGPTFormat(promptImproverSkill);
+  md += "\n```\n\n";
 
   for (const rungNum of data.rungsCovered) {
     const rung = competitorPricingMonitor.rungs.find((r) => r.rungNumber === rungNum);
@@ -47,4 +56,3 @@ export function getPromptsLibraryMarkdown(data: AutomationPlaybookData): string 
 export function promptContractMarkdown(contract: PromptContract): string {
   return promptContractToMarkdown(contract, "Prompt Contract");
 }
-

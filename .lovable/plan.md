@@ -1,38 +1,29 @@
-## Goal
+## Plan: Export Chapter 2 Content Brief as Markdown
 
-Bring the Step 3 "Parameter Playground" quiz (Q1–Q6) up to the same Check-answers / Try again grading flow that Step 2 (Hallucination Hunt) now has. Q7 (multi-select reflection about the learner's own work) stays ungraded — it's a reflection, not a knowledge check.
+Generate a detailed markdown document covering the full Chapter 2 (M02 — Data Readiness & Knowledge Base Preparation) brief and save it as a downloadable artifact.
 
-## Scope
+### Steps
 
-All edits inside `src/components/assess/modules/M01Work.tsx` and the `PARAMETER_QUIZ` constant. No schema changes, no other steps touched.
+1. Re-read `src/lib/assess/content/m02.ts` and `src/components/m03/.../M02Step3Guided.tsx` (and the blueprint builder) to make sure every section, framework list, panel, and output is captured verbatim where it matters (5 use cases, 3 knowledge layers, 5 required + 7 advanced metadata fields, 5 entry types, 5 retrieval test patterns, 12 Gate 1 checks, 8 reason codes, 7 guided panels, 5-section generated blueprint).
 
-## Changes
+2. Write a single markdown file to `/mnt/documents/chapter-02-brief.md` with this structure:
+   - Module Identity (title, default use case, bridge from M01, method note)
+   - **Part A — Course Overview**
+     - Use case selector
+     - Three knowledge layers
+     - Steps 1–3 walkthrough
+     - Reference frameworks (all enumerated lists)
+     - OCR worked-example notes
+   - **Part B — Assignment (Step 3 Guided Build)**
+     - The 7 sequential panels with what each captures
+     - Closing Decision Panel (readiness status + explanation)
+     - Generated Blueprint Output (5 sections) and PDF/Markdown artefact
+     - Gate 1 progression rule (PASS / PARTIAL / BLOCKED → M03)
+   - Quick-reference appendix tables (metadata fields, entry types, retrieval tests, reason codes)
 
-1. **`PARAMETER_QUIZ`** — Add `correct` + one-line `explanation` to each of the six single-choice questions in Step 3 (Q1–Q6). Q7 stays as the open multi-select reflection and is rendered separately.
+3. Emit a `<presentation-artifact>` tag pointing to `chapter-02-brief.md` so the user can preview/download it.
 
-2. **`ParameterNotes` interface** — Add `quizChecked?: boolean`.
+### Out of scope
 
-3. **`setParameterQuizAnswer`** — When the learner edits any of the six graded answers, set `quizChecked: false` so they must re-confirm. Editing Q7 does not flip the flag.
-
-4. **Handlers** — Add `handleCheckParameters` and `handleRetryParameters` that toggle `quizChecked` (mirrors the Step 2 implementation).
-
-5. **Pass threshold** — `parameterQuizPassed = quizChecked && correctCount >= 5` (5 / 6, same ratio as Step 2's 4 / 5).
-
-6. **Continue gating** — Replace the current `parameterQuizComplete` check inside `parameterStepComplete` with `parameterQuizPassed`. Update `disabledReason` to walk through: "Answer all six checks" → "Click Check answers" → "Review highlighted answers and try again" → existing reasons for control matches / Part B checks / Q7 / acknowledgement.
-
-7. **Quiz rendering (Q1–Q6 loop, ~lines 1497–1529)** — When `quizChecked` is true:
-   - Green border + ✓ on correct, red border + ✗ on incorrect
-   - "Why: …" explanation under each graded question
-   - Inputs disabled until Try again
-8. **Buttons under the six questions** — "Check answers" (disabled until all 6 answered) and "Try again" (only when `!parameterQuizPassed && quizChecked`), plus an "X of 6 correct" result line. Same visual treatment as Step 2.
-
-## Out of scope
-
-- Q7 reflection (kept ungraded)
-- Part A dial cards, Part B task guide, control-match exercise, prompt-controls section
-- Method note section
-- Any other module
-
-## Verification
-
-Run `tsc --noEmit` after the edit; spot-check the rendered Step 3 in the preview to confirm grading + gating behave like Step 2.
+- No app code, route, or UI changes.
+- No edits to the M02 content itself — this is a read-only export.

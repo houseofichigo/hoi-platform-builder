@@ -12,4 +12,10 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      // o200k_base, cl100k_base, and @react-pdf/renderer are intentional lazy chunks.
+      chunkSizeWarningLimit: 2500,
+    },
+  },
 });

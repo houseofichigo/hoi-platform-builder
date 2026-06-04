@@ -221,6 +221,7 @@ export function M01Work() {
           v.quizAnswers && typeof v.quizAnswers === "object" && !Array.isArray(v.quizAnswers)
             ? v.quizAnswers
             : {},
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedToken(true);

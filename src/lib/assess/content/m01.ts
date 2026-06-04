@@ -285,63 +285,111 @@ export const M01_COURSE_CONTENT = {
     tryPrompts: [
       {
         label: "Temperature test - consistency vs variety",
-        settings: "Run once with low temperature, once with higher temperature.",
-        text:
+        prompt:
           "Write a 3-sentence product description for a premium Moroccan argan oil brand sold in upscale French boutiques.",
+        variants: [
+          {
+            label: "Low temperature",
+            settings: "Temperature 0.0-0.2. Expect safer, more repeatable wording.",
+          },
+          {
+            label: "High temperature",
+            settings: "Temperature 1.0-1.5. Expect more varied wording and more drift risk.",
+          },
+        ],
       },
       {
         label: "Top-p test - candidate pool",
-        settings: "Keep temperature at default; compare top-p 1.0, 0.5, and 0.1 if your tool exposes it.",
-        text:
+        prompt:
           "Write five taglines for a French SaaS startup that helps small businesses adopt AI responsibly.",
+        variants: [
+          {
+            label: "Low top-p",
+            settings: "Top-p 0.1-0.5, temperature default. Expect narrower, safer phrasing.",
+          },
+          {
+            label: "High top-p",
+            settings: "Top-p 0.9-1.0, temperature default. Expect a wider candidate pool.",
+          },
+        ],
       },
       {
-        label: "Prompt-control test - no dial required",
-        settings: "Use any chat tool. Do not change model settings.",
-        text:
-          "Generate five distinctly different taglines for a French SaaS startup that helps small businesses adopt AI responsibly. Each tagline must use a different angle: trust, speed, simplicity, governance, and competitive advantage.",
+        label: "Top-k test - candidate count",
+        prompt:
+          "Write the opening sentence of a French detective novel set in Marseille.",
+        variants: [
+          {
+            label: "Low top-k",
+            settings: "Top-k 1-10. Expect constrained, repeatable openings.",
+          },
+          {
+            label: "High top-k",
+            settings: "Top-k 40-100. Expect more variety in the first words and imagery.",
+          },
+        ],
       },
     ],
     taskGuide: [
       {
         task: "Data extraction from documents",
+        when: "Use when values must be captured reliably from contracts, forms, claims, or standard business records.",
         setting: "Low temperature when available",
+        pattern: "Low randomness + strict output schema + validation",
+        example: "Extract customer name, date, amount, and reference number into fixed fields, then validate missing or unusual values.",
         control:
           "Use strict output fields, source-only instructions, validation rules, and human review for exceptions.",
       },
       {
         task: "Classification or triage",
+        when: "Use when items need consistent routing, priority, or category labels.",
         setting: "Low temperature when available",
+        pattern: "Clear categories + examples + confidence threshold",
+        example: "Classify support tickets into billing, technical, legal, or escalation-needed, with uncertain cases routed to a person.",
         control:
           "Define categories, examples, confidence thresholds, escalation paths, and audit logs.",
       },
       {
         task: "Summarising long documents",
+        when: "Use when leaders need a short answer from long source material.",
         setting: "Low to medium",
+        pattern: "Quote-first grounding + concise output structure",
+        example: "Summarise board notes into decisions, risks, owners, and open questions, citing the relevant source section.",
         control:
           "Ask for quotes first, cite sections, separate facts from assumptions, and flag missing evidence.",
       },
       {
         task: "Translation or localisation",
+        when: "Use when meaning, terminology, and tone must survive across languages.",
         setting: "Low for faithful, medium for creative",
+        pattern: "Glossary + audience + tone rules",
+        example: "Translate a technical support article into French using approved product terms and a formal customer tone.",
         control:
           "Provide glossary, audience, tone, forbidden terms, and review rules for regulated language.",
       },
       {
         task: "Emails, memos, and internal drafts",
+        when: "Use when the goal is useful drafting, not autonomous decision-making.",
         setting: "Medium",
+        pattern: "Audience + length + tone + no-invention rule",
+        example: "Draft a client follow-up email in 120 words, warm but direct, with no new promises or dates.",
         control:
           "Specify audience, length, structure, tone, and what must not be invented.",
       },
       {
         task: "Creative campaigns and ideation",
+        when: "Use when variety is useful and humans will choose the winner.",
         setting: "Higher temperature can help when exposed",
+        pattern: "Distinct angles + human selection",
+        example: "Generate campaign concepts across trust, speed, simplicity, governance, and differentiation.",
         control:
           "Ask for multiple distinct directions, then choose and refine with human judgement.",
       },
       {
         task: "Code, automations, or agents",
+        when: "Use when AI can call tools, move data, or trigger workflow actions.",
         setting: "Low for repeatability",
+        pattern: "Tool permissions + dry runs + approval gates + logs",
+        example: "Let an agent draft a refund response, but require approved policy evidence and human approval before sending.",
         control:
           "Use tests, tool permissions, dry runs, approval gates, rollback paths, and logs.",
       },

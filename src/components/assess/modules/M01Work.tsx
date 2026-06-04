@@ -1331,12 +1331,8 @@ export function M01Work() {
   const parameterChecksComplete = s.checks.every((check) =>
     parameterNotes.exerciseChecks.includes(check.id),
   );
-  const controlMatchesComplete = s.controlExercise.every((item) =>
-    Boolean(parameterNotes.controlMatches[item.id]),
-  );
   const parameterStepComplete =
     parameterChecksComplete &&
-    controlMatchesComplete &&
     parameterQuizPassed &&
     parameterNotes.workSelections.length > 0 &&
     parameterNotes.acknowledged;
@@ -1345,9 +1341,7 @@ export function M01Work() {
 
   const parameterDisabledReason = !parameterChecksComplete
     ? "Complete the Step 3 checks in Part A."
-    : !controlMatchesComplete
-      ? "Match every task to a control pattern."
-      : !parameterAllAnswered
+    : !parameterAllAnswered
         ? "Answer all six checks, then click Check answers."
         : !parameterQuizChecked
           ? "Click Check answers to confirm your quiz responses."
@@ -1437,8 +1431,19 @@ export function M01Work() {
               {s.tryPrompts.map((prompt) => (
                 <div key={prompt.label} className="rounded-md border border-chalk bg-white p-4">
                   <p className="text-[14px] font-semibold text-navy">{prompt.label}</p>
-                  <p className="mt-2 text-[12px] leading-relaxed text-slate">{prompt.settings}</p>
-                  <CopyPromptCard label="Prompt" text={prompt.text} compact />
+                  <div className="mt-3 space-y-3">
+                    {prompt.variants.map((variant) => (
+                      <div key={variant.label} className="rounded-md border border-chalk bg-paper p-3">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-terracotta">
+                          {variant.label}
+                        </p>
+                        <p className="mt-1 text-[12px] leading-relaxed text-slate">
+                          {variant.settings}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <CopyPromptCard label="Use the same prompt for both runs" text={prompt.prompt} compact />
                 </div>
               ))}
             </div>
@@ -1455,10 +1460,21 @@ export function M01Work() {
               {s.taskGuide.map((item) => (
                 <div key={item.task} className="rounded-md border border-chalk bg-paper p-4">
                   <p className="text-[14px] font-semibold text-navy">{item.task}</p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-slate">{item.when}</p>
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-terracotta">
                     {item.setting}
                   </p>
+                  <div className="mt-3 rounded-md border border-chalk bg-white p-3">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+                      Best control pattern
+                    </p>
+                    <p className="mt-1 text-[13px] font-semibold text-navy">{item.pattern}</p>
+                  </div>
                   <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.control}</p>
+                  <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                    <span className="font-semibold text-navy">Business example: </span>
+                    {item.example}
+                  </p>
                 </div>
               ))}
             </div>
@@ -1493,47 +1509,6 @@ export function M01Work() {
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <div>
-              <p className="eyebrow-muted">MATCH THE CONTROL</p>
-              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
-                Choose the best control pattern
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {s.controlExercise.map((item) => (
-                <div key={item.id} className="rounded-md border border-chalk bg-paper p-4">
-                  <p className="text-[14px] font-semibold text-navy">{item.task}</p>
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    {s.controlOptions.map((option) => (
-                      <label
-                        key={option}
-                        className="flex cursor-pointer items-start gap-2 rounded-md border border-chalk bg-white p-3 text-[13px] leading-relaxed text-graphite"
-                      >
-                        <input
-                          type="radio"
-                          name={`m01-parameter-control-${item.id}`}
-                          checked={parameterNotes.controlMatches[item.id] === option}
-                          onChange={() => {
-                            updateParameterNotes({
-                              ...parameterNotes,
-                              controlMatches: {
-                                ...parameterNotes.controlMatches,
-                                [item.id]: option,
-                              },
-                            });
-                          }}
-                          className="mt-1 h-4 w-4 accent-terracotta"
-                        />
-                        <span>{option}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
 

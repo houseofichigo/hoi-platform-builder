@@ -1309,12 +1309,25 @@ export function M01Work() {
   const s = M01_COURSE_CONTENT.step3;
   const m = M01_COURSE_CONTENT.methodNote;
   const parameterQuizAnswers = parameterNotes.quizAnswers;
-  const parameterQuizComplete = PARAMETER_QUIZ.every((question) => {
+  const parameterAllAnswered = PARAMETER_QUIZ.every((question) => {
     const value = parameterQuizAnswers[question.id];
-    return question.type === "multi"
-      ? Array.isArray(value) && value.length > 0
-      : typeof value === "string" && value.length > 0;
+    return typeof value === "string" && value.length > 0;
   });
+  const parameterCorrectCount = PARAMETER_QUIZ.reduce(
+    (acc, q) => (parameterQuizAnswers[q.id] === q.correct ? acc + 1 : acc),
+    0,
+  );
+  const parameterPassThreshold = 5;
+  const parameterQuizChecked = !!parameterNotes.quizChecked;
+  const parameterQuizPassed =
+    parameterQuizChecked && parameterCorrectCount >= parameterPassThreshold;
+
+  const handleCheckParameters = () => {
+    updateParameterNotes({ ...parameterNotes, quizChecked: true });
+  };
+  const handleRetryParameters = () => {
+    updateParameterNotes({ ...parameterNotes, quizChecked: false });
+  };
   const parameterChecksComplete = s.checks.every((check) =>
     parameterNotes.exerciseChecks.includes(check.id),
   );
@@ -1324,11 +1337,31 @@ export function M01Work() {
   const parameterStepComplete =
     parameterChecksComplete &&
     controlMatchesComplete &&
-    parameterQuizComplete &&
+    parameterQuizPassed &&
     parameterNotes.workSelections.length > 0 &&
     parameterNotes.acknowledged;
   const canCompleteM01 =
     parameterStepComplete && reflectionSel.length > 0 && noteSel.length > 0;
+
+  const parameterDisabledReason = !parameterChecksComplete
+    ? "Complete the Step 3 checks in Part A."
+    : !controlMatchesComplete
+      ? "Match every task to a control pattern."
+      : !parameterAllAnswered
+        ? "Answer all six checks, then click Check answers."
+        : !parameterQuizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !parameterQuizPassed
+            ? "Review the highlighted answers and try again."
+            : parameterNotes.workSelections.length === 0
+              ? "Pick at least one control need from your work."
+              : !parameterNotes.acknowledged
+                ? "Confirm the durable-controls habit to continue."
+                : reflectionSel.length === 0
+                  ? "Pick at least one parameter note."
+                  : noteSel.length === 0
+                    ? "Pick at least one method note to carry forward."
+                    : "Complete the Step 3 checks, answer the quiz, match the control patterns, and pick your parameter notes and method note.";
 
   return (
     <Step

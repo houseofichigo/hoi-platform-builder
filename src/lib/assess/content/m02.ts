@@ -1,6 +1,6 @@
 import type { InvoiceOcrProfileContext, OCRBlock } from "./types";
 
-export const M02_DEFAULT_USE_CASE_ID = "customer-support-kb";
+export const M02_DEFAULT_USE_CASE_ID = "supplier-onboarding";
 
 export interface M02UseCaseSource {
   title: string;
@@ -505,7 +505,11 @@ export const M02_USE_CASES: readonly M02UseCase[] = [
 ] as const;
 
 export function getM02UseCase(caseId?: string): M02UseCase {
-  return M02_USE_CASES.find((useCase) => useCase.id === caseId) ?? M02_USE_CASES[0];
+  return (
+    M02_USE_CASES.find((useCase) => useCase.id === caseId) ??
+    M02_USE_CASES.find((useCase) => useCase.id === M02_DEFAULT_USE_CASE_ID) ??
+    M02_USE_CASES[0]
+  );
 }
 
 export const M02_COURSE_CONTENT = {
@@ -583,13 +587,13 @@ export const M02_COURSE_CONTENT = {
   step3: {
     title: "Build the KB blueprint",
     why:
-      "The final M02 deliverable is a blueprint, not a production knowledge base. Use your selected sources to define five demonstrative entries, choose five retrieval tests, confirm evidence checks, and decide the Gate 1 readiness status.",
+      "The final M02 deliverable is a generated operating blueprint, not another curation exercise. HOI shows the seven components of a working knowledge base, applied to a concrete use case, then turns the reference into a document your team can use.",
     example:
-      "A strong blueprint entry is not just 'refund policy'. It is 'Refund window after product use' with a source, owner, layer, rule/fact/example, and a retrieval question that proves the AI can find it.",
+      "For Supplier Onboarding, the blueprint includes a data map, layered knowledge sources, atomic entries, metadata, source precedence, access rules, retrieval tests, and AI-facing instructions.",
     whatToNotice: [
-      "Five demonstrative entries are enough to prove the structure without overbuilding",
-      "Retrieval tests show whether the knowledge can actually be found and used",
-      "PASS, PARTIAL, or BLOCKED should be based on evidence, not optimism",
+      "The learner is not expected to invent the operating standard from scratch",
+      "A strong blueprint explains what the AI can retrieve, what it must cite, and when it must stop",
+      "PASS, PARTIAL, or BLOCKED should reflect the governance work still needed before Build",
     ],
     examplesInTheWild: [
       {
@@ -609,7 +613,7 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
       },
     ],
-    produces: "Use-case-specific KB blueprint with entries, retrieval tests, gaps, and Gate 1 readiness",
+    produces: "Generated operating knowledge-base blueprint and Gate 1 readiness decision",
     nextLabel: "Complete M02",
   },
 

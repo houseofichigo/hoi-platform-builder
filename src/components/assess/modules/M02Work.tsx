@@ -9,6 +9,7 @@ import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { SeededBadge } from "@/components/assess/SeededBadge";
+import { M02Step3Guided } from "@/components/m02/step3/M02Step3Guided";
 import {
   M02_DEFAULT_USE_CASE_ID,
   M02_COURSE_CONTENT,
@@ -18,6 +19,11 @@ import {
   getM02ContextualRuleOptions,
 } from "@/lib/assess/content/course1";
 import type { M02UseCase, M02UseCaseSource } from "@/lib/assess/content/course1";
+import {
+  createDefaultM02Step3State,
+  type M02GeneratedBlueprint,
+  type M02Step3State,
+} from "@/data/m02/blueprintSchema";
 
 const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
 const TOTAL_STEPS = 3;
@@ -36,6 +42,7 @@ interface GateReadinessShape {
   status: GateStatus;
   checks: string[];
   reasonCodes: string[];
+  explanation?: string;
 }
 
 const DEFAULT_TEST_SET: TestSetShape = { clean: 5, edge: 5, adversarial: 5 };
@@ -61,6 +68,8 @@ export function M02Work() {
   const knowledgeEntriesOut = useAssessOutput<string[]>("m02.knowledge_entries");
   const retrievalTestsOut = useAssessOutput<string[]>("m02.retrieval_tests");
   const gateReadinessOut = useAssessOutput<GateReadinessShape>("m02.gate1_readiness");
+  const step3StateOut = useAssessOutput<M02Step3State>("m02.step3_state");
+  const kbBlueprintOut = useAssessOutput<M02GeneratedBlueprint | null>("m02.kb_blueprint");
 
   const [step, setStep] = useState<StepNum>(1);
   const [selectedCaseId, setSelectedCaseId] = useState(M02_DEFAULT_USE_CASE_ID);
@@ -135,7 +144,7 @@ export function M02Work() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress.isLoading]);
 
-  // Hydrate selected use case. Older M02 progress defaults to customer support.
+  // Hydrate selected use case. Older M02 progress defaults to the current reference blueprint.
   useEffect(() => {
     if (hydrated.selectedCase || selectedCaseOut.isLoading) return;
     const saved = selectedCaseOut.value;
@@ -227,6 +236,7 @@ export function M02Work() {
         status: v.status ?? "",
         checks: Array.isArray(v.checks) ? v.checks : [],
         reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes : [],
+        explanation: typeof v.explanation === "string" ? v.explanation : "",
       });
     }
     setHydrated((h) => ({ ...h, gateReadiness: true }));
@@ -238,6 +248,20 @@ export function M02Work() {
   const testSetTotal = testSet.clean + testSet.edge + testSet.adversarial;
 
   const selectUseCase = (caseId: string) => {
+    if (caseId !== selectedCaseId) {
+      const hasStep3Work =
+        !!kbBlueprintOut.value ||
+        !!step3StateOut.value?.generated ||
+        !!step3StateOut.value?.revealedPanels?.some(Boolean);
+      if (hasStep3Work && !window.confirm("Changing use case will reset Step 3. Continue?")) {
+        return;
+      }
+      const resetState = createDefaultM02Step3State(caseId);
+      step3StateOut.setValue.mutate(resetState);
+      kbBlueprintOut.setValue.mutate(null);
+      setGateReadiness(DEFAULT_GATE_READINESS);
+      gateReadinessOut.setValue.mutate(DEFAULT_GATE_READINESS);
+    }
     setSelectedCaseId(caseId);
     selectedCaseOut.setValue.mutate(caseId);
   };
@@ -336,9 +360,9 @@ export function M02Work() {
                 documents, files, rules, and examples must it be allowed to use?
               </p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                Customer Support is the recommended example because most teams understand FAQs,
-                product pages, tickets, policies, and escalation. You can choose another business
-                case if it is closer to your work.
+                Supplier Onboarding is the complete reference blueprint for this version. You can
+                still explore other business cases, but their generated Step 3 blueprints will be
+                added after the Supplier pattern is locked.
               </p>
             </div>
 
@@ -600,39 +624,14 @@ export function M02Work() {
     );
   }
 
-  // ============ STEP 3 — Three-layer blueprint + complete ============
+  // ============ STEP 3 — Guided blueprint generation ============
   const s = M02_COURSE_CONTENT.step3;
-  const knowledgeEntryOptions = selectedUseCase.sampleKnowledgeEntries;
-  const retrievalTestOptions = selectedUseCase.sampleRetrievalTests;
-  const requiredKnowledgeEntries = knowledgeEntryOptions.length;
-  const requiredRetrievalTests = retrievalTestOptions.length;
   const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
     const next = { ...gateReadiness, ...patch };
     setGateReadiness(next);
     gateReadinessOut.setValue.mutate(next);
   };
-  const suggestedGateStatus: Exclude<GateStatus, ""> =
-    internalSel.length === 0 ||
-    contextualSel.length === 0 ||
-    taskSourceSel.length === 0 ||
-    testSetTotal < 3 ||
-    knowledgeEntrySel.length < requiredKnowledgeEntries ||
-    retrievalTestSel.length < requiredRetrievalTests
-      ? "blocked"
-      : gapsSel.length > 0 || gateReadiness.reasonCodes.length > 0
-        ? "partial"
-        : "pass";
-  const needsReasonCode = gateReadiness.status !== "" && gateReadiness.status !== "pass";
-  const canCompleteM02 =
-    internalSel.length > 0 &&
-    contextualSel.length > 0 &&
-    taskSourceSel.length > 0 &&
-    testSetTotal >= 3 &&
-    knowledgeEntrySel.length >= requiredKnowledgeEntries &&
-    retrievalTestSel.length >= requiredRetrievalTests &&
-    !!gateReadiness.status &&
-    gapsSel.length > 0 &&
-    (!needsReasonCode || gateReadiness.reasonCodes.length > 0);
+  const canCompleteM02 = !!kbBlueprintOut.value && !!step3StateOut.value?.generated;
 
   return (
     <Step
@@ -647,220 +646,24 @@ export function M02Work() {
         </ul>
       }
       yourVersion={
-        <div className="space-y-8">
-          <ExamplesInTheWild items={M02_COURSE_CONTENT.step3.examplesInTheWild} />
-
-          {/* Three-layer synthesis card */}
-          <div className="card border-l-[3px] border-l-terracotta space-y-5">
-            <p className="eyebrow">YOUR THREE-LAYER KNOWLEDGE MAP — {workspace.name.toUpperCase()}</p>
-            <p className="text-[13px] leading-relaxed text-graphite">
-              Use case: <strong>{selectedUseCase.title}</strong>. {selectedUseCase.whatAiShouldDo}
-            </p>
-
-            <LayerRow
-              num="01"
-              label="Internal knowledge"
-              items={internalSel}
-              empty="No internal sources selected yet — go back to Step 1."
-            />
-            <LayerRow
-              num="02"
-              label="Contextual knowledge"
-              items={contextualSel}
-              empty="No contextual rules selected yet — go back to Step 1."
-            />
-
-            <div className="space-y-1">
-              <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-                LAYER 03
-              </span>
-              <p className="text-sm font-medium text-navy mt-1">Task-specific knowledge</p>
-              {taskSourceSel.length === 0 ? (
-                <p className="text-[13px] italic text-slate">
-                  No task-specific sources selected yet - go back to Step 2.
-                </p>
-              ) : (
-                <ul className="space-y-1">
-                  {taskSourceSel.map((it) => (
-                    <li key={it} className="text-[13px] text-graphite">
-                      · {it}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="text-[12px] text-slate">
-                Planned test shape: {testSet.clean} clean · {testSet.edge} edge ·{" "}
-                {testSet.adversarial} adversarial = {testSetTotal} examples total
-              </p>
-            </div>
-          </div>
-
-          <ChecklistSection
-            title={`Create five demonstrative entries for ${selectedUseCase.shortLabel}`}
-            hint="Required metadata only: title, layer/category, source, owner, and rule/fact/example. Advanced metadata can be added later."
-            items={knowledgeEntryOptions}
-            selected={knowledgeEntrySel}
-            onToggle={(opt) => {
-              const next = toggle(knowledgeEntrySel, opt);
-              setKnowledgeEntrySel(next);
-              knowledgeEntriesOut.setValue.mutate(next);
-            }}
-            footer={`${knowledgeEntrySel.length}/${requiredKnowledgeEntries} selected — select all five entry categories.`}
-          />
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-md border border-chalk bg-white p-4">
-              <p className="eyebrow-muted">REQUIRED METADATA</p>
-              <ul className="mt-3 space-y-1 text-[13px] text-graphite">
-                {M02_COURSE_CONTENT.requiredMetadata.map((item) => (
-                  <li key={item}>· {item}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-md border border-chalk bg-mist/40 p-4">
-              <p className="eyebrow-muted">OPTIONAL ADVANCED METADATA</p>
-              <ul className="mt-3 space-y-1 text-[13px] text-graphite">
-                {M02_COURSE_CONTENT.advancedMetadata.map((item) => (
-                  <li key={item}>· {item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <ChecklistSection
-            title="Choose five retrieval test questions"
-            hint="Use these templates now. Later you can edit each one for the exact process and source."
-            items={retrievalTestOptions}
-            selected={retrievalTestSel}
-            onToggle={(opt) => {
-              const next = toggle(retrievalTestSel, opt);
-              setRetrievalTestSel(next);
-              retrievalTestsOut.setValue.mutate(next);
-            }}
-            footer={`${retrievalTestSel.length}/${requiredRetrievalTests} selected — select all five retrieval tests.`}
-          />
-
-          <div className="border-t border-chalk pt-6 space-y-4">
-            <div>
-              <p className="text-sm font-medium text-navy">Data + knowledge readiness status</p>
-              <p className="mt-1 text-[12px] italic text-slate">
-                Based on the current blueprint, the suggested status is{" "}
-                <strong className="uppercase text-terracotta">{suggestedGateStatus}</strong>.
-                Confirm the status your team should carry into Gate 1.
-              </p>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {[
-                { id: "pass", label: "PASS", body: "All checks satisfied with evidence." },
-                { id: "partial", label: "PARTIAL", body: "Most checks satisfied; gaps have owners and timelines." },
-                { id: "blocked", label: "BLOCKED", body: "Critical gaps remain without a resolution path." },
-              ].map((status) => (
-                <button
-                  key={status.id}
-                  type="button"
-                  onClick={() => updateGateReadiness({ status: status.id as GateStatus })}
-                  className={`rounded-md border p-3 text-left transition-colors ${
-                    gateReadiness.status === status.id
-                      ? "border-terracotta bg-terracotta/5"
-                      : "border-chalk bg-white hover:bg-mist/40"
-                  }`}
-                >
-                  <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
-                    {status.label}
-                  </span>
-                  <span className="mt-1 block text-[12px] leading-relaxed text-graphite">
-                    {status.body}
-                  </span>
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => updateGateReadiness({ status: suggestedGateStatus })}
-              className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-left text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
-            >
-              Use suggested status: {suggestedGateStatus.toUpperCase()}
-            </button>
-
-            <ChecklistSection
-              title="Evidence checks satisfied"
-              hint="Select the checks you can currently support with evidence."
-              items={M02_COURSE_CONTENT.gateReadinessChecks}
-              selected={gateReadiness.checks}
-              onToggle={(opt) => updateGateReadiness({ checks: toggle(gateReadiness.checks, opt) })}
-              footer={`${gateReadiness.checks.length}/${M02_COURSE_CONTENT.gateReadinessChecks.length} checks selected.`}
-            />
-
-            <ChecklistSection
-              title="Reason codes to carry forward"
-              hint="Required for PARTIAL or BLOCKED. Reason codes make gaps traceable before Build."
-              items={M02_COURSE_CONTENT.gateReasonCodes}
-              selected={gateReadiness.reasonCodes}
-              onToggle={(opt) => updateGateReadiness({ reasonCodes: toggle(gateReadiness.reasonCodes, opt) })}
-              footer={`${gateReadiness.reasonCodes.length} reason codes selected.`}
-            />
-          </div>
-
-          <div className="card bg-mist/40 space-y-2">
-            <p className="eyebrow-muted">BLUEPRINT, NOT PRODUCTION KB</p>
-            <p className="text-[14px] leading-relaxed text-graphite">
-              This is a defendable structure with five demonstrative entries. The production
-              knowledge base can grow later; M02 only needs enough evidence to decide whether the
-              process is safe to take into Build.
-            </p>
-            <p className="text-[12px] italic text-slate">
-              Named gaps from Step 2: {gapsSel.length > 0 ? gapsSel.join("; ") : "none selected yet"}
-            </p>
-          </div>
-
-          <div className="rounded-md border border-chalk bg-white p-4">
-            <p className="eyebrow-muted">OPTIONAL CAPSTONE BRIDGE</p>
-            <h4 className="mt-2 font-display text-base text-navy">
-              Want to see this method applied in a capstone?
-            </h4>
-            <p className="mt-2 text-[13px] leading-relaxed text-graphite">
-              The core M02 assignment stays generalized. The Capstone Library shows how the same
-              three-layer blueprint transfers to specific business workflows.
-            </p>
-            <Link
-              to="/app/$workspaceSlug/assess/use-cases"
-              params={{ workspaceSlug: workspace.slug }}
-              className="mt-3 inline-flex text-[13px] font-medium text-terracotta hover:text-navy"
-            >
-              Open Capstone Library →
-            </Link>
-          </div>
-
-          <div className="border-t border-chalk pt-6 space-y-3">
-            <p className="text-sm font-medium text-navy">Language to keep straight</p>
-            <div className="grid gap-2 md:grid-cols-2">
-              {M02_COURSE_CONTENT.glossaryDefinitions.map((item) => (
-                <div key={item.term} className="rounded-md border border-chalk bg-white p-3">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
-                    {item.term}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-relaxed text-graphite">
-                    {item.definition}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Method-note callout */}
-          <div className="card bg-mist/40 space-y-1">
-            <p className="eyebrow-muted">METHOD NOTE</p>
-            <p className="text-[14px] text-navy">{M02_COURSE_CONTENT.methodNote}</p>
-          </div>
-        </div>
+        <M02Step3Guided
+          selectedUseCase={selectedUseCase}
+          internalSources={internalSel}
+          contextualRules={contextualSel}
+          taskSources={taskSourceSel}
+          namedGaps={gapsSel}
+          step3State={step3StateOut.value}
+          generatedBlueprint={kbBlueprintOut.value}
+          gateReadiness={gateReadiness}
+          onStep3StateChange={(next) => step3StateOut.setValue.mutate(next)}
+          onGeneratedBlueprintChange={(next) => kbBlueprintOut.setValue.mutate(next)}
+          onGateReadinessChange={updateGateReadiness}
+          onChangeUseCase={() => goToStep(1)}
+        />
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
       canContinue={canCompleteM02}
-      disabledReason={
-        needsReasonCode && gateReadiness.reasonCodes.length === 0
-          ? "Add at least one reason code for PARTIAL or BLOCKED."
-          : "Select all five entry categories, all five retrieval tests, a readiness status, and at least one gap."
-      }
+      disabledReason="Reveal all seven components, answer both reflections, and generate the blueprint."
       nextLabel="Complete M02"
       onBack={() => goToStep(2)}
       onContinue={completeM02}

@@ -10,10 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { SeededBadge } from "@/components/assess/SeededBadge";
 import {
+  M02_DEFAULT_USE_CASE_ID,
   M02_COURSE_CONTENT,
+  M02_USE_CASES,
+  getM02UseCase,
   getM02InternalSourceOptions,
   getM02ContextualRuleOptions,
 } from "@/lib/assess/content/course1";
+import type { M02UseCase, M02UseCaseSource } from "@/lib/assess/content/course1";
 
 const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
 const TOTAL_STEPS = 3;
@@ -25,6 +29,7 @@ interface TestSetShape {
   clean: number;
   edge: number;
   adversarial: number;
+  sources?: string[];
 }
 
 interface GateReadinessShape {
@@ -51,12 +56,14 @@ export function M02Work() {
   const internalSourcesOut = useAssessOutput<string[]>("m02.internal_sources");
   const contextualRulesOut = useAssessOutput<string[]>("m02.contextual_rules");
   const testSetOut = useAssessOutput<TestSetShape>("m02.test_set");
+  const selectedCaseOut = useAssessOutput<string>("m02.selected_case");
   const gapsOut = useAssessOutput<string[]>("m02.gaps");
   const knowledgeEntriesOut = useAssessOutput<string[]>("m02.knowledge_entries");
   const retrievalTestsOut = useAssessOutput<string[]>("m02.retrieval_tests");
   const gateReadinessOut = useAssessOutput<GateReadinessShape>("m02.gate1_readiness");
 
   const [step, setStep] = useState<StepNum>(1);
+  const [selectedCaseId, setSelectedCaseId] = useState(M02_DEFAULT_USE_CASE_ID);
   const [internalSel, setInternalSel] = useState<string[]>([]);
   const [contextualSel, setContextualSel] = useState<string[]>([]);
   const [testSet, setTestSet] = useState<TestSetShape>(DEFAULT_TEST_SET);
@@ -65,9 +72,13 @@ export function M02Work() {
   const [retrievalTestSel, setRetrievalTestSel] = useState<string[]>([]);
   const [gateReadiness, setGateReadiness] =
     useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
+  const [customInternalSource, setCustomInternalSource] = useState("");
+  const [customContextualRule, setCustomContextualRule] = useState("");
+  const [customTaskSource, setCustomTaskSource] = useState("");
 
   const [hydrated, setHydrated] = useState({
     step: false,
+    selectedCase: false,
     internal: false,
     contextual: false,
     testSet: false,
@@ -86,13 +97,19 @@ export function M02Work() {
   );
 
   const internalSourceOptions = useMemo(
-    () => getM02InternalSourceOptions(profileContext),
-    [profileContext],
+    () => getM02InternalSourceOptions(profileContext, selectedCaseId),
+    [profileContext, selectedCaseId],
   );
   const contextualRuleOptions = useMemo(
-    () => getM02ContextualRuleOptions(profileContext),
-    [profileContext],
+    () => getM02ContextualRuleOptions(profileContext, selectedCaseId),
+    [profileContext, selectedCaseId],
   );
+  const selectedUseCase = useMemo(
+    () => getM02UseCase(selectedCaseId),
+    [selectedCaseId],
+  );
+  const taskSourceOptions = selectedUseCase.taskSpecificSources.map((source) => source.title);
+  const taskSourceSel = testSet.sources ?? [];
 
   // Hydrate step from progress
   useEffect(() => {
@@ -117,6 +134,16 @@ export function M02Work() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress.isLoading]);
+
+  // Hydrate selected use case. Older M02 progress defaults to customer support.
+  useEffect(() => {
+    if (hydrated.selectedCase || selectedCaseOut.isLoading) return;
+    const saved = selectedCaseOut.value;
+    if (typeof saved === "string" && M02_USE_CASES.some((useCase) => useCase.id === saved)) {
+      setSelectedCaseId(saved);
+    }
+    setHydrated((h) => ({ ...h, selectedCase: true }));
+  }, [hydrated.selectedCase, selectedCaseOut.isLoading, selectedCaseOut.value]);
 
   // Seed m02.test_set defaults once if missing
   useEffect(() => {
@@ -160,7 +187,12 @@ export function M02Work() {
   useEffect(() => {
     if (hydrated.testSet || testSetOut.isLoading) return;
     if (testSetOut.value && typeof testSetOut.value === "object") {
-      setTestSet({ ...DEFAULT_TEST_SET, ...(testSetOut.value as Partial<TestSetShape>) });
+      const value = testSetOut.value as Partial<TestSetShape>;
+      setTestSet({
+        ...DEFAULT_TEST_SET,
+        ...value,
+        sources: Array.isArray(value.sources) ? value.sources : [],
+      });
     }
     setHydrated((h) => ({ ...h, testSet: true }));
   }, [hydrated.testSet, testSetOut.isLoading, testSetOut.value]);
@@ -205,6 +237,36 @@ export function M02Work() {
 
   const testSetTotal = testSet.clean + testSet.edge + testSet.adversarial;
 
+  const selectUseCase = (caseId: string) => {
+    setSelectedCaseId(caseId);
+    selectedCaseOut.setValue.mutate(caseId);
+  };
+
+  const updateTestSet = (patch: Partial<TestSetShape>) => {
+    const next = { ...testSet, ...patch };
+    setTestSet(next);
+    testSetOut.setValue.mutate(next);
+  };
+
+  const updateTaskSources = (nextSources: string[]) => {
+    updateTestSet({ sources: nextSources });
+  };
+
+  const addCustomSelection = (
+    value: string,
+    selected: string[],
+    setSelected: (next: string[]) => void,
+    persist: (next: string[]) => void,
+    clear: () => void,
+  ) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    const next = selected.includes(trimmed) ? selected : [...selected, trimmed];
+    setSelected(next);
+    persist(next);
+    clear();
+  };
+
   const goToStep = async (next: StepNum) => {
     setStep(next);
     await progress.setStep.mutateAsync(next);
@@ -212,6 +274,10 @@ export function M02Work() {
 
   const completeM02 = async () => {
     if (!user || !workspace) return;
+    await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
+    await internalSourcesOut.setValue.mutateAsync(internalSel);
+    await contextualRulesOut.setValue.mutateAsync(contextualSel);
+    await testSetOut.setValue.mutateAsync(testSet);
     await gapsOut.setValue.mutateAsync(gapsSel);
     await knowledgeEntriesOut.setValue.mutateAsync(knowledgeEntrySel);
     await retrievalTestsOut.setValue.mutateAsync(retrievalTestSel);
@@ -247,12 +313,6 @@ export function M02Work() {
   if (step === 1) {
     const s = M02_COURSE_CONTENT.step1;
 
-    const updateTestSet = (key: keyof TestSetShape, value: number) => {
-      const next = { ...testSet, [key]: Math.max(0, value) };
-      setTestSet(next);
-      testSetOut.setValue.mutate(next);
-    };
-
     return (
       <Step
         storyHeader={M02_COURSE_CONTENT.storyHeader}
@@ -271,133 +331,68 @@ export function M02Work() {
             <div className="card bg-mist/40 space-y-2">
               <p className="eyebrow-muted">WHERE THIS IS HEADING</p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                In M01 you saw that models generate fluent text without an internal truth check.
-                M02 asks the next business question: what knowledge must exist before AI can
-                answer, route, or draft anything useful?
+                In M01 you saw that models can sound fluent without being grounded. M02 starts
+                with a practical question: if we want AI to help with one business process, what
+                documents, files, rules, and examples must it be allowed to use?
               </p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                Use support or customer-operations triage as the default case: enough policy,
-                customer context, edge cases, and governance to make the method concrete without
-                locking the course to one industry.
+                Customer Support is the recommended example because most teams understand FAQs,
+                product pages, tickets, policies, and escalation. You can choose another business
+                case if it is closer to your work.
               </p>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              {M02_COURSE_CONTENT.step1.examplesInTheWild.map((item) => (
-                <div key={item.title} className="rounded-md border border-chalk bg-white p-4">
-                  <p className="eyebrow-muted">{item.label}</p>
-                  <h4 className="mt-2 font-display text-base text-navy">{item.title}</h4>
-                  <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.body}</p>
-                </div>
-              ))}
-            </div>
+            <ExamplesInTheWild items={M02_COURSE_CONTENT.step1.examplesInTheWild} />
 
-            <div className="border-t border-chalk pt-6 space-y-3">
-              <p className="eyebrow">LAYER 01 · INTERNAL KNOWLEDGE</p>
-              <p className="text-sm font-medium text-navy">
-                Which internal knowledge sources exist in {workspace.name}? (pick all that apply)
-              </p>
-              <ul className="space-y-2">
-                {internalSourceOptions.map((opt) => (
-                  <li key={opt}>
-                    <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
-                      <input
-                        type="checkbox"
-                        checked={internalSel.includes(opt)}
-                        onChange={() => {
-                          const next = toggle(internalSel, opt);
-                          setInternalSel(next);
-                          internalSourcesOut.setValue.mutate(next);
-                        }}
-                        className="mt-1 h-4 w-4 accent-terracotta"
-                      />
-                      <span>{opt}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-[12px] italic text-slate">
-                {internalSel.length} selected — pick at least one to continue.
-              </p>
-            </div>
-
-            <div className="border-t border-chalk pt-6 space-y-3">
-              <p className="eyebrow">LAYER 02 · CONTEXTUAL KNOWLEDGE</p>
-              <p className="text-sm font-medium text-navy">
-                Which rules and boundaries apply at {workspace.name}? (pick all that apply)
-              </p>
-              <ul className="space-y-2">
-                {contextualRuleOptions.map((opt) => (
-                  <li key={opt}>
-                    <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
-                      <input
-                        type="checkbox"
-                        checked={contextualSel.includes(opt)}
-                        onChange={() => {
-                          const next = toggle(contextualSel, opt);
-                          setContextualSel(next);
-                          contextualRulesOut.setValue.mutate(next);
-                        }}
-                        className="mt-1 h-4 w-4 accent-terracotta"
-                      />
-                      <span>{opt}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-[12px] italic text-slate">
-                {contextualSel.length} selected — pick at least one to continue.
-              </p>
-            </div>
-
-            <div className="border-t border-chalk pt-6 space-y-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="eyebrow">LAYER 03 · TASK-SPECIFIC KNOWLEDGE</p>
-                  <p className="mt-2 text-sm font-medium text-navy">
-                    Your minimum test-set shape for {workspace.name}
-                  </p>
-                </div>
-                <SeededBadge seeded={testSetOut.seeded} touched={testSetOut.touched} />
+            <div className="border-t border-chalk pt-6 space-y-4">
+              <div>
+                <p className="eyebrow">PART A · PICK THE BUSINESS USE CASE</p>
+                <h4 className="mt-2 font-display text-xl text-navy">
+                  Which process should the knowledge base prepare?
+                </h4>
+                <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+                  This is not your final capstone choice. It is the practical example you will use
+                  to learn how the three knowledge layers work.
+                </p>
               </div>
-              <p className="text-[12px] italic text-slate">
-                Keep it light for now. M02 needs a blueprint for the examples you will curate,
-                not a production-ready evaluation set.
-              </p>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <TestSetField
-                  label="Clean cases"
-                  hint="Baseline examples the process should handle"
-                  value={testSet.clean}
-                  onChange={(v) => updateTestSet("clean", v)}
-                />
-                <TestSetField
-                  label="Edge cases"
-                  hint="Ambiguous or incomplete cases"
-                  value={testSet.edge}
-                  onChange={(v) => updateTestSet("edge", v)}
-                />
-                <TestSetField
-                  label="Adversarial cases"
-                  hint="Refusal, escalation, or abuse tests"
-                  value={testSet.adversarial}
-                  onChange={(v) => updateTestSet("adversarial", v)}
-                />
+              <div className="grid gap-3 md:grid-cols-2">
+                {M02_USE_CASES.map((useCase) => (
+                  <button
+                    key={useCase.id}
+                    type="button"
+                    onClick={() => selectUseCase(useCase.id)}
+                    className={`rounded-md border p-4 text-left transition-colors ${
+                      selectedCaseId === useCase.id
+                        ? "border-terracotta bg-terracotta/5"
+                        : "border-chalk bg-white hover:bg-mist/40"
+                    }`}
+                  >
+                    <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
+                      {useCase.shortLabel}
+                      {useCase.id === M02_DEFAULT_USE_CASE_ID ? " · recommended" : ""}
+                    </span>
+                    <span className="mt-2 block font-display text-base text-navy">
+                      {useCase.title}
+                    </span>
+                    <span className="mt-1 block text-[13px] leading-relaxed text-graphite">
+                      {useCase.businessGoal}
+                    </span>
+                  </button>
+                ))}
               </div>
-
-              <p className="text-[12px] italic text-slate">
-                {testSetTotal} examples total
-                {testSetTotal < 3 ? " — need at least 3 to continue." : " — minimum reached."}
-              </p>
             </div>
+
+            <UseCaseLayerPreview useCase={selectedUseCase} />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={internalSel.length > 0 && contextualSel.length > 0 && testSetTotal >= 3}
-        disabledReason="Pick at least one internal source, one contextual rule, and at least 3 test examples."
+        canContinue={!!selectedUseCase}
+        disabledReason="Choose one business use case."
         nextLabel={s.nextLabel}
-        onContinue={() => goToStep(2)}
+        onContinue={async () => {
+          await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
+          await goToStep(2);
+        }}
       />
     );
   }
@@ -419,65 +414,151 @@ export function M02Work() {
         }
         yourVersion={
           <div className="space-y-8">
-            <div className="card border-l-[3px] border-l-terracotta space-y-5">
-              <p className="eyebrow">YOUR THREE-LAYER MAP SO FAR — {workspace.name.toUpperCase()}</p>
+            <ExamplesInTheWild items={M02_COURSE_CONTENT.step2.examplesInTheWild} />
 
-              <LayerRow
-                num="01"
-                label="Internal knowledge"
-                items={internalSel}
-                empty="No internal sources selected yet — go back to Step 1."
-              />
-              <LayerRow
-                num="02"
-                label="Contextual knowledge"
-                items={contextualSel}
-                empty="No contextual rules selected yet — go back to Step 1."
-              />
-
-              <div className="space-y-1">
-                <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-                  LAYER 03
-                </span>
-                <p className="mt-1 text-sm font-medium text-navy">Task-specific knowledge</p>
-                <p className="text-[13px] text-graphite">
-                  {testSet.clean} clean · {testSet.edge} edge · {testSet.adversarial} adversarial =
-                  {" "}{testSetTotal} examples and boundary cases total
-                </p>
-              </div>
+            <div className="card border-l-[3px] border-l-terracotta space-y-3">
+              <p className="eyebrow">SELECTED USE CASE</p>
+              <h4 className="font-display text-xl text-navy">{selectedUseCase.title}</h4>
+              <p className="text-[14px] leading-relaxed text-graphite">
+                {selectedUseCase.whatAiShouldDo}
+              </p>
+              <button
+                type="button"
+                onClick={() => goToStep(1)}
+                className="text-left text-[12px] font-medium text-terracotta hover:text-navy"
+              >
+                Change use case
+              </button>
             </div>
+
+            <SourcePickerSection
+              layerNum="01"
+              title="Internal knowledge"
+              intro="Pick the documents, systems, or records that tell the AI what exists inside the business."
+              sourceOptions={selectedUseCase.internalSources}
+              fallbackOptions={internalSourceOptions}
+              selected={internalSel}
+              onToggle={(opt) => {
+                const next = toggle(internalSel, opt);
+                setInternalSel(next);
+                internalSourcesOut.setValue.mutate(next);
+              }}
+              customValue={customInternalSource}
+              onCustomChange={setCustomInternalSource}
+              onAddCustom={() =>
+                addCustomSelection(
+                  customInternalSource,
+                  internalSel,
+                  setInternalSel,
+                  (next) => internalSourcesOut.setValue.mutate(next),
+                  () => setCustomInternalSource(""),
+                )
+              }
+              footer={`${internalSel.length} selected - pick at least one source.`}
+            />
+
+            <SourcePickerSection
+              layerNum="02"
+              title="Contextual knowledge"
+              intro="Pick the policies, procedures, boundaries, or source-precedence rules that govern the answer."
+              sourceOptions={selectedUseCase.contextualRules}
+              fallbackOptions={contextualRuleOptions}
+              selected={contextualSel}
+              onToggle={(opt) => {
+                const next = toggle(contextualSel, opt);
+                setContextualSel(next);
+                contextualRulesOut.setValue.mutate(next);
+              }}
+              customValue={customContextualRule}
+              onCustomChange={setCustomContextualRule}
+              onAddCustom={() =>
+                addCustomSelection(
+                  customContextualRule,
+                  contextualSel,
+                  setContextualSel,
+                  (next) => contextualRulesOut.setValue.mutate(next),
+                  () => setCustomContextualRule(""),
+                )
+              }
+              footer={`${contextualSel.length} selected - pick at least one rule or boundary.`}
+            />
+
+            <SourcePickerSection
+              layerNum="03"
+              title="Task-specific knowledge"
+              intro="Pick the examples that prove how this use case should behave in real work."
+              sourceOptions={selectedUseCase.taskSpecificSources}
+              fallbackOptions={taskSourceOptions}
+              selected={taskSourceSel}
+              onToggle={(opt) => updateTaskSources(toggle(taskSourceSel, opt))}
+              customValue={customTaskSource}
+              onCustomChange={setCustomTaskSource}
+              onAddCustom={() =>
+                addCustomSelection(
+                  customTaskSource,
+                  taskSourceSel,
+                  updateTaskSources,
+                  () => undefined,
+                  () => setCustomTaskSource(""),
+                )
+              }
+              footer={`${taskSourceSel.length} selected - pick at least one example source.`}
+            />
 
             <div className="border-t border-chalk pt-6 space-y-3">
-              <p className="text-sm font-medium text-navy">
-                Which gaps do you recognise in this process? (pick all that apply)
-              </p>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="eyebrow">MINIMUM TEST SET SHAPE</p>
+                  <p className="mt-2 text-sm font-medium text-navy">
+                    How many examples should the blueprint plan to curate?
+                  </p>
+                </div>
+                <SeededBadge seeded={testSetOut.seeded} touched={testSetOut.touched} />
+              </div>
               <p className="text-[12px] italic text-slate">
-                This is a readiness diagnosis, not a confession of failure. A good blueprint names
-                the gaps before Build starts.
+                Keep it light. M02 needs a blueprint for the examples you will curate, not a
+                production-ready evaluation set.
               </p>
-              <ul className="space-y-2">
-                {M02_COURSE_CONTENT.gapOptions.map((opt) => (
-                  <li key={opt}>
-                    <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
-                      <input
-                        type="checkbox"
-                        checked={gapsSel.includes(opt)}
-                        onChange={() => {
-                          const next = toggle(gapsSel, opt);
-                          setGapsSel(next);
-                          gapsOut.setValue.mutate(next);
-                        }}
-                        className="mt-1 h-4 w-4 accent-terracotta"
-                      />
-                      <span>{opt}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <TestSetField
+                  label="Clean cases"
+                  hint="Baseline examples the process should handle"
+                  value={testSet.clean}
+                  onChange={(v) => updateTestSet({ clean: Math.max(0, v) })}
+                />
+                <TestSetField
+                  label="Edge cases"
+                  hint="Ambiguous or incomplete cases"
+                  value={testSet.edge}
+                  onChange={(v) => updateTestSet({ edge: Math.max(0, v) })}
+                />
+                <TestSetField
+                  label="Adversarial cases"
+                  hint="Refusal, escalation, or abuse tests"
+                  value={testSet.adversarial}
+                  onChange={(v) => updateTestSet({ adversarial: Math.max(0, v) })}
+                />
+              </div>
+
               <p className="text-[12px] italic text-slate">
-                {gapsSel.length} selected — pick at least one to continue.
+                {testSetTotal} examples total
+                {testSetTotal < 3 ? " - need at least 3 to continue." : " - minimum reached."}
               </p>
             </div>
+
+            <ChecklistSection
+              title="Readiness gaps to name before Build"
+              hint="This is a readiness diagnosis, not a confession of failure. A good blueprint names the gaps before Build starts."
+              items={[...selectedUseCase.commonGaps, ...M02_COURSE_CONTENT.gapOptions]}
+              selected={gapsSel}
+              onToggle={(opt) => {
+                const next = toggle(gapsSel, opt);
+                setGapsSel(next);
+                gapsOut.setValue.mutate(next);
+              }}
+              footer={`${gapsSel.length} selected - pick at least one gap.`}
+            />
 
             <ChecklistSection
               title="Reason codes to carry into Gate 1"
@@ -504,8 +585,14 @@ export function M02Work() {
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={gapsSel.length > 0}
-        disabledReason="Pick at least one readiness gap."
+        canContinue={
+          internalSel.length > 0 &&
+          contextualSel.length > 0 &&
+          taskSourceSel.length > 0 &&
+          testSetTotal >= 3 &&
+          gapsSel.length > 0
+        }
+        disabledReason="Pick at least one source for each layer, keep at least 3 test examples, and name one readiness gap."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}
@@ -515,8 +602,10 @@ export function M02Work() {
 
   // ============ STEP 3 — Three-layer blueprint + complete ============
   const s = M02_COURSE_CONTENT.step3;
-  const requiredKnowledgeEntries = M02_COURSE_CONTENT.knowledgeEntryOptions.length;
-  const requiredRetrievalTests = M02_COURSE_CONTENT.retrievalTestOptions.length;
+  const knowledgeEntryOptions = selectedUseCase.sampleKnowledgeEntries;
+  const retrievalTestOptions = selectedUseCase.sampleRetrievalTests;
+  const requiredKnowledgeEntries = knowledgeEntryOptions.length;
+  const requiredRetrievalTests = retrievalTestOptions.length;
   const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
     const next = { ...gateReadiness, ...patch };
     setGateReadiness(next);
@@ -525,6 +614,7 @@ export function M02Work() {
   const suggestedGateStatus: Exclude<GateStatus, ""> =
     internalSel.length === 0 ||
     contextualSel.length === 0 ||
+    taskSourceSel.length === 0 ||
     testSetTotal < 3 ||
     knowledgeEntrySel.length < requiredKnowledgeEntries ||
     retrievalTestSel.length < requiredRetrievalTests
@@ -534,6 +624,10 @@ export function M02Work() {
         : "pass";
   const needsReasonCode = gateReadiness.status !== "" && gateReadiness.status !== "pass";
   const canCompleteM02 =
+    internalSel.length > 0 &&
+    contextualSel.length > 0 &&
+    taskSourceSel.length > 0 &&
+    testSetTotal >= 3 &&
     knowledgeEntrySel.length >= requiredKnowledgeEntries &&
     retrievalTestSel.length >= requiredRetrievalTests &&
     !!gateReadiness.status &&
@@ -554,9 +648,14 @@ export function M02Work() {
       }
       yourVersion={
         <div className="space-y-8">
+          <ExamplesInTheWild items={M02_COURSE_CONTENT.step3.examplesInTheWild} />
+
           {/* Three-layer synthesis card */}
           <div className="card border-l-[3px] border-l-terracotta space-y-5">
             <p className="eyebrow">YOUR THREE-LAYER KNOWLEDGE MAP — {workspace.name.toUpperCase()}</p>
+            <p className="text-[13px] leading-relaxed text-graphite">
+              Use case: <strong>{selectedUseCase.title}</strong>. {selectedUseCase.whatAiShouldDo}
+            </p>
 
             <LayerRow
               num="01"
@@ -576,16 +675,30 @@ export function M02Work() {
                 LAYER 03
               </span>
               <p className="text-sm font-medium text-navy mt-1">Task-specific knowledge</p>
-              <p className="text-[13px] text-graphite">
-                {testSet.clean} clean · {testSet.edge} edge · {testSet.adversarial} adversarial = {testSetTotal} examples and boundary cases total
+              {taskSourceSel.length === 0 ? (
+                <p className="text-[13px] italic text-slate">
+                  No task-specific sources selected yet - go back to Step 2.
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {taskSourceSel.map((it) => (
+                    <li key={it} className="text-[13px] text-graphite">
+                      · {it}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-[12px] text-slate">
+                Planned test shape: {testSet.clean} clean · {testSet.edge} edge ·{" "}
+                {testSet.adversarial} adversarial = {testSetTotal} examples total
               </p>
             </div>
           </div>
 
           <ChecklistSection
-            title="Create five demonstrative knowledge-entry categories"
+            title={`Create five demonstrative entries for ${selectedUseCase.shortLabel}`}
             hint="Required metadata only: title, layer/category, source, owner, and rule/fact/example. Advanced metadata can be added later."
-            items={M02_COURSE_CONTENT.knowledgeEntryOptions}
+            items={knowledgeEntryOptions}
             selected={knowledgeEntrySel}
             onToggle={(opt) => {
               const next = toggle(knowledgeEntrySel, opt);
@@ -617,7 +730,7 @@ export function M02Work() {
           <ChecklistSection
             title="Choose five retrieval test questions"
             hint="Use these templates now. Later you can edit each one for the exact process and source."
-            items={M02_COURSE_CONTENT.retrievalTestOptions}
+            items={retrievalTestOptions}
             selected={retrievalTestSel}
             onToggle={(opt) => {
               const next = toggle(retrievalTestSel, opt);
@@ -700,6 +813,24 @@ export function M02Work() {
             </p>
           </div>
 
+          <div className="rounded-md border border-chalk bg-white p-4">
+            <p className="eyebrow-muted">OPTIONAL CAPSTONE BRIDGE</p>
+            <h4 className="mt-2 font-display text-base text-navy">
+              Want to see this method applied in a capstone?
+            </h4>
+            <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+              The core M02 assignment stays generalized. The Capstone Library shows how the same
+              three-layer blueprint transfers to specific business workflows.
+            </p>
+            <Link
+              to="/app/$workspaceSlug/assess/use-cases"
+              params={{ workspaceSlug: workspace.slug }}
+              className="mt-3 inline-flex text-[13px] font-medium text-terracotta hover:text-navy"
+            >
+              Open Capstone Library →
+            </Link>
+          </div>
+
           <div className="border-t border-chalk pt-6 space-y-3">
             <p className="text-sm font-medium text-navy">Language to keep straight</p>
             <div className="grid gap-2 md:grid-cols-2">
@@ -734,6 +865,222 @@ export function M02Work() {
       onBack={() => goToStep(2)}
       onContinue={completeM02}
     />
+  );
+}
+
+function ExamplesInTheWild({
+  items,
+}: {
+  items: readonly {
+    label: string;
+    title: string;
+    body: string;
+    sourceLabel?: string;
+    sourceUrl?: string;
+  }[];
+}) {
+  return (
+    <div className="space-y-3">
+      <p className="eyebrow-muted">EXAMPLES IN THE WILD</p>
+      <div className="grid gap-3 md:grid-cols-2">
+        {items.map((item) => (
+          <div key={item.title} className="rounded-md border border-chalk bg-white p-4">
+            <p className="eyebrow-muted">{item.label}</p>
+            <h4 className="mt-2 font-display text-base text-navy">{item.title}</h4>
+            <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.body}</p>
+            {item.sourceUrl && (
+              <a
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex text-[12px] font-medium text-terracotta hover:text-navy"
+              >
+                Source: {item.sourceLabel ?? "reference"} →
+              </a>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function UseCaseLayerPreview({ useCase }: { useCase: M02UseCase }) {
+  return (
+    <div className="border-t border-chalk pt-6 space-y-4">
+      <div>
+        <p className="eyebrow">PART B · SEE THE THREE KNOWLEDGE LAYERS</p>
+        <h4 className="mt-2 font-display text-xl text-navy">
+          What {useCase.shortLabel} needs before AI can help
+        </h4>
+        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+          {useCase.whatAiShouldDo}
+        </p>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        <LayerPreviewCard
+          num="01"
+          title="Internal knowledge"
+          description="The business facts, records, and documents the AI needs to know what exists."
+          sources={useCase.internalSources}
+        />
+        <LayerPreviewCard
+          num="02"
+          title="Contextual knowledge"
+          description="The policies, procedures, and boundaries that tell the AI what it is allowed to do."
+          sources={useCase.contextualRules}
+        />
+        <LayerPreviewCard
+          num="03"
+          title="Task-specific knowledge"
+          description="The real examples that show the AI what good, risky, and incomplete cases look like."
+          sources={useCase.taskSpecificSources}
+        />
+      </div>
+    </div>
+  );
+}
+
+function LayerPreviewCard({
+  num,
+  title,
+  description,
+  sources,
+}: {
+  num: string;
+  title: string;
+  description: string;
+  sources: readonly M02UseCaseSource[];
+}) {
+  return (
+    <div className="rounded-md border border-chalk bg-white p-4">
+      <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+        LAYER {num}
+      </span>
+      <h5 className="mt-3 font-display text-base text-navy">{title}</h5>
+      <p className="mt-1 text-[12px] leading-relaxed text-slate">{description}</p>
+      <ul className="mt-3 space-y-2">
+        {sources.slice(0, 5).map((source) => (
+          <li key={source.title} className="text-[13px] text-graphite">
+            <strong className="text-navy">{source.title}</strong>
+            <span className="block text-[12px] text-slate">{source.examples.join(", ")}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SourcePickerSection({
+  layerNum,
+  title,
+  intro,
+  sourceOptions,
+  fallbackOptions,
+  selected,
+  onToggle,
+  customValue,
+  onCustomChange,
+  onAddCustom,
+  footer,
+}: {
+  layerNum: string;
+  title: string;
+  intro: string;
+  sourceOptions: readonly M02UseCaseSource[];
+  fallbackOptions: readonly string[];
+  selected: string[];
+  onToggle: (item: string) => void;
+  customValue: string;
+  onCustomChange: (value: string) => void;
+  onAddCustom: () => void;
+  footer: string;
+}) {
+  const optionTitles = sourceOptions.map((source) => source.title);
+  const extraOptions = fallbackOptions.filter((option) => !optionTitles.includes(option));
+
+  return (
+    <div className="border-t border-chalk pt-6 space-y-4">
+      <div>
+        <p className="eyebrow">LAYER {layerNum} · {title}</p>
+        <p className="mt-2 text-sm font-medium text-navy">{intro}</p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {sourceOptions.map((source) => {
+          const checked = selected.includes(source.title);
+          return (
+            <label
+              key={source.title}
+              className={`cursor-pointer rounded-md border p-4 transition-colors ${
+                checked ? "border-terracotta bg-terracotta/5" : "border-chalk bg-white hover:bg-mist/40"
+              }`}
+            >
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => onToggle(source.title)}
+                  className="mt-1 h-4 w-4 accent-terracotta"
+                />
+                <div>
+                  <p className="text-sm font-medium text-navy">{source.title}</p>
+                  <p className="mt-1 text-[12px] leading-relaxed text-graphite">
+                    {source.description}
+                  </p>
+                  <p className="mt-2 text-[11px] text-slate">
+                    Examples: {source.examples.join(", ")}
+                  </p>
+                  <p className="mt-2 text-[11px] italic text-slate">
+                    If missing: {source.gapIfMissing}
+                  </p>
+                </div>
+              </div>
+            </label>
+          );
+        })}
+      </div>
+
+      {extraOptions.length > 0 && (
+        <div className="rounded-md border border-chalk bg-mist/30 p-4">
+          <p className="eyebrow-muted">MORE OPTIONS</p>
+          <ul className="mt-3 grid gap-2 md:grid-cols-2">
+            {extraOptions.map((option) => (
+              <li key={option}>
+                <label className="flex cursor-pointer items-start gap-2 text-[13px] text-navy">
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(option)}
+                    onChange={() => onToggle(option)}
+                    className="mt-1 h-4 w-4 accent-terracotta"
+                  />
+                  <span>{option}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-2 rounded-md border border-chalk bg-white p-3 sm:flex-row">
+        <input
+          type="text"
+          value={customValue}
+          onChange={(event) => onCustomChange(event.target.value)}
+          placeholder="Add another source, document, file, or rule..."
+          className="min-w-0 flex-1 rounded border border-chalk bg-paper px-3 py-2 text-[13px] text-navy outline-none focus:border-terracotta"
+        />
+        <button
+          type="button"
+          onClick={onAddCustom}
+          className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
+        >
+          Add source
+        </button>
+      </div>
+
+      <p className="text-[12px] italic text-slate">{footer}</p>
+    </div>
   );
 }
 

@@ -1,21 +1,529 @@
 import type { InvoiceOcrProfileContext, OCRBlock } from "./types";
 
+export const M02_DEFAULT_USE_CASE_ID = "customer-support-kb";
+
+export interface M02UseCaseSource {
+  title: string;
+  description: string;
+  examples: readonly string[];
+  gapIfMissing: string;
+}
+
+export interface M02UseCase {
+  id: string;
+  title: string;
+  shortLabel: string;
+  businessGoal: string;
+  whatAiShouldDo: string;
+  internalSources: readonly M02UseCaseSource[];
+  contextualRules: readonly M02UseCaseSource[];
+  taskSpecificSources: readonly M02UseCaseSource[];
+  commonGaps: readonly string[];
+  sampleKnowledgeEntries: readonly string[];
+  sampleRetrievalTests: readonly string[];
+}
+
+export const M02_USE_CASES: readonly M02UseCase[] = [
+  {
+    id: "customer-support-kb",
+    title: "Customer Support Knowledge Base",
+    shortLabel: "Support",
+    businessGoal:
+      "Help an AI assistant answer, route, and escalate customer questions using approved knowledge.",
+    whatAiShouldDo:
+      "Find the right product or policy source, draft a bounded answer, and know when to escalate to a human.",
+    internalSources: [
+      {
+        title: "Product brochure or catalog",
+        description: "The official description of what the product does, who it is for, and what is included.",
+        examples: ["Product brochure", "pricing/package page", "feature list"],
+        gapIfMissing: "The AI may describe the wrong feature, promise unsupported behavior, or answer from memory.",
+      },
+      {
+        title: "FAQ or help-center articles",
+        description: "Approved answers to common customer questions.",
+        examples: ["FAQ page", "help center", "getting-started guide"],
+        gapIfMissing: "Common questions become inconsistent because the AI has no approved answer to retrieve.",
+      },
+      {
+        title: "Product documentation and release notes",
+        description: "The detailed source for setup steps, limitations, changes, and known issues.",
+        examples: ["user guide", "release notes", "known issue log"],
+        gapIfMissing: "The AI may answer with outdated instructions or miss current limitations.",
+      },
+      {
+        title: "Customer or account context",
+        description: "The business context that changes the answer for different customers.",
+        examples: ["plan", "region", "entitlements", "account status"],
+        gapIfMissing: "The AI may give the right answer to the wrong customer segment.",
+      },
+      {
+        title: "Resolved and unresolved tickets",
+        description: "Past requests showing what was solved, what failed, and what needed escalation.",
+        examples: ["resolved tickets", "unresolved complaints", "quality review notes"],
+        gapIfMissing: "The AI cannot learn the real operating patterns or edge cases of the support team.",
+      },
+    ],
+    contextualRules: [
+      {
+        title: "Refund, return, or service policy",
+        description: "The rule that controls what support can approve, refuse, or escalate.",
+        examples: ["refund policy", "return policy", "service terms"],
+        gapIfMissing: "The AI may invent exceptions or promise outcomes the business cannot honor.",
+      },
+      {
+        title: "Privacy and data-handling rules",
+        description: "The boundary for what customer data can be read, summarized, stored, or shared.",
+        examples: ["privacy policy", "data retention rule", "processor list"],
+        gapIfMissing: "The AI may expose or process customer information outside approved boundaries.",
+      },
+      {
+        title: "Escalation procedure",
+        description: "The rules for routing legal, safety, security, payment, or high-risk cases to a human.",
+        examples: ["escalation matrix", "queue owners", "risk triggers"],
+        gapIfMissing: "The AI may keep answering when the correct action is to stop and escalate.",
+      },
+      {
+        title: "SLA and urgency rules",
+        description: "The service commitment that changes how quickly a case should move and who owns it.",
+        examples: ["SLA table", "priority matrix", "enterprise support rules"],
+        gapIfMissing: "The AI may route urgent cases like normal cases or over-prioritize low-risk requests.",
+      },
+      {
+        title: "Tone and commitment boundaries",
+        description: "The voice, approval limits, and promises the AI must avoid making.",
+        examples: ["tone guide", "approval thresholds", "do-not-promise list"],
+        gapIfMissing: "The AI may sound helpful while making unauthorized commercial or legal commitments.",
+      },
+    ],
+    taskSpecificSources: [
+      {
+        title: "Clean resolved examples",
+        description: "Straightforward cases where the right answer, owner, and source are obvious.",
+        examples: ["simple password reset", "clear feature question", "standard policy answer"],
+        gapIfMissing: "The team cannot prove the baseline assistant behavior works.",
+      },
+      {
+        title: "Ambiguous or incomplete cases",
+        description: "Examples where the AI must ask a follow-up question or identify missing context.",
+        examples: ["missing account plan", "multi-topic request", "unclear product version"],
+        gapIfMissing: "The AI may answer too early instead of asking for the information it needs.",
+      },
+      {
+        title: "Escalated cases",
+        description: "Examples where the correct behavior is routing to a specialist or manager.",
+        examples: ["legal threat", "security concern", "commercial exception request"],
+        gapIfMissing: "The AI may automate cases that should remain human-owned.",
+      },
+      {
+        title: "Unsafe or adversarial requests",
+        description: "Requests that test refusal, privacy, source conflict, or prompt-injection behavior.",
+        examples: ["fake policy quote", "private data request", "ignore previous instructions"],
+        gapIfMissing: "The system has no evidence that it can refuse or protect the business.",
+      },
+      {
+        title: "Unresolved or failed cases",
+        description: "Cases that show where current knowledge is missing, conflicting, or hard to apply.",
+        examples: ["unresolved complaints", "reopened tickets", "quality failures"],
+        gapIfMissing: "The blueprint hides the highest-value gaps and only proves the easy cases.",
+      },
+    ],
+    commonGaps: [
+      "No owner for the product or policy source",
+      "FAQ exists but has no review date or version",
+      "Ticket history is messy, duplicated, or not labelled",
+      "Escalation rules live in messages instead of an approved procedure",
+      "Customer data access is unclear or too broad",
+    ],
+    sampleKnowledgeEntries: [
+      "Product eligibility answer - source-backed product or plan rule",
+      "Refund or service-policy rule - approved boundary and owner",
+      "Escalation trigger - when the AI must route to a human",
+      "Known issue or limitation - current source and review date",
+      "Edge-case example - ambiguous request with expected response",
+    ],
+    sampleRetrievalTests: [
+      "A customer asks a standard product question. Which approved source should answer it?",
+      "A customer asks for an exception. Which policy and approval rule applies?",
+      "A message mentions legal, security, or payment risk. Who owns the escalation?",
+      "The FAQ and a historical ticket conflict. Which source wins?",
+      "The request is missing account context. What should the AI ask before answering?",
+    ],
+  },
+  {
+    id: "hr-policy-support",
+    title: "HR Policy Support",
+    shortLabel: "HR",
+    businessGoal: "Help employees find accurate HR guidance without bypassing privacy or manager review.",
+    whatAiShouldDo:
+      "Retrieve the right policy, explain it safely, and route sensitive employee cases to HR.",
+    internalSources: [
+      {
+        title: "Employee handbook",
+        description: "The approved source for employment rules and employee-facing guidance.",
+        examples: ["handbook", "benefits guide", "people policy portal"],
+        gapIfMissing: "The AI may answer from informal practice instead of approved policy.",
+      },
+      {
+        title: "HR case history",
+        description: "Past employee questions and how HR resolved them.",
+        examples: ["closed HR tickets", "request categories", "resolution notes"],
+        gapIfMissing: "The AI cannot learn common patterns or expected handling paths.",
+      },
+      {
+        title: "Employee profile context",
+        description: "The fields that change policy answers for each employee.",
+        examples: ["country", "contract type", "team", "tenure"],
+        gapIfMissing: "The AI may give guidance for the wrong region or employment type.",
+      },
+    ],
+    contextualRules: [
+      {
+        title: "Privacy and confidentiality rules",
+        description: "The boundary for employee data access and disclosure.",
+        examples: ["HR privacy rule", "access role matrix", "retention policy"],
+        gapIfMissing: "The AI may expose or summarize sensitive employee information incorrectly.",
+      },
+      {
+        title: "Manager or HR approval boundary",
+        description: "The cases where an employee needs human review or approval.",
+        examples: ["leave approval rule", "compensation escalation", "disciplinary process"],
+        gapIfMissing: "The AI may imply approval for actions it cannot authorize.",
+      },
+      {
+        title: "Regional policy variants",
+        description: "Differences by location, contract type, or local employment rule.",
+        examples: ["France policy", "UAE policy", "remote-work variant"],
+        gapIfMissing: "The AI may apply a general policy to a local exception.",
+      },
+    ],
+    taskSpecificSources: [
+      {
+        title: "Routine employee questions",
+        description: "Clear examples where the policy answer is simple.",
+        examples: ["leave balance question", "benefits deadline", "expense policy"],
+        gapIfMissing: "The baseline assistant behavior is not proven.",
+      },
+      {
+        title: "Sensitive HR cases",
+        description: "Examples where privacy, manager involvement, or HR escalation is required.",
+        examples: ["medical leave", "complaint", "compensation concern"],
+        gapIfMissing: "The assistant may over-answer sensitive situations.",
+      },
+      {
+        title: "Policy conflict cases",
+        description: "Examples where two policies or regions could point to different answers.",
+        examples: ["remote-work exception", "contract variant", "local holiday"],
+        gapIfMissing: "The assistant will not know when to ask for context or escalate.",
+      },
+    ],
+    commonGaps: [
+      "Policy variants by country are not separated",
+      "Employee data access is too broad",
+      "Approval boundaries are not documented",
+      "Sensitive cases are not labelled for escalation",
+    ],
+    sampleKnowledgeEntries: [
+      "Employee policy answer - approved handbook source",
+      "Regional policy variant - location and contract boundary",
+      "Sensitive-case escalation - HR owner and trigger",
+      "Approval rule - manager or HR sign-off requirement",
+      "Edge-case example - missing employee context",
+    ],
+    sampleRetrievalTests: [
+      "An employee asks a routine policy question. Which handbook source answers it?",
+      "The answer changes by country. What context must be checked first?",
+      "A request includes sensitive personal information. What escalation rule applies?",
+      "Two policy pages conflict. Which source wins?",
+      "The employee asks for approval. What should the AI refuse to promise?",
+    ],
+  },
+  {
+    id: "sales-quote-support",
+    title: "Sales Quote Support",
+    shortLabel: "Sales",
+    businessGoal: "Help sales teams draft accurate quotes while respecting pricing and approval rules.",
+    whatAiShouldDo:
+      "Use approved product, package, account, and discount knowledge to draft a quote that a human can review.",
+    internalSources: [
+      {
+        title: "Product and package catalog",
+        description: "The approved list of products, bundles, options, and limitations.",
+        examples: ["catalog", "package table", "feature matrix"],
+        gapIfMissing: "The AI may quote unsupported bundles or omit required options.",
+      },
+      {
+        title: "Pricing and discount history",
+        description: "Approved price structures and examples of accepted discount logic.",
+        examples: ["pricing table", "discount log", "approval history"],
+        gapIfMissing: "The AI may invent pricing or normalize exceptions as standard practice.",
+      },
+      {
+        title: "Account and opportunity context",
+        description: "The deal context that changes eligibility, terms, or next steps.",
+        examples: ["CRM opportunity", "customer segment", "renewal status"],
+        gapIfMissing: "The AI may generate a quote that ignores customer context.",
+      },
+    ],
+    contextualRules: [
+      {
+        title: "Approval thresholds",
+        description: "The levels where sales, finance, or leadership must approve.",
+        examples: ["discount threshold", "deal desk rule", "approval matrix"],
+        gapIfMissing: "The AI may propose terms that need approval without flagging them.",
+      },
+      {
+        title: "Legal and commercial boundaries",
+        description: "The clauses, promises, or terms that cannot be changed freely.",
+        examples: ["standard terms", "redline boundary", "commitment list"],
+        gapIfMissing: "The AI may draft commercial promises outside approved boundaries.",
+      },
+      {
+        title: "Source precedence",
+        description: "Which source wins when price lists, CRM notes, and prior quotes disagree.",
+        examples: ["current price book", "approved exception record", "deal desk note"],
+        gapIfMissing: "The AI may copy a stale exception into a new quote.",
+      },
+    ],
+    taskSpecificSources: [
+      {
+        title: "Clean quote examples",
+        description: "Standard quotes with clear products, pricing, and approval status.",
+        examples: ["standard SMB quote", "renewal quote", "approved package"],
+        gapIfMissing: "The AI has no baseline pattern for a clean draft.",
+      },
+      {
+        title: "Exception examples",
+        description: "Quotes requiring approval, non-standard terms, or missing context.",
+        examples: ["large discount", "non-standard term", "missing plan data"],
+        gapIfMissing: "The AI may treat risky exceptions as normal quotes.",
+      },
+      {
+        title: "Rejected or corrected quotes",
+        description: "Examples that show common mistakes and what changed during review.",
+        examples: ["rejected discount", "incorrect bundle", "missing approval"],
+        gapIfMissing: "The blueprint misses the real failure modes of quote drafting.",
+      },
+    ],
+    commonGaps: [
+      "Pricing source is not clearly current",
+      "Approval thresholds are informal",
+      "Prior quote exceptions are not labelled",
+      "CRM context is incomplete",
+    ],
+    sampleKnowledgeEntries: [
+      "Product/package rule - current catalog source",
+      "Discount boundary - approval threshold and owner",
+      "Commercial term limit - legal source and escalation",
+      "Account-context requirement - fields needed before drafting",
+      "Corrected-quote example - common mistake and expected fix",
+    ],
+    sampleRetrievalTests: [
+      "A standard quote is requested. Which catalog and price source should be used?",
+      "A discount exceeds threshold. Who must approve it?",
+      "CRM notes conflict with the price book. Which source wins?",
+      "A non-standard term is requested. What must be escalated?",
+      "A quote is missing customer segment. What should the AI ask first?",
+    ],
+  },
+  {
+    id: "rfp-response-support",
+    title: "RFP Response Support",
+    shortLabel: "RFP",
+    businessGoal: "Help teams draft consistent proposal answers from approved product and company knowledge.",
+    whatAiShouldDo:
+      "Retrieve approved answer blocks, adapt them to the question, and flag claims needing human confirmation.",
+    internalSources: [
+      {
+        title: "Approved answer library",
+        description: "Reusable responses for common company, security, product, and delivery questions.",
+        examples: ["proposal answer bank", "security answers", "implementation FAQ"],
+        gapIfMissing: "The AI may invent claims or reuse outdated proposal language.",
+      },
+      {
+        title: "Product and delivery documentation",
+        description: "The source for capabilities, limitations, timelines, and delivery model.",
+        examples: ["product docs", "delivery playbook", "case study repository"],
+        gapIfMissing: "The AI may overstate capabilities or miss current delivery limits.",
+      },
+      {
+        title: "Past proposal outcomes",
+        description: "Accepted, corrected, and rejected responses from previous RFPs.",
+        examples: ["won proposals", "red-team notes", "client clarifications"],
+        gapIfMissing: "The AI cannot learn which answers survived review.",
+      },
+    ],
+    contextualRules: [
+      {
+        title: "Claims and evidence boundary",
+        description: "Which claims require proof, citation, or leadership approval.",
+        examples: ["claim approval rule", "case-study permission", "security evidence rule"],
+        gapIfMissing: "The AI may make unsupported client-facing claims.",
+      },
+      {
+        title: "Confidentiality and sharing rules",
+        description: "What internal proof can be used, cited, summarized, or excluded.",
+        examples: ["NDA boundary", "client reference permission", "internal-only note"],
+        gapIfMissing: "The AI may include information that cannot be shared externally.",
+      },
+      {
+        title: "Review workflow",
+        description: "Who reviews technical, legal, security, and commercial sections.",
+        examples: ["review owner map", "red-team checklist", "submission workflow"],
+        gapIfMissing: "The AI may produce answers with no accountable reviewer.",
+      },
+    ],
+    taskSpecificSources: [
+      {
+        title: "Standard RFP questions",
+        description: "Common questions where approved answer blocks already exist.",
+        examples: ["company overview", "implementation process", "support model"],
+        gapIfMissing: "The AI cannot prove baseline answer reuse.",
+      },
+      {
+        title: "High-risk claims",
+        description: "Questions that ask for metrics, guarantees, security posture, or customer proof.",
+        examples: ["uptime claim", "security certification", "client reference"],
+        gapIfMissing: "The AI may answer with unsupported evidence.",
+      },
+      {
+        title: "Ambiguous requirements",
+        description: "Questions that require clarification before an answer is safe.",
+        examples: ["broad integration ask", "unclear timeline", "undefined scope"],
+        gapIfMissing: "The AI may assume requirements that the customer did not state.",
+      },
+    ],
+    commonGaps: [
+      "Approved answer library is outdated",
+      "Evidence for claims is missing",
+      "External sharing permissions are unclear",
+      "Review owners differ by section but are not mapped",
+    ],
+    sampleKnowledgeEntries: [
+      "Approved answer block - source and last review",
+      "Claim requiring evidence - proof source and owner",
+      "External-sharing boundary - what can be included",
+      "Review owner rule - section and accountable reviewer",
+      "Ambiguous requirement example - required clarification",
+    ],
+    sampleRetrievalTests: [
+      "A standard implementation question appears. Which answer block applies?",
+      "A question asks for a metric. What evidence must be retrieved?",
+      "A customer asks for confidential proof. What can be shared?",
+      "A security answer needs review. Who owns it?",
+      "A requirement is ambiguous. What clarification should the AI ask for?",
+    ],
+  },
+  {
+    id: "supplier-onboarding",
+    title: "Supplier Onboarding",
+    shortLabel: "Supplier",
+    businessGoal: "Help operations teams collect, review, and route supplier onboarding information.",
+    whatAiShouldDo:
+      "Identify missing supplier information, apply onboarding rules, and route risk cases to the right owner.",
+    internalSources: [
+      {
+        title: "Supplier profile and questionnaire",
+        description: "The information collected from each supplier before approval.",
+        examples: ["supplier form", "business profile", "capability questionnaire"],
+        gapIfMissing: "The AI cannot tell whether the supplier file is complete.",
+      },
+      {
+        title: "Approved supplier records",
+        description: "Past onboarding files showing what complete and approved records look like.",
+        examples: ["approved supplier profiles", "review notes", "status history"],
+        gapIfMissing: "The AI cannot compare a new case with a known-good pattern.",
+      },
+      {
+        title: "Contract and service templates",
+        description: "The reusable language and requirements that shape onboarding decisions.",
+        examples: ["service template", "standard terms", "scope checklist"],
+        gapIfMissing: "The AI may miss required information or suggest unapproved terms.",
+      },
+    ],
+    contextualRules: [
+      {
+        title: "Procurement approval rules",
+        description: "The thresholds and owners for supplier approval.",
+        examples: ["approval matrix", "spend threshold", "category owner"],
+        gapIfMissing: "The AI may route a supplier to the wrong reviewer.",
+      },
+      {
+        title: "Security and data requirements",
+        description: "The checks required before sharing systems, data, or customer context.",
+        examples: ["security questionnaire", "data processing rule", "access policy"],
+        gapIfMissing: "The AI may approve a supplier before risk review.",
+      },
+      {
+        title: "Risk and exception rules",
+        description: "The conditions that require legal, finance, security, or leadership review.",
+        examples: ["risk triggers", "exception approval", "country restriction"],
+        gapIfMissing: "The AI may normalize exceptions that need human judgment.",
+      },
+    ],
+    taskSpecificSources: [
+      {
+        title: "Clean onboarding examples",
+        description: "Complete supplier files that should pass standard review.",
+        examples: ["complete profile", "standard category", "approved review note"],
+        gapIfMissing: "The baseline workflow cannot be tested.",
+      },
+      {
+        title: "Incomplete supplier examples",
+        description: "Cases with missing documents, missing owner, or unclear category.",
+        examples: ["missing questionnaire", "unclear service scope", "no review owner"],
+        gapIfMissing: "The AI may fail to ask for missing information.",
+      },
+      {
+        title: "Risk escalation examples",
+        description: "Cases that require security, legal, finance, or leadership review.",
+        examples: ["sensitive access", "non-standard terms", "restricted geography"],
+        gapIfMissing: "The AI may treat risk cases as routine onboarding.",
+      },
+    ],
+    commonGaps: [
+      "Supplier categories are inconsistent",
+      "Approval owner is missing for some cases",
+      "Security requirements are not linked to supplier type",
+      "Exception rules are handled informally",
+    ],
+    sampleKnowledgeEntries: [
+      "Required supplier profile field - source and owner",
+      "Approval threshold - category and accountable reviewer",
+      "Security requirement - data/access boundary",
+      "Exception trigger - escalation owner",
+      "Incomplete-file example - missing information and expected action",
+    ],
+    sampleRetrievalTests: [
+      "A supplier file is missing a required field. What should the AI ask for?",
+      "A supplier belongs to a high-risk category. Who must review it?",
+      "A standard supplier is complete. Which rule allows it to move forward?",
+      "Security access is requested. What requirement must be checked?",
+      "A supplier category is unclear. What clarification should the AI request?",
+    ],
+  },
+] as const;
+
+export function getM02UseCase(caseId?: string): M02UseCase {
+  return M02_USE_CASES.find((useCase) => useCase.id === caseId) ?? M02_USE_CASES[0];
+}
+
 export const M02_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: build a three-layer knowledge base blueprint for a general support or customer-operations process.",
+    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: choose one business process, map its three knowledge layers, and turn those sources into a practical knowledge base blueprint.",
 
   step1: {
-    title: "Map the knowledge layers",
+    title: "Choose the use case and map the layers",
     why:
-      "Before a model can answer, route, summarize, or draft reliably, it needs more than documents. It needs the internal sources, the contextual rules, and the task-specific examples that make a business process understandable.",
+      "Before a model can answer, route, summarize, or draft reliably, it needs a specific business situation. Start by choosing the process, then look at the three knowledge layers the AI would need.",
     example:
-      "For support or customer-operations triage, the three layers might include ticket records and customer context, policy and privacy rules, plus clean, edge, and adversarial examples that show the right behavior.",
+      "For a customer support knowledge base, the AI needs product and FAQ sources, policy and escalation rules, plus real examples of clean, ambiguous, escalated, and unsafe support cases.",
     whatToNotice: [
-      "The model cannot use knowledge that has no source, owner, or access path",
-      "Business rules are part of the knowledge layer, not decoration around it",
-      "Task-specific examples are how you prove the system can handle the real workflow",
+      "A use case turns abstract data readiness into a concrete source map",
+      "The same three layers show up across support, HR, sales, RFP, and supplier workflows",
+      "The task-specific layer is where real examples prove how the system should behave",
     ],
     examplesInTheWild: [
       {
@@ -23,37 +531,59 @@ export const M02_COURSE_CONTENT = {
         title: "CompStat turned scattered signals into operating knowledge",
         body:
           "The useful shift was not just more data. It was shared categories, ownership, cadence, and visibility so teams could act on patterns instead of anecdotes.",
+        sourceLabel: "NYPD CompStat",
+        sourceUrl: "https://www.nyc.gov/site/nypd/stats/crime-statistics/compstat.page",
       },
       {
         label: "METADATA EXAMPLE",
         title: "Netflix-style metadata shows why labels matter",
         body:
           "Recommendations work because content is described in structured ways. AI workflows need the same discipline: source, category, owner, status, and context.",
+        sourceLabel: "Netflix Help Center",
+        sourceUrl: "https://help.netflix.com/en/node/100639",
       },
     ],
-    produces: "Three-layer source map: internal sources, contextual rules, and task-specific examples",
-    nextLabel: "Step 2 - find readiness gaps",
+    produces: "Selected use case and three-layer source map preview",
+    nextLabel: "Step 2 - pick sources and gaps",
   },
 
   step2: {
-    title: "Find the readiness gaps",
+    title: "Pick the sources and find the gaps",
     why:
-      "A knowledge map is only useful if it reveals what is missing. In M02, gaps are not blockers by themselves. Hidden gaps are the risk; named gaps become reason codes you can govern.",
+      "Now turn the example map into your own source map. Pick the documents, files, systems, policies, and examples that would make the selected use case AI-ready, then name what is still missing.",
     example:
-      "A support triage process may have ticket history and a policy page, but still be blocked by unclear ownership, stale metadata, missing edge cases, or no rule for which source wins when evidence conflicts.",
+      "A support workflow might have a product brochure, FAQ, resolved tickets, and a refund policy, but still be blocked by missing owners, stale articles, no escalation rule, or no edge-case examples.",
     whatToNotice: [
       "A missing owner is a readiness problem even when the document exists",
       "A source without metadata is hard to retrieve, audit, or refresh",
-      "Reason codes make gaps portable into Gate 1 and the Build phase",
+      "Reason codes turn vague concerns into Gate 1 evidence",
     ],
-    produces: "Readiness gaps and Gate 1 reason-code candidates",
+    examplesInTheWild: [
+      {
+        label: "BAD CONSEQUENCE",
+        title: "Air Canada showed why source conflicts must be governed",
+        body:
+          "A chatbot gave a customer bereavement-fare guidance that conflicted with the linked policy page. The operational lesson for M02: if two sources conflict, the system needs a source-precedence rule before it answers.",
+        sourceLabel: "Moffatt v. Air Canada, 2024 BCCRT 149",
+        sourceUrl: "https://www.canlii.org/en/bc/bccrt/doc/2024/2024bccrt149/2024bccrt149.html",
+      },
+      {
+        label: "BAD CONSEQUENCE",
+        title: "Internal articles still need sharing rules",
+        body:
+          "Service teams often mix internal and customer-facing articles. The readiness gap is not just missing content; it is knowing which article can be shared, by whom, and in which channel.",
+        sourceLabel: "Atlassian Support",
+        sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
+      },
+    ],
+    produces: "Selected sources for each layer, readiness gaps, and Gate 1 reason-code candidates",
     nextLabel: "Step 3 - build the blueprint",
   },
 
   step3: {
     title: "Build the KB blueprint",
     why:
-      "The final M02 deliverable is a blueprint, not a production knowledge base. You will define five demonstrative entry categories, choose five retrieval tests, confirm evidence checks, and decide the Gate 1 readiness status.",
+      "The final M02 deliverable is a blueprint, not a production knowledge base. Use your selected sources to define five demonstrative entries, choose five retrieval tests, confirm evidence checks, and decide the Gate 1 readiness status.",
     example:
       "A strong blueprint entry is not just 'refund policy'. It is 'Refund window after product use' with a source, owner, layer, rule/fact/example, and a retrieval question that proves the AI can find it.",
     whatToNotice: [
@@ -61,7 +591,25 @@ export const M02_COURSE_CONTENT = {
       "Retrieval tests show whether the knowledge can actually be found and used",
       "PASS, PARTIAL, or BLOCKED should be based on evidence, not optimism",
     ],
-    produces: "Three-layer KB blueprint with entries, retrieval tests, gaps, and Gate 1 readiness",
+    examplesInTheWild: [
+      {
+        label: "GOOD PRACTICE",
+        title: "Atlassian treats the knowledge base as part of service operations",
+        body:
+          "Knowledge articles work best when they are searchable in the service flow, connected to requests, and managed as reusable operational assets rather than loose documents.",
+        sourceLabel: "Atlassian Knowledge Management",
+        sourceUrl: "https://www.atlassian.com/software/confluence/guides/knowledge-management",
+      },
+      {
+        label: "GOOD PRACTICE",
+        title: "Internal visibility labels protect what agents can share",
+        body:
+          "A blueprint should separate what the AI may use internally from what can be sent to a customer. Visibility and sharing rules belong in the entry metadata, not in memory.",
+        sourceLabel: "Atlassian Support",
+        sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
+      },
+    ],
+    produces: "Use-case-specific KB blueprint with entries, retrieval tests, gaps, and Gate 1 readiness",
     nextLabel: "Complete M02",
   },
 
@@ -461,6 +1009,7 @@ export const M02_COURSE_CONTENT = {
       clean: 5,
       edge: 5,
       adversarial: 5,
+      sources: [],
     },
   },
 
@@ -468,9 +1017,11 @@ export const M02_COURSE_CONTENT = {
     "The data map tells us what exists. The knowledge base tells the AI what to use. M02 is done when the knowledge is source-backed, metadata-rich, testable, and governed.",
 } as const;
 
-export function getM02InternalSourceOptions(ctx: InvoiceOcrProfileContext): string[] {
+export function getM02InternalSourceOptions(ctx: InvoiceOcrProfileContext, caseId?: string): string[] {
   const company = ctx.companyName ?? "your company";
+  const useCase = getM02UseCase(caseId);
   return [
+    ...useCase.internalSources.map((source) => `${source.title} at ${company}`),
     `Ticket, request, or process records at ${company}`,
     "Approved policy or procedure knowledge base",
     "Customer, employee, supplier, or account context",
@@ -478,12 +1029,14 @@ export function getM02InternalSourceOptions(ctx: InvoiceOcrProfileContext): stri
     "Historical resolved cases with expected outcomes",
     "Product, service, contract, or entitlement catalog",
     "Audit log or quality review records",
-  ];
+  ].filter((value, index, arr) => arr.indexOf(value) === index);
 }
 
-export function getM02ContextualRuleOptions(ctx: InvoiceOcrProfileContext): string[] {
+export function getM02ContextualRuleOptions(ctx: InvoiceOcrProfileContext, caseId?: string): string[] {
   const country = ctx.country ?? "your region";
+  const useCase = getM02UseCase(caseId);
   return [
+    ...useCase.contextualRules.map((source) => source.title),
     `Privacy and data-handling rules for ${country}`,
     "Internal policy boundaries and approval thresholds",
     "Customer commitment boundary: what the AI must not promise",
@@ -492,5 +1045,5 @@ export function getM02ContextualRuleOptions(ctx: InvoiceOcrProfileContext): stri
     "Retention and audit trail requirements",
     "Sector-specific regulation if the workflow is regulated",
     "Vendor or processor rules if the data leaves your environment",
-  ];
+  ].filter((value, index, arr) => arr.indexOf(value) === index);
 }

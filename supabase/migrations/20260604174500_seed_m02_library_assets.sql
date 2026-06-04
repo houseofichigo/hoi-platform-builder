@@ -1,0 +1,202 @@
+-- Seed M02 library assets for the generalized Knowledge Base Blueprint module.
+-- Idempotent via stable UUIDs. These are global published assets, not workspace-specific data.
+
+INSERT INTO public.library_items
+  (
+    id,
+    workspace_id,
+    type,
+    title,
+    summary,
+    module_ids,
+    phase_ids,
+    tags,
+    published,
+    editorial_status,
+    published_at,
+    content_url,
+    metadata,
+    version
+  )
+VALUES
+  ('22222222-0000-4000-8000-000000000201', NULL, 'prompts',
+   'Source Inventory Builder',
+   'A prompt for turning a business process into a three-layer source map before AI work starts.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','data-readiness','knowledge-base','source-map','prompt']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "prompt_text": "Act as an AI data readiness analyst. For the business process below, create a three-layer source inventory: 1) internal sources, 2) contextual rules, and 3) task-specific examples. For each source, identify owner, source location, freshness, access path, sensitivity, and whether the AI may use it. End with missing sources and questions for the process owner. Process: [describe process].",
+      "framework": "three-layer knowledge map",
+      "tested_on": ["ChatGPT", "Claude", "Gemini"],
+      "expected_input": "A plain-language description of a business process.",
+      "expected_output": "Three-layer source inventory with owners, access, sensitivity, gaps, and questions.",
+      "difficulty": "beginner"
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000202', NULL, 'prompts',
+   'Knowledge Entry Extractor',
+   'A prompt for converting a trusted source into a structured knowledge-base entry.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','knowledge-entry','metadata','prompt']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "prompt_text": "Use only the source text below. Extract one knowledge-base entry with: title, layer/category, source, owner, rule/fact/example, sensitivity, allowed AI use, tags, review status, and refresh frequency. If a field is not supported by the source, mark it as UNKNOWN rather than inventing it. Source text: [paste source].",
+      "framework": "source-only extraction",
+      "tested_on": ["ChatGPT", "Claude", "Gemini"],
+      "expected_input": "A policy, procedure, FAQ, ticket sample, or source excerpt.",
+      "expected_output": "One structured knowledge entry with unsupported fields marked UNKNOWN.",
+      "difficulty": "beginner"
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000203', NULL, 'prompts',
+   'Metadata Completeness Checker',
+   'A prompt for finding missing owner, source, version, sensitivity, and refresh metadata before Build.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','metadata','quality-check','prompt']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "prompt_text": "Review the knowledge entries below for readiness. For each entry, check whether title, layer/category, source, owner, rule/fact/example, sensitivity, allowed AI use, review status, and refresh frequency are present. Return a table with COMPLETE / MISSING / UNCLEAR and assign reason codes where useful: NO_OWNER, NO_SOURCE, NO_METADATA, NO_ACCESS, RULES_UNDOCUMENTED, NO_BOUNDARY_CASES, NO_RETRIEVAL_TEST, SENSITIVE_DATA_BLOCKED. Entries: [paste entries].",
+      "framework": "readiness checklist",
+      "tested_on": ["ChatGPT", "Claude", "Gemini"],
+      "expected_input": "Draft knowledge entries.",
+      "expected_output": "Metadata completeness table with reason codes.",
+      "difficulty": "beginner"
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000204', NULL, 'prompts',
+   'Retrieval Test Question Generator',
+   'A prompt for creating test questions that prove whether the AI can find the right source and limitation.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','retrieval-test','knowledge-base','prompt']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "prompt_text": "Given the knowledge entries below, generate five retrieval test questions. Each question must specify: expected entry, expected source, what a correct answer must include, what the AI must not infer, and when to escalate to a human. Entries: [paste entries].",
+      "framework": "retrieval evaluation",
+      "tested_on": ["ChatGPT", "Claude", "Gemini"],
+      "expected_input": "A small set of structured knowledge entries.",
+      "expected_output": "Five retrieval test questions with expected source and limitation.",
+      "difficulty": "beginner"
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000205', NULL, 'prompts',
+   'Gate 1 Reason Code Classifier',
+   'A prompt for classifying M02 gaps into PASS, PARTIAL, or BLOCKED readiness evidence.',
+   ARRAY['m02','m04']::text[], ARRAY['assess','build']::text[],
+   ARRAY['m02','gate-1','reason-codes','readiness','prompt']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "prompt_text": "Act as a Gate 1 readiness reviewer. Review the source map, knowledge entries, retrieval tests, and gaps below. Assign status PASS, PARTIAL, or BLOCKED. If status is not PASS, assign one or more reason codes: NO_OWNER, NO_SOURCE, NO_METADATA, NO_ACCESS, RULES_UNDOCUMENTED, NO_BOUNDARY_CASES, NO_RETRIEVAL_TEST, SENSITIVE_DATA_BLOCKED. Explain the decision in plain business language and list the next action owner. Evidence: [paste evidence].",
+      "framework": "gate-readiness review",
+      "tested_on": ["ChatGPT", "Claude", "Gemini"],
+      "expected_input": "M02 source map, blueprint entries, retrieval tests, and gaps.",
+      "expected_output": "PASS / PARTIAL / BLOCKED status with reason codes and next actions.",
+      "difficulty": "intermediate"
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000206', NULL, 'documents',
+   'Three-Layer Source Map Template',
+   'A lightweight template for mapping internal sources, contextual rules, and task-specific examples.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','template','source-map','data-readiness']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "file_url": "",
+      "document_type": "template",
+      "page_count": 2,
+      "sections": ["Internal sources", "Contextual rules", "Task-specific examples", "Owners", "Access", "Sensitivity", "Gaps"]
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000207', NULL, 'documents',
+   'Knowledge Entry Template',
+   'A one-entry template with required and advanced metadata fields for M02.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','template','knowledge-entry','metadata']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "file_url": "",
+      "document_type": "template",
+      "page_count": 1,
+      "required_fields": ["Title", "Layer or category", "Source", "Owner", "Rule, fact, or example"],
+      "advanced_fields": ["Source location", "Version or review date", "Sensitivity", "Allowed AI use", "Tags", "Review status", "Refresh frequency"]
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000208', NULL, 'documents',
+   'Gate 1 Readiness Checklist',
+   'A checklist for deciding whether a candidate process is safe to take into Build.',
+   ARRAY['m02','m04']::text[], ARRAY['assess','build']::text[],
+   ARRAY['m02','gate-1','template','readiness','reason-codes']::text[],
+   true, 'published', now(), NULL,
+   '{
+      "file_url": "",
+      "document_type": "checklist",
+      "page_count": 2,
+      "statuses": ["PASS", "PARTIAL", "BLOCKED"],
+      "reason_codes": ["NO_OWNER", "NO_SOURCE", "NO_METADATA", "NO_ACCESS", "RULES_UNDOCUMENTED", "NO_BOUNDARY_CASES", "NO_RETRIEVAL_TEST", "SENSITIVE_DATA_BLOCKED"]
+    }'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000209', NULL, 'glossary',
+   'Data readiness',
+   'The evidence that a process has usable sources, owners, quality checks, access rules, and known gaps before AI is introduced.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','glossary','data-readiness']::text[],
+   true, 'published', now(), NULL,
+   '{"term":"Data readiness","definition":"The evidence that a process has usable sources, owners, quality checks, access rules, and known gaps before AI is introduced.","module_first_introduced":"m02","related_terms":["Knowledge base","Data map","Reason code"]}'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000210', NULL, 'glossary',
+   'Knowledge base',
+   'A structured, source-backed layer of business knowledge that an AI system can retrieve, cite, and use within agreed boundaries.',
+   ARRAY['m02','m04']::text[], ARRAY['assess','build']::text[],
+   ARRAY['m02','glossary','knowledge-base']::text[],
+   true, 'published', now(), NULL,
+   '{"term":"Knowledge base","definition":"A structured, source-backed layer of business knowledge that an AI system can retrieve, cite, and use within agreed boundaries.","module_first_introduced":"m02","related_terms":["Metadata","Retrieval test","RAG"]}'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000211', NULL, 'glossary',
+   'Metadata',
+   'The labels around a knowledge entry: source, owner, version, sensitivity, status, and refresh rule.',
+   ARRAY['m02']::text[], ARRAY['assess']::text[],
+   ARRAY['m02','glossary','metadata']::text[],
+   true, 'published', now(), NULL,
+   '{"term":"Metadata","definition":"The labels around a knowledge entry: source, owner, version, sensitivity, status, and refresh rule. Metadata is what makes knowledge governable.","module_first_introduced":"m02","related_terms":["Lineage","Sensitivity","Knowledge entry"]}'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000212', NULL, 'glossary',
+   'Retrieval test',
+   'A question designed to prove whether the AI can find the right entry, use the right source, and respect the right limitation.',
+   ARRAY['m02','m04']::text[], ARRAY['assess','build']::text[],
+   ARRAY['m02','glossary','retrieval-test']::text[],
+   true, 'published', now(), NULL,
+   '{"term":"Retrieval test","definition":"A question designed to prove whether the AI can find the right entry, use the right source, and respect the right limitation.","module_first_introduced":"m02","related_terms":["Knowledge base","RAG","Evaluation"]}'::jsonb,
+   1),
+
+  ('22222222-0000-4000-8000-000000000213', NULL, 'glossary',
+   'Reason code',
+   'A short label for why readiness is partial or blocked, such as NO_OWNER, NO_METADATA, or NO_ACCESS.',
+   ARRAY['m02','m04']::text[], ARRAY['assess','build']::text[],
+   ARRAY['m02','glossary','gate-1','reason-code']::text[],
+   true, 'published', now(), NULL,
+   '{"term":"Reason code","definition":"A short label for why readiness is partial or blocked, such as NO_OWNER, NO_METADATA, or NO_ACCESS.","module_first_introduced":"m02","related_terms":["Gate 1","Data readiness","Governance"]}'::jsonb,
+   1)
+ON CONFLICT (id) DO UPDATE SET
+  type             = EXCLUDED.type,
+  title            = EXCLUDED.title,
+  summary          = EXCLUDED.summary,
+  module_ids       = EXCLUDED.module_ids,
+  phase_ids        = EXCLUDED.phase_ids,
+  tags             = EXCLUDED.tags,
+  published        = EXCLUDED.published,
+  editorial_status = EXCLUDED.editorial_status,
+  published_at     = COALESCE(public.library_items.published_at, EXCLUDED.published_at),
+  content_url      = EXCLUDED.content_url,
+  metadata         = EXCLUDED.metadata,
+  updated_at       = now();

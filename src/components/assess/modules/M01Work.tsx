@@ -7,7 +7,6 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
-import { PromptBlock } from "@/components/assess/PromptBlock";
 import { M01_COURSE_CONTENT, getM01DangerousTaskOptions } from "@/lib/assess/content/course1";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 
@@ -184,6 +183,75 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
   },
 ] as const;
 
+const PARAMETER_QUIZ: readonly QuizQuestion[] = [
+  {
+    id: "q1",
+    type: "single",
+    question: "What does temperature mainly control?",
+    options: [
+      "The model's processing speed",
+      "The cost per token",
+      "How predictable or varied the next-token selection is",
+      "Which documents the model can access",
+    ],
+  },
+  {
+    id: "q2",
+    type: "single",
+    question: "What does top-p do?",
+    options: [
+      "It limits the model to the top P percent of training data",
+      "It narrows or widens the probability pool of candidate next tokens",
+      "It controls the total number of output tokens",
+      "It gives the model access to more sources",
+    ],
+  },
+  {
+    id: "q3",
+    type: "single",
+    question: "For repeated extraction, classification, or compliance workflows, what matters most?",
+    options: [
+      "Creative variation",
+      "Consistent output, strict structure, validation, and review rules",
+      "Higher randomness",
+      "Longer answers",
+    ],
+  },
+  {
+    id: "q4",
+    type: "single",
+    question: "In everyday chat tools like ChatGPT or Claude.ai, what control do most users have?",
+    options: [
+      "Full control over temperature, top-p, and top-k",
+      "No direct sampling controls; the main lever is the prompt",
+      "Only top-k through settings",
+      "Control only if they pay for a team plan",
+    ],
+  },
+  {
+    id: "q5",
+    type: "single",
+    question: "What is the strongest control pattern for an AI agent?",
+    options: [
+      "Raise temperature so it can improvise",
+      "Give it all available tools so it can solve anything",
+      "Define allowed tools, trusted sources, human review, forbidden actions, and logs",
+      "Ask it to be careful",
+    ],
+  },
+  {
+    id: "q6",
+    type: "single",
+    question: "What is the main business takeaway from this step?",
+    options: [
+      "Managers should learn to tune every sampling parameter",
+      "Prompting, evidence, and guardrails are the durable control surface",
+      "High temperature is always better for business writing",
+      "Top-k is the most important AI setting",
+    ],
+  },
+] as const;
+
 interface TokenAwareness {
   observations: string[];
   strategies: string[];
@@ -197,6 +265,14 @@ interface ScepticismLog {
   exerciseChecks: string[];
   quizAnswers: Record<string, string | string[]>;
   riskSelections: string[];
+  acknowledged: boolean;
+}
+
+interface ParameterNotes {
+  exerciseChecks: string[];
+  quizAnswers: Record<string, string | string[]>;
+  controlMatches: Record<string, string>;
+  workSelections: string[];
   acknowledged: boolean;
 }
 
@@ -214,6 +290,7 @@ export function M01Work() {
   const methodNote = useAssessOutput<string[]>("m01.method_note");
   const tokenAwarenessOut = useAssessOutput<TokenAwareness>("m01.token_awareness");
   const scepticismLogOut = useAssessOutput<ScepticismLog>("m01.scepticism_log");
+  const parameterNotesOut = useAssessOutput<ParameterNotes>("m01.parameter_notes");
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [reflectionSel, setReflectionSel] = useState<string[]>([]);
@@ -231,10 +308,18 @@ export function M01Work() {
     riskSelections: [],
     acknowledged: false,
   });
+  const [parameterNotes, setParameterNotes] = useState<ParameterNotes>({
+    exerciseChecks: [],
+    quizAnswers: {},
+    controlMatches: {},
+    workSelections: [],
+    acknowledged: false,
+  });
   const [hydratedReflection, setHydratedReflection] = useState(false);
   const [hydratedNote, setHydratedNote] = useState(false);
   const [hydratedToken, setHydratedToken] = useState(false);
   const [hydratedScepticism, setHydratedScepticism] = useState(false);
+  const [hydratedParameter, setHydratedParameter] = useState(false);
   const [hydratedStep, setHydratedStep] = useState(false);
 
   // Hydrate current step from progress
@@ -339,6 +424,27 @@ export function M01Work() {
     setHydratedScepticism(true);
   }, [hydratedScepticism, scepticismLogOut.isLoading, scepticismLogOut.value]);
 
+  useEffect(() => {
+    if (hydratedParameter || parameterNotesOut.isLoading) return;
+    const v = parameterNotesOut.value;
+    if (v && typeof v === "object") {
+      setParameterNotes({
+        exerciseChecks: Array.isArray(v.exerciseChecks) ? v.exerciseChecks : [],
+        quizAnswers:
+          v.quizAnswers && typeof v.quizAnswers === "object" && !Array.isArray(v.quizAnswers)
+            ? v.quizAnswers
+            : {},
+        controlMatches:
+          v.controlMatches && typeof v.controlMatches === "object" && !Array.isArray(v.controlMatches)
+            ? v.controlMatches
+            : {},
+        workSelections: Array.isArray(v.workSelections) ? v.workSelections : [],
+        acknowledged: !!v.acknowledged,
+      });
+    }
+    setHydratedParameter(true);
+  }, [hydratedParameter, parameterNotesOut.isLoading, parameterNotesOut.value]);
+
   const dangerousTaskOptions = useMemo(
     () =>
       getM01DangerousTaskOptions({
@@ -362,6 +468,11 @@ export function M01Work() {
   const updateScepticismLog = (next: ScepticismLog) => {
     setScepticismLog(next);
     scepticismLogOut.setValue.mutate(next);
+  };
+
+  const updateParameterNotes = (next: ParameterNotes) => {
+    setParameterNotes(next);
+    parameterNotesOut.setValue.mutate(next);
   };
 
   const setQuizAnswer = (questionId: string, value: string, multi: boolean) => {
@@ -396,6 +507,21 @@ export function M01Work() {
     });
   };
 
+  const setParameterQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+    const current = parameterNotes.quizAnswers;
+    const currentValue = current[questionId];
+    const nextValue = multi
+      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
+      : value;
+    updateParameterNotes({
+      ...parameterNotes,
+      quizAnswers: {
+        ...current,
+        [questionId]: nextValue,
+      },
+    });
+  };
+
   const goToStep = async (next: 1 | 2 | 3) => {
     setStep(next);
     await progress.setStep.mutateAsync(next);
@@ -407,6 +533,7 @@ export function M01Work() {
     await methodNote.setValue.mutateAsync(noteSel);
     await tokenAwarenessOut.setValue.mutateAsync(tokenAwareness);
     await scepticismLogOut.setValue.mutateAsync(scepticismLog);
+    await parameterNotesOut.setValue.mutateAsync(parameterNotes);
     // Upsert progress as complete with current_step cleared
     const { error } = await supabase.from("assess_progress").upsert(
       {
@@ -1053,7 +1180,28 @@ export function M01Work() {
   // ============ STEP 3 ============
   const s = M01_COURSE_CONTENT.step3;
   const m = M01_COURSE_CONTENT.methodNote;
-  const exps = s.experiments;
+  const parameterQuizAnswers = parameterNotes.quizAnswers;
+  const parameterQuizComplete = PARAMETER_QUIZ.every((question) => {
+    const value = parameterQuizAnswers[question.id];
+    return question.type === "multi"
+      ? Array.isArray(value) && value.length > 0
+      : typeof value === "string" && value.length > 0;
+  });
+  const parameterChecksComplete = s.checks.every((check) =>
+    parameterNotes.exerciseChecks.includes(check.id),
+  );
+  const controlMatchesComplete = s.controlExercise.every((item) =>
+    Boolean(parameterNotes.controlMatches[item.id]),
+  );
+  const parameterStepComplete =
+    parameterChecksComplete &&
+    controlMatchesComplete &&
+    parameterQuizComplete &&
+    parameterNotes.workSelections.length > 0 &&
+    parameterNotes.acknowledged;
+  const canCompleteM01 =
+    parameterStepComplete && reflectionSel.length > 0 && noteSel.length > 0;
+
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
@@ -1068,46 +1216,252 @@ export function M01Work() {
       }
       yourVersion={
         <div className="space-y-8">
-          <details open className="rounded border border-chalk bg-white p-4">
-            <summary className="cursor-pointer text-sm font-medium text-navy">
-              {exps.temperature.label}
-            </summary>
-            <div className="mt-4 space-y-4">
-              <PromptBlock label={exps.temperature.low.label} text={exps.temperature.low.prompt} />
-              <PromptBlock label={exps.temperature.high.label} text={exps.temperature.high.prompt} />
+          <section className="rounded-md border border-chalk bg-paper p-5">
+            <p className="eyebrow-muted">WHERE THIS IS HEADING</p>
+            <p className="mt-3 text-[15px] leading-relaxed text-graphite">{s.intro}</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {s.headingPoints.map((point) => (
+                <div key={point} className="rounded-md border border-chalk bg-white p-3">
+                  <p className="text-[13px] font-semibold leading-relaxed text-navy">{point}</p>
+                </div>
+              ))}
             </div>
-          </details>
-          <details className="rounded border border-chalk bg-white p-4">
-            <summary className="cursor-pointer text-sm font-medium text-navy">
-              {exps.topK.label}
-            </summary>
-            <div className="mt-4 space-y-4">
-              <PromptBlock label={exps.topK.low.label} text={exps.topK.low.prompt} />
-              <PromptBlock label={exps.topK.high.label} text={exps.topK.high.prompt} />
-            </div>
-          </details>
-          <details className="rounded border border-chalk bg-white p-4">
-            <summary className="cursor-pointer text-sm font-medium text-navy">
-              {exps.topP.label}
-            </summary>
-            <div className="mt-4 space-y-4">
-              <PromptBlock label={exps.topP.low.label} text={exps.topP.low.prompt} />
-              <PromptBlock label={exps.topP.high.label} text={exps.topP.high.prompt} />
-            </div>
-          </details>
+          </section>
 
-          <div className="border-t border-chalk pt-6">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-navy">
-                Reflection — pick the takeaways that match what you observed
-              </p>
-              {reflection.seeded && !reflection.touched && (
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate">
-                  Seeded
-                </span>
-              )}
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">PART A · SEE THE DIALS</p>
+              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                Three settings, one business lesson
+              </h3>
             </div>
-            <ul className="mt-3 space-y-2">
+            <div className="grid gap-4 md:grid-cols-3">
+              {s.dials.map((dial) => (
+                <article key={dial.id} className="rounded-md border border-chalk bg-white p-5">
+                  <h4 className="text-[17px] font-semibold text-navy">{dial.title}</h4>
+                  <p className="mt-2 text-[14px] font-medium text-terracotta">{dial.plain}</p>
+                  <p className="mt-3 text-[13px] leading-relaxed text-graphite">
+                    {dial.businessUse}
+                  </p>
+                  <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                    <strong className="text-navy">Watch out:</strong> {dial.watchOut}
+                  </p>
+                  <p className="mt-3 rounded-md bg-paper p-3 text-[12px] leading-relaxed text-slate">
+                    {dial.example}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+              <div>
+                <p className="eyebrow-muted">OPTIONAL · TRY IT LIVE</p>
+                <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                  Playground prompts
+                </h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-graphite">{s.studio.note}</p>
+              </div>
+              <a
+                href={s.studio.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-fit rounded-full border border-terracotta px-4 py-2 text-[13px] font-semibold text-terracotta hover:bg-terracotta hover:text-white"
+              >
+                {s.studio.label} →
+              </a>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {s.tryPrompts.map((prompt) => (
+                <div key={prompt.label} className="rounded-md border border-chalk bg-white p-4">
+                  <p className="text-[14px] font-semibold text-navy">{prompt.label}</p>
+                  <p className="mt-2 text-[12px] leading-relaxed text-slate">{prompt.settings}</p>
+                  <CopyPromptCard label="Prompt" text={prompt.text} compact />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">PART B · HOW TO APPLY THIS</p>
+              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                Business settings guide
+              </h3>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {s.taskGuide.map((item) => (
+                <div key={item.task} className="rounded-md border border-chalk bg-paper p-4">
+                  <p className="text-[14px] font-semibold text-navy">{item.task}</p>
+                  <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.14em] text-terracotta">
+                    {item.setting}
+                  </p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.control}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">PROMPTING &gt; PARAMETERS</p>
+              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                The controls your team actually uses
+              </h3>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {s.promptControls.map((control) => (
+                <div key={control.title} className="rounded-md border border-chalk bg-white p-4">
+                  <p className="text-[15px] font-semibold text-navy">{control.title}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+                    {control.promptMove}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-md border border-terracotta/25 bg-terracotta/5 p-5">
+              <p className="eyebrow-muted">AGENT CONTROL BRIDGE</p>
+              <p className="mt-2 text-[15px] font-semibold text-navy">
+                For agents, control is an operating model, not a creativity dial.
+              </p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {s.agentControls.map((control) => (
+                  <div key={control} className="rounded-md border border-terracotta/20 bg-white p-3">
+                    <p className="text-[13px] leading-relaxed text-graphite">{control}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">MATCH THE CONTROL</p>
+              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                Choose the best control pattern
+              </h3>
+            </div>
+            <div className="space-y-4">
+              {s.controlExercise.map((item) => (
+                <div key={item.id} className="rounded-md border border-chalk bg-paper p-4">
+                  <p className="text-[14px] font-semibold text-navy">{item.task}</p>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {s.controlOptions.map((option) => (
+                      <label
+                        key={option}
+                        className="flex cursor-pointer items-start gap-2 rounded-md border border-chalk bg-white p-3 text-[13px] leading-relaxed text-graphite"
+                      >
+                        <input
+                          type="radio"
+                          name={`m01-parameter-control-${item.id}`}
+                          checked={parameterNotes.controlMatches[item.id] === option}
+                          onChange={() => {
+                            updateParameterNotes({
+                              ...parameterNotes,
+                              controlMatches: {
+                                ...parameterNotes.controlMatches,
+                                [item.id]: option,
+                              },
+                            });
+                          }}
+                          className="mt-1 h-4 w-4 accent-terracotta"
+                        />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">PART C · CHECK YOUR UNDERSTANDING</p>
+              <h3 className="mt-2 font-display text-[28px] leading-tight text-navy">
+                Six checks and one control reflection
+              </h3>
+            </div>
+            <div className="space-y-4">
+              {PARAMETER_QUIZ.map((question, index) => {
+                const current = parameterQuizAnswers[question.id];
+                const multi = question.type === "multi";
+                return (
+                  <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
+                    <p className="text-[14px] font-semibold text-navy">
+                      Q{index + 1}. {question.question}
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {question.options.map((option) => {
+                        const checked = multi
+                          ? Array.isArray(current) && current.includes(option)
+                          : current === option;
+                        return (
+                          <label
+                            key={option}
+                            className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                          >
+                            <input
+                              type={multi ? "checkbox" : "radio"}
+                              name={`m01-parameter-${question.id}`}
+                              checked={checked}
+                              onChange={() => setParameterQuizAnswer(question.id, option, multi)}
+                              className="mt-1 h-4 w-4 accent-terracotta"
+                            />
+                            <span>{option}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              <div className="rounded-md border border-chalk bg-paper p-4">
+                <p className="text-[14px] font-semibold text-navy">
+                  Q7. Which control needs matter most in your work?
+                </p>
+                <div className="mt-3 space-y-2">
+                  {s.workReflections.map((option) => (
+                    <label
+                      key={option}
+                      className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={parameterNotes.workSelections.includes(option)}
+                        onChange={() => {
+                          updateParameterNotes({
+                            ...parameterNotes,
+                            workSelections: toggle(parameterNotes.workSelections, option),
+                          });
+                        }}
+                        className="mt-1 h-4 w-4 accent-terracotta"
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="eyebrow-muted">PARAMETER NOTES</p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-navy">
+                  Pick the takeaways that should go into your Foundation artifact.
+                </p>
+                {reflection.seeded && !reflection.touched && (
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate">
+                    Seeded
+                  </span>
+                )}
+              </div>
+            </div>
+            <ul className="space-y-2">
               {s.reflectionOptions.map((opt) => (
                 <li key={opt}>
                   <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
@@ -1126,15 +1480,15 @@ export function M01Work() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-[12px] italic text-slate">
+            <p className="text-[12px] italic text-slate">
               {reflectionSel.length} selected — pick at least one.
             </p>
-          </div>
+          </section>
 
-          <div className="space-y-3">
+          <section className="space-y-3">
             <p className="eyebrow-muted">{m.title}</p>
             <p className="text-sm font-medium text-navy">
-              Tasks at {workspace.name} where confidently-wrong AI would be dangerous (pick all that apply)
+              Tasks at {workspace.name} where AI needs stricter control (pick all that apply)
             </p>
             <ul className="space-y-2">
               {dangerousTaskOptions.map((opt) => (
@@ -1158,13 +1512,76 @@ export function M01Work() {
             <p className="text-[12px] italic text-slate">
               {noteSel.length} selected — pick at least one to complete M01.
             </p>
-          </div>
+          </section>
+
+          <section className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-md border border-chalk bg-paper p-4">
+              <p className="eyebrow-muted">SOURCE-BACKED NOTE</p>
+              <p className="mt-3 text-[13px] leading-relaxed text-graphite">
+                Providers expose different controls. Some newer frontier models restrict sampling
+                parameters entirely, while OpenAI and Gemini still document temperature and top-p
+                style settings in API surfaces.
+              </p>
+              <div className="mt-3 space-y-1">
+                {s.sources.map((source) => (
+                  <a
+                    key={source.url}
+                    href={source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block text-[12px] font-semibold text-terracotta hover:underline"
+                  >
+                    {source.label} →
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {s.checks.map((check) => (
+                <label
+                  key={check.id}
+                  className="flex cursor-pointer items-start gap-3 rounded-md border border-chalk bg-white p-3 text-[14px] text-navy"
+                >
+                  <input
+                    type="checkbox"
+                    checked={parameterNotes.exerciseChecks.includes(check.id)}
+                    onChange={() => {
+                      updateParameterNotes({
+                        ...parameterNotes,
+                        exerciseChecks: toggle(parameterNotes.exerciseChecks, check.id),
+                      });
+                    }}
+                    className="mt-1 h-4 w-4 accent-terracotta"
+                  />
+                  <span>{check.label}</span>
+                </label>
+              ))}
+              <label className="flex cursor-pointer items-start gap-3 rounded-md border border-terracotta/25 bg-terracotta/5 p-4 text-[14px] text-navy">
+                <input
+                  type="checkbox"
+                  checked={parameterNotes.acknowledged}
+                  onChange={(event) => {
+                    updateParameterNotes({
+                      ...parameterNotes,
+                      acknowledged: event.target.checked,
+                    });
+                  }}
+                  className="mt-1 h-4 w-4 accent-terracotta"
+                />
+                <span>
+                  I understand that the durable control surface is prompts, evidence, tools,
+                  review rules, and logs — not only parameter tuning.
+                </span>
+              </label>
+            </div>
+          </section>
         </div>
       }
       produces={<p className="text-[14px] text-navy">{s.produces}<br />{m.produces}</p>}
-      canContinue={reflectionSel.length > 0 && noteSel.length > 0}
-      disabledReason="Pick at least one parameter reflection and one dangerous-task method note."
-      nextLabel="Complete M01"
+      canContinue={canCompleteM01}
+      disabledReason="Complete the Step 3 checks, answer the quiz, match the control patterns, and pick your parameter notes and method note."
+      nextLabel={s.nextLabel}
       onBack={() => goToStep(2)}
       onContinue={completeM01}
     />

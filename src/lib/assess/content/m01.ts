@@ -222,64 +222,230 @@ export const M01_COURSE_CONTENT = {
 
   step3: {
     title: "Parameter Playground",
-    why: "Same question, different generation behavior. Three parameters: temperature, top-k, top-p.",
+    why:
+      "Parameters explain why AI outputs vary, but most business users will not control them directly. In real work, you control AI through prompts, trusted sources, tool permissions, review rules, and escalation paths.",
     example:
-      "You cannot directly set these on every chat product, but asking the model to act as if a parameter is set to a value is a useful proxy to feel the spread.",
+      "In ChatGPT or Claude.ai you usually cannot set temperature, top-p, or top-k. But you can still say: use only this policy, respond in this structure, ask before taking action, cite sources, and escalate uncertainty.",
     whatToNotice: [
-      "Low temperature -> deterministic, factual, repetitive",
-      "High temperature / top-k / top-p -> creative, varied, riskier on facts",
-      "Operational systems usually need repeatability more than variety",
+      "Temperature changes consistency versus variety; it does not make the model more truthful",
+      "Top-p and top-k shape the candidate pool, but most teams should leave them at provider defaults",
+      "For everyday tools, prompting is the control surface people actually have",
+      "For agents, control means tools, sources, human review, forbidden actions, and audit logs",
     ],
     produces: "The Foundation, section 2 (parameter notes)",
-    nextLabel: "Complete method note",
-    experiments: {
-      temperature: {
-        label: "Temperature - randomness control",
-        low: {
-          label: "Low temperature (0.1)",
-          prompt:
-            "Act as if your temperature is set to 0.1.\n\nExplain the difference between a chatbot, an assistant, an agent, and an AI system.",
-        },
-        high: {
-          label: "High temperature (0.9)",
-          prompt:
-            "Act as if your temperature is set to 0.9.\n\nExplain the difference between a chatbot, an assistant, an agent, and an AI system.",
-        },
+    nextLabel: "Complete M01",
+    intro:
+      "Step 1 showed how the model sees text as tokens. Step 2 showed why it can produce confident wrong answers. Step 3 shows what you can control: old-school sampling dials when you are in a developer playground, and durable business controls when you are using ChatGPT, Claude, Gemini, or an AI agent.",
+    headingPoints: [
+      "These dials live mainly in APIs and developer playgrounds, not everyday chat apps.",
+      "The frontier-model trend is toward fewer sampling knobs and more instruction-based control.",
+      "Managers should care less about tuning numbers and more about designing prompts, evidence, and guardrails.",
+    ],
+    dials: [
+      {
+        id: "temperature",
+        title: "Temperature",
+        plain: "The consistency-versus-variety dial.",
+        businessUse:
+          "Low temperature fits extraction, classification, compliance, and repeatable operations. Higher temperature fits brainstorming, naming, and creative variation.",
+        watchOut:
+          "Low temperature is more predictable, not automatically more accurate. A confident wrong answer can still be repeated consistently.",
+        example:
+          "Support policy summary: keep it low. Ten campaign ideas: allow more variety.",
       },
-      topK: {
-        label: "Top-k - choice pool size",
-        low: {
-          label: "Low top-k (10)",
-          prompt:
-            "Act as if top-k is set to 10.\n\nWrite a short answer to a customer asking why their request needs human review.",
-        },
-        high: {
-          label: "High top-k (100)",
-          prompt:
-            "Act as if top-k is set to 100.\n\nWrite a short answer to a customer asking why their request needs human review.",
-        },
+      {
+        id: "top_p",
+        title: "Top-p",
+        plain: "The probability-pool dial.",
+        businessUse:
+          "It narrows or widens the pool of likely next tokens. Most business teams should leave it at default and control output through instructions.",
+        watchOut:
+          "Changing top-p and temperature together makes behavior harder to interpret.",
+        example:
+          "If you need safer, less surprising wording, use clearer constraints before changing top-p.",
       },
-      topP: {
-        label: "Top-p - probability threshold",
-        low: {
-          label: "Low top-p (0.4)",
-          prompt:
-            "Act as if top-p is set to 0.4.\n\nSummarize a short internal policy into three rules for a support agent.",
-        },
-        high: {
-          label: "High top-p (0.95)",
-          prompt:
-            "Act as if top-p is set to 0.95.\n\nSummarize a short internal policy into three rules for a support agent.",
-        },
+      {
+        id: "top_k",
+        title: "Top-k",
+        plain: "The candidate-count dial.",
+        businessUse:
+          "It limits how many likely next tokens the model can consider. Some platforms expose it; others do not.",
+        watchOut:
+          "It is a blunt tool. It can reduce variety, but it does not understand business risk.",
+        example:
+          "A developer may tune it in Gemini-style workflows; a manager should specify acceptable behavior instead.",
       },
+    ],
+    studio: {
+      url: "https://aistudio.google.com",
+      label: "Open Google AI Studio",
+      note:
+        "Optional: use this if you want to see the dials live. The course does not require a Google account or playground access.",
     },
+    tryPrompts: [
+      {
+        label: "Temperature test - consistency vs variety",
+        settings: "Run once with low temperature, once with higher temperature.",
+        text:
+          "Write a 3-sentence product description for a premium Moroccan argan oil brand sold in upscale French boutiques.",
+      },
+      {
+        label: "Top-p test - candidate pool",
+        settings: "Keep temperature at default; compare top-p 1.0, 0.5, and 0.1 if your tool exposes it.",
+        text:
+          "Write five taglines for a French SaaS startup that helps small businesses adopt AI responsibly.",
+      },
+      {
+        label: "Prompt-control test - no dial required",
+        settings: "Use any chat tool. Do not change model settings.",
+        text:
+          "Generate five distinctly different taglines for a French SaaS startup that helps small businesses adopt AI responsibly. Each tagline must use a different angle: trust, speed, simplicity, governance, and competitive advantage.",
+      },
+    ],
+    taskGuide: [
+      {
+        task: "Data extraction from documents",
+        setting: "Low temperature when available",
+        control:
+          "Use strict output fields, source-only instructions, validation rules, and human review for exceptions.",
+      },
+      {
+        task: "Classification or triage",
+        setting: "Low temperature when available",
+        control:
+          "Define categories, examples, confidence thresholds, escalation paths, and audit logs.",
+      },
+      {
+        task: "Summarising long documents",
+        setting: "Low to medium",
+        control:
+          "Ask for quotes first, cite sections, separate facts from assumptions, and flag missing evidence.",
+      },
+      {
+        task: "Translation or localisation",
+        setting: "Low for faithful, medium for creative",
+        control:
+          "Provide glossary, audience, tone, forbidden terms, and review rules for regulated language.",
+      },
+      {
+        task: "Emails, memos, and internal drafts",
+        setting: "Medium",
+        control:
+          "Specify audience, length, structure, tone, and what must not be invented.",
+      },
+      {
+        task: "Creative campaigns and ideation",
+        setting: "Higher temperature can help when exposed",
+        control:
+          "Ask for multiple distinct directions, then choose and refine with human judgement.",
+      },
+      {
+        task: "Code, automations, or agents",
+        setting: "Low for repeatability",
+        control:
+          "Use tests, tool permissions, dry runs, approval gates, rollback paths, and logs.",
+      },
+    ],
+    promptControls: [
+      {
+        title: "Need consistency?",
+        promptMove:
+          "Ask for the same structure every time, provide examples, and require a fixed output format.",
+      },
+      {
+        title: "Need variety?",
+        promptMove:
+          "Ask for several distinct options with named angles instead of simply raising randomness.",
+      },
+      {
+        title: "Need truthfulness?",
+        promptMove:
+          "Use source-only instructions, citations, quote-first grounding, and the hallucination audit from Step 2.",
+      },
+      {
+        title: "Need agent safety?",
+        promptMove:
+          "Define allowed tools, forbidden actions, when to ask a human, and what must be logged.",
+      },
+    ],
+    agentControls: [
+      "Allowed tools: which systems, APIs, files, or databases the agent can touch",
+      "Trusted sources: which policies, documents, or systems count as evidence",
+      "Human review: when the agent must ask before acting",
+      "Forbidden actions: what the agent can never do without approval",
+      "Audit logs: what decision, source, tool call, and handoff evidence must be recorded",
+    ],
+    controlExercise: [
+      {
+        id: "invoice_extraction",
+        task: "Extract dates, names, and amounts from 1,000 documents",
+        answer: "Low randomness + strict output schema + validation",
+      },
+      {
+        id: "tagline_generation",
+        task: "Generate twenty campaign directions for a new product",
+        answer: "Prompt for distinct angles + human selection",
+      },
+      {
+        id: "policy_agent",
+        task: "Let an AI support agent answer refund requests",
+        answer: "Trusted policy source + escalation rule + audit log",
+      },
+      {
+        id: "board_summary",
+        task: "Summarise board notes for executives",
+        answer: "Quote-first grounding + concise output structure",
+      },
+    ],
+    controlOptions: [
+      "Low randomness + strict output schema + validation",
+      "Prompt for distinct angles + human selection",
+      "Trusted policy source + escalation rule + audit log",
+      "Quote-first grounding + concise output structure",
+    ],
+    workReflections: [
+      "I need more consistent outputs from a repeated workflow",
+      "I need more varied outputs for ideation or marketing",
+      "I need AI to cite trusted sources before answering",
+      "I need an agent to ask for human approval before taking action",
+      "I need logs that show what the AI decided and why",
+      "I need clearer prompts because my team uses chat tools without parameter controls",
+    ],
+    checks: [
+      {
+        id: "dials_reviewed",
+        label: "I can explain temperature, top-p, and top-k in business language.",
+      },
+      {
+        id: "task_controls_reviewed",
+        label: "I can choose different controls for extraction, ideation, summaries, and agents.",
+      },
+      {
+        id: "agent_guardrails_reviewed",
+        label: "I understand that agent control means tools, sources, human review, forbidden actions, and logs.",
+      },
+    ],
+    sources: [
+      {
+        label: "Anthropic model deprecations",
+        url: "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+      },
+      {
+        label: "OpenAI temperature and top-p documentation",
+        url: "https://platform.openai.com/docs/api-reference/responses/create",
+      },
+      {
+        label: "Google Gemini generation config",
+        url: "https://ai.google.dev/api/generate-content",
+      },
+    ],
     reflectionOptions: [
-      "Low temperature -> consistent, deterministic answers - fits structured operational tasks",
-      "High temperature -> creative variation - fits brainstorming, copywriting, naming",
-      "Top-k caps the candidate pool - lower = safer, higher = more variety",
-      "Top-p adapts the pool to context - flexible but harder to predict",
-      "For governed workflows, defaults that reduce creativity are usually the right call",
-      "For ideation or marketing copy, looser settings can produce richer options",
+      "Low temperature means more consistent output, not guaranteed truth",
+      "Higher randomness can help ideation, but it also needs stronger prompt guardrails",
+      "Top-p and top-k shape the candidate pool, but most teams should leave them at defaults",
+      "For chat tools, prompt design is usually the only control surface available",
+      "For agents, tool permissions and human-review rules matter more than sampling dials",
+      "For governed workflows, sources, schemas, validation, and logs are the real control system",
     ],
   },
 

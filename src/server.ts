@@ -38,29 +38,30 @@ function isStaticAssetRequest(request: Request): boolean {
   );
 }
 
-function shouldPreventShellCaching(request: Request, response: Response): boolean {
-  if (isStaticAssetRequest(request)) return false;
-
-  const accept = request.headers.get("accept") ?? "";
-  const fetchMode = request.headers.get("sec-fetch-mode") ?? request.mode;
-  const contentType = response.headers.get("content-type") ?? "";
-
-  return (
-    fetchMode === "navigate" ||
-    accept.includes("text/html") ||
-    contentType.includes("text/html")
-  );
+function isHashedBuildAsset(request: Request): boolean {
+  const pathname = new URL(request.url).pathname;
+  // Vite emits fingerprinted files under /assets/ — safe to cache forever.
+  return pathname.startsWith("/assets/");
 }
 
 function withRefreshSafeHeaders(request: Request, response: Response): Response {
-  if (!shouldPreventShellCaching(request, response)) {
-    return response;
-  }
-
   const headers = new Headers(response.headers);
-  headers.set("cache-control", "no-store, max-age=0");
-  headers.set("pragma", "no-cache");
-  headers.set("expires", "0");
+
+  if (isHashedBuildAsset(request)) {
+    // Content-hashed: immutable forever. New deploys ship new filenames.
+    headers.set("cache-control", "public, max-age=31536000, immutable");
+  } else if (isStaticAssetRequest(request)) {
+    // Non-fingerprinted static files (favicon, og images, etc.) —
+    // allow short caching but require revalidation so updates roll out.
+    headers.set("cache-control", "public, max-age=0, must-revalidate");
+  } else {
+    // HTML shell, loader/RSC fetches, server-function RPCs: never cache.
+    // A stale shell pinning old /assets/*.js hashes is the #1 cause of
+    // "missing export" / blank-page errors after a deploy.
+    headers.set("cache-control", "no-store, max-age=0");
+    headers.set("pragma", "no-cache");
+    headers.set("expires", "0");
+  }
 
   return new Response(response.body, {
     status: response.status,

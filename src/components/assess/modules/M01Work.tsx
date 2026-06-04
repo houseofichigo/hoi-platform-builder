@@ -472,6 +472,7 @@ export function M01Work() {
             : {},
         workSelections: Array.isArray(v.workSelections) ? v.workSelections : [],
         acknowledged: !!v.acknowledged,
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedParameter(true);
@@ -537,18 +538,16 @@ export function M01Work() {
     });
   };
 
-  const setParameterQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+  const setParameterQuizAnswer = (questionId: string, value: string) => {
     const current = parameterNotes.quizAnswers;
-    const currentValue = current[questionId];
-    const nextValue = multi
-      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
-      : value;
     updateParameterNotes({
       ...parameterNotes,
       quizAnswers: {
         ...current,
-        [questionId]: nextValue,
+        [questionId]: value,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 

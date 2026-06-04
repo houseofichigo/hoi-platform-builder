@@ -104,14 +104,7 @@ const TOKEN_QUIZ = [
   },
 ] as const;
 
-type QuizQuestion = {
-  id: string;
-  type: "single" | "multi";
-  question: string;
-  options: readonly string[];
-};
-
-const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
+const SCEPTICISM_QUIZ = [
   {
     id: "q1",
     type: "single",
@@ -122,6 +115,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Information from before the model's training cutoff",
       "An honest refusal to answer",
     ],
+    correct: "Plausible, confident information that is incorrect or fabricated",
+    explanation:
+      "Hallucinations are confident, plausible-sounding fabrications — not random noise or honest refusals.",
   },
   {
     id: "q2",
@@ -134,6 +130,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "The specific figures may be fabricated until verified",
       "Specific numbers are usually accurate",
     ],
+    correct: "The specific figures may be fabricated until verified",
+    explanation:
+      "Precise numbers without sources are the classic hallucination signature — treat them as unverified.",
   },
   {
     id: "q3",
@@ -146,6 +145,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Your prompt must have changed each time",
       "The answer is probably becoming more accurate",
     ],
+    correct: "The model may be inventing rather than retrieving a stable fact",
+    explanation:
+      "Drift across fresh chats signals generation, not retrieval of a stable fact.",
   },
   {
     id: "q4",
@@ -157,6 +159,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "I do not have specific information; share a source and I can help",
       "The company was founded in 2015 by a named person",
     ],
+    correct: "I do not have specific information; share a source and I can help",
+    explanation:
+      "An honest abstain with a request for a source carries the lowest fabrication risk.",
   },
   {
     id: "q5",
@@ -169,6 +174,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Trust it if it sounds professional",
       "Only check spelling and tone",
     ],
+    correct: "Run the Hallucination Audit prompt on the draft",
+    explanation:
+      "A structured audit catches fabricated claims — asking the model to self-check or trusting tone does not.",
   },
   {
     id: "q6",
@@ -181,6 +189,9 @@ const SCEPTICISM_QUIZ: readonly QuizQuestion[] = [
       "Engineers forgot to add an I do not know response",
       "Humans rarely admit uncertainty",
     ],
+    correct: "They are trained and evaluated in ways that reward attempting answers over abstaining",
+    explanation:
+      "Training and evaluation incentives push models toward attempting answers rather than abstaining.",
   },
 ] as const;
 
@@ -198,6 +209,7 @@ interface ScepticismLog {
   quizAnswers: Record<string, string | string[]>;
   riskSelections: string[];
   acknowledged: boolean;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";

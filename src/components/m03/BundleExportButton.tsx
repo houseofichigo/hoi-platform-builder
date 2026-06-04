@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { saveAs } from "file-saver";
 import { toast } from "sonner";
 import type { AutomationPlaybookData } from "@/data/m03/m03Schema";
 import { formatDateForFilename } from "./m03Display";
@@ -10,6 +9,7 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
   const downloadPdf = async () => {
     try {
       setBusy("pdf");
+      const { saveAs } = await import("file-saver");
       const { generatePlaybookPDF } = await import("./PlaybookPDFRenderer");
       const blob = await generatePlaybookPDF(data);
       saveAs(blob, `m03-playbook-${data.platform}-${formatDateForFilename()}.pdf`);
@@ -24,6 +24,7 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
   const downloadZip = async () => {
     try {
       setBusy("zip");
+      const { saveAs } = await import("file-saver");
       const JSZip = (await import("jszip")).default;
       const {
         getCrossPlatformReferencePDF,

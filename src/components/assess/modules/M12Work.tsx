@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import {
@@ -89,7 +88,6 @@ export function M12Work() {
 
   const progress = useAssessProgress("m12");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const roadmapOut = useAssessOutput<RoadmapOutput>("m12.roadmap");
   const gapsOut = useAssessOutput<GapsOutput>("m12.capability_gaps");
@@ -99,12 +97,9 @@ export function M12Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(
@@ -428,9 +423,14 @@ export function M12Work() {
             selected={scorecard.selected}
             targets={scorecard.targets}
             onToggle={(id) => {
+              const metric = M12_COURSE_CONTENT.scorecardMetrics.find((m) => m.id === id);
               const next: ScorecardOutput = {
                 ...scorecard,
                 selected: { ...scorecard.selected, [id]: !scorecard.selected[id] },
+                targets:
+                  !scorecard.selected[id] && metric && !scorecard.targets[id]
+                    ? { ...scorecard.targets, [id]: metric.suggestedTarget }
+                    : scorecard.targets,
               };
               setScorecard(next);
               scorecardOut.setValue.mutate(next);

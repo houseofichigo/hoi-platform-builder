@@ -278,7 +278,7 @@ export const MODULES: ModuleMeta[] = [
     description: 'Choose the AI stack that meets governance requirements before it becomes a liability. Compare capability, cost, governance, and production fit.',
     objectives: [
       'Compare platforms on capability, cost, and governance',
-      'Apply six governance criteria to any tool',
+      'Apply eight governance criteria to any tool',
       'Validate or replace the pilot stack for production',
       'Document tool selection using an Architecture Decision Record',
     ],
@@ -294,9 +294,9 @@ export const MODULES: ModuleMeta[] = [
       { term: 'ADR', definition: 'Architecture Decision Record: a short decision document naming context, options, decision, rationale, consequences, and review date.' },
       { term: 'Pilot-to-production gap', definition: 'The distance between a tool that works in a controlled pilot and a tool that can survive production governance.' },
     ],
-    assignment: 'Validate a candidate stack against six production governance criteria. Compare two platforms head-to-head and write a Tool Selection ADR.',
+    assignment: 'Validate a candidate stack against eight production governance criteria. Compare two platforms head-to-head and write a Tool Selection ADR.',
     outcome: 'Comparison matrix, Tool Selection ADR, and stack decision.',
-    assignmentAlignment: 'Current app already follows the comparison/ADR structure. Later polish should remove the remaining required justification prose.',
+    assignmentAlignment: 'Current app now uses a generic pilot-stack inventory, governance comparison, ADR, and keep/replace/constrain decision. Evidence and justification are optional notes.',
   },
   {
     id: 'm08', num: 8, title: 'Integration & Deployment Planning',
@@ -308,7 +308,7 @@ export const MODULES: ModuleMeta[] = [
     description: 'Make architecture decisions, identify security risks, and model cost for the path to production.',
     objectives: [
       'Make deployment architecture choices: local vs cloud, open vs managed',
-      'Map data flows across app, assistant, agent, storage, accounting, and audit systems',
+      'Map data flows across app, assistant, agent, storage, system of record, and audit systems',
       'Identify and mitigate the top three deployment security risks',
       'Estimate cost across tokens, infrastructure, licensing, and operations',
       'Write a partner-ready integration and rollback plan',
@@ -323,11 +323,11 @@ export const MODULES: ModuleMeta[] = [
       { term: 'Architecture decision', definition: 'A consequential technical choice documented with context, alternatives, rationale, consequences, and review date.' },
       { term: 'Data-flow control', definition: 'Knowing where data enters, where it is stored, who can access it, where it leaves, and how it is deleted.' },
       { term: 'Security at scale', definition: 'Authentication, secrets management, signed webhooks, audit logs, least privilege, and incident response.' },
-      { term: 'Cost model', definition: 'Expected spend across LLM tokens, OCR/API usage, compute, storage, licensing, support, and human review time.' },
+      { term: 'Cost model', definition: 'Expected spend across LLM tokens, specialist APIs/processing, compute, storage, licensing, support, and human review time.' },
     ],
     assignment: 'Produce an integration plan for a candidate system: architecture choice, top three risks, and cost estimate.',
     outcome: 'A 1-2 page Integration Plan.',
-    assignmentAlignment: 'Current app includes architecture, security, cost, rollback, and handoff. Keep the richer structure, but reduce required cost notes in the assignment-content pass.',
+    assignmentAlignment: 'Current app now uses a generic integration plan with generated security mitigations, optional cost notes, rollback, and partner handoff.',
   },
   {
     id: 'm09', num: 9, title: 'AI Portfolio Scoring & Use Case Prioritisation',
@@ -359,7 +359,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Score four candidate use cases formally through the engine. Apply Gate 3 to all four and decide which earns the next investment cycle.',
     outcome: 'Scored four-use-case portfolio, step-automation maps, and Gate 3 decisions.',
-    assignmentAlignment: 'Current app includes candidate scoring and Gate 3 dossier. Later align language to v6 formal portfolio decisions and the Build scoring engine.',
+    assignmentAlignment: 'Current app now scores four generic portfolio candidates: customer email classification, quote generation, HR ticket triage, and RFP response drafting, then produces a Gate 3 dossier.',
   },
   {
     id: 'm10', num: 10, title: 'Documentation & Adoption',
@@ -390,7 +390,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Produce a documentation outline, a 2-3 page operating playbook, and a handoff plan for any candidate system.',
     outcome: 'Documentation Pack: outline, playbook, and handoff plan.',
-    assignmentAlignment: 'Current app still produces a system card, which remains useful as supporting evidence. Later make the outline/playbook/handoff framing primary.',
+    assignmentAlignment: 'Current app now uses generic system documentation, a generated system card/playbook, and a five-stage handoff plan for any candidate AI system.',
   },
   {
     id: 'm11', num: 11, title: 'Monitoring & Quality',
@@ -421,7 +421,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Define metrics for a candidate system. Configure alert thresholds. Identify drift conditions that would trigger portfolio re-scoring.',
     outcome: 'A 1-page Monitoring Plan with drift triggers, escalation paths, and re-scoring criteria.',
-    assignmentAlignment: 'Current app is close to v6. Later simplify any remaining required prose into generated monitoring and drift summaries.',
+    assignmentAlignment: 'Current app now uses generic monitoring metrics, alert rules, drift response, and re-scoring triggers with generated plan text and optional edits.',
   },
   {
     id: 'm12', num: 12, title: 'AI Strategy & Roadmap',
@@ -453,7 +453,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build a 12-month AI roadmap using the scored portfolio from M09. Include sequencing, capability gaps, investment estimates, and a one-page executive summary.',
     outcome: 'AI Strategy Roadmap, capability gap analysis, and executive summary.',
-    assignmentAlignment: 'Current app includes an executive scorecard as a strong supporting artifact. Later review whether it stays required or becomes supporting evidence.',
+    assignmentAlignment: 'Current app now uses a generic scored-portfolio roadmap, capability gaps, executive scorecard, and generated sponsor-ready summary.',
   },
 ];
 

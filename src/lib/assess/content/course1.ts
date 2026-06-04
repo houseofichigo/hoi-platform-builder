@@ -24,29 +24,29 @@ import {
   M06_COURSE_CONTENT,
 } from "./m06";
 import {
-  M07_OCR_CONTENT,
   getM07ToolDecisionScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m07";
+  M07_COURSE_CONTENT,
+} from "./m07";
 import {
-  M08_OCR_CONTENT,
   getM08DeploymentPlanScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m08";
+  M08_COURSE_CONTENT,
+} from "./m08";
 import {
-  M09_OCR_CONTENT,
   getM09PortfolioScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m09";
+  M09_COURSE_CONTENT,
+} from "./m09";
 import {
-  M10_OCR_CONTENT,
   getM10DocumentationScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m10";
+  M10_COURSE_CONTENT,
+} from "./m10";
 import {
-  M11_OCR_CONTENT,
   getM11MonitoringPlanScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m11";
+  M11_COURSE_CONTENT,
+} from "./m11";
 import {
-  M12_OCR_CONTENT,
   getM12StrategyScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m12";
+  M12_COURSE_CONTENT,
+} from "./m12";
 
 export type * from "./types";
 export type {
@@ -54,17 +54,12 @@ export type {
   SixElementScaffold,
 } from "./m03";
 
-// Temporary adapter for Course 1 while the module-by-module v6 assignment
-// rewrite lands. Core UI imports from this boundary instead of the applied
-// Invoice OCR files directly, so future content swaps stay localized here.
+// Course 1 content boundary. Applied use-case content, including Invoice OCR,
+// lives under the Use Case Tracks registry instead of the core course.
 export { M01_COURSE_CONTENT, M02_COURSE_CONTENT, M03_COURSE_CONTENT };
 export { M04_COURSE_CONTENT, M05_COURSE_CONTENT, M06_COURSE_CONTENT };
-export const M07_COURSE_CONTENT = M07_OCR_CONTENT;
-export const M08_COURSE_CONTENT = M08_OCR_CONTENT;
-export const M09_COURSE_CONTENT = M09_OCR_CONTENT;
-export const M10_COURSE_CONTENT = M10_OCR_CONTENT;
-export const M11_COURSE_CONTENT = M11_OCR_CONTENT;
-export const M12_COURSE_CONTENT = M12_OCR_CONTENT;
+export { M07_COURSE_CONTENT, M08_COURSE_CONTENT, M09_COURSE_CONTENT };
+export { M10_COURSE_CONTENT, M11_COURSE_CONTENT, M12_COURSE_CONTENT };
 
 export {
   getM01DangerousTaskOptions,

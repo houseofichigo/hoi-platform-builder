@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { DocumentationLayerMap } from "@/components/assess/DocumentationLayerMap";
@@ -78,7 +77,6 @@ export function M10Work() {
 
   const progress = useAssessProgress("m10");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const outlineOut = useAssessOutput<OutlineOutput>("m10.documentation_outline");
   const playbookOut = useAssessOutput<PlaybookOutput>("m10.playbook");
@@ -87,12 +85,9 @@ export function M10Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(

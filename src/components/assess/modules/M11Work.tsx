@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { MonitoringMetricGrid } from "@/components/assess/MonitoringMetricGrid";
@@ -76,7 +75,6 @@ export function M11Work() {
 
   const progress = useAssessProgress("m11");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const metricsOut = useAssessOutput<MetricsOutput>("m11.metrics");
   const alertsOut = useAssessOutput<AlertsOutput>("m11.alerts");
@@ -86,12 +84,9 @@ export function M11Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(
@@ -306,9 +301,14 @@ export function M11Work() {
             selected={metrics.selected}
             owners={metrics.owners}
             onToggle={(id) => {
+              const metric = M11_COURSE_CONTENT.metrics.find((m) => m.id === id);
               const next: MetricsOutput = {
                 ...metrics,
                 selected: { ...metrics.selected, [id]: !metrics.selected[id] },
+                owners:
+                  !metrics.selected[id] && metric && !metrics.owners[id]
+                    ? { ...metrics.owners, [id]: "Named process owner" }
+                    : metrics.owners,
               };
               setMetrics(next);
               metricsOut.setValue.mutate(next);

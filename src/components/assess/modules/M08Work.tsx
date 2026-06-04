@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { ArchitectureChoiceGrid } from "@/components/assess/ArchitectureChoiceGrid";
@@ -69,7 +68,6 @@ export function M08Work() {
 
   const progress = useAssessProgress("m08");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const architectureOut = useAssessOutput<ArchitectureOutput>("m08.architecture");
   const securityOut = useAssessOutput<SecurityOutput>("m08.security_risks");
@@ -79,12 +77,9 @@ export function M08Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(
@@ -351,6 +346,10 @@ export function M08Work() {
                     : security.selected;
                 const nextMitigations = { ...security.mitigations };
                 if (isSelected) delete nextMitigations[id];
+                if (!isSelected && !nextMitigations[id]) {
+                  const risk = M08_COURSE_CONTENT.securityRisks.find((r) => r.id === id);
+                  if (risk) nextMitigations[id] = risk.mitigation;
+                }
                 const next = { selected: nextSelected, mitigations: nextMitigations };
                 setSecurity(next);
                 securityOut.setValue.mutate(next);
@@ -386,8 +385,7 @@ export function M08Work() {
       const row = cost[id];
       return row && row.volume >= 0 && row.unitCost >= 0;
     });
-    const notesCount = COST_IDS.filter((id) => (cost[id]?.notes ?? "").trim() !== "").length;
-    const canContinue = allValid && notesCount >= 3;
+    const canContinue = allValid;
 
     return (
       <Step
@@ -416,7 +414,7 @@ export function M08Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={canContinue}
-        disabledReason="Set volume and unit cost for every category and add notes for at least 3."
+        disabledReason="Set volume and unit cost for every category."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(2)}
         onContinue={async () => {

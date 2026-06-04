@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { StackLayerInventory } from "@/components/assess/StackLayerInventory";
@@ -80,7 +79,6 @@ export function M07Work() {
 
   const progress = useAssessProgress("m07");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const inventoryOut = useAssessOutput<StackInventory>("m07.stack_inventory");
   const comparisonOut = useAssessOutput<ComparisonOutput>("m07.comparison_matrix");
@@ -90,12 +88,9 @@ export function M07Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(() => getM07ToolDecisionScaffold(profileContext), [profileContext]);
@@ -314,7 +309,7 @@ export function M07Work() {
                           setInventory(next);
                           inventoryOut.setValue.mutate(next);
                         }}
-                        placeholder="e.g. OpenAI GPT-5, Xero, Lovable Cloud..."
+                        placeholder="e.g. OpenAI GPT-5, Zendesk, Lovable Cloud..."
                         className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
                       />
                     </div>
@@ -363,10 +358,7 @@ export function M07Work() {
         comparison.scores.alternative_stack[id] >= 1 &&
         comparison.scores.alternative_stack[id] <= 5,
     );
-    const evidenceCount = CRITERION_IDS.filter(
-      (id) => comparison.evidence[id].trim() !== "",
-    ).length;
-    const canContinue = allScored && evidenceCount >= 4;
+    const canContinue = allScored;
 
     return (
       <Step
@@ -470,7 +462,7 @@ export function M07Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={canContinue}
-        disabledReason="Score all 16 cells and write evidence for at least 4 criteria."
+        disabledReason="Score all 16 cells."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={async () => {
@@ -589,7 +581,7 @@ export function M07Work() {
                   decisionOut.setValue.mutate(next);
                 }}
                 rows={4}
-                placeholder="e.g. EU-region only, volume ≤ X invoices/month, no payment release, named service account."
+                placeholder="e.g. EU-region only, capped volume, no external sends, named service account."
                 className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
               />
             </div>
@@ -618,7 +610,7 @@ export function M07Work() {
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
       canContinue={canComplete}
-      disabledReason="Pick a decision and write a justification of at least 40 characters."
+      disabledReason="Pick a decision. If you choose constrain, name the constraint."
       nextLabel="Complete M07 → M08"
       onBack={() => goToStep(3)}
       onContinue={completeM07}

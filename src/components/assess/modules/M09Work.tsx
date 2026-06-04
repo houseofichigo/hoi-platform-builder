@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { ScoringPillarGrid } from "@/components/assess/ScoringPillarGrid";
@@ -128,7 +127,6 @@ export function M09Work() {
 
   const progress = useAssessProgress("m09");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const candidatesOut = useAssessOutput<CandidatesOutput>("m09.candidates");
   const scoresOut = useAssessOutput<ScoresOutput>("m09.scores");
@@ -139,12 +137,9 @@ export function M09Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(
@@ -771,7 +766,7 @@ export function M09Work() {
       yourVersion={
         <div className="space-y-6">
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-2">
-            <p className="eyebrow-muted">WORKED EXAMPLE</p>
+            <p className="eyebrow-muted">PORTFOLIO CONTEXT</p>
             <p className="text-[13px] text-navy">{scaffold.workedExampleName}</p>
           </div>
 

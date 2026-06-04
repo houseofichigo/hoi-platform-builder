@@ -194,7 +194,7 @@ const SCEPTICISM_QUIZ = [
   },
 ] as const;
 
-const PARAMETER_QUIZ: readonly QuizQuestion[] = [
+const PARAMETER_QUIZ = [
   {
     id: "q1",
     type: "single",
@@ -205,6 +205,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "How predictable or varied the next-token selection is",
       "Which documents the model can access",
     ],
+    correct: "How predictable or varied the next-token selection is",
+    explanation:
+      "Temperature scales the probabilities — low values stay predictable, high values open the field to more varied next-token picks.",
   },
   {
     id: "q2",
@@ -216,6 +219,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "It controls the total number of output tokens",
       "It gives the model access to more sources",
     ],
+    correct: "It narrows or widens the probability pool of candidate next tokens",
+    explanation:
+      "Top-p (nucleus sampling) sets the cumulative probability cutoff for the candidate pool — it has nothing to do with training data or output length.",
   },
   {
     id: "q3",
@@ -227,6 +233,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Higher randomness",
       "Longer answers",
     ],
+    correct: "Consistent output, strict structure, validation, and review rules",
+    explanation:
+      "Repeatable workflows need determinism, structure, and review — creativity is the wrong target.",
   },
   {
     id: "q4",
@@ -238,6 +247,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Only top-k through settings",
       "Control only if they pay for a team plan",
     ],
+    correct: "No direct sampling controls; the main lever is the prompt",
+    explanation:
+      "Most chat UIs do not expose sampling knobs — your real control surface is the prompt itself.",
   },
   {
     id: "q5",
@@ -249,6 +261,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Define allowed tools, trusted sources, human review, forbidden actions, and logs",
       "Ask it to be careful",
     ],
+    correct: "Define allowed tools, trusted sources, human review, forbidden actions, and logs",
+    explanation:
+      "Agent control is an operating model — scoped tools, sources, review, forbidden actions, and logs — not a creativity dial.",
   },
   {
     id: "q6",
@@ -260,6 +275,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "High temperature is always better for business writing",
       "Top-k is the most important AI setting",
     ],
+    correct: "Prompting, evidence, and guardrails are the durable control surface",
+    explanation:
+      "Sampling knobs change between vendors; prompting, evidence, and guardrails are the controls that travel with you.",
   },
 ] as const;
 
@@ -286,6 +304,7 @@ interface ParameterNotes {
   controlMatches: Record<string, string>;
   workSelections: string[];
   acknowledged: boolean;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";
@@ -453,6 +472,7 @@ export function M01Work() {
             : {},
         workSelections: Array.isArray(v.workSelections) ? v.workSelections : [],
         acknowledged: !!v.acknowledged,
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedParameter(true);
@@ -518,18 +538,16 @@ export function M01Work() {
     });
   };
 
-  const setParameterQuizAnswer = (questionId: string, value: string, multi: boolean) => {
+  const setParameterQuizAnswer = (questionId: string, value: string) => {
     const current = parameterNotes.quizAnswers;
-    const currentValue = current[questionId];
-    const nextValue = multi
-      ? toggle(Array.isArray(currentValue) ? currentValue : [], value)
-      : value;
     updateParameterNotes({
       ...parameterNotes,
       quizAnswers: {
         ...current,
-        [questionId]: nextValue,
+        [questionId]: value,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 
@@ -1291,12 +1309,25 @@ export function M01Work() {
   const s = M01_COURSE_CONTENT.step3;
   const m = M01_COURSE_CONTENT.methodNote;
   const parameterQuizAnswers = parameterNotes.quizAnswers;
-  const parameterQuizComplete = PARAMETER_QUIZ.every((question) => {
+  const parameterAllAnswered = PARAMETER_QUIZ.every((question) => {
     const value = parameterQuizAnswers[question.id];
-    return question.type === "multi"
-      ? Array.isArray(value) && value.length > 0
-      : typeof value === "string" && value.length > 0;
+    return typeof value === "string" && value.length > 0;
   });
+  const parameterCorrectCount = PARAMETER_QUIZ.reduce(
+    (acc, q) => (parameterQuizAnswers[q.id] === q.correct ? acc + 1 : acc),
+    0,
+  );
+  const parameterPassThreshold = 5;
+  const parameterQuizChecked = !!parameterNotes.quizChecked;
+  const parameterQuizPassed =
+    parameterQuizChecked && parameterCorrectCount >= parameterPassThreshold;
+
+  const handleCheckParameters = () => {
+    updateParameterNotes({ ...parameterNotes, quizChecked: true });
+  };
+  const handleRetryParameters = () => {
+    updateParameterNotes({ ...parameterNotes, quizChecked: false });
+  };
   const parameterChecksComplete = s.checks.every((check) =>
     parameterNotes.exerciseChecks.includes(check.id),
   );
@@ -1306,11 +1337,31 @@ export function M01Work() {
   const parameterStepComplete =
     parameterChecksComplete &&
     controlMatchesComplete &&
-    parameterQuizComplete &&
+    parameterQuizPassed &&
     parameterNotes.workSelections.length > 0 &&
     parameterNotes.acknowledged;
   const canCompleteM01 =
     parameterStepComplete && reflectionSel.length > 0 && noteSel.length > 0;
+
+  const parameterDisabledReason = !parameterChecksComplete
+    ? "Complete the Step 3 checks in Part A."
+    : !controlMatchesComplete
+      ? "Match every task to a control pattern."
+      : !parameterAllAnswered
+        ? "Answer all six checks, then click Check answers."
+        : !parameterQuizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !parameterQuizPassed
+            ? "Review the highlighted answers and try again."
+            : parameterNotes.workSelections.length === 0
+              ? "Pick at least one control need from your work."
+              : !parameterNotes.acknowledged
+                ? "Confirm the durable-controls habit to continue."
+                : reflectionSel.length === 0
+                  ? "Pick at least one parameter note."
+                  : noteSel.length === 0
+                    ? "Pick at least one method note to carry forward."
+                    : "Complete the Step 3 checks, answer the quiz, match the control patterns, and pick your parameter notes and method note.";
 
   return (
     <Step
@@ -1496,27 +1547,59 @@ export function M01Work() {
             <div className="space-y-4">
               {PARAMETER_QUIZ.map((question, index) => {
                 const current = parameterQuizAnswers[question.id];
-                const multi = question.type === "multi";
+                const isAnswered = typeof current === "string" && current.length > 0;
+                const showGrading = parameterQuizChecked && isAnswered;
+                const isCorrect = showGrading && current === question.correct;
                 return (
-                  <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
-                    <p className="text-[14px] font-semibold text-navy">
-                      Q{index + 1}. {question.question}
-                    </p>
+                  <div
+                    key={question.id}
+                    className={`rounded-md border bg-paper p-4 ${
+                      showGrading
+                        ? isCorrect
+                          ? "border-emerald-500/60 bg-emerald-500/5"
+                          : "border-danger/40 bg-danger/5"
+                        : "border-chalk"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-[14px] font-semibold text-navy">
+                        Q{index + 1}. {question.question}
+                      </p>
+                      {showGrading && (
+                        <span
+                          className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
+                            isCorrect ? "text-emerald-700" : "text-danger"
+                          }`}
+                        >
+                          {isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-3 space-y-2">
                       {question.options.map((option) => {
-                        const checked = multi
-                          ? Array.isArray(current) && current.includes(option)
-                          : current === option;
+                        const checked = current === option;
+                        const isOptionCorrect = option === question.correct;
+                        const isOptionWrongPick = showGrading && checked && !isCorrect;
+                        const rowClass = showGrading
+                          ? isOptionCorrect
+                            ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
+                            : isOptionWrongPick
+                              ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
+                              : "rounded-md border border-transparent px-2 py-1"
+                          : "";
                         return (
                           <label
                             key={option}
-                            className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                            className={`flex items-start gap-2 text-[14px] text-graphite ${
+                              parameterQuizChecked ? "cursor-default" : "cursor-pointer"
+                            } ${rowClass}`}
                           >
                             <input
-                              type={multi ? "checkbox" : "radio"}
+                              type="radio"
                               name={`m01-parameter-${question.id}`}
                               checked={checked}
-                              onChange={() => setParameterQuizAnswer(question.id, option, multi)}
+                              onChange={() => setParameterQuizAnswer(question.id, option)}
+                              disabled={parameterQuizChecked}
                               className="mt-1 h-4 w-4 accent-terracotta"
                             />
                             <span>{option}</span>
@@ -1524,9 +1607,53 @@ export function M01Work() {
                         );
                       })}
                     </div>
+                    {showGrading && question.explanation && (
+                      <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                        <span className="font-semibold text-navy">Why: </span>
+                        {question.explanation}
+                      </p>
+                    )}
                   </div>
                 );
               })}
+
+              <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+                {parameterQuizChecked ? (
+                  <>
+                    <p className="text-[14px] text-navy">
+                      You got{" "}
+                      <span className="font-semibold">
+                        {parameterCorrectCount} of {PARAMETER_QUIZ.length}
+                      </span>{" "}
+                      correct.{" "}
+                      {parameterQuizPassed
+                        ? "Nice — you can continue."
+                        : `You need at least ${parameterPassThreshold} correct. Adjust your answers and check again.`}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRetryParameters}
+                      className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
+                    >
+                      Try again
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[13px] text-slate">
+                      Answer all six, then confirm to see which are correct before moving on.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCheckParameters}
+                      disabled={!parameterAllAnswered}
+                      className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-terracotta/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Check answers
+                    </button>
+                  </>
+                )}
+              </div>
 
               <div className="rounded-md border border-chalk bg-paper p-4">
                 <p className="text-[14px] font-semibold text-navy">
@@ -1690,7 +1817,7 @@ export function M01Work() {
       }
       produces={<p className="text-[14px] text-navy">{s.produces}<br />{m.produces}</p>}
       canContinue={canCompleteM01}
-      disabledReason="Complete the Step 3 checks, answer the quiz, match the control patterns, and pick your parameter notes and method note."
+      disabledReason={parameterDisabledReason}
       nextLabel={s.nextLabel}
       onBack={() => goToStep(2)}
       onContinue={completeM01}

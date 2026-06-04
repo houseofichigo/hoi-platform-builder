@@ -12,27 +12,27 @@ type ModelKey = keyof typeof MODELS;
 
 const SAMPLES: { id: string; label: string; text: string }[] = [
   {
-    id: "invoice_line",
-    label: "Short invoice line",
-    text: "Invoice 2025-0381 · Supplier: Acme GmbH · Net 1.250,00 EUR · VAT 19% 237,50 EUR · Total 1.487,50 EUR · Due 2026-06-30",
+    id: "support_policy_answer",
+    label: "Short support answer",
+    text: "Customers can request a refund within 30 days when the product is unused, the order number is provided, and the refund reason matches the published policy.",
   },
   {
-    id: "messy_ocr",
-    label: "Messy OCR invoice text",
+    id: "messy_ticket",
+    label: "Messy support ticket",
     text:
-      "lNV0lCE  N°  20Z5-O381\nSUPPLlER : Ac me  Gm bH\nN€T   1.25O,OO  €  VAT  l9%  237,5O\nTOTAL    l,487.5O EUR\nDUE   3O-O6-2O26    REF# 8839/A\n--- OCR ARTIFACTS ---\n||||  ::  ||  scan-noise  ||  ||",
+      "cust says: paid twice?? order #A-8839 maybe A-8893\ncan't login since monday, renewal tomorrow, pls fix asap!!!\nnotes from chat: tried reset link 3x, no email, maybe old domain?\npriority unclear -- account owner is travelling",
   },
   {
-    id: "supplier_email",
-    label: "Long supplier email",
+    id: "customer_email",
+    label: "Long customer email",
     text:
-      "Dear Accounts Payable,\n\nPlease find attached invoice 2025-0381 for the consulting engagement covering May 1 through May 31. As discussed, the engagement scope included two on-site workshops, four remote review sessions, and the delivery of the final readiness report. The invoice reflects the agreed daily rate plus travel expenses approved by your procurement team.\n\nPayment is due within 30 days per our master services agreement. Please confirm receipt and let me know if you need a purchase order reference, a breakdown of travel costs, or an additional VAT statement for your accounting system.\n\nKind regards,\nMaria — Acme GmbH",
+      "Hello support team,\n\nI am writing because our team account is blocked even though our renewal was approved last week. We have a customer workshop tomorrow and need access for five users before 09:00. The reset email does not arrive, and the admin console says the workspace is inactive.\n\nCould you confirm whether the renewal was applied, restore access for the listed users, and let me know if you need any additional verification from our account owner?\n\nThank you,\nAmira",
   },
   {
-    id: "policy",
-    label: "Policy document excerpt",
+    id: "knowledge_base",
+    label: "Knowledge-base excerpt",
     text:
-      "All supplier invoices above EUR 1,000 require dual approval: the budget owner and the finance controller. Invoices flagged with low OCR confidence on any monetary field must be routed to manual review and may not be auto-posted. Reviewers are responsible for verifying VAT treatment against the supplier country and ensuring the purchase order reference is present. Any deviation must be logged in the audit trail with a reason code selected from the approved list.",
+      "Account-access issues are high priority when a renewal, live customer event, or executive stakeholder is mentioned. The assistant may summarize status, identify missing details, and draft an internal escalation note. It must not promise restoration, change account status, or reveal internal account records to the customer without human approval.",
   },
 ];
 
@@ -289,7 +289,7 @@ export function TokenizerLab({ compact = false, onChange }: Props) {
 
       <p className="text-[11px] italic text-slate">
         Estimates use a simplified tokenizer. Real token counts depend on the model's
-        tokenizer; real bills depend on your provider invoice. Use this lab to build intuition,
+        tokenizer; real costs depend on your provider's pricing page. Use this lab to build intuition,
         not to forecast billing.
       </p>
     </div>

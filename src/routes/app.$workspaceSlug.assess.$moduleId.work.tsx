@@ -4,7 +4,6 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { AssessRetakeProvider, useAssessProgress } from "@/hooks/useAssess";
 import { ModuleCompletionActions } from "@/components/assess/ModuleCompletionActions";
-import { getActiveUseCaseTrack, getUseCaseTrackStep } from "@/lib/assess/use-case-tracks";
 import { M01Work } from "@/components/assess/modules/M01Work";
 import { M02Work } from "@/components/assess/modules/M02Work";
 import { M03Work } from "@/components/assess/modules/M03Work";
@@ -34,8 +33,6 @@ function ModuleWork() {
   const studied = progress?.studied ?? false;
   const assignmentComplete = (progress?.status ?? "not_started") === "complete";
   const showingCompletion = assignmentComplete && !retaking;
-  const appliedTrack = getActiveUseCaseTrack();
-  const appliedStep = getUseCaseTrackStep(appliedTrack.slug, m.id);
 
   useEffect(() => {
     if (!retaking || !assignmentComplete) return;
@@ -56,21 +53,6 @@ function ModuleWork() {
             className="font-medium text-terracotta hover:opacity-80 whitespace-nowrap"
           >
             Open Study →
-          </Link>
-        </div>
-      )}
-
-      {!showingCompletion && appliedStep && (
-        <div className="rounded-md border border-terracotta/25 bg-terracotta/5 px-4 py-3 text-[13px] text-navy flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            Want to see this method applied to Invoice OCR? Open the read-only capstone preview.
-          </span>
-          <Link
-            to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
-            params={{ workspaceSlug: slug, trackId: appliedTrack.slug, moduleId: m.id }}
-            className="font-medium text-terracotta hover:opacity-80 whitespace-nowrap"
-          >
-            See OCR version →
           </Link>
         </div>
       )}

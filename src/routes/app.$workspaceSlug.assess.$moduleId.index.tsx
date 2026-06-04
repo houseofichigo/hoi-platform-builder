@@ -5,7 +5,6 @@ import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
-import { getActiveUseCaseTrack, getUseCaseTrackStep } from "@/lib/assess/use-case-tracks";
 import { getCoreAssignment, getCoreAssignmentCase } from "@/lib/assess/core-assignments";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/$moduleId/")({
@@ -21,8 +20,6 @@ function ModuleOverview() {
   const m = getModule(moduleId as ModuleId)!;
   const course = getModuleCourse(m.id);
   const moduleMedia = getModuleMedia(m.id);
-  const appliedTrack = getActiveUseCaseTrack();
-  const appliedStep = getUseCaseTrackStep(appliedTrack.slug, m.id);
   const coreAssignment = getCoreAssignment(m.id);
   const coreCase = getCoreAssignmentCase(coreAssignment.recommendedCaseId);
   const { data: progress } = useAssessProgress(m.id);
@@ -105,7 +102,7 @@ function ModuleOverview() {
             <p>{m.description}</p>
             <p>
               The core assignment is deliberately generic so the method transfers across functions.
-              The capstone preview shows the same module through Invoice OCR without changing your course progress.
+              Use Case Tracks show applied versions separately without changing your core course progress.
             </p>
           </CourseSection>
 
@@ -172,15 +169,6 @@ function ModuleOverview() {
                   moduleId={m.id}
                 />
               )}
-              {appliedStep && (
-                <AppliedTrackCard
-                  slug={slug}
-                  moduleId={m.id}
-                  trackId={appliedTrack.slug}
-                  title="See the OCR version"
-                  body={appliedStep.summary}
-                />
-              )}
             </div>
             {m.assignmentAlignment && (
               <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
@@ -219,21 +207,6 @@ function ModuleOverview() {
             <p className="eyebrow text-terracotta">PRODUCES</p>
             <p className="mt-3 text-[14px] leading-relaxed text-navy">{m.outcome}</p>
           </div>
-          {appliedStep && (
-            <div className="rounded-md border border-chalk bg-white p-5">
-              <p className="eyebrow-muted">APPLIED TRACK</p>
-              <p className="mt-3 text-[14px] font-semibold text-navy">{appliedTrack.title}</p>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">{appliedTrack.function}</p>
-              <p className="mt-3 text-[13px] leading-relaxed text-graphite">{appliedStep.conceptApplied}</p>
-              <Link
-                to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
-                params={{ workspaceSlug: slug, trackId: appliedTrack.slug, moduleId: m.id }}
-                className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta hover:opacity-80"
-              >
-                Open OCR step <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          )}
           {m.prereq && (
             <div className="rounded-md border border-chalk bg-white p-5">
               <p className="eyebrow-muted">PREREQUISITE</p>
@@ -283,35 +256,6 @@ function ModuleOverview() {
         </button>
       </footer>
     </div>
-  );
-}
-
-function AppliedTrackCard({
-  slug,
-  moduleId,
-  trackId,
-  title,
-  body,
-}: {
-  slug: string;
-  moduleId: ModuleId;
-  trackId: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <Link
-      to="/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId"
-      params={{ workspaceSlug: slug, trackId, moduleId }}
-      className="rounded-md border border-terracotta/25 bg-terracotta/5 p-4 transition-colors hover:border-terracotta/50"
-    >
-      <p className="eyebrow text-terracotta">Applied track</p>
-      <h3 className="mt-2 text-[16px] font-semibold text-navy">{title}</h3>
-      <p className="mt-2 line-clamp-3 text-[13px] leading-relaxed text-graphite">{body}</p>
-      <span className="mt-4 inline-flex items-center gap-2 text-[13px] font-medium text-terracotta">
-        Open <ArrowRight className="h-3.5 w-3.5" />
-      </span>
-    </Link>
   );
 }
 

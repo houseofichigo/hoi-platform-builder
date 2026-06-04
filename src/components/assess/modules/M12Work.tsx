@@ -35,6 +35,23 @@ const GAP_IDS: readonly CapabilityGapId[] = [
   "partnerships",
   "governance",
 ];
+const ROADMAP_QUICK_ADDS: Record<RoadmapHorizonId, readonly string[]> = {
+  now: [
+    "Scale the top M09 candidate",
+    "Close monitoring on the live workflow",
+    "Name system owner and backup",
+  ],
+  next: [
+    "Pilot two constrained candidates",
+    "Bring one candidate to Gate 2",
+    "Resolve the highest governance blocker",
+  ],
+  later: [
+    "Prepare deferred candidates",
+    "Close data and partnership gaps",
+    "Re-issue the roadmap after portfolio review",
+  ],
+};
 
 interface RoadmapOutput {
   initiatives: Record<RoadmapHorizonId, HorizonInitiative[]>;
@@ -79,6 +96,17 @@ function emptyScorecard(): ScorecardOutput {
 
 function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function seededRoadmap(scaffold: ReturnType<typeof getM12StrategyScaffold>): RoadmapOutput {
+  return {
+    initiatives: {
+      now: [{ id: uid(), label: ROADMAP_QUICK_ADDS.now[0] }],
+      next: [{ id: uid(), label: ROADMAP_QUICK_ADDS.next[0] }],
+      later: [{ id: uid(), label: ROADMAP_QUICK_ADDS.later[0] }],
+    },
+    rationale: scaffold.roadmapNarrative,
+  };
 }
 
 export function M12Work() {
@@ -171,10 +199,13 @@ export function M12Work() {
         }
       }
       merged.rationale = typeof v.rationale === "string" ? v.rationale : "";
-      setRoadmap(merged);
+      const hasAnyInitiative = HORIZON_IDS.some((id) => merged.initiatives[id].length > 0);
+      setRoadmap(hasAnyInitiative || merged.rationale.trim() !== "" ? merged : seededRoadmap(scaffold));
+    } else {
+      setRoadmap(seededRoadmap(scaffold));
     }
     setHydrated((h) => ({ ...h, roadmap: true }));
-  }, [hydrated.roadmap, roadmapOut.isLoading, roadmapOut.value]);
+  }, [hydrated.roadmap, roadmapOut.isLoading, roadmapOut.value, scaffold]);
 
   // Hydrate gaps
   useEffect(() => {
@@ -301,6 +332,7 @@ export function M12Work() {
             horizons={M12_COURSE_CONTENT.horizons}
             initiatives={roadmap.initiatives}
             rationale={roadmap.rationale}
+            suggestions={ROADMAP_QUICK_ADDS}
             onAdd={(horizon, label) => {
               const next: RoadmapOutput = {
                 ...roadmap,

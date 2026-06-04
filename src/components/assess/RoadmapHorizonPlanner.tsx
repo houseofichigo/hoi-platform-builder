@@ -12,6 +12,7 @@ interface Props {
   horizons: readonly RoadmapHorizon[];
   initiatives: Record<RoadmapHorizonId, HorizonInitiative[]>;
   rationale: string;
+  suggestions?: Partial<Record<RoadmapHorizonId, readonly string[]>>;
   onAdd: (horizon: RoadmapHorizonId, label: string) => void;
   onRemove: (horizon: RoadmapHorizonId, id: string) => void;
   onRationaleChange: (value: string) => void;
@@ -21,6 +22,7 @@ export function RoadmapHorizonPlanner({
   horizons,
   initiatives,
   rationale,
+  suggestions = {},
   onAdd,
   onRemove,
   onRationaleChange,
@@ -56,6 +58,35 @@ export function RoadmapHorizonPlanner({
                   </li>
                 ))}
               </ul>
+              {(suggestions[h.id]?.length ?? 0) > 0 && (
+                <div className="space-y-1">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">
+                    Quick add
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {suggestions[h.id]?.map((label) => {
+                      const alreadyAdded = list.some((i) => i.label === label);
+                      return (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => {
+                            if (!alreadyAdded) onAdd(h.id, label);
+                          }}
+                          disabled={alreadyAdded}
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-[0.12em] ${
+                            alreadyAdded
+                              ? "bg-mist text-slate/50"
+                              : "bg-paper text-slate hover:bg-mist hover:text-navy"
+                          }`}
+                        >
+                          {alreadyAdded ? "Added" : label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <AddInitiative onAdd={(label) => onAdd(h.id, label)} />
             </div>
           );

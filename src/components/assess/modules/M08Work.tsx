@@ -367,7 +367,7 @@ export function M08Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={allMitigated}
-        disabledReason="Select exactly three risks and write a mitigation for each."
+        disabledReason="Select exactly three risks and keep or adapt the generated mitigations."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={async () => {

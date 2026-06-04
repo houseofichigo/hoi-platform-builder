@@ -14,6 +14,7 @@ const IMPORT_RE = /\bimport\s+(?:type\s+)?[^"';]*?\bfrom\s*["']([^"']+)["']/g;
 const SIDE_EFFECT_RE = /\bimport\s*["']([^"']+)["']/g;
 const APPLIED_TRACK_IMPORT = "@/lib/worked-examples/invoice-ocr";
 const OCR_CONTENT_SYMBOL_RE = /\bM\d\d_OCR_CONTENT\b/;
+const VISIBLE_APPLIED_TERMS_RE = /\b(OCR|invoice|invoices|VAT|Accounts Payable)\b/i;
 
 const CORE_PATHS = [
   "src/components/assess",
@@ -23,6 +24,19 @@ const CORE_PATHS = [
   "src/routes/app.$workspaceSlug.assess.$moduleId.study.tsx",
   "src/routes/app.$workspaceSlug.assess.assignments.tsx",
 ];
+const VISIBLE_COPY_PATHS = [
+  "src/components/assess",
+  "src/lib/assess/content",
+  "src/routes/app.$workspaceSlug.assess.$moduleId.gate.tsx",
+  "src/routes/app.$workspaceSlug.assess.$moduleId.work.tsx",
+  "src/routes/app.$workspaceSlug.assess.$moduleId.index.tsx",
+  "src/routes/app.$workspaceSlug.assess.$moduleId.study.tsx",
+  "src/routes/app.$workspaceSlug.assess.assignments.tsx",
+];
+const VISIBLE_COPY_ALLOWLIST = new Set([
+  "src/components/assess/OCRBlockWalkthrough.tsx",
+  "src/lib/assess/content/types.ts",
+]);
 
 function walk(path: string, out: string[] = []): string[] {
   if (!existsSync(path)) return out;
@@ -41,6 +55,12 @@ function stripComments(src: string): string {
   return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 }
 
+function stripImports(src: string): string {
+  return src
+    .replace(/^\s*import[\s\S]*?;\s*$/gm, "")
+    .replace(/^\s*export\s+type[\s\S]*?;\s*$/gm, "");
+}
+
 function importsFromAppliedTrack(src: string): string[] {
   const found = new Set<string>();
   for (const re of [IMPORT_RE, SIDE_EFFECT_RE]) {
@@ -54,6 +74,7 @@ function importsFromAppliedTrack(src: string): string[] {
 }
 
 const files = [...new Set(CORE_PATHS.flatMap((path) => walk(join(ROOT, path))))];
+const visibleFiles = [...new Set(VISIBLE_COPY_PATHS.flatMap((path) => walk(join(ROOT, path))))];
 const violations: string[] = [];
 
 for (const file of files) {
@@ -64,6 +85,16 @@ for (const file of files) {
   }
   if (OCR_CONTENT_SYMBOL_RE.test(source)) {
     violations.push(`${rel} references an OCR content constant directly`);
+  }
+}
+
+for (const file of visibleFiles) {
+  const rel = relative(ROOT, file);
+  if (VISIBLE_COPY_ALLOWLIST.has(rel)) continue;
+  const visibleSource = stripImports(stripComments(readFileSync(file, "utf8")));
+  const match = visibleSource.match(VISIBLE_APPLIED_TERMS_RE);
+  if (match) {
+    violations.push(`${rel} contains visible applied-track term "${match[0]}" in core Assess`);
   }
 }
 

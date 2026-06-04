@@ -21,7 +21,7 @@ export function SystemCardEditor({
       <div className="card bg-mist/40 space-y-1">
         <p className="eyebrow-muted">GENERATED SYSTEM CARD</p>
         <p className="text-[13px] text-slate">
-          We drafted a system card from your worked example. Confirm each
+          We drafted a system card from your course inputs. Confirm each
           Article 11 section reads correctly for your context.
         </p>
       </div>

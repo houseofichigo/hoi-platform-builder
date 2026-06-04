@@ -54,17 +54,25 @@ export function SecurityRiskPicker({
               </button>
             </div>
             {isSelected && (
-              <div className="space-y-1">
+              <div className="space-y-2 rounded-md border border-chalk bg-paper p-3">
                 <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-slate">
-                  Mitigation
+                  Generated mitigation
                 </p>
-                <textarea
-                  value={mitigations[r.id] ?? ""}
-                  onChange={(e) => onMitigationChange(r.id, e.target.value)}
-                  rows={2}
-                  placeholder={r.mitigation}
-                  className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
-                />
+                <p className="text-[12px] leading-relaxed text-navy">
+                  {mitigations[r.id] || r.mitigation}
+                </p>
+                <details className="group">
+                  <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.16em] text-slate hover:text-navy">
+                    Advanced edit (optional)
+                  </summary>
+                  <textarea
+                    value={mitigations[r.id] ?? r.mitigation}
+                    onChange={(e) => onMitigationChange(r.id, e.target.value)}
+                    rows={2}
+                    placeholder={r.mitigation}
+                    className="mt-2 w-full rounded-md border border-chalk bg-white p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
+                  />
+                </details>
               </div>
             )}
           </li>

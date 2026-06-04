@@ -337,11 +337,11 @@ export function M06Work() {
       design.pilotScope.trim() !== "";
 
     const fields: { key: keyof DesignOutput; label: string; rows: number }[] = [
-      { key: "agentGoal", label: "AGENT GOAL", rows: 3 },
-      { key: "workflow", label: "WORKFLOW (6 STEPS)", rows: 8 },
-      { key: "toolPolicy", label: "TOOL POLICY", rows: 5 },
-      { key: "memoryPolicy", label: "MEMORY POLICY", rows: 4 },
-      { key: "pilotScope", label: "PILOT SCOPE", rows: 5 },
+      { key: "agentGoal", label: "Agent goal", rows: 3 },
+      { key: "workflow", label: "Workflow", rows: 8 },
+      { key: "toolPolicy", label: "Tool policy", rows: 5 },
+      { key: "memoryPolicy", label: "Memory policy", rows: 4 },
+      { key: "pilotScope", label: "Pilot scope", rows: 5 },
     ];
 
     return (
@@ -363,19 +363,33 @@ export function M06Work() {
           <div className="space-y-6">
             <AgentCapabilityMap capabilities={M06_COURSE_CONTENT.capabilities} />
             <div className="space-y-4">
+              <div className="rounded-md border border-chalk bg-mist/40 p-4 text-[13px] leading-relaxed text-navy">
+                We generated the first blueprint from the course pattern. Review each section,
+                then use Advanced edit only when the boundary needs to change.
+              </div>
               {fields.map((f) => (
-                <div key={f.key} className="space-y-1">
-                  <p className="eyebrow-muted">{f.label}</p>
-                  <textarea
-                    value={design[f.key]}
-                    onChange={(e) => {
-                      const next = { ...design, [f.key]: e.target.value };
-                      setDesign(next);
-                      designOut.setValue.mutate(next);
-                    }}
-                    rows={f.rows}
-                    className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] leading-relaxed text-navy outline-none focus:border-terracotta"
-                  />
+                <div key={f.key} className="rounded-md border border-chalk bg-white p-4 space-y-2">
+                  <p className="eyebrow-muted">{f.label.toUpperCase()}</p>
+                  <p className="whitespace-pre-line text-[13px] leading-relaxed text-navy">
+                    {design[f.key]}
+                  </p>
+                  <details className="group rounded-md border border-chalk bg-paper">
+                    <summary className="cursor-pointer px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-slate hover:text-navy">
+                      Advanced edit (optional)
+                    </summary>
+                    <div className="p-3 pt-0">
+                      <textarea
+                        value={design[f.key]}
+                        onChange={(e) => {
+                          const next = { ...design, [f.key]: e.target.value };
+                          setDesign(next);
+                          designOut.setValue.mutate(next);
+                        }}
+                        rows={f.rows}
+                        className="w-full rounded-md border border-chalk bg-white p-2 font-mono text-[12px] leading-relaxed text-navy outline-none focus:border-terracotta"
+                      />
+                    </div>
+                  </details>
                 </div>
               ))}
             </div>
@@ -383,7 +397,7 @@ export function M06Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={allFilled}
-        disabledReason="Fill all five blueprint fields."
+        disabledReason="Review the generated blueprint sections."
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await designOut.setValue.mutateAsync(design);
@@ -557,9 +571,9 @@ export function M06Work() {
     const canContinue = baseFilled && targetsFilled;
 
     const baseFields: { key: "population" | "window" | "rollbackOwner"; label: string; placeholder: string }[] = [
-      { key: "population", label: "PILOT POPULATION", placeholder: "Default: one pilot team using mock or sandbox workflow data only." },
-      { key: "window", label: "TIME WINDOW", placeholder: "Default: two-week controlled pilot with a fixed review date." },
-      { key: "rollbackOwner", label: "ROLLBACK OWNER", placeholder: "Default: named operations lead or pilot owner." },
+      { key: "population", label: "Pilot population", placeholder: "Default: one pilot team using mock or sandbox workflow data only." },
+      { key: "window", label: "Time window", placeholder: "Default: two-week controlled pilot with a fixed review date." },
+      { key: "rollbackOwner", label: "Rollback owner", placeholder: "Default: named operations lead or pilot owner." },
     ];
 
     return (
@@ -587,19 +601,25 @@ export function M06Work() {
 
             <div className="space-y-3">
               {baseFields.map((f) => (
-                <div key={f.key} className="space-y-1">
-                  <p className="eyebrow-muted">{f.label}</p>
-                  <textarea
-                    value={pilot[f.key]}
-                    onChange={(e) => {
-                      const next = { ...pilot, [f.key]: e.target.value };
-                      setPilot(next);
-                      pilotOut.setValue.mutate(next);
-                    }}
-                    rows={2}
-                    placeholder={f.placeholder}
-                    className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
-                  />
+                <div key={f.key} className="rounded-md border border-chalk bg-white p-3 space-y-2">
+                  <p className="eyebrow-muted">{f.label.toUpperCase()}</p>
+                  <p className="text-[13px] leading-relaxed text-navy">{pilot[f.key]}</p>
+                  <details>
+                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.16em] text-slate hover:text-navy">
+                      Advanced edit (optional)
+                    </summary>
+                    <textarea
+                      value={pilot[f.key]}
+                      onChange={(e) => {
+                        const next = { ...pilot, [f.key]: e.target.value };
+                        setPilot(next);
+                        pilotOut.setValue.mutate(next);
+                      }}
+                      rows={2}
+                      placeholder={f.placeholder}
+                      className="mt-2 w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
+                    />
+                  </details>
                 </div>
               ))}
             </div>
@@ -607,22 +627,28 @@ export function M06Work() {
             <div className="space-y-3">
               <p className="text-sm font-medium text-navy">Set a target value for each metric.</p>
               {M06_COURSE_CONTENT.pilotMetrics.map((m) => (
-                <div key={m.id} className="space-y-1">
+                <div key={m.id} className="rounded-md border border-chalk bg-white p-3 space-y-2">
                   <p className="eyebrow-muted">TARGET · {m.label.toUpperCase()}</p>
-                  <textarea
-                    value={pilot.targets[m.id]}
-                    onChange={(e) => {
-                      const next: PilotPlanOutput = {
-                        ...pilot,
-                        targets: { ...pilot.targets, [m.id]: e.target.value },
-                      };
-                      setPilot(next);
-                      pilotOut.setValue.mutate(next);
-                    }}
-                    rows={2}
-                    placeholder={m.target}
-                    className="w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
-                  />
+                  <p className="text-[13px] leading-relaxed text-navy">{pilot.targets[m.id]}</p>
+                  <details>
+                    <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-[0.16em] text-slate hover:text-navy">
+                      Advanced edit (optional)
+                    </summary>
+                    <textarea
+                      value={pilot.targets[m.id]}
+                      onChange={(e) => {
+                        const next: PilotPlanOutput = {
+                          ...pilot,
+                          targets: { ...pilot.targets, [m.id]: e.target.value },
+                        };
+                        setPilot(next);
+                        pilotOut.setValue.mutate(next);
+                      }}
+                      rows={2}
+                      placeholder={m.target}
+                      className="mt-2 w-full rounded-md border border-chalk bg-paper p-2 font-mono text-[12px] text-navy outline-none focus:border-terracotta"
+                    />
+                  </details>
                 </div>
               ))}
             </div>
@@ -630,7 +656,7 @@ export function M06Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={canContinue}
-        disabledReason="Fill population, window, rollback owner, and all five metric targets."
+        disabledReason="Review the generated pilot boundary and metric targets."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(3)}
         onContinue={async () => {

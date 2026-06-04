@@ -20,7 +20,7 @@ export function AssistantArchitectureMap({ blocks }: AssistantArchitectureMapPro
           </div>
           <p className="text-[13px] text-navy">{b.description}</p>
           <div className="space-y-1">
-            <p className="eyebrow-muted">OCR EXAMPLE</p>
+            <p className="eyebrow-muted">EXAMPLE</p>
             <p className="text-[12px] text-slate">{b.invoiceOcrExample}</p>
           </div>
           <div className="space-y-1">

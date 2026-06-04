@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { AgentCapabilityMap } from "@/components/assess/AgentCapabilityMap";
@@ -92,9 +91,9 @@ function buildHitlDefaults(): HitlPolicyOutput {
 }
 function buildPilotDefaults(): PilotPlanOutput {
   return {
-    population: "One AP pilot team using mock or sandbox invoice data only.",
+    population: "One pilot team using mock or sandbox workflow data only.",
     window: "Two-week controlled pilot window with a fixed review date.",
-    rollbackOwner: "Named AP lead or pilot owner.",
+    rollbackOwner: "Named operations lead or pilot owner.",
     targets: {
       accuracy: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "accuracy")?.target ?? "",
       cycle_time: M06_COURSE_CONTENT.pilotMetrics.find((m) => m.id === "cycle_time")?.target ?? "",
@@ -117,6 +116,11 @@ const HITL_SEVERITIES: readonly { value: Exclude<HitlSeverity, "">; label: strin
   { value: "not_applicable", label: "N/A" },
 ];
 
+function checkpointLabel(id: HitlCheckpointId) {
+  if (id === "payment_or_sync") return "write / sync";
+  return id.replace(/_/g, " ");
+}
+
 export function M06Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
@@ -124,7 +128,6 @@ export function M06Work() {
 
   const progress = useAssessProgress("m06");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   const designOut = useAssessOutput<DesignOutput>("m06.agent_design");
   const integrationOut = useAssessOutput<IntegrationPlanOutput>("m06.integration_plan");
@@ -135,12 +138,9 @@ export function M06Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(() => getM06AgentScaffold(profileContext), [profileContext]);
@@ -491,7 +491,7 @@ export function M06Work() {
             <HITLCheckpointMatrix checkpoints={M06_COURSE_CONTENT.hitlCheckpoints} />
             <div className="space-y-2">
               <p className="text-sm font-medium text-navy">
-                Set severity. Payment/sync and exception must be required.
+                Set severity. Write/sync and exception must be required.
               </p>
               <ul className="space-y-2">
                 {M06_COURSE_CONTENT.hitlCheckpoints.map((c) => (
@@ -500,7 +500,7 @@ export function M06Work() {
                     className="rounded-md border border-chalk bg-white px-3 py-2 flex flex-wrap items-center gap-3"
                   >
                     <span className="text-sm font-medium text-navy w-44 shrink-0">
-                      {c.id.replace(/_/g, " ")}
+                      {checkpointLabel(c.id)}
                     </span>
                     {HITL_SEVERITIES.map((opt) => {
                       const selected = hitl[c.id] === opt.value;
@@ -535,7 +535,7 @@ export function M06Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={canContinue}
-        disabledReason="Set every severity. Payment/sync and exception must be required."
+        disabledReason="Set every severity. Write/sync and exception must be required."
         nextLabel={s.nextLabel}
         onBack={() => goToStep(2)}
         onContinue={async () => {
@@ -557,9 +557,9 @@ export function M06Work() {
     const canContinue = baseFilled && targetsFilled;
 
     const baseFields: { key: "population" | "window" | "rollbackOwner"; label: string; placeholder: string }[] = [
-      { key: "population", label: "PILOT POPULATION", placeholder: "Default: one AP pilot team using mock or sandbox invoice data only." },
+      { key: "population", label: "PILOT POPULATION", placeholder: "Default: one pilot team using mock or sandbox workflow data only." },
       { key: "window", label: "TIME WINDOW", placeholder: "Default: two-week controlled pilot with a fixed review date." },
-      { key: "rollbackOwner", label: "ROLLBACK OWNER", placeholder: "Default: named AP lead or pilot owner." },
+      { key: "rollbackOwner", label: "ROLLBACK OWNER", placeholder: "Default: named operations lead or pilot owner." },
     ];
 
     return (
@@ -684,7 +684,7 @@ export function M06Work() {
             <ul className="text-[12px] text-navy">
               {M06_COURSE_CONTENT.hitlCheckpoints.map((c) => (
                 <li key={c.id}>
-                  <span className="font-medium">{c.id.replace(/_/g, " ")}:</span>{" "}
+                  <span className="font-medium">{checkpointLabel(c.id)}:</span>{" "}
                   {hitl[c.id] || "—"}
                 </li>
               ))}

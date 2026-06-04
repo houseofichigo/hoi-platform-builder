@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { PrototypeSurfaceMap } from "@/components/assess/PrototypeSurfaceMap";
@@ -44,11 +43,11 @@ const REQUIREMENT_CAPABILITIES: Record<PrototypeRequirementId, readonly string[]
   ocr_extraction: [
     "extract required fields",
     "flag low confidence",
-    "separate invoice header and line items",
+    "separate source content and structured fields",
     "surface missing data",
   ],
   system_sync: [
-    "prepare accounting export",
+    "prepare system export",
     "block unsafe write",
     "log sync status",
     "show retry path",
@@ -126,7 +125,6 @@ export function M05Work() {
 
   const progress = useAssessProgress("m05");
   const workspaceProfile = useWorkspaceProfile();
-  const useCaseProfile = useUseCaseProfile();
 
   // New canonical key per completion.ts
   const surfacesOut = useAssessOutput<ScopeOutput>("m05.surfaces");
@@ -138,12 +136,9 @@ export function M05Work() {
   const profileContext = useMemo(
     () => ({
       companyName: workspace?.name,
-      accountingSoftware: useCaseProfile.data?.accounting_software as string | undefined,
       country: workspaceProfile.data?.country as string | undefined,
-      invoiceVolume: useCaseProfile.data?.invoice_volume as string | undefined,
-      vatContext: useCaseProfile.data?.vat_context as string | undefined,
     }),
-    [workspace?.name, workspaceProfile.data, useCaseProfile.data],
+    [workspace?.name, workspaceProfile.data],
   );
 
   const scaffold = useMemo(() => getM05PrototypeBriefScaffold(profileContext), [profileContext]);

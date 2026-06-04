@@ -14,7 +14,7 @@ export function AgentRequirementCards({ cards }: AgentRequirementCardsProps) {
         >
           <header className="space-y-1">
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-terracotta">
-              REQUIREMENT · {c.id.toUpperCase().replace(/_/g, " ")}
+              REQUIREMENT
             </p>
             <p className="font-display text-navy text-base">{c.title}</p>
           </header>

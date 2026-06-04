@@ -12,17 +12,17 @@ import {
   getM03PromptScaffolds,
 } from "./m03";
 import {
-  M04_OCR_CONTENT,
   getM04AssistantScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m04";
+  M04_COURSE_CONTENT,
+} from "./m04";
 import {
-  M05_OCR_CONTENT,
   getM05PrototypeBriefScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m05";
+  M05_COURSE_CONTENT,
+} from "./m05";
 import {
-  M06_OCR_CONTENT,
   getM06AgentScaffold,
-} from "@/lib/worked-examples/invoice-ocr/m06";
+  M06_COURSE_CONTENT,
+} from "./m06";
 import {
   M07_OCR_CONTENT,
   getM07ToolDecisionScaffold,
@@ -58,9 +58,7 @@ export type {
 // rewrite lands. Core UI imports from this boundary instead of the applied
 // Invoice OCR files directly, so future content swaps stay localized here.
 export { M01_COURSE_CONTENT, M02_COURSE_CONTENT, M03_COURSE_CONTENT };
-export const M04_COURSE_CONTENT = M04_OCR_CONTENT;
-export const M05_COURSE_CONTENT = M05_OCR_CONTENT;
-export const M06_COURSE_CONTENT = M06_OCR_CONTENT;
+export { M04_COURSE_CONTENT, M05_COURSE_CONTENT, M06_COURSE_CONTENT };
 export const M07_COURSE_CONTENT = M07_OCR_CONTENT;
 export const M08_COURSE_CONTENT = M08_OCR_CONTENT;
 export const M09_COURSE_CONTENT = M09_OCR_CONTENT;

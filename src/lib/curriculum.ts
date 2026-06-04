@@ -201,7 +201,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build a grounded assistant on a small reference dataset. Run the five-query test set, document RAG governance, and apply Gate 1 with a named PASS / PARTIAL / FAIL decision and reason codes if not PASS.',
     outcome: 'Assistant blueprint, source checklist, five test outputs, RAG governance notes, and Gate 1 decision.',
-    assignmentAlignment: 'Current app assignment has the assistant/RAG evidence flow but still needs the generic reference-dataset framing and explicit v6 reason-code language during the assignment-content pass.',
+    assignmentAlignment: 'Current app assignment now uses the generic internal-policy assistant framing with source lookup, contextual rules, example-answer testing, injection refusal, and Gate 1 evidence.',
   },
   {
     id: 'm05', num: 5, title: 'Prototyping with No-Code',
@@ -232,7 +232,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build a working no-code prototype of a simple two-screen workflow, such as intake form plus review dashboard. Walk through it and document three agent requirements.',
     outcome: 'Working prototype and three agent requirement cards grounded in the walkthrough.',
-    assignmentAlignment: 'Current app assignment uses a structured no-code brief rather than a live prototype. Keep this safe for now; later add a clear optional Lovable build handoff.',
+    assignmentAlignment: 'Current app assignment now uses the generic intake, review, decision, and audit prototype loop. It remains a safe no-code brief and walkthrough rather than a production build.',
   },
   {
     id: 'm06', num: 6, title: 'AI Agents & Pilot',
@@ -266,7 +266,7 @@ export const MODULES: ModuleMeta[] = [
     ],
     assignment: 'Build a live agent for a low-risk task. Connect one tool via MCP, run 10 representative inputs, measure accuracy against a baseline, and apply Gate 2.',
     outcome: 'Working AI agent, pilot metrics report, and Gate 2 decision.',
-    assignmentAlignment: 'Current app assignment safely simulates the agent pilot with blueprints, policies, and generated defaults. Later content should clarify where live MCP/n8n work is optional or facilitator-led.',
+    assignmentAlignment: 'Current app assignment now uses the generic lead-routing / workflow-agent pilot pattern with bounded tools, HITL checkpoints, pilot metrics, and Gate 2 evidence.',
   },
   {
     id: 'm07', num: 7, title: 'Tools & Platforms',

@@ -771,17 +771,43 @@ export function M01Work() {
     const exercisesComplete = s.exercises.every((exercise) =>
       checkedExercises.includes(exercise.id),
     );
-    const quizComplete = SCEPTICISM_QUIZ.every((question) => {
+    const allAnswered = SCEPTICISM_QUIZ.every((question) => {
       const value = quizAnswers[question.id];
-      return question.type === "multi"
-        ? Array.isArray(value) && value.length > 0
-        : typeof value === "string" && value.length > 0;
+      return typeof value === "string" && value.length > 0;
     });
+    const correctCount = SCEPTICISM_QUIZ.reduce(
+      (acc, q) => (quizAnswers[q.id] === q.correct ? acc + 1 : acc),
+      0,
+    );
+    const passThreshold = 5;
+    const quizChecked = !!scepticismLog.quizChecked;
+    const quizPassed = quizChecked && correctCount >= passThreshold;
     const stepComplete =
       exercisesComplete &&
-      quizComplete &&
+      quizPassed &&
       scepticismLog.riskSelections.length > 0 &&
       scepticismLog.acknowledged;
+
+    const handleCheckScepticism = () => {
+      updateScepticismLog({ ...scepticismLog, quizChecked: true });
+    };
+    const handleRetryScepticism = () => {
+      updateScepticismLog({ ...scepticismLog, quizChecked: false });
+    };
+
+    const scepticismDisabledReason = !exercisesComplete
+      ? "Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit."
+      : !allAnswered
+        ? "Answer all six questions, then check your answers."
+        : !quizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !quizPassed
+            ? "Review the highlighted answers and try again."
+            : scepticismLog.riskSelections.length === 0
+              ? "Pick at least one work-risk task."
+              : !scepticismLog.acknowledged
+                ? "Confirm the verification habit to continue."
+                : "Complete Part A, answer the checks, pick one work-risk task, and confirm the verification habit.";
 
     return (
       <Step

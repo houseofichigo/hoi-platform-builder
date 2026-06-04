@@ -1,38 +1,33 @@
-## Goal
+# M02: Consolidate to a single knowledge check on Step 3
 
-Bring the Step 3 "Parameter Playground" quiz (Q1–Q6) up to the same Check-answers / Try again grading flow that Step 2 (Hallucination Hunt) now has. Q7 (multi-select reflection about the learner's own work) stays ungraded — it's a reflection, not a knowledge check.
+## Goal
+Today M02 renders a separate quiz on each of the 3 steps. Keep only the Step 3 quiz (the last step) and remove the Step 1 and Step 2 quizzes, so learners do one knowledge check at the end of the module.
 
 ## Scope
-
-All edits inside `src/components/assess/modules/M01Work.tsx` and the `PARAMETER_QUIZ` constant. No schema changes, no other steps touched.
+Frontend-only change inside `src/components/assess/modules/M02Work.tsx`. No schema changes, no changes to other modules, no changes to the Step 3 Guided Build (`M02Step3Guided`) or the blueprint generator.
 
 ## Changes
 
-1. **`PARAMETER_QUIZ`** — Add `correct` + one-line `explanation` to each of the six single-choice questions in Step 3 (Q1–Q6). Q7 stays as the open multi-select reflection and is rendered separately.
+1. **Remove Step 1 and Step 2 quiz UI**
+   - Drop the quiz section currently rendered inside the Step 1 and Step 2 `<Step>` content.
+   - Remove the quiz from any "can continue" / disabled-reason logic on Steps 1 and 2, so progression depends only on the existing assignment outputs (sources / gaps), not on a quiz.
 
-2. **`ParameterNotes` interface** — Add `quizChecked?: boolean`.
+2. **Keep the Step 3 quiz as the single end-of-module knowledge check**
+   - Leave `M02_STEP_QUIZZES.step3` and its rendering on Step 3 intact.
+   - Step 3's existing gating (blueprint generated + Gate 1 readiness + quiz pass) remains, so the final quiz still acts as the module's knowledge check.
 
-3. **`setParameterQuizAnswer`** — When the learner edits any of the six graded answers, set `quizChecked: false` so they must re-confirm. Editing Q7 does not flip the flag.
-
-4. **Handlers** — Add `handleCheckParameters` and `handleRetryParameters` that toggle `quizChecked` (mirrors the Step 2 implementation).
-
-5. **Pass threshold** — `parameterQuizPassed = quizChecked && correctCount >= 5` (5 / 6, same ratio as Step 2's 4 / 5).
-
-6. **Continue gating** — Replace the current `parameterQuizComplete` check inside `parameterStepComplete` with `parameterQuizPassed`. Update `disabledReason` to walk through: "Answer all six checks" → "Click Check answers" → "Review highlighted answers and try again" → existing reasons for control matches / Part B checks / Q7 / acknowledgement.
-
-7. **Quiz rendering (Q1–Q6 loop, ~lines 1497–1529)** — When `quizChecked` is true:
-   - Green border + ✓ on correct, red border + ✗ on incorrect
-   - "Why: …" explanation under each graded question
-   - Inputs disabled until Try again
-8. **Buttons under the six questions** — "Check answers" (disabled until all 6 answered) and "Try again" (only when `!parameterQuizPassed && quizChecked`), plus an "X of 6 correct" result line. Same visual treatment as Step 2.
+3. **Trim dead code**
+   - Remove `M02_STEP_QUIZZES.step1` and `M02_STEP_QUIZZES.step2` entries.
+   - Remove `step1QuizStatus` and `step2QuizStatus` derivations and any references to them.
+   - Narrow `M02QuizStepKey` to just `"step3"` and simplify `M02KnowledgeCheckState` / `createDefaultM02KnowledgeCheck` / `normalizeM02KnowledgeCheck` to only track `step3`.
+   - Persisted `m02.knowledge_check` output continues to be written; `normalizeM02KnowledgeCheck` will safely ignore any legacy `step1`/`step2` fields from prior saves (backward compatible — no migration needed).
 
 ## Out of scope
-
-- Q7 reflection (kept ungraded)
-- Part A dial cards, Part B task guide, control-match exercise, prompt-controls section
-- Method note section
-- Any other module
+- No changes to `M01`–`M12` other than M02.
+- No changes to assess output keys, completion artifacts, or gate logic.
+- No visual redesign of the Step 3 quiz itself.
 
 ## Verification
-
-Run `tsc --noEmit` after the edit; spot-check the rendered Step 3 in the preview to confirm grading + gating behave like Step 2.
+- Step 1 and Step 2 no longer show a "Knowledge check" block; Continue is enabled once their existing assignment inputs are filled.
+- Step 3 still shows the knowledge check and still requires passing it (alongside blueprint + Gate 1) to complete M02.
+- Reloading a workspace that previously answered Step 1/Step 2 quizzes does not error — legacy fields are ignored.

@@ -28,7 +28,7 @@ const TOTAL_STEPS = 3;
 
 type StepNum = 1 | 2 | 3;
 type GateStatus = "pass" | "partial" | "blocked" | "";
-type M02QuizStepKey = "step1" | "step2" | "step3";
+type M02QuizStepKey = "step3";
 type M02QuizAnswer = string | string[];
 
 interface M02QuizQuestion {
@@ -60,8 +60,6 @@ interface M02QuizStepState {
 }
 
 interface M02KnowledgeCheckState {
-  step1: M02QuizStepState;
-  step2: M02QuizStepState;
   step3: M02QuizStepState;
 }
 
@@ -73,140 +71,6 @@ const DEFAULT_GATE_READINESS: GateReadinessShape = {
 };
 
 const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
-  step1: [
-    {
-      id: "q1",
-      type: "single",
-      question: "What is the purpose of choosing a business use case first?",
-      options: [
-        "To make data readiness concrete around one process",
-        "To choose the final capstone project",
-        "To skip source mapping",
-        "To decide which AI model to buy",
-      ],
-      correct: "To make data readiness concrete around one process",
-      explanation:
-        "The use case gives the learner a practical lens for identifying the knowledge AI would need.",
-    },
-    {
-      id: "q2",
-      type: "single",
-      question: "Which source belongs most clearly in the internal knowledge layer?",
-      options: [
-        "A refund policy",
-        "A product brochure, FAQ, or customer record",
-        "An escalation rule",
-        "A risky edge-case ticket",
-      ],
-      correct: "A product brochure, FAQ, or customer record",
-      explanation:
-        "Internal knowledge is what the business knows about itself: products, records, documents, and operational facts.",
-    },
-    {
-      id: "q3",
-      type: "single",
-      question: "Which source belongs most clearly in the contextual knowledge layer?",
-      options: [
-        "A resolved ticket example",
-        "A product catalog",
-        "An approval, privacy, refund, or escalation rule",
-        "A list of customer complaints",
-      ],
-      correct: "An approval, privacy, refund, or escalation rule",
-      explanation:
-        "Contextual knowledge sets boundaries: policies, procedures, permissions, approvals, and escalation rules.",
-    },
-    {
-      id: "q4",
-      type: "single",
-      question: "Why does the task-specific layer matter?",
-      options: [
-        "It replaces policies with examples",
-        "It shows what good, ambiguous, risky, and incomplete work looks like",
-        "It stores the AI's chat history",
-        "It removes the need for retrieval tests",
-      ],
-      correct: "It shows what good, ambiguous, risky, and incomplete work looks like",
-      explanation:
-        "Task-specific examples help the future assistant learn how the work behaves in real operating cases.",
-    },
-    {
-      id: "q5",
-      type: "multi",
-      question: "Which layers feel most fragile in your business today?",
-      options: ["Internal knowledge", "Contextual rules", "Task-specific examples"],
-    },
-  ],
-  step2: [
-    {
-      id: "q1",
-      type: "single",
-      question: "What is the main job of Step 2?",
-      options: [
-        "Build the full knowledge base",
-        "Spot what would be missing, stale, ownerless, or risky before Build",
-        "Choose a model provider",
-        "Write final AI prompts",
-      ],
-      correct: "Spot what would be missing, stale, ownerless, or risky before Build",
-      explanation:
-        "Step 2 is diagnosis. The learner names gaps before HOI shows the complete blueprint in Step 3.",
-    },
-    {
-      id: "q2",
-      type: "single",
-      question: "A policy exists, but nobody owns review or updates. What is that?",
-      options: [
-        "Not a problem because the document exists",
-        "A readiness gap",
-        "A retrieval test",
-        "A task-specific example",
-      ],
-      correct: "A readiness gap",
-      explanation:
-        "AI-ready knowledge needs an accountable owner. A document without ownership can become stale or disputed.",
-    },
-    {
-      id: "q3",
-      type: "single",
-      question: "Which issue is a readiness gap for customer support AI?",
-      options: [
-        "The FAQ has a clear owner and review date",
-        "Escalation rules live only in messages and informal memory",
-        "The product catalog is current",
-        "Resolved tickets are labelled by outcome",
-      ],
-      correct: "Escalation rules live only in messages and informal memory",
-      explanation:
-        "Informal rules are hard to retrieve, audit, and enforce. They need to become governed knowledge.",
-    },
-    {
-      id: "q4",
-      type: "single",
-      question: "What happens to the gaps selected in Step 2?",
-      options: [
-        "They disappear after the quiz",
-        "They become open items in the Step 3 Governance Register",
-        "They replace the generated blueprint",
-        "They automatically block M02 completion",
-      ],
-      correct: "They become open items in the Step 3 Governance Register",
-      explanation:
-        "Step 2 gaps carry forward as practical governance actions before the process moves into Build.",
-    },
-    {
-      id: "q5",
-      type: "multi",
-      question: "Which readiness gaps are most likely in your business?",
-      options: [
-        "Missing owner",
-        "Stale source",
-        "Unclear access",
-        "Weak examples",
-        "Informal escalation rule",
-      ],
-    },
-  ],
   step3: [
     {
       id: "q1",
@@ -283,8 +147,6 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
 
 function createDefaultM02KnowledgeCheck(): M02KnowledgeCheckState {
   return {
-    step1: { answers: {}, checked: false },
-    step2: { answers: {}, checked: false },
     step3: { answers: {}, checked: false },
   };
 }
@@ -293,7 +155,7 @@ function normalizeM02KnowledgeCheck(value: unknown): M02KnowledgeCheckState {
   const defaults = createDefaultM02KnowledgeCheck();
   if (!value || typeof value !== "object" || Array.isArray(value)) return defaults;
   const source = value as Partial<Record<M02QuizStepKey, Partial<M02QuizStepState>>>;
-  return (["step1", "step2", "step3"] as const).reduce<M02KnowledgeCheckState>((acc, stepKey) => {
+  return (["step3"] as const).reduce<M02KnowledgeCheckState>((acc, stepKey) => {
     const stepValue = source[stepKey];
     acc[stepKey] = {
       answers:
@@ -392,8 +254,6 @@ export function M02Work() {
     [selectedCaseId],
   );
   const selectedBlueprint = getM02Blueprint(selectedCaseId);
-  const step1QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step1, knowledgeCheck.step1);
-  const step2QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step2, knowledgeCheck.step2);
   const step3QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step3, knowledgeCheck.step3);
 
   // Hydrate step from progress
@@ -648,7 +508,6 @@ export function M02Work() {
       gapsOut.setValue.mutate([]);
       persistKnowledgeCheck({
         ...knowledgeCheck,
-        step2: { answers: {}, checked: false },
         step3: { answers: {}, checked: false },
       });
     }
@@ -790,31 +649,11 @@ export function M02Work() {
             </div>
 
             <UseCaseLayerPreview useCase={selectedUseCase} />
-
-            <QuizSection
-              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
-              title="Five quick checks"
-              quiz={M02_STEP_QUIZZES.step1}
-              state={knowledgeCheck.step1}
-              status={step1QuizStatus}
-              namePrefix="m02-step1"
-              onAnswer={(questionId, option, multi) => setQuizAnswer("step1", questionId, option, multi)}
-              onCheck={() => checkQuiz("step1")}
-              onRetry={() => retryQuiz("step1")}
-            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && step1QuizStatus.quizPassed}
-        disabledReason={
-          !selectedUseCase
-            ? "Choose one business use case."
-            : !step1QuizStatus.allAnswered
-              ? "Answer all five checks before continuing."
-              : !step1QuizStatus.quizChecked
-                ? "Click Check answers before continuing."
-                : "You need at least 3 correct answers before continuing."
-        }
+        canContinue={!!selectedUseCase}
+        disabledReason={!selectedUseCase ? "Choose one business use case." : undefined}
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
@@ -920,30 +759,14 @@ export function M02Work() {
                 before Build.
               </p>
             </div>
-
-            <QuizSection
-              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
-              title="Five quick checks"
-              quiz={M02_STEP_QUIZZES.step2}
-              state={knowledgeCheck.step2}
-              status={step2QuizStatus}
-              namePrefix="m02-step2"
-              onAnswer={(questionId, option, multi) => setQuizAnswer("step2", questionId, option, multi)}
-              onCheck={() => checkQuiz("step2")}
-              onRetry={() => retryQuiz("step2")}
-            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && gapsSel.length > 0 && step2QuizStatus.quizPassed}
+        canContinue={!!selectedUseCase && gapsSel.length > 0}
         disabledReason={
           gapsSel.length === 0
             ? "Name at least one readiness gap before moving to the blueprint."
-            : !step2QuizStatus.allAnswered
-              ? "Answer all five checks before continuing."
-              : !step2QuizStatus.quizChecked
-                ? "Click Check answers before continuing."
-                : "You need at least 3 correct answers before continuing."
+            : undefined
         }
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}

@@ -114,4 +114,11 @@ export type AutomationPlaybookData = {
   platform: Platform;
   useCase: string;
   rungsCovered: number[];
+  vagueResults: VaguePromptTestResult;
+  promptContract: PromptContract;
+  skillSpec: SkillSpec;
+  rungWalkthrough: Record<number, LadderRungResult>;
+  reflectionAnswers: ReflectionAnswers;
+  readinessStatus: "PASS" | "PARTIAL" | "BLOCKED";
+  readinessExplanation: string;
 };

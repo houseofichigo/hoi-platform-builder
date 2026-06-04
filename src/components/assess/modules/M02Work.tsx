@@ -254,8 +254,6 @@ export function M02Work() {
     [selectedCaseId],
   );
   const selectedBlueprint = getM02Blueprint(selectedCaseId);
-  const step1QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step1, knowledgeCheck.step1);
-  const step2QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step2, knowledgeCheck.step2);
   const step3QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step3, knowledgeCheck.step3);
 
   // Hydrate step from progress
@@ -510,7 +508,6 @@ export function M02Work() {
       gapsOut.setValue.mutate([]);
       persistKnowledgeCheck({
         ...knowledgeCheck,
-        step2: { answers: {}, checked: false },
         step3: { answers: {}, checked: false },
       });
     }

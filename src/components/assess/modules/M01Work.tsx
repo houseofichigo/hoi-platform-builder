@@ -28,6 +28,9 @@ const TOKEN_QUIZ = [
       "A fragment of text that may be a word, part of a word, punctuation, whitespace, or a number piece",
       "A sentence the model processes at once",
     ],
+    correct: "A fragment of text that may be a word, part of a word, punctuation, whitespace, or a number piece",
+    explanation:
+      "Tokens are sub-word fragments produced by the tokenizer — not whole words, characters, or sentences.",
   },
   {
     id: "q2",
@@ -39,6 +42,9 @@ const TOKEN_QUIZ = [
       "It was trained on incorrect data",
       "It cannot count anything",
     ],
+    correct: "It sees the word as one or a few tokens, not as individual letters",
+    explanation:
+      "The model never sees individual characters — only the token chunks the tokenizer produced.",
   },
   {
     id: "q3",
@@ -50,6 +56,9 @@ const TOKEN_QUIZ = [
       "Token count does not matter for short tickets",
       "Only output tokens are billed",
     ],
+    correct: "French usually uses more tokens than English, and both input and output are billed",
+    explanation:
+      "Non-English text typically tokenizes into more pieces, and providers bill both input and output tokens.",
   },
   {
     id: "q4",
@@ -61,6 +70,10 @@ const TOKEN_QUIZ = [
       "Long numbers split into token chunks, so the model pattern-matches rather than verifies every digit",
       "Business identifiers are always absent from training data",
     ],
+    correct:
+      "Long numbers split into token chunks, so the model pattern-matches rather than verifies every digit",
+    explanation:
+      "Identifiers are tokenized into multi-digit chunks, so the model can't reliably reason character-by-character.",
   },
   {
     id: "q5",
@@ -72,6 +85,9 @@ const TOKEN_QUIZ = [
       "Send every document in full",
       "Use long, polite prompts",
     ],
+    correct: "Write in the desired output language and ask for concise responses by default",
+    explanation:
+      "Matching prompt language to output language and asking for brevity directly trims input and output tokens.",
   },
   {
     id: "q6",
@@ -94,6 +110,7 @@ interface TokenAwareness {
   acknowledged: boolean;
   exerciseChecks?: string[];
   quizAnswers?: Record<string, string | string[]>;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";

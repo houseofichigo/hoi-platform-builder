@@ -194,7 +194,7 @@ const SCEPTICISM_QUIZ = [
   },
 ] as const;
 
-const PARAMETER_QUIZ: readonly QuizQuestion[] = [
+const PARAMETER_QUIZ = [
   {
     id: "q1",
     type: "single",
@@ -205,6 +205,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "How predictable or varied the next-token selection is",
       "Which documents the model can access",
     ],
+    correct: "How predictable or varied the next-token selection is",
+    explanation:
+      "Temperature scales the probabilities — low values stay predictable, high values open the field to more varied next-token picks.",
   },
   {
     id: "q2",
@@ -216,6 +219,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "It controls the total number of output tokens",
       "It gives the model access to more sources",
     ],
+    correct: "It narrows or widens the probability pool of candidate next tokens",
+    explanation:
+      "Top-p (nucleus sampling) sets the cumulative probability cutoff for the candidate pool — it has nothing to do with training data or output length.",
   },
   {
     id: "q3",
@@ -227,6 +233,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Higher randomness",
       "Longer answers",
     ],
+    correct: "Consistent output, strict structure, validation, and review rules",
+    explanation:
+      "Repeatable workflows need determinism, structure, and review — creativity is the wrong target.",
   },
   {
     id: "q4",
@@ -238,6 +247,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Only top-k through settings",
       "Control only if they pay for a team plan",
     ],
+    correct: "No direct sampling controls; the main lever is the prompt",
+    explanation:
+      "Most chat UIs do not expose sampling knobs — your real control surface is the prompt itself.",
   },
   {
     id: "q5",
@@ -249,6 +261,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "Define allowed tools, trusted sources, human review, forbidden actions, and logs",
       "Ask it to be careful",
     ],
+    correct: "Define allowed tools, trusted sources, human review, forbidden actions, and logs",
+    explanation:
+      "Agent control is an operating model — scoped tools, sources, review, forbidden actions, and logs — not a creativity dial.",
   },
   {
     id: "q6",
@@ -260,6 +275,9 @@ const PARAMETER_QUIZ: readonly QuizQuestion[] = [
       "High temperature is always better for business writing",
       "Top-k is the most important AI setting",
     ],
+    correct: "Prompting, evidence, and guardrails are the durable control surface",
+    explanation:
+      "Sampling knobs change between vendors; prompting, evidence, and guardrails are the controls that travel with you.",
   },
 ] as const;
 
@@ -286,6 +304,7 @@ interface ParameterNotes {
   controlMatches: Record<string, string>;
   workSelections: string[];
   acknowledged: boolean;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";

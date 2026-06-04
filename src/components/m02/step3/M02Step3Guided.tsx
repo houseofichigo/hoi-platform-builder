@@ -40,7 +40,7 @@ interface M02Step3GuidedProps {
   step3State: M02Step3State | undefined;
   generatedBlueprint: M02GeneratedBlueprint | null | undefined;
   gateReadiness: GateReadinessShape;
-  onStep3StateChange: (state: M02Step3State) => void;
+  onStep3StateChange: (state: M02Step3State, options?: { immediate?: boolean }) => void;
   onGeneratedBlueprintChange: (blueprint: M02GeneratedBlueprint | null) => void;
   onGateReadinessChange: (patch: Partial<GateReadinessShape>) => void;
   onChangeUseCase: () => void;
@@ -169,8 +169,8 @@ export function M02Step3Guided({
     state.hardestComponents.length > 0 && !!state.status && state.statusExplanation.trim().length > 0;
   const canGenerate = allPanelsRevealed && reflectionsComplete;
 
-  const updateState = (patch: Partial<M02Step3State>) => {
-    onStep3StateChange({ ...state, ...patch, useCaseId: selectedUseCase.id });
+  const updateState = (patch: Partial<M02Step3State>, options?: { immediate?: boolean }) => {
+    onStep3StateChange({ ...state, ...patch, useCaseId: selectedUseCase.id }, options);
   };
 
   const revealPanel = (index: number) => {
@@ -215,11 +215,14 @@ export function M02Step3Guided({
     });
     onGeneratedBlueprintChange(generated);
     onGateReadinessChange({ status: state.status, explanation: state.statusExplanation });
-    onStep3StateChange({
-      ...state,
-      generated: true,
-      generatedAt: generated.generatedAt,
-    });
+    onStep3StateChange(
+      {
+        ...state,
+        generated: true,
+        generatedAt: generated.generatedAt,
+      },
+      { immediate: true },
+    );
     setLoadingIndex(-1);
     window.setTimeout(() => documentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
@@ -231,7 +234,7 @@ export function M02Step3Guided({
         onChangeUseCase={() => {
           const hasStep3Work = state.revealedPanels.some(Boolean) || state.generated || !!generatedBlueprint;
           if (!hasStep3Work || window.confirm("Changing use case will reset Step 3. Continue?")) {
-            onStep3StateChange(createDefaultM02Step3State(selectedUseCase.id));
+            onStep3StateChange(createDefaultM02Step3State(selectedUseCase.id), { immediate: true });
             onGeneratedBlueprintChange(null);
             onChangeUseCase();
           }

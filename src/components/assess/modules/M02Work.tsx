@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,6 +28,17 @@ const TOTAL_STEPS = 3;
 
 type StepNum = 1 | 2 | 3;
 type GateStatus = "pass" | "partial" | "blocked" | "";
+type M02QuizStepKey = "step1" | "step2" | "step3";
+type M02QuizAnswer = string | string[];
+
+interface M02QuizQuestion {
+  id: string;
+  type: "single" | "multi";
+  question: string;
+  options: readonly string[];
+  correct?: string;
+  explanation?: string;
+}
 
 interface TestSetShape {
   clean: number;
@@ -43,12 +54,285 @@ interface GateReadinessShape {
   explanation?: string;
 }
 
+interface M02QuizStepState {
+  answers: Record<string, M02QuizAnswer>;
+  checked: boolean;
+}
+
+interface M02KnowledgeCheckState {
+  step1: M02QuizStepState;
+  step2: M02QuizStepState;
+  step3: M02QuizStepState;
+}
+
 const DEFAULT_TEST_SET: TestSetShape = { clean: 5, edge: 5, adversarial: 5 };
 const DEFAULT_GATE_READINESS: GateReadinessShape = {
   status: "",
   checks: [],
   reasonCodes: [],
 };
+
+const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
+  step1: [
+    {
+      id: "q1",
+      type: "single",
+      question: "What is the purpose of choosing a business use case first?",
+      options: [
+        "To make data readiness concrete around one process",
+        "To choose the final capstone project",
+        "To skip source mapping",
+        "To decide which AI model to buy",
+      ],
+      correct: "To make data readiness concrete around one process",
+      explanation:
+        "The use case gives the learner a practical lens for identifying the knowledge AI would need.",
+    },
+    {
+      id: "q2",
+      type: "single",
+      question: "Which source belongs most clearly in the internal knowledge layer?",
+      options: [
+        "A refund policy",
+        "A product brochure, FAQ, or customer record",
+        "An escalation rule",
+        "A risky edge-case ticket",
+      ],
+      correct: "A product brochure, FAQ, or customer record",
+      explanation:
+        "Internal knowledge is what the business knows about itself: products, records, documents, and operational facts.",
+    },
+    {
+      id: "q3",
+      type: "single",
+      question: "Which source belongs most clearly in the contextual knowledge layer?",
+      options: [
+        "A resolved ticket example",
+        "A product catalog",
+        "An approval, privacy, refund, or escalation rule",
+        "A list of customer complaints",
+      ],
+      correct: "An approval, privacy, refund, or escalation rule",
+      explanation:
+        "Contextual knowledge sets boundaries: policies, procedures, permissions, approvals, and escalation rules.",
+    },
+    {
+      id: "q4",
+      type: "single",
+      question: "Why does the task-specific layer matter?",
+      options: [
+        "It replaces policies with examples",
+        "It shows what good, ambiguous, risky, and incomplete work looks like",
+        "It stores the AI's chat history",
+        "It removes the need for retrieval tests",
+      ],
+      correct: "It shows what good, ambiguous, risky, and incomplete work looks like",
+      explanation:
+        "Task-specific examples help the future assistant learn how the work behaves in real operating cases.",
+    },
+    {
+      id: "q5",
+      type: "multi",
+      question: "Which layers feel most fragile in your business today?",
+      options: ["Internal knowledge", "Contextual rules", "Task-specific examples"],
+    },
+  ],
+  step2: [
+    {
+      id: "q1",
+      type: "single",
+      question: "What is the main job of Step 2?",
+      options: [
+        "Build the full knowledge base",
+        "Spot what would be missing, stale, ownerless, or risky before Build",
+        "Choose a model provider",
+        "Write final AI prompts",
+      ],
+      correct: "Spot what would be missing, stale, ownerless, or risky before Build",
+      explanation:
+        "Step 2 is diagnosis. The learner names gaps before HOI shows the complete blueprint in Step 3.",
+    },
+    {
+      id: "q2",
+      type: "single",
+      question: "A policy exists, but nobody owns review or updates. What is that?",
+      options: [
+        "Not a problem because the document exists",
+        "A readiness gap",
+        "A retrieval test",
+        "A task-specific example",
+      ],
+      correct: "A readiness gap",
+      explanation:
+        "AI-ready knowledge needs an accountable owner. A document without ownership can become stale or disputed.",
+    },
+    {
+      id: "q3",
+      type: "single",
+      question: "Which issue is a readiness gap for customer support AI?",
+      options: [
+        "The FAQ has a clear owner and review date",
+        "Escalation rules live only in messages and informal memory",
+        "The product catalog is current",
+        "Resolved tickets are labelled by outcome",
+      ],
+      correct: "Escalation rules live only in messages and informal memory",
+      explanation:
+        "Informal rules are hard to retrieve, audit, and enforce. They need to become governed knowledge.",
+    },
+    {
+      id: "q4",
+      type: "single",
+      question: "What happens to the gaps selected in Step 2?",
+      options: [
+        "They disappear after the quiz",
+        "They become open items in the Step 3 Governance Register",
+        "They replace the generated blueprint",
+        "They automatically block M02 completion",
+      ],
+      correct: "They become open items in the Step 3 Governance Register",
+      explanation:
+        "Step 2 gaps carry forward as practical governance actions before the process moves into Build.",
+    },
+    {
+      id: "q5",
+      type: "multi",
+      question: "Which readiness gaps are most likely in your business?",
+      options: [
+        "Missing owner",
+        "Stale source",
+        "Unclear access",
+        "Weak examples",
+        "Informal escalation rule",
+      ],
+    },
+  ],
+  step3: [
+    {
+      id: "q1",
+      type: "single",
+      question: "What is an operating knowledge base blueprint?",
+      options: [
+        "A folder of documents for the AI to read",
+        "A structured spec showing entries, rules, tests, governance, and AI-facing retrieval instructions",
+        "A list of model parameters",
+        "A final production database",
+      ],
+      correct:
+        "A structured spec showing entries, rules, tests, governance, and AI-facing retrieval instructions",
+      explanation:
+        "The M02 deliverable is an operational blueprint your team can use before building a real assistant.",
+    },
+    {
+      id: "q2",
+      type: "single",
+      question: "Why do knowledge entries need metadata?",
+      options: [
+        "To make the document look more complete",
+        "To identify source, owner, layer, and allowed use",
+        "To reduce token costs",
+        "To replace human review",
+      ],
+      correct: "To identify source, owner, layer, and allowed use",
+      explanation:
+        "Metadata makes each entry governable and auditable instead of just another loose paragraph.",
+    },
+    {
+      id: "q3",
+      type: "single",
+      question: "What do lineage and source precedence control?",
+      options: [
+        "Which source supports an answer and which source wins when sources conflict",
+        "How creative the model should be",
+        "Which employee writes the prompt",
+        "How many documents fit in the context window",
+      ],
+      correct: "Which source supports an answer and which source wins when sources conflict",
+      explanation:
+        "Lineage creates traceability. Precedence prevents source conflicts from turning into confident contradictions.",
+    },
+    {
+      id: "q4",
+      type: "single",
+      question: "What makes a retrieval test useful?",
+      options: [
+        "It is a broad question the AI can answer however it wants",
+        "It includes a question, expected entry, expected source, and expected behavior",
+        "It checks whether the AI sounds confident",
+        "It is only run after deployment",
+      ],
+      correct: "It includes a question, expected entry, expected source, and expected behavior",
+      explanation:
+        "A retrieval test is provable because the expected evidence and behavior are defined in advance.",
+    },
+    {
+      id: "q5",
+      type: "multi",
+      question: "Which blueprint components would you want reviewed before Build?",
+      options: [
+        "Data map",
+        "Knowledge entries",
+        "Metadata",
+        "Lineage and precedence",
+        "Access and sensitivity",
+        "Retrieval tests",
+      ],
+    },
+  ],
+};
+
+function createDefaultM02KnowledgeCheck(): M02KnowledgeCheckState {
+  return {
+    step1: { answers: {}, checked: false },
+    step2: { answers: {}, checked: false },
+    step3: { answers: {}, checked: false },
+  };
+}
+
+function normalizeM02KnowledgeCheck(value: unknown): M02KnowledgeCheckState {
+  const defaults = createDefaultM02KnowledgeCheck();
+  if (!value || typeof value !== "object" || Array.isArray(value)) return defaults;
+  const source = value as Partial<Record<M02QuizStepKey, Partial<M02QuizStepState>>>;
+  return (["step1", "step2", "step3"] as const).reduce<M02KnowledgeCheckState>((acc, stepKey) => {
+    const stepValue = source[stepKey];
+    acc[stepKey] = {
+      answers:
+        stepValue?.answers && typeof stepValue.answers === "object" && !Array.isArray(stepValue.answers)
+          ? stepValue.answers
+          : {},
+      checked: !!stepValue?.checked,
+    };
+    return acc;
+  }, defaults);
+}
+
+function getM02QuizStatus(
+  quiz: readonly M02QuizQuestion[],
+  state: M02QuizStepState,
+) {
+  const answers = state.answers ?? {};
+  const gradableQuestions = quiz.filter((question) => !!question.correct);
+  const allAnswered = quiz.every((question) => {
+    const value = answers[question.id];
+    return question.type === "multi"
+      ? Array.isArray(value) && value.length > 0
+      : typeof value === "string" && value.length > 0;
+  });
+  const correctCount = gradableQuestions.reduce(
+    (count, question) => (answers[question.id] === question.correct ? count + 1 : count),
+    0,
+  );
+  const passThreshold = Math.min(3, gradableQuestions.length);
+  const quizPassed = allAnswered && state.checked && correctCount >= passThreshold;
+  return {
+    allAnswered,
+    correctCount,
+    gradableCount: gradableQuestions.length,
+    passThreshold,
+    quizChecked: state.checked,
+    quizPassed,
+  };
+}
 
 export function M02Work() {
   const { user } = useAuth();
@@ -67,6 +351,7 @@ export function M02Work() {
   const gateReadinessOut = useAssessOutput<GateReadinessShape>("m02.gate1_readiness");
   const step3StateOut = useAssessOutput<M02Step3State>("m02.step3_state");
   const kbBlueprintOut = useAssessOutput<M02GeneratedBlueprint | null>("m02.kb_blueprint");
+  const knowledgeCheckOut = useAssessOutput<M02KnowledgeCheckState>("m02.knowledge_check");
 
   const [step, setStep] = useState<StepNum>(1);
   const [selectedCaseId, setSelectedCaseId] = useState(M02_DEFAULT_USE_CASE_ID);
@@ -78,7 +363,14 @@ export function M02Work() {
   const [retrievalTestSel, setRetrievalTestSel] = useState<string[]>([]);
   const [gateReadiness, setGateReadiness] =
     useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
+  const [knowledgeCheck, setKnowledgeCheck] =
+    useState<M02KnowledgeCheckState>(() => createDefaultM02KnowledgeCheck());
+  const [step3DraftState, setStep3DraftState] =
+    useState<M02Step3State>(() => createDefaultM02Step3State(M02_DEFAULT_USE_CASE_ID));
+  const [kbBlueprintDraft, setKbBlueprintDraft] =
+    useState<M02GeneratedBlueprint | null>(null);
   const [customGap, setCustomGap] = useState("");
+  const step3SaveTimerRef = useRef<number | null>(null);
 
   const [hydrated, setHydrated] = useState({
     step: false,
@@ -90,6 +382,9 @@ export function M02Work() {
     knowledgeEntries: false,
     retrievalTests: false,
     gateReadiness: false,
+    knowledgeCheck: false,
+    step3State: false,
+    kbBlueprint: false,
   });
 
   const selectedUseCase = useMemo(
@@ -97,6 +392,9 @@ export function M02Work() {
     [selectedCaseId],
   );
   const selectedBlueprint = getM02Blueprint(selectedCaseId);
+  const step1QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step1, knowledgeCheck.step1);
+  const step2QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step2, knowledgeCheck.step2);
+  const step3QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step3, knowledgeCheck.step3);
 
   // Hydrate step from progress
   useEffect(() => {
@@ -220,25 +518,139 @@ export function M02Work() {
     setHydrated((h) => ({ ...h, gateReadiness: true }));
   }, [hydrated.gateReadiness, gateReadinessOut.isLoading, gateReadinessOut.value]);
 
+  useEffect(() => {
+    if (hydrated.knowledgeCheck || knowledgeCheckOut.isLoading) return;
+    setKnowledgeCheck(normalizeM02KnowledgeCheck(knowledgeCheckOut.value));
+    setHydrated((h) => ({ ...h, knowledgeCheck: true }));
+  }, [hydrated.knowledgeCheck, knowledgeCheckOut.isLoading, knowledgeCheckOut.value]);
+
+  useEffect(() => {
+    if (hydrated.step3State || !hydrated.selectedCase || step3StateOut.isLoading) return;
+    const saved = step3StateOut.value;
+    if (saved?.useCaseId === selectedCaseId) {
+      setStep3DraftState(saved);
+    } else {
+      setStep3DraftState(createDefaultM02Step3State(selectedCaseId));
+    }
+    setHydrated((h) => ({ ...h, step3State: true }));
+  }, [
+    hydrated.step3State,
+    hydrated.selectedCase,
+    selectedCaseId,
+    step3StateOut.isLoading,
+    step3StateOut.value,
+  ]);
+
+  useEffect(() => {
+    if (hydrated.kbBlueprint || !hydrated.selectedCase || kbBlueprintOut.isLoading) return;
+    const saved = kbBlueprintOut.value;
+    setKbBlueprintDraft(saved?.useCaseId === selectedCaseId ? saved : null);
+    setHydrated((h) => ({ ...h, kbBlueprint: true }));
+  }, [
+    hydrated.kbBlueprint,
+    hydrated.selectedCase,
+    selectedCaseId,
+    kbBlueprintOut.isLoading,
+    kbBlueprintOut.value,
+  ]);
+
+  useEffect(() => {
+    return () => {
+      if (step3SaveTimerRef.current) window.clearTimeout(step3SaveTimerRef.current);
+    };
+  }, []);
+
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
+
+  const persistKnowledgeCheck = (next: M02KnowledgeCheckState) => {
+    setKnowledgeCheck(next);
+    knowledgeCheckOut.setValue.mutate(next);
+  };
+
+  const setQuizAnswer = (stepKey: M02QuizStepKey, questionId: string, option: string, multi: boolean) => {
+    const stepState = knowledgeCheck[stepKey] ?? { answers: {}, checked: false };
+    const currentValue = stepState.answers[questionId];
+    const nextValue = multi
+      ? toggle(Array.isArray(currentValue) ? currentValue : [], option)
+      : option;
+    persistKnowledgeCheck({
+      ...knowledgeCheck,
+      [stepKey]: {
+        answers: {
+          ...stepState.answers,
+          [questionId]: nextValue,
+        },
+        checked: false,
+      },
+    });
+  };
+
+  const checkQuiz = (stepKey: M02QuizStepKey) => {
+    persistKnowledgeCheck({
+      ...knowledgeCheck,
+      [stepKey]: {
+        ...knowledgeCheck[stepKey],
+        checked: true,
+      },
+    });
+  };
+
+  const retryQuiz = (stepKey: M02QuizStepKey) => {
+    persistKnowledgeCheck({
+      ...knowledgeCheck,
+      [stepKey]: {
+        ...knowledgeCheck[stepKey],
+        checked: false,
+      },
+    });
+  };
+
+  const persistStep3DraftState = (
+    next: M02Step3State,
+    options: { immediate?: boolean } = {},
+  ) => {
+    setStep3DraftState(next);
+    if (step3SaveTimerRef.current) {
+      window.clearTimeout(step3SaveTimerRef.current);
+      step3SaveTimerRef.current = null;
+    }
+    if (options.immediate) {
+      step3StateOut.setValue.mutate(next);
+      return;
+    }
+    step3SaveTimerRef.current = window.setTimeout(() => {
+      step3StateOut.setValue.mutate(next);
+      step3SaveTimerRef.current = null;
+    }, 700);
+  };
+
+  const persistGeneratedBlueprint = (next: M02GeneratedBlueprint | null) => {
+    setKbBlueprintDraft(next);
+    if (next) kbBlueprintOut.setValue.mutate(next);
+  };
 
   const selectUseCase = (caseId: string) => {
     if (caseId !== selectedCaseId) {
       const hasStep3Work =
-        !!kbBlueprintOut.value ||
-        !!step3StateOut.value?.generated ||
-        !!step3StateOut.value?.revealedPanels?.some(Boolean);
+        !!kbBlueprintDraft ||
+        !!step3DraftState.generated ||
+        !!step3DraftState.revealedPanels?.some(Boolean);
       if (hasStep3Work && !window.confirm("Changing use case will reset Step 3. Continue?")) {
         return;
       }
       const resetState = createDefaultM02Step3State(caseId);
-      step3StateOut.setValue.mutate(resetState);
-      kbBlueprintOut.setValue.mutate(null);
+      persistStep3DraftState(resetState, { immediate: true });
+      setKbBlueprintDraft(null);
       setGateReadiness(DEFAULT_GATE_READINESS);
       gateReadinessOut.setValue.mutate(DEFAULT_GATE_READINESS);
       setGapsSel([]);
       gapsOut.setValue.mutate([]);
+      persistKnowledgeCheck({
+        ...knowledgeCheck,
+        step2: { answers: {}, checked: false },
+        step3: { answers: {}, checked: false },
+      });
     }
     setSelectedCaseId(caseId);
     selectedCaseOut.setValue.mutate(caseId);
@@ -274,6 +686,9 @@ export function M02Work() {
     await knowledgeEntriesOut.setValue.mutateAsync(knowledgeEntrySel);
     await retrievalTestsOut.setValue.mutateAsync(retrievalTestSel);
     await gateReadinessOut.setValue.mutateAsync(gateReadiness);
+    await knowledgeCheckOut.setValue.mutateAsync(knowledgeCheck);
+    await step3StateOut.setValue.mutateAsync(step3DraftState);
+    if (kbBlueprintDraft) await kbBlueprintOut.setValue.mutateAsync(kbBlueprintDraft);
     const { error } = await supabase.from("assess_progress").upsert(
       {
         workspace_id: workspace.id,
@@ -375,11 +790,31 @@ export function M02Work() {
             </div>
 
             <UseCaseLayerPreview useCase={selectedUseCase} />
+
+            <QuizSection
+              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
+              title="Five quick checks"
+              quiz={M02_STEP_QUIZZES.step1}
+              state={knowledgeCheck.step1}
+              status={step1QuizStatus}
+              namePrefix="m02-step1"
+              onAnswer={(questionId, option, multi) => setQuizAnswer("step1", questionId, option, multi)}
+              onCheck={() => checkQuiz("step1")}
+              onRetry={() => retryQuiz("step1")}
+            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase}
-        disabledReason="Choose one business use case."
+        canContinue={!!selectedUseCase && step1QuizStatus.quizPassed}
+        disabledReason={
+          !selectedUseCase
+            ? "Choose one business use case."
+            : !step1QuizStatus.allAnswered
+              ? "Answer all five checks before continuing."
+              : !step1QuizStatus.quizChecked
+                ? "Click Check answers before continuing."
+                : "You need at least 3 correct answers before continuing."
+        }
         nextLabel={s.nextLabel}
         onContinue={async () => {
           await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
@@ -485,11 +920,31 @@ export function M02Work() {
                 before Build.
               </p>
             </div>
+
+            <QuizSection
+              eyebrow="PART C · CHECK YOUR UNDERSTANDING"
+              title="Five quick checks"
+              quiz={M02_STEP_QUIZZES.step2}
+              state={knowledgeCheck.step2}
+              status={step2QuizStatus}
+              namePrefix="m02-step2"
+              onAnswer={(questionId, option, multi) => setQuizAnswer("step2", questionId, option, multi)}
+              onCheck={() => checkQuiz("step2")}
+              onRetry={() => retryQuiz("step2")}
+            />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && gapsSel.length > 0}
-        disabledReason="Name at least one readiness gap before moving to the blueprint."
+        canContinue={!!selectedUseCase && gapsSel.length > 0 && step2QuizStatus.quizPassed}
+        disabledReason={
+          gapsSel.length === 0
+            ? "Name at least one readiness gap before moving to the blueprint."
+            : !step2QuizStatus.allAnswered
+              ? "Answer all five checks before continuing."
+              : !step2QuizStatus.quizChecked
+                ? "Click Check answers before continuing."
+                : "You need at least 3 correct answers before continuing."
+        }
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}
@@ -504,7 +959,7 @@ export function M02Work() {
     setGateReadiness(next);
     gateReadinessOut.setValue.mutate(next);
   };
-  const canCompleteM02 = !!kbBlueprintOut.value && !!step3StateOut.value?.generated;
+  const canCompleteM02 = !!kbBlueprintDraft && kbBlueprintDraft.useCaseId === selectedCaseId && step3DraftState.generated;
 
   return (
     <Step
@@ -519,21 +974,43 @@ export function M02Work() {
         </ul>
       }
       yourVersion={
-        <M02Step3Guided
-          selectedUseCase={selectedUseCase}
-          namedGaps={gapsSel}
-          step3State={step3StateOut.value}
-          generatedBlueprint={kbBlueprintOut.value}
-          gateReadiness={gateReadiness}
-          onStep3StateChange={(next) => step3StateOut.setValue.mutate(next)}
-          onGeneratedBlueprintChange={(next) => kbBlueprintOut.setValue.mutate(next)}
-          onGateReadinessChange={updateGateReadiness}
-          onChangeUseCase={() => goToStep(1)}
-        />
+        <div className="space-y-8">
+          <M02Step3Guided
+            selectedUseCase={selectedUseCase}
+            namedGaps={gapsSel}
+            step3State={step3DraftState}
+            generatedBlueprint={kbBlueprintDraft?.useCaseId === selectedCaseId ? kbBlueprintDraft : null}
+            gateReadiness={gateReadiness}
+            onStep3StateChange={persistStep3DraftState}
+            onGeneratedBlueprintChange={persistGeneratedBlueprint}
+            onGateReadinessChange={updateGateReadiness}
+            onChangeUseCase={() => goToStep(1)}
+          />
+
+          <QuizSection
+            eyebrow="PART C · CHECK YOUR UNDERSTANDING"
+            title="Five quick checks"
+            quiz={M02_STEP_QUIZZES.step3}
+            state={knowledgeCheck.step3}
+            status={step3QuizStatus}
+            namePrefix="m02-step3"
+            onAnswer={(questionId, option, multi) => setQuizAnswer("step3", questionId, option, multi)}
+            onCheck={() => checkQuiz("step3")}
+            onRetry={() => retryQuiz("step3")}
+          />
+        </div>
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-      canContinue={canCompleteM02}
-      disabledReason="Reveal all seven components, answer both reflections, and generate the blueprint."
+      canContinue={canCompleteM02 && step3QuizStatus.quizPassed}
+      disabledReason={
+        !canCompleteM02
+          ? "Reveal all seven components, answer both reflections, and generate the blueprint."
+          : !step3QuizStatus.allAnswered
+            ? "Answer all five checks before completing M02."
+            : !step3QuizStatus.quizChecked
+              ? "Click Check answers before completing M02."
+              : "You need at least 3 correct answers before completing M02."
+      }
       nextLabel="Complete M02"
       onBack={() => goToStep(2)}
       onContinue={completeM02}
@@ -749,6 +1226,164 @@ function ChecklistSection({
       </ul>
       <p className="text-[12px] italic text-slate">{footer}</p>
     </div>
+  );
+}
+
+function QuizSection({
+  eyebrow,
+  title,
+  quiz,
+  state,
+  status,
+  namePrefix,
+  onAnswer,
+  onCheck,
+  onRetry,
+}: {
+  eyebrow: string;
+  title: string;
+  quiz: readonly M02QuizQuestion[];
+  state: M02QuizStepState;
+  status: ReturnType<typeof getM02QuizStatus>;
+  namePrefix: string;
+  onAnswer: (questionId: string, option: string, multi: boolean) => void;
+  onCheck: () => void;
+  onRetry: () => void;
+}) {
+  const answers = state.answers ?? {};
+  return (
+    <section className="border-t border-chalk pt-6 space-y-4">
+      <div>
+        <p className="eyebrow-muted">{eyebrow}</p>
+        <h4 className="mt-2 font-display text-xl text-navy">{title}</h4>
+        <p className="mt-1 text-[13px] leading-relaxed text-slate">
+          Four questions are checked. The final reflection has no single right answer.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {quiz.map((question, index) => {
+          const current = answers[question.id];
+          const multi = question.type === "multi";
+          const gradable = !!question.correct;
+          const isAnswered = multi
+            ? Array.isArray(current) && current.length > 0
+            : typeof current === "string" && current.length > 0;
+          const showGrading = status.quizChecked && gradable && isAnswered;
+          const isCorrect = showGrading && current === question.correct;
+
+          return (
+            <div
+              key={question.id}
+              className={`rounded-md border bg-paper p-4 ${
+                showGrading
+                  ? isCorrect
+                    ? "border-emerald-500/60 bg-emerald-500/5"
+                    : "border-danger/40 bg-danger/5"
+                  : "border-chalk"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[14px] font-semibold text-navy">
+                  Q{index + 1}. {question.question}
+                </p>
+                {showGrading && (
+                  <span
+                    className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
+                      isCorrect ? "text-emerald-700" : "text-danger"
+                    }`}
+                  >
+                    {isCorrect ? "Correct" : "Incorrect"}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {question.options.map((option) => {
+                  const checked = multi
+                    ? Array.isArray(current) && current.includes(option)
+                    : current === option;
+                  const isOptionCorrect = gradable && option === question.correct;
+                  const isOptionWrongPick = showGrading && checked && !isCorrect;
+                  const rowClass = showGrading
+                    ? isOptionCorrect
+                      ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
+                      : isOptionWrongPick
+                        ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
+                        : "rounded-md border border-transparent px-2 py-1"
+                    : "";
+                  return (
+                    <label
+                      key={option}
+                      className={`flex items-start gap-2 text-[14px] text-graphite ${
+                        status.quizChecked ? "cursor-default" : "cursor-pointer"
+                      } ${rowClass}`}
+                    >
+                      <input
+                        type={multi ? "checkbox" : "radio"}
+                        name={`${namePrefix}-${question.id}`}
+                        checked={checked}
+                        onChange={() => onAnswer(question.id, option, multi)}
+                        disabled={status.quizChecked}
+                        className="mt-1 h-4 w-4 accent-terracotta"
+                      />
+                      <span>{option}</span>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {showGrading && question.explanation && (
+                <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                  <span className="font-semibold text-navy">Why: </span>
+                  {question.explanation}
+                </p>
+              )}
+              {status.quizChecked && multi && (
+                <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                  This is a reflection question. There is no single right answer.
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+        {status.quizChecked ? (
+          <>
+            <p className="text-[14px] text-navy">
+              You got <span className="font-semibold">{status.correctCount} of {status.gradableCount}</span>{" "}
+              checked questions correct.{" "}
+              {status.quizPassed
+                ? "You can continue."
+                : `You need at least ${status.passThreshold} correct. Adjust your answers and check again.`}
+            </p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
+            >
+              Try again
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-[13px] text-slate">
+              Answer all five, then check your answers before moving on.
+            </p>
+            <button
+              type="button"
+              onClick={onCheck}
+              disabled={!status.allAnswered}
+              className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-navy disabled:cursor-not-allowed disabled:bg-slate/40"
+            >
+              Check answers
+            </button>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 

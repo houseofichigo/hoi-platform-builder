@@ -28,6 +28,9 @@ const TOKEN_QUIZ = [
       "A fragment of text that may be a word, part of a word, punctuation, whitespace, or a number piece",
       "A sentence the model processes at once",
     ],
+    correct: "A fragment of text that may be a word, part of a word, punctuation, whitespace, or a number piece",
+    explanation:
+      "Tokens are sub-word fragments produced by the tokenizer — not whole words, characters, or sentences.",
   },
   {
     id: "q2",
@@ -39,6 +42,9 @@ const TOKEN_QUIZ = [
       "It was trained on incorrect data",
       "It cannot count anything",
     ],
+    correct: "It sees the word as one or a few tokens, not as individual letters",
+    explanation:
+      "The model never sees individual characters — only the token chunks the tokenizer produced.",
   },
   {
     id: "q3",
@@ -50,6 +56,9 @@ const TOKEN_QUIZ = [
       "Token count does not matter for short tickets",
       "Only output tokens are billed",
     ],
+    correct: "French usually uses more tokens than English, and both input and output are billed",
+    explanation:
+      "Non-English text typically tokenizes into more pieces, and providers bill both input and output tokens.",
   },
   {
     id: "q4",
@@ -61,6 +70,10 @@ const TOKEN_QUIZ = [
       "Long numbers split into token chunks, so the model pattern-matches rather than verifies every digit",
       "Business identifiers are always absent from training data",
     ],
+    correct:
+      "Long numbers split into token chunks, so the model pattern-matches rather than verifies every digit",
+    explanation:
+      "Identifiers are tokenized into multi-digit chunks, so the model can't reliably reason character-by-character.",
   },
   {
     id: "q5",
@@ -72,6 +85,9 @@ const TOKEN_QUIZ = [
       "Send every document in full",
       "Use long, polite prompts",
     ],
+    correct: "Write in the desired output language and ask for concise responses by default",
+    explanation:
+      "Matching prompt language to output language and asking for brevity directly trims input and output tokens.",
   },
   {
     id: "q6",
@@ -94,6 +110,7 @@ interface TokenAwareness {
   acknowledged: boolean;
   exerciseChecks?: string[];
   quizAnswers?: Record<string, string | string[]>;
+  quizChecked?: boolean;
 }
 
 const CHAPTER_LABEL = "PHASE 01 · M01 · LLM FUNDAMENTALS";
@@ -204,6 +221,7 @@ export function M01Work() {
           v.quizAnswers && typeof v.quizAnswers === "object" && !Array.isArray(v.quizAnswers)
             ? v.quizAnswers
             : {},
+        quizChecked: !!v.quizChecked,
       });
     }
     setHydratedToken(true);
@@ -241,6 +259,8 @@ export function M01Work() {
         ...current,
         [questionId]: nextValue,
       },
+      // Editing answers re-opens the quiz so the learner has to confirm again.
+      quizChecked: false,
     });
   };
 
@@ -288,14 +308,43 @@ export function M01Work() {
     const requiredExerciseIds = s.exercises.map((exercise) => exercise.id);
     const checkedExercises = tokenAwareness.exerciseChecks ?? [];
     const quizAnswers = tokenAwareness.quizAnswers ?? {};
-    const quizComplete = TOKEN_QUIZ.every((question) => {
+    const allAnswered = TOKEN_QUIZ.every((question) => {
       const value = quizAnswers[question.id];
       return question.type === "multi"
         ? Array.isArray(value) && value.length > 0
         : typeof value === "string" && value.length > 0;
     });
+    const gradableQuestions = TOKEN_QUIZ.filter(
+      (q): q is typeof q & { correct: string } => q.type === "single" && "correct" in q,
+    );
+    const correctCount = gradableQuestions.reduce(
+      (acc, q) => (quizAnswers[q.id] === q.correct ? acc + 1 : acc),
+      0,
+    );
+    const passThreshold = 4;
+    const quizChecked = !!tokenAwareness.quizChecked;
+    const quizPassed = quizChecked && correctCount >= passThreshold;
     const exercisesComplete = requiredExerciseIds.every((id) => checkedExercises.includes(id));
-    const stepComplete = exercisesComplete && quizComplete && tokenAwareness.acknowledged;
+    const stepComplete = exercisesComplete && quizPassed && tokenAwareness.acknowledged;
+
+    const handleCheckAnswers = () => {
+      updateTokenAwareness({ ...tokenAwareness, quizChecked: true });
+    };
+    const handleRetryQuiz = () => {
+      updateTokenAwareness({ ...tokenAwareness, quizChecked: false });
+    };
+
+    const disabledReason = !exercisesComplete
+      ? "Complete the exercises, answer the quiz, and confirm the token lesson."
+      : !allAnswered
+        ? "Answer all six questions, then check your answers."
+        : !quizChecked
+          ? "Click Check answers to confirm your quiz responses."
+          : !quizPassed
+            ? "Review the highlighted answers and try again."
+            : !tokenAwareness.acknowledged
+              ? "Confirm the token lesson acknowledgement to continue."
+              : "Complete the exercises, answer the quiz, and confirm the token lesson.";
 
     return (
       <Step
@@ -421,26 +470,68 @@ export function M01Work() {
                 {TOKEN_QUIZ.map((question, index) => {
                   const current = quizAnswers[question.id];
                   const multi = question.type === "multi";
+                  const gradable = !multi && "correct" in question;
+                  const correctAnswer = gradable ? (question as { correct: string }).correct : null;
+                  const explanation = gradable
+                    ? (question as { explanation?: string }).explanation
+                    : null;
+                  const isAnswered = multi
+                    ? Array.isArray(current) && current.length > 0
+                    : typeof current === "string" && current.length > 0;
+                  const showGrading = quizChecked && gradable && isAnswered;
+                  const isCorrect = showGrading && current === correctAnswer;
                   return (
-                    <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
-                      <p className="text-[14px] font-semibold text-navy">
-                        Q{index + 1}. {question.question}
-                      </p>
+                    <div
+                      key={question.id}
+                      className={`rounded-md border bg-paper p-4 ${
+                        showGrading
+                          ? isCorrect
+                            ? "border-emerald-500/60 bg-emerald-500/5"
+                            : "border-danger/40 bg-danger/5"
+                          : "border-chalk"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-[14px] font-semibold text-navy">
+                          Q{index + 1}. {question.question}
+                        </p>
+                        {showGrading && (
+                          <span
+                            className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
+                              isCorrect ? "text-emerald-700" : "text-danger"
+                            }`}
+                          >
+                            {isCorrect ? "✓ Correct" : "✗ Incorrect"}
+                          </span>
+                        )}
+                      </div>
                       <div className="mt-3 space-y-2">
                         {question.options.map((option) => {
                           const checked = multi
                             ? Array.isArray(current) && current.includes(option)
                             : current === option;
+                          const isOptionCorrect = gradable && option === correctAnswer;
+                          const isOptionWrongPick = showGrading && checked && !isCorrect;
+                          const rowClass = showGrading
+                            ? isOptionCorrect
+                              ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
+                              : isOptionWrongPick
+                                ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
+                                : "rounded-md border border-transparent px-2 py-1"
+                            : "";
                           return (
                             <label
                               key={option}
-                              className="flex cursor-pointer items-start gap-2 text-[14px] text-graphite"
+                              className={`flex items-start gap-2 text-[14px] text-graphite ${
+                                quizChecked ? "cursor-default" : "cursor-pointer"
+                              } ${rowClass}`}
                             >
                               <input
                                 type={multi ? "checkbox" : "radio"}
                                 name={`m01-token-${question.id}`}
                                 checked={checked}
                                 onChange={() => setQuizAnswer(question.id, option, multi)}
+                                disabled={quizChecked}
                                 className="mt-1 h-4 w-4 accent-terracotta"
                               />
                               <span>{option}</span>
@@ -448,9 +539,55 @@ export function M01Work() {
                           );
                         })}
                       </div>
+                      {showGrading && explanation && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                          <span className="font-semibold text-navy">Why: </span>
+                          {explanation}
+                        </p>
+                      )}
+                      {quizChecked && multi && (
+                        <p className="mt-3 text-[12px] leading-relaxed text-slate">
+                          This is a reflection question — there is no single right answer.
+                        </p>
+                      )}
                     </div>
                   );
                 })}
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+                {quizChecked ? (
+                  <>
+                    <p className="text-[14px] text-navy">
+                      You got <span className="font-semibold">{correctCount} of {gradableQuestions.length}</span>{" "}
+                      correct.{" "}
+                      {quizPassed
+                        ? "Nice — you can continue."
+                        : `You need at least ${passThreshold} correct. Adjust your answers and check again.`}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleRetryQuiz}
+                      className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
+                    >
+                      Try again
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[13px] text-slate">
+                      Answer all six, then confirm to see which are correct before moving on.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleCheckAnswers}
+                      disabled={!allAnswered}
+                      className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-terracotta/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Check answers
+                    </button>
+                  </>
+                )}
               </div>
             </section>
 
@@ -475,7 +612,7 @@ export function M01Work() {
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
         canContinue={stepComplete}
-        disabledReason="Complete the exercises, answer the quiz, and confirm the token lesson."
+        disabledReason={disabledReason}
         nextLabel={s.nextLabel}
         onContinue={() => goToStep(2)}
       />

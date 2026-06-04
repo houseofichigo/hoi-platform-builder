@@ -1,29 +1,33 @@
-## Plan: Export Chapter 2 Content Brief as Markdown
+# M02: Consolidate to a single knowledge check on Step 3
 
-Generate a detailed markdown document covering the full Chapter 2 (M02 — Data Readiness & Knowledge Base Preparation) brief and save it as a downloadable artifact.
+## Goal
+Today M02 renders a separate quiz on each of the 3 steps. Keep only the Step 3 quiz (the last step) and remove the Step 1 and Step 2 quizzes, so learners do one knowledge check at the end of the module.
 
-### Steps
+## Scope
+Frontend-only change inside `src/components/assess/modules/M02Work.tsx`. No schema changes, no changes to other modules, no changes to the Step 3 Guided Build (`M02Step3Guided`) or the blueprint generator.
 
-1. Re-read `src/lib/assess/content/m02.ts` and `src/components/m03/.../M02Step3Guided.tsx` (and the blueprint builder) to make sure every section, framework list, panel, and output is captured verbatim where it matters (5 use cases, 3 knowledge layers, 5 required + 7 advanced metadata fields, 5 entry types, 5 retrieval test patterns, 12 Gate 1 checks, 8 reason codes, 7 guided panels, 5-section generated blueprint).
+## Changes
 
-2. Write a single markdown file to `/mnt/documents/chapter-02-brief.md` with this structure:
-   - Module Identity (title, default use case, bridge from M01, method note)
-   - **Part A — Course Overview**
-     - Use case selector
-     - Three knowledge layers
-     - Steps 1–3 walkthrough
-     - Reference frameworks (all enumerated lists)
-     - OCR worked-example notes
-   - **Part B — Assignment (Step 3 Guided Build)**
-     - The 7 sequential panels with what each captures
-     - Closing Decision Panel (readiness status + explanation)
-     - Generated Blueprint Output (5 sections) and PDF/Markdown artefact
-     - Gate 1 progression rule (PASS / PARTIAL / BLOCKED → M03)
-   - Quick-reference appendix tables (metadata fields, entry types, retrieval tests, reason codes)
+1. **Remove Step 1 and Step 2 quiz UI**
+   - Drop the quiz section currently rendered inside the Step 1 and Step 2 `<Step>` content.
+   - Remove the quiz from any "can continue" / disabled-reason logic on Steps 1 and 2, so progression depends only on the existing assignment outputs (sources / gaps), not on a quiz.
 
-3. Emit a `<presentation-artifact>` tag pointing to `chapter-02-brief.md` so the user can preview/download it.
+2. **Keep the Step 3 quiz as the single end-of-module knowledge check**
+   - Leave `M02_STEP_QUIZZES.step3` and its rendering on Step 3 intact.
+   - Step 3's existing gating (blueprint generated + Gate 1 readiness + quiz pass) remains, so the final quiz still acts as the module's knowledge check.
 
-### Out of scope
+3. **Trim dead code**
+   - Remove `M02_STEP_QUIZZES.step1` and `M02_STEP_QUIZZES.step2` entries.
+   - Remove `step1QuizStatus` and `step2QuizStatus` derivations and any references to them.
+   - Narrow `M02QuizStepKey` to just `"step3"` and simplify `M02KnowledgeCheckState` / `createDefaultM02KnowledgeCheck` / `normalizeM02KnowledgeCheck` to only track `step3`.
+   - Persisted `m02.knowledge_check` output continues to be written; `normalizeM02KnowledgeCheck` will safely ignore any legacy `step1`/`step2` fields from prior saves (backward compatible — no migration needed).
 
-- No app code, route, or UI changes.
-- No edits to the M02 content itself — this is a read-only export.
+## Out of scope
+- No changes to `M01`–`M12` other than M02.
+- No changes to assess output keys, completion artifacts, or gate logic.
+- No visual redesign of the Step 3 quiz itself.
+
+## Verification
+- Step 1 and Step 2 no longer show a "Knowledge check" block; Continue is enabled once their existing assignment inputs are filled.
+- Step 3 still shows the knowledge check and still requires passing it (alongside blueprint + Gate 1) to complete M02.
+- Reloading a workspace that previously answered Step 1/Step 2 quizzes does not error — legacy fields are ignored.

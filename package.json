@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "build:m03-assets": "node --experimental-strip-types src/scripts/generatePricingTracker.ts",
     "check:assess-outputs": "bun scripts/check-assess-output-keys.ts",
     "check:assess-boundaries": "bun scripts/check-assess-core-boundaries.ts",
     "check:build-outputs": "bun scripts/check-build-output-keys.ts",

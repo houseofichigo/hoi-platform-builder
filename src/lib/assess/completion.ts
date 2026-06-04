@@ -23,10 +23,15 @@ export const ARTIFACTS: ArtifactDef[] = [
       "m02.contextual_rules",
       "m02.test_set",
       "m02.gaps",
-      "m03.architecture",
-      "m03.ladder_understood",
-      "m03.prompts",
-      "m03.quality_checked",
+      "m03.platform",
+      "m03.use_case",
+      "m03.vague_prompt_test",
+      "m03.structured_prompt",
+      "m03.skill_spec",
+      "m03.ladder_walkthrough",
+      "m03.reflection_answers",
+      "m03.readiness_status",
+      "m03.automation_playbook",
     ],
   },
   {
@@ -109,6 +114,15 @@ export const GATES = [
  * rename) still reach artifact readiness without re-completing the module.
  */
 export const OUTPUT_KEY_ALIASES: Record<string, string[]> = {
+  "m03.platform": ["m03.architecture"],
+  "m03.use_case": ["m03.architecture"],
+  "m03.vague_prompt_test": ["m03.architecture"],
+  "m03.structured_prompt": ["m03.prompts"],
+  "m03.skill_spec": ["m03.prompts"],
+  "m03.ladder_walkthrough": ["m03.ladder_understood"],
+  "m03.reflection_answers": ["m03.quality_checked"],
+  "m03.readiness_status": ["m03.quality_checked"],
+  "m03.automation_playbook": ["m03.quality_checked"],
   "m05.surfaces": ["m05.prototype_scope"],
   // Walkthrough findings/notes are persisted inside the agent_requirements
   // payload by M05Work, so presence of agent_requirements satisfies walkthrough.

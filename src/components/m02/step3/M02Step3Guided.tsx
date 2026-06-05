@@ -3,12 +3,15 @@ import type { M02UseCase } from "@/lib/assess/content/course1";
 import {
   M02_BLUEPRINT_COMPONENTS,
   createDefaultM02Step3State,
+  normalizeM02Step3State,
+  type M02BlueprintC1,
+  type M02BlueprintC2,
+  type M02BlueprintC3,
   type M02BlueprintData,
   type M02GeneratedBlueprint,
   type M02Step3State,
 } from "@/data/m02/blueprintSchema";
 import { getM02Blueprint } from "@/data/m02/blueprints";
-import { AccessSensitivityPanel } from "./AccessSensitivityPanel";
 import { BlueprintDocument } from "./BlueprintDocument";
 import { BlueprintExportButton } from "./BlueprintExportButton";
 import {
@@ -17,13 +20,7 @@ import {
 } from "./BlueprintGenerator";
 import { ClosingDecisionPanel } from "./ClosingDecisionPanel";
 import { ComponentRevealPanel } from "./ComponentRevealPanel";
-import { DataMapPanel } from "./DataMapPanel";
-import { EntriesPanel } from "./EntriesPanel";
-import { KnowledgeLayersPanel } from "./KnowledgeLayersPanel";
-import { LineagePanel } from "./LineagePanel";
-import { MetadataPanel } from "./MetadataPanel";
 import { ProgressIndicator } from "./ProgressIndicator";
-import { RetrievalTestsPanel } from "./RetrievalTestsPanel";
 
 type GateStatus = "pass" | "partial" | "blocked" | "";
 
@@ -48,74 +45,34 @@ interface M02Step3GuidedProps {
 
 const PANEL_DEFINITIONS = [
   {
-    title: "Data Map (the visibility layer)",
+    title: "C1 - Data Map",
     whatItIs:
-      "A data map shows where the information for a process actually lives: systems, documents, owners, and refresh cadence. It is the business visibility layer before anything becomes AI-ready.",
+      "C1 turns a raw document, source, or system record into a named KB entry with owner, source location, metadata, sensitivity, and an entry ID.",
     whyItMatters:
-      "Without it, teams ask AI to use knowledge that no one can locate, own, or refresh. The predictable failure is stale or untraceable answers.",
-    revealLabel: "the data map",
-    render: (blueprint: M02BlueprintData) => <DataMapPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.dataMap.whatToNotice,
+      "Without C1, the AI sees a document pile. With C1, it sees source-backed knowledge that can be retrieved and governed.",
+    revealLabel: "C1",
+    render: (blueprint: M02BlueprintData) => <C1Panel component={blueprint.components.c1} />,
+    notice: (blueprint: M02BlueprintData) => blueprint.components.c1.whatToNotice,
   },
   {
-    title: "The Three Knowledge Layers (the structural layer)",
+    title: "C2 - Trust + Safety",
     whatItIs:
-      "The same sources are organised by job: internal facts, contextual rules, and task-specific examples. The layers prevent one messy pile of documents from pretending to be a knowledge base.",
+      "C2 adds the rules around the entry: source precedence, access level, allowed AI behavior, and escalation boundaries.",
     whyItMatters:
-      "Without the layers, the AI cannot tell the difference between a fact, a policy, and an example. The predictable failure is using yesterday's example as if it were today's rule.",
-    revealLabel: "the three layers",
-    render: (blueprint: M02BlueprintData) => <KnowledgeLayersPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.knowledgeLayers.whatToNotice,
+      "Without C2, the AI may retrieve the right fact but use it for the wrong person, channel, or decision.",
+    revealLabel: "C2",
+    render: (blueprint: M02BlueprintData) => <C2Panel component={blueprint.components.c2} />,
+    notice: (blueprint: M02BlueprintData) => blueprint.components.c2.whatToNotice,
   },
   {
-    title: "Knowledge Entries (the content layer)",
+    title: "C3 - Verification",
     whatItIs:
-      "Knowledge entries are atomic units the AI can retrieve: one rule, one fact, or one example with a source. They turn broad documents into usable evidence.",
+      "C3 proves the KB works with a retrieval test: user question, expected entry, expected source, expected behavior, and Gate 1 evidence.",
     whyItMatters:
-      "Without entries, retrieval returns long documents and hopes the model finds the right sentence. The predictable failure is vague answers that cannot be audited.",
-    revealLabel: "the entries",
-    render: (blueprint: M02BlueprintData) => <EntriesPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.entries.whatToNotice,
-  },
-  {
-    title: "Metadata (the governance layer)",
-    whatItIs:
-      "Metadata is the label set that makes each entry governable: title, layer, source, owner, and usable content. It is the minimum operating discipline around knowledge.",
-    whyItMatters:
-      "Without metadata, nobody knows whether an entry is current, who owns it, or how AI is allowed to use it. The predictable failure is an impressive answer with no accountable source.",
-    revealLabel: "the metadata standard",
-    render: (blueprint: M02BlueprintData) => <MetadataPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.metadata.whatToNotice,
-  },
-  {
-    title: "Lineage and Source Precedence (the trust layer)",
-    whatItIs:
-      "Lineage traces an AI answer back to the entry and source that support it. Source precedence decides which source wins when two sources conflict.",
-    whyItMatters:
-      "Without lineage and precedence, conflicting sources become confident contradictions. The predictable failure is an answer that sounds right but cannot be defended.",
-    revealLabel: "lineage and precedence",
-    render: (blueprint: M02BlueprintData) => <LineagePanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.lineage.whatToNotice,
-  },
-  {
-    title: "Access and Sensitivity (the safety layer)",
-    whatItIs:
-      "Access and sensitivity rules decide who can see an entry, what the AI may use, and what cannot leave the company boundary.",
-    whyItMatters:
-      "Without this layer, the AI may use the right knowledge in the wrong place or expose internal material externally. The predictable failure is a useful answer that creates risk.",
-    revealLabel: "access and sensitivity",
-    render: (blueprint: M02BlueprintData) => <AccessSensitivityPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.accessSensitivity.whatToNotice,
-  },
-  {
-    title: "Retrieval Tests (the verification layer)",
-    whatItIs:
-      "Retrieval tests are questions with expected entries, sources, and behaviours. They prove whether the knowledge base works before it is used in a real workflow.",
-    whyItMatters:
-      "Without tests, the team is trusting vibes. The predictable failure is discovering only after deployment that the assistant retrieves the wrong rule or skips escalation.",
-    revealLabel: "the test suite",
-    render: (blueprint: M02BlueprintData) => <RetrievalTestsPanel blueprint={blueprint} />,
-    notice: (blueprint: M02BlueprintData) => blueprint.retrievalTests.whatToNotice,
+      "Without C3, the team is assuming retrieval works. The failure only appears later, with real users and real risk.",
+    revealLabel: "C3",
+    render: (blueprint: M02BlueprintData) => <C3Panel component={blueprint.components.c3} />,
+    notice: (blueprint: M02BlueprintData) => blueprint.components.c3.whatToNotice,
   },
 ] as const;
 
@@ -124,7 +81,7 @@ export function M02Step3Guided({
   namedGaps,
   step3State,
   generatedBlueprint,
-  gateReadiness,
+  gateReadiness: _gateReadiness,
   onStep3StateChange,
   onGeneratedBlueprintChange,
   onGateReadinessChange,
@@ -135,8 +92,7 @@ export function M02Step3Guided({
   const [loadingIndex, setLoadingIndex] = useState(-1);
 
   const state = useMemo(() => {
-    if (step3State?.useCaseId === selectedUseCase.id) return step3State;
-    return createDefaultM02Step3State(selectedUseCase.id);
+    return normalizeM02Step3State(step3State, selectedUseCase.id);
   }, [selectedUseCase.id, step3State]);
 
   if (!blueprint) {
@@ -170,7 +126,7 @@ export function M02Step3Guided({
   const canGenerate = allPanelsRevealed && reflectionsComplete;
 
   const updateState = (patch: Partial<M02Step3State>, options?: { immediate?: boolean }) => {
-    onStep3StateChange({ ...state, ...patch, useCaseId: selectedUseCase.id }, options);
+    onStep3StateChange(normalizeM02Step3State({ ...state, ...patch, useCaseId: selectedUseCase.id }, selectedUseCase.id), options);
   };
 
   const revealPanel = (index: number) => {
@@ -243,10 +199,9 @@ export function M02Step3Guided({
 
       <div className="rounded-lg bg-mist/40 p-5">
         <p className="text-[14px] leading-relaxed text-graphite">
-          A real operating knowledge base has seven components. Each one solves a specific failure
-          mode, and skipping any one creates a predictable kind of breakdown. We will walk through
-          all seven, applied to your use case. By the end you will have the complete reference
-          blueprint, and you will know exactly what good looks like.
+          A real operating knowledge base has three components. You will watch one raw source become
+          an AI-ready KB entry, then add the rules that make it safe, then prove it with a retrieval
+          test. Same source, three components, one Gate 1 decision.
         </p>
         <div className="mt-4">
           <ProgressIndicator labels={M02_BLUEPRINT_COMPONENTS} revealedPanels={state.revealedPanels} />
@@ -351,25 +306,128 @@ export function M02Step3Guided({
             </h4>
             <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-graphite">
               <p>
-                → <strong>M04 (AI Assistants & RAG)</strong> ingests this index, applies these
-                retrieval instructions, and runs these tests.
+                Next: <strong>M04 (AI Assistants & RAG)</strong> ingests this entry, applies these
+                trust rules, and runs this verification test.
               </p>
               <p>
-                → <strong>Gate 1</strong> uses the governance register as the pre-Build checklist
-                for whether this process is ready to take into Build.
+                Gate check: <strong>Gate 1</strong> uses C1, C2, and C3 as the pre-Build checklist for
+                whether this process is ready to take into Build.
               </p>
               <p>
-                → <strong>Your team</strong> can hand the document above to a developer, vendor, or
+                Handoff: <strong>Your team</strong> can hand the document above to a developer, vendor, or
                 CIO to explain what an AI-ready knowledge base for this process should look like.
-              </p>
-              <p className="text-[12px] italic text-slate">
-                You will still complete M03 next. This blueprint becomes especially useful once M04
-                asks you to design a real assistant.
               </p>
             </div>
           </section>
         </div>
       )}
+    </div>
+  );
+}
+
+function C1Panel({ component }: { component: M02BlueprintC1 }) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+      <div className="rounded-md border border-chalk bg-paper p-4">
+        <p className="eyebrow-muted">RAW DOCUMENT</p>
+        <h5 className="mt-2 font-display text-lg text-navy">{component.rawSource.name}</h5>
+        <div className="mt-3 space-y-3 text-[13px] text-graphite">
+          <Fact label="Format" value={component.rawSource.format} />
+          <Fact label="Starting state" value={component.rawSource.startingState} />
+          <Fact label="Why AI cannot use it yet" value={component.rawSource.whyAiCannotUseItYet} />
+        </div>
+      </div>
+      <div className="rounded-md border border-chalk bg-white p-4">
+        <p className="eyebrow-muted">AI-READY KB ENTRY</p>
+        <h5 className="mt-2 font-display text-lg text-navy">
+          {component.kbEntry.id} · {component.kbEntry.title}
+        </h5>
+        <p className="mt-2 text-[13px] leading-relaxed text-graphite">{component.kbEntry.content}</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <Fact label="Source location" value={component.dataMapRow.sourceLocation} />
+          <Fact label="Owner" value={component.dataMapRow.owner} />
+          <Fact label="Category" value={component.dataMapRow.category} />
+          <Fact label="Refresh cadence" value={component.dataMapRow.refreshCadence} />
+          <Fact label="Sensitivity" value={component.kbEntry.metadata.sensitivity} />
+          <Fact label="Allowed AI use" value={component.kbEntry.metadata.allowedAiUse} />
+          <Fact label="Version" value={component.kbEntry.metadata.version} />
+          <Fact label="Tags" value={component.kbEntry.metadata.tags.join(", ")} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function C2Panel({ component }: { component: M02BlueprintC2 }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-md border border-chalk bg-white p-4">
+          <p className="eyebrow-muted">SOURCE PRECEDENCE</p>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-[13px] leading-relaxed text-graphite">
+            {component.sourcePrecedence.map((rule) => <li key={rule}>{rule}</li>)}
+          </ol>
+        </div>
+        <div className="rounded-md border border-chalk bg-mist/50 p-4">
+          <p className="eyebrow-muted">ALLOWED AI BEHAVIOR</p>
+          <p className="mt-3 text-[13px] leading-relaxed text-graphite">{component.allowedAiBehaviour}</p>
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.14em] text-slate">
+            Escalation boundary
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-graphite">{component.escalationBoundary}</p>
+        </div>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        {component.accessRules.map((rule) => (
+          <div key={rule.level} className="rounded-md border border-chalk bg-paper p-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-terracotta">{rule.level}</p>
+            <p className="mt-2 text-[13px] text-navy">{rule.appliesTo}</p>
+            <p className="mt-2 text-[12px] leading-relaxed text-slate">{rule.aiBehaviour}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function C3Panel({ component }: { component: M02BlueprintC3 }) {
+  const test = component.retrievalTest;
+  return (
+    <div className="space-y-4">
+      <div className="rounded-md border border-chalk bg-white p-4">
+        <p className="eyebrow-muted">RETRIEVAL TEST</p>
+        <h5 className="mt-2 font-display text-lg text-navy">
+          {test.id} · {test.userQuestion}
+        </h5>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <Fact label="Expected entry" value={test.expectedEntry} />
+          <Fact label="Expected source" value={test.expectedSource} />
+          <Fact label="Expected behavior" value={test.expectedBehaviour} />
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-md border border-chalk bg-paper p-4">
+          <p className="eyebrow-muted">PASS / PARTIAL / FAIL</p>
+          <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-graphite">
+            {component.passCriteria.map((item) => <li key={item}>· {item}</li>)}
+          </ul>
+        </div>
+        <div className="rounded-md border border-chalk bg-mist/50 p-4">
+          <p className="eyebrow-muted">GATE 1 EVIDENCE</p>
+          <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-graphite">
+            {component.gateEvidence.map((item) => <li key={item}>· {item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">{label}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-graphite">{value}</p>
     </div>
   );
 }

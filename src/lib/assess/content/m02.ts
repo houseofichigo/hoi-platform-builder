@@ -516,18 +516,18 @@ export const M02_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: choose one business process, map its three knowledge layers, and turn those sources into a practical knowledge base blueprint.",
+    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: choose one business process and turn one raw source into a practical three-component knowledge base blueprint.",
 
   step1: {
-    title: "Choose the use case and map the layers",
+    title: "Choose the use case and preview the source families",
     why:
-      "Before a model can answer, route, summarize, or draft reliably, it needs a specific business situation. Start by choosing the process, then look at the three knowledge layers the AI would need.",
+      "Before a model can answer, route, summarize, or draft reliably, it needs a specific business situation. Start by choosing the process, then look at the source families the AI would need.",
     example:
       "For a customer support knowledge base, the AI needs product and FAQ sources, policy and escalation rules, plus real examples of clean, ambiguous, escalated, and unsafe support cases.",
     whatToNotice: [
       "A use case turns abstract data readiness into a concrete source map",
-      "The same three layers show up across support, HR, sales, RFP, and supplier workflows",
-      "The task-specific layer is where real examples prove how the system should behave",
+      "The same source families show up across support, HR, sales, RFP, and supplier workflows",
+      "Step 3 will turn one raw source into C1 Data Map, C2 Trust + Safety, and C3 Verification",
     ],
     examplesInTheWild: [
       {
@@ -547,7 +547,7 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://help.netflix.com/en/node/100639",
       },
     ],
-    produces: "Selected use case and three-layer source map preview",
+    produces: "Selected use case and source-family preview",
     nextLabel: "Step 2 - review readiness gaps",
   },
 
@@ -589,7 +589,7 @@ export const M02_COURSE_CONTENT = {
     why:
       "The final M02 deliverable is a generated operating blueprint, not another curation exercise. HOI now shows the complete reference blueprint for your chosen use case, then turns it into a document your team can use.",
     example:
-      "For each use case, the blueprint includes a data map, layered knowledge sources, atomic entries, metadata, source precedence, access rules, retrieval tests, and AI-facing instructions.",
+      "For each use case, the blueprint walks one raw source through C1 Data Map, C2 Trust + Safety, and C3 Verification.",
     whatToNotice: [
       "The learner is not expected to invent the operating standard from scratch",
       "A strong blueprint explains what the AI can retrieve, what it must cite, and when it must stop",
@@ -687,17 +687,15 @@ export const M02_COURSE_CONTENT = {
   ] as const,
 
   gateReadinessChecks: [
-    "Data layers identified",
-    "Knowledge base scope defined",
-    "Trusted sources selected",
-    "Ownership defined",
-    "Metadata added",
-    "Quality checks documented",
-    "Access governed",
-    "Privacy and residency known",
-    "Boundary cases curated",
-    "Retrieval test questions written",
-    "Refresh process defined",
+    "C1 raw source selected",
+    "C1 KB entry ID, owner, source, metadata, and sensitivity defined",
+    "C2 source precedence rules named",
+    "C2 access and allowed AI behavior defined",
+    "C2 escalation boundary documented",
+    "C3 retrieval test written",
+    "C3 expected entry, source, and behavior documented",
+    "C3 PASS / PARTIAL / FAIL criteria recorded",
+    "Gate 1 status selected",
     "Gaps and blockers listed",
   ] as const,
 
@@ -1008,17 +1006,8 @@ export const M02_COURSE_CONTENT = {
     "We have not defined the refresh process for the knowledge base",
   ] as const,
 
-  seeds: {
-    "m02.test_set": {
-      clean: 5,
-      edge: 5,
-      adversarial: 5,
-      sources: [],
-    },
-  },
-
   methodNote:
-    "The data map tells us what exists. The knowledge base tells the AI what to use. M02 is done when the knowledge is source-backed, metadata-rich, testable, and governed.",
+    "C1 tells us what the source is and how it becomes a KB entry. C2 tells the AI how it may use that entry. C3 proves the entry retrieves and behaves correctly before Build.",
 } as const;
 
 export function getM02InternalSourceOptions(ctx: InvoiceOcrProfileContext, caseId?: string): string[] {

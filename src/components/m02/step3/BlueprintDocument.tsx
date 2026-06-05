@@ -8,6 +8,7 @@ interface BlueprintDocumentProps {
 }
 
 export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentProps) {
+  const { c1, c2, c3 } = blueprint.components;
   return (
     <article className="rounded-lg border border-chalk bg-white p-6 shadow-sm md:p-8">
       <div className="border-b border-chalk pb-5">
@@ -20,79 +21,83 @@ export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentPro
         </p>
       </div>
 
-      <BlueprintSection title="Section 1 - Index">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[780px] border-collapse text-left text-[12px]">
-            <thead>
-              <tr className="border-b border-chalk text-[10px] uppercase tracking-[0.14em] text-slate">
-                <th className="py-2 pr-3 font-mono">Entry ID</th>
-                <th className="py-2 pr-3 font-mono">Title</th>
-                <th className="py-2 pr-3 font-mono">Layer</th>
-                <th className="py-2 pr-3 font-mono">Category</th>
-                <th className="py-2 pr-3 font-mono">Source</th>
-                <th className="py-2 font-mono">Summary</th>
-              </tr>
-            </thead>
-            <tbody>
-              {blueprint.entries.items.map((entry) => (
-                <tr key={entry.id} className="border-b border-chalk/70 align-top">
-                  <td className="py-3 pr-3 font-mono font-medium text-ink">{entry.id}</td>
-                  <td className="py-3 pr-3 font-medium text-navy">{entry.title}</td>
-                  <td className="py-3 pr-3 text-graphite">{entry.layer}</td>
-                  <td className="py-3 pr-3 text-graphite">{entry.category}</td>
-                  <td className="py-3 pr-3 text-graphite">
-                    {entry.source}
-                    <span className="block text-slate">{entry.sourceOwner}</span>
-                  </td>
-                  <td className="py-3 text-graphite">{entry.content.split(". ")[0]}.</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <BlueprintSection title="C1 - Data Map">
+        <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
+          <div className="rounded-md border border-chalk bg-paper p-4">
+            <p className="eyebrow-muted">RAW SOURCE</p>
+            <h4 className="mt-2 font-display text-lg text-navy">{c1.rawSource.name}</h4>
+            <Fact label="Format" value={c1.rawSource.format} />
+            <Fact label="Starting state" value={c1.rawSource.startingState} />
+            <Fact label="Why AI cannot use it yet" value={c1.rawSource.whyAiCannotUseItYet} />
+          </div>
+          <div className="rounded-md border border-chalk bg-white p-4">
+            <p className="eyebrow-muted">AI-READY KB ENTRY</p>
+            <h4 className="mt-2 font-display text-lg text-navy">
+              {c1.kbEntry.id} · {c1.kbEntry.title}
+            </h4>
+            <p className="mt-2 text-[13px] leading-relaxed text-graphite">{c1.kbEntry.content}</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <Fact label="Source" value={c1.kbEntry.source} />
+              <Fact label="Owner" value={c1.kbEntry.sourceOwner} />
+              <Fact label="Category" value={c1.dataMapRow.category} />
+              <Fact label="Refresh cadence" value={c1.dataMapRow.refreshCadence} />
+              <Fact label="Sensitivity" value={c1.kbEntry.metadata.sensitivity} />
+              <Fact label="Allowed AI use" value={c1.kbEntry.metadata.allowedAiUse} />
+              <Fact label="Version" value={c1.kbEntry.metadata.version} />
+              <Fact label="Tags" value={c1.kbEntry.metadata.tags.join(", ")} />
+            </div>
+          </div>
         </div>
       </BlueprintSection>
 
-      <BlueprintSection title="Section 2 - Retrieval Instructions">
-        <div className="rounded-lg bg-mist p-5">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-terracotta">
-            AI-FACING INSTRUCTIONS
-          </p>
-          <InstructionBlock label="Scope" value={blueprint.retrievalInstructions.scope} />
-          <InstructionList label="Retrieval order" items={blueprint.retrievalInstructions.retrievalOrder} />
-          <InstructionList label="Source precedence" items={blueprint.retrievalInstructions.sourcePrecedence} />
-          <InstructionBlock label="Citation" value={blueprint.retrievalInstructions.citation} />
-          <InstructionBlock label="Sensitivity" value={blueprint.retrievalInstructions.sensitivity} />
-          <InstructionBlock label="Boundary behaviour" value={blueprint.retrievalInstructions.boundaryBehaviour} />
+      <BlueprintSection title="C2 - Trust + Safety">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-md border border-chalk bg-white p-4">
+            <p className="eyebrow-muted">SOURCE PRECEDENCE</p>
+            <ol className="mt-3 list-decimal space-y-2 pl-5 text-[13px] leading-relaxed text-graphite">
+              {c2.sourcePrecedence.map((rule) => <li key={rule}>{rule}</li>)}
+            </ol>
+          </div>
+          <div className="rounded-md border border-chalk bg-mist/50 p-4">
+            <p className="eyebrow-muted">ALLOWED AI BEHAVIOR</p>
+            <p className="mt-3 text-[13px] leading-relaxed text-graphite">{c2.allowedAiBehaviour}</p>
+            <Fact label="Escalation boundary" value={c2.escalationBoundary} />
+          </div>
         </div>
-      </BlueprintSection>
-
-      <BlueprintSection title="Section 3 - Retrieval Test Suite">
-        <div className="grid gap-3">
-          {blueprint.retrievalTests.tests.map((test) => (
-            <div key={test.id} className="rounded-md border border-chalk bg-paper p-4">
-              <p className="font-mono text-[12px] font-medium text-ink">{test.id}</p>
-              <h4 className="mt-2 font-display text-base text-navy">{test.question}</h4>
-              <dl className="mt-3 grid gap-2 text-[12px] md:grid-cols-3">
-                <div>
-                  <dt className="font-mono uppercase tracking-[0.14em] text-slate">Expected entry</dt>
-                  <dd className="mt-1 text-graphite">{test.expectedEntry}</dd>
-                </div>
-                <div>
-                  <dt className="font-mono uppercase tracking-[0.14em] text-slate">Expected source</dt>
-                  <dd className="mt-1 text-graphite">{test.expectedSource}</dd>
-                </div>
-                <div>
-                  <dt className="font-mono uppercase tracking-[0.14em] text-slate">Expected behaviour</dt>
-                  <dd className="mt-1 text-graphite">{test.expectedBehaviour}</dd>
-                </div>
-              </dl>
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {c2.accessRules.map((rule) => (
+            <div key={rule.level} className="rounded-md border border-chalk bg-paper p-4">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-terracotta">{rule.level}</p>
+              <p className="mt-2 text-[13px] text-navy">{rule.appliesTo}</p>
+              <p className="mt-2 text-[12px] leading-relaxed text-slate">{rule.aiBehaviour}</p>
             </div>
           ))}
         </div>
       </BlueprintSection>
 
-      <BlueprintSection title="Section 4 - Governance Register">
+      <BlueprintSection title="C3 - Verification">
+        <div className="rounded-md border border-chalk bg-white p-4">
+          <p className="eyebrow-muted">RETRIEVAL TEST</p>
+          <h4 className="mt-2 font-display text-lg text-navy">
+            {c3.retrievalTest.id} · {c3.retrievalTest.userQuestion}
+          </h4>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <Fact label="Expected entry" value={c3.retrievalTest.expectedEntry} />
+            <Fact label="Expected source" value={c3.retrievalTest.expectedSource} />
+            <Fact label="Expected behavior" value={c3.retrievalTest.expectedBehaviour} />
+          </div>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <ListCard title="PASS / PARTIAL / FAIL" items={c3.passCriteria} />
+          <ListCard title="GATE 1 EVIDENCE" items={c3.gateEvidence} />
+        </div>
+      </BlueprintSection>
+
+      <BlueprintSection title="Gate 1 Decision">
         <div className="space-y-3">
+          <p className="rounded-md bg-terracotta/5 p-4 font-medium text-navy">
+            Chosen readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
+          </p>
           {governanceItems(generated).map((item) => (
             <div key={item.title} className="rounded-md border border-chalk bg-paper p-4">
               <h4 className="font-display text-base text-navy">{item.title}</h4>
@@ -115,27 +120,12 @@ export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentPro
         </div>
       </BlueprintSection>
 
-      <BlueprintSection title="Section 5 - Forward Path">
-        <div className="space-y-3 text-[14px] leading-relaxed text-graphite">
-          <p>
-            In M04, this blueprint becomes the specification for a real AI assistant. The
-            assistant should ingest this index, apply these retrieval instructions, and run these
-            tests before it is trusted in a workflow.
-          </p>
-          <p>
-            At Gate 1, the governance register becomes the pre-Build checklist. The team should
-            decide which open items must be resolved before building and which can move forward
-            with named constraints.
-          </p>
-          <p>
-            Your team now has a document that can be handed to a developer, vendor, CIO, or
-            internal owner to explain what an AI-ready knowledge base for this process should look
-            like.
-          </p>
-          <p className="rounded-md bg-terracotta/5 p-4 font-medium text-navy">
-            Chosen readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
-          </p>
-        </div>
+      <BlueprintSection title="Forward Path">
+        <p className="text-[14px] leading-relaxed text-graphite">
+          In M04, this blueprint becomes the specification for a real AI assistant. The assistant
+          should ingest the C1 entry, apply the C2 trust and safety rules, and run the C3 verification
+          test before it is trusted in a workflow.
+        </p>
       </BlueprintSection>
     </article>
   );
@@ -150,22 +140,22 @@ function BlueprintSection({ title, children }: { title: string; children: ReactN
   );
 }
 
-function InstructionBlock({ label, value }: { label: string; value: string }) {
+function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="mt-4">
-      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate">{label}</p>
-      <p className="mt-1 text-[13px] leading-relaxed text-ink">{value}</p>
+    <div className="mt-3">
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">{label}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-graphite">{value}</p>
     </div>
   );
 }
 
-function InstructionList({ label, items }: { label: string; items: string[] }) {
+function ListCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="mt-4">
-      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate">{label}</p>
-      <ol className="mt-1 list-decimal space-y-1 pl-5 text-[13px] leading-relaxed text-ink">
-        {items.map((item) => <li key={item}>{item}</li>)}
-      </ol>
+    <div className="rounded-md border border-chalk bg-paper p-4">
+      <p className="eyebrow-muted">{title}</p>
+      <ul className="mt-3 space-y-2 text-[13px] leading-relaxed text-graphite">
+        {items.map((item) => <li key={item}>· {item}</li>)}
+      </ul>
     </div>
   );
 }

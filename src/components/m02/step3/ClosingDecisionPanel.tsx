@@ -44,7 +44,7 @@ export function ClosingDecisionPanel({
     <section className="rounded-lg border border-chalk bg-white p-6 shadow-sm">
       <p className="eyebrow">CLOSING DECISION</p>
       <h4 className="mt-2 font-display text-2xl text-navy">
-        You have now seen the seven components for {useCaseName}
+        You have now seen the three components for {useCaseName}
       </h4>
       <div className="mt-4 grid gap-2 text-[13px] text-graphite sm:grid-cols-2">
         {componentLabels.map((label) => (

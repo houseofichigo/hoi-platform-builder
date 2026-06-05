@@ -18,6 +18,7 @@ import type { M02UseCase, M02UseCaseSource } from "@/lib/assess/content/course1"
 import { getM02Blueprint } from "@/data/m02/blueprints";
 import {
   createDefaultM02Step3State,
+  normalizeM02Step3State,
   type M02BlueprintData,
   type M02GeneratedBlueprint,
   type M02Step3State,
@@ -40,13 +41,6 @@ interface M02QuizQuestion {
   explanation?: string;
 }
 
-interface TestSetShape {
-  clean: number;
-  edge: number;
-  adversarial: number;
-  sources?: string[];
-}
-
 interface GateReadinessShape {
   status: GateStatus;
   checks: string[];
@@ -63,7 +57,6 @@ interface M02KnowledgeCheckState {
   step3: M02QuizStepState;
 }
 
-const DEFAULT_TEST_SET: TestSetShape = { clean: 5, edge: 5, adversarial: 5 };
 const DEFAULT_GATE_READINESS: GateReadinessShape = {
   status: "",
   checks: [],
@@ -78,42 +71,42 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
       question: "What is an operating knowledge base blueprint?",
       options: [
         "A folder of documents for the AI to read",
-        "A structured spec showing entries, rules, tests, governance, and AI-facing retrieval instructions",
+        "A three-component spec showing C1 Data Map, C2 Trust + Safety, and C3 Verification",
         "A list of model parameters",
         "A final production database",
       ],
       correct:
-        "A structured spec showing entries, rules, tests, governance, and AI-facing retrieval instructions",
+        "A three-component spec showing C1 Data Map, C2 Trust + Safety, and C3 Verification",
       explanation:
         "The M02 deliverable is an operational blueprint your team can use before building a real assistant.",
     },
     {
       id: "q2",
       type: "single",
-      question: "Why do knowledge entries need metadata?",
+      question: "What does C1 Data Map add to a raw document?",
       options: [
         "To make the document look more complete",
-        "To identify source, owner, layer, and allowed use",
+        "Source, owner, metadata, sensitivity, and a retrievable KB entry ID",
         "To reduce token costs",
         "To replace human review",
       ],
-      correct: "To identify source, owner, layer, and allowed use",
+      correct: "Source, owner, metadata, sensitivity, and a retrievable KB entry ID",
       explanation:
-        "Metadata makes each entry governable and auditable instead of just another loose paragraph.",
+        "C1 is how raw material becomes source-backed, owned, and retrievable knowledge.",
     },
     {
       id: "q3",
       type: "single",
-      question: "What do lineage and source precedence control?",
+      question: "What does C2 Trust + Safety control?",
       options: [
-        "Which source supports an answer and which source wins when sources conflict",
+        "Which source wins, who may see the answer, what the AI may do, and when to escalate",
         "How creative the model should be",
         "Which employee writes the prompt",
         "How many documents fit in the context window",
       ],
-      correct: "Which source supports an answer and which source wins when sources conflict",
+      correct: "Which source wins, who may see the answer, what the AI may do, and when to escalate",
       explanation:
-        "Lineage creates traceability. Precedence prevents source conflicts from turning into confident contradictions.",
+        "C2 prevents the AI from using the right knowledge in the wrong channel, for the wrong person, or beyond its authority.",
     },
     {
       id: "q4",
@@ -134,12 +127,9 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
       type: "multi",
       question: "Which blueprint components would you want reviewed before Build?",
       options: [
-        "Data map",
-        "Knowledge entries",
-        "Metadata",
-        "Lineage and precedence",
-        "Access and sensitivity",
-        "Retrieval tests",
+        "C1 - Data Map",
+        "C2 - Trust + Safety",
+        "C3 - Verification",
       ],
     },
   ],
@@ -203,13 +193,8 @@ export function M02Work() {
 
   const progress = useAssessProgress("m02");
 
-  const internalSourcesOut = useAssessOutput<string[]>("m02.internal_sources");
-  const contextualRulesOut = useAssessOutput<string[]>("m02.contextual_rules");
-  const testSetOut = useAssessOutput<TestSetShape>("m02.test_set");
   const selectedCaseOut = useAssessOutput<string>("m02.selected_case");
   const gapsOut = useAssessOutput<string[]>("m02.gaps");
-  const knowledgeEntriesOut = useAssessOutput<string[]>("m02.knowledge_entries");
-  const retrievalTestsOut = useAssessOutput<string[]>("m02.retrieval_tests");
   const gateReadinessOut = useAssessOutput<GateReadinessShape>("m02.gate1_readiness");
   const step3StateOut = useAssessOutput<M02Step3State>("m02.step3_state");
   const kbBlueprintOut = useAssessOutput<M02GeneratedBlueprint | null>("m02.kb_blueprint");
@@ -217,12 +202,7 @@ export function M02Work() {
 
   const [step, setStep] = useState<StepNum>(1);
   const [selectedCaseId, setSelectedCaseId] = useState(M02_DEFAULT_USE_CASE_ID);
-  const [internalSel, setInternalSel] = useState<string[]>([]);
-  const [contextualSel, setContextualSel] = useState<string[]>([]);
-  const [testSet, setTestSet] = useState<TestSetShape>(DEFAULT_TEST_SET);
   const [gapsSel, setGapsSel] = useState<string[]>([]);
-  const [knowledgeEntrySel, setKnowledgeEntrySel] = useState<string[]>([]);
-  const [retrievalTestSel, setRetrievalTestSel] = useState<string[]>([]);
   const [gateReadiness, setGateReadiness] =
     useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
   const [knowledgeCheck, setKnowledgeCheck] =
@@ -237,12 +217,7 @@ export function M02Work() {
   const [hydrated, setHydrated] = useState({
     step: false,
     selectedCase: false,
-    internal: false,
-    contextual: false,
-    testSet: false,
     gaps: false,
-    knowledgeEntries: false,
-    retrievalTests: false,
     gateReadiness: false,
     knowledgeCheck: false,
     step3State: false,
@@ -290,79 +265,12 @@ export function M02Work() {
     setHydrated((h) => ({ ...h, selectedCase: true }));
   }, [hydrated.selectedCase, selectedCaseOut.isLoading, selectedCaseOut.value]);
 
-  // Seed m02.test_set defaults once if missing
-  useEffect(() => {
-    if (!user || !workspace) return;
-    if (testSetOut.isLoading) return;
-    if (testSetOut.value !== undefined) return;
-    (async () => {
-      const seeds = M02_COURSE_CONTENT.seeds["m02.test_set"];
-      const { error } = await supabase.from("assess_outputs").upsert(
-        {
-          workspace_id: workspace.id,
-          user_id: user.id,
-          output_key: "m02.test_set",
-          value: seeds as never,
-          seeded: true,
-          touched: false,
-        },
-        { onConflict: "workspace_id,user_id,output_key" },
-      );
-      if (!error) {
-        qc.invalidateQueries({
-          queryKey: ["assess-output", workspace.id, user.id, "m02.test_set"],
-        });
-      }
-    })();
-  }, [user, workspace, testSetOut.isLoading, testSetOut.value, qc]);
-
   // Hydrate local state from persisted outputs
-  useEffect(() => {
-    if (hydrated.internal || internalSourcesOut.isLoading) return;
-    if (Array.isArray(internalSourcesOut.value)) setInternalSel(internalSourcesOut.value);
-    setHydrated((h) => ({ ...h, internal: true }));
-  }, [hydrated.internal, internalSourcesOut.isLoading, internalSourcesOut.value]);
-
-  useEffect(() => {
-    if (hydrated.contextual || contextualRulesOut.isLoading) return;
-    if (Array.isArray(contextualRulesOut.value)) setContextualSel(contextualRulesOut.value);
-    setHydrated((h) => ({ ...h, contextual: true }));
-  }, [hydrated.contextual, contextualRulesOut.isLoading, contextualRulesOut.value]);
-
-  useEffect(() => {
-    if (hydrated.testSet || testSetOut.isLoading) return;
-    if (testSetOut.value && typeof testSetOut.value === "object") {
-      const value = testSetOut.value as Partial<TestSetShape>;
-      setTestSet({
-        ...DEFAULT_TEST_SET,
-        ...value,
-        sources: Array.isArray(value.sources) ? value.sources : [],
-      });
-    }
-    setHydrated((h) => ({ ...h, testSet: true }));
-  }, [hydrated.testSet, testSetOut.isLoading, testSetOut.value]);
-
   useEffect(() => {
     if (hydrated.gaps || gapsOut.isLoading) return;
     if (Array.isArray(gapsOut.value)) setGapsSel(gapsOut.value);
     setHydrated((h) => ({ ...h, gaps: true }));
   }, [hydrated.gaps, gapsOut.isLoading, gapsOut.value]);
-
-  useEffect(() => {
-    if (hydrated.knowledgeEntries || knowledgeEntriesOut.isLoading) return;
-    if (Array.isArray(knowledgeEntriesOut.value)) {
-      setKnowledgeEntrySel(knowledgeEntriesOut.value);
-    }
-    setHydrated((h) => ({ ...h, knowledgeEntries: true }));
-  }, [hydrated.knowledgeEntries, knowledgeEntriesOut.isLoading, knowledgeEntriesOut.value]);
-
-  useEffect(() => {
-    if (hydrated.retrievalTests || retrievalTestsOut.isLoading) return;
-    if (Array.isArray(retrievalTestsOut.value)) {
-      setRetrievalTestSel(retrievalTestsOut.value);
-    }
-    setHydrated((h) => ({ ...h, retrievalTests: true }));
-  }, [hydrated.retrievalTests, retrievalTestsOut.isLoading, retrievalTestsOut.value]);
 
   useEffect(() => {
     if (hydrated.gateReadiness || gateReadinessOut.isLoading) return;
@@ -388,7 +296,7 @@ export function M02Work() {
     if (hydrated.step3State || !hydrated.selectedCase || step3StateOut.isLoading) return;
     const saved = step3StateOut.value;
     if (saved?.useCaseId === selectedCaseId) {
-      setStep3DraftState(saved);
+      setStep3DraftState(normalizeM02Step3State(saved, selectedCaseId));
     } else {
       setStep3DraftState(createDefaultM02Step3State(selectedCaseId));
     }
@@ -404,7 +312,11 @@ export function M02Work() {
   useEffect(() => {
     if (hydrated.kbBlueprint || !hydrated.selectedCase || kbBlueprintOut.isLoading) return;
     const saved = kbBlueprintOut.value;
-    setKbBlueprintDraft(saved?.useCaseId === selectedCaseId ? saved : null);
+    setKbBlueprintDraft(
+      saved?.useCaseId === selectedCaseId && saved.markdown.includes("## C1 - Data Map")
+        ? saved
+        : null,
+    );
     setHydrated((h) => ({ ...h, kbBlueprint: true }));
   }, [
     hydrated.kbBlueprint,
@@ -538,12 +450,7 @@ export function M02Work() {
   const completeM02 = async () => {
     if (!user || !workspace) return;
     await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
-    await internalSourcesOut.setValue.mutateAsync(internalSel);
-    await contextualRulesOut.setValue.mutateAsync(contextualSel);
-    await testSetOut.setValue.mutateAsync(testSet);
     await gapsOut.setValue.mutateAsync(gapsSel);
-    await knowledgeEntriesOut.setValue.mutateAsync(knowledgeEntrySel);
-    await retrievalTestsOut.setValue.mutateAsync(retrievalTestSel);
     await gateReadinessOut.setValue.mutateAsync(gateReadiness);
     await knowledgeCheckOut.setValue.mutateAsync(knowledgeCheck);
     await step3StateOut.setValue.mutateAsync(step3DraftState);
@@ -618,7 +525,7 @@ export function M02Work() {
                 </h4>
                 <p className="mt-2 text-[14px] leading-relaxed text-graphite">
                   This is not your final capstone choice. It is the practical example you will use
-                  to learn how the three knowledge layers work.
+                  to learn how raw sources become AI-ready knowledge through C1, C2, and C3.
                 </p>
               </div>
               <div className="grid gap-3 md:grid-cols-2">
@@ -827,7 +734,7 @@ export function M02Work() {
       canContinue={canCompleteM02 && step3QuizStatus.quizPassed}
       disabledReason={
         !canCompleteM02
-          ? "Reveal all seven components, answer both reflections, and generate the blueprint."
+          ? "Reveal all three components, answer both reflections, and generate the blueprint."
           : !step3QuizStatus.allAnswered
             ? "Answer all five checks before completing M02."
             : !step3QuizStatus.quizChecked
@@ -882,7 +789,7 @@ function UseCaseLayerPreview({ useCase }: { useCase: M02UseCase }) {
   return (
     <div className="border-t border-chalk pt-6 space-y-4">
       <div>
-        <p className="eyebrow">PART B · SEE THE THREE KNOWLEDGE LAYERS</p>
+        <p className="eyebrow">PART B · SEE THE SOURCE FAMILIES</p>
         <h4 className="mt-2 font-display text-xl text-navy">
           What {useCase.shortLabel} needs before AI can help
         </h4>
@@ -915,65 +822,61 @@ function UseCaseLayerPreview({ useCase }: { useCase: M02UseCase }) {
 }
 
 function BlueprintReferenceMap({ blueprint }: { blueprint: M02BlueprintData }) {
+  const { c1, c2, c3 } = blueprint.components;
   return (
     <div className="border-t border-chalk pt-6 space-y-6">
       <div>
-        <p className="eyebrow">REFERENCE MAP · {blueprint.useCaseName.toUpperCase()}</p>
+        <p className="eyebrow">REFERENCE BLUEPRINT · {blueprint.useCaseName.toUpperCase()}</p>
         <h4 className="mt-2 font-display text-xl text-navy">
-          What a complete knowledge base would need
+          How one raw source becomes an operating KB
         </h4>
         <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-          {blueprint.dataMap.intro}
+          Step 3 will walk this same source through C1 Data Map, C2 Trust + Safety, and C3 Verification.
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        {blueprint.dataMap.locations.map((location) => (
-          <div key={location.information} className="rounded-md border border-chalk bg-white p-4">
-            <p className="text-sm font-medium text-navy">{location.information}</p>
-            <dl className="mt-3 space-y-2 text-[12px] text-graphite">
-              <div>
-                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Lives in</dt>
-                <dd>{location.livesIn}</dd>
-              </div>
-              <div>
-                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Owner</dt>
-                <dd>{location.owner}</dd>
-              </div>
-              <div>
-                <dt className="font-mono uppercase tracking-[0.14em] text-slate">Movement</dt>
-                <dd>{location.movement}</dd>
-              </div>
-            </dl>
-          </div>
-        ))}
-      </div>
-
       <div className="grid gap-3 lg:grid-cols-3">
-        {blueprint.knowledgeLayers.layers.map((layer, index) => (
-          <div key={layer.name} className="rounded-md border border-chalk bg-white p-4">
-            <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-              LAYER {index + 1}
-            </span>
-            <h5 className="mt-3 font-display text-base text-navy">{layer.name} knowledge</h5>
-            <p className="mt-1 text-[12px] leading-relaxed text-slate">{layer.description}</p>
-            <ul className="mt-3 space-y-2">
-              {layer.sources.map((source) => (
-                <li key={`${source.item}-${source.from}`} className="text-[13px] text-graphite">
-                  <strong className="text-navy">{source.item}</strong>
-                  <span className="block text-[12px] text-slate">from {source.from}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <div className="rounded-md border border-chalk bg-white p-4">
+          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+            C1
+          </span>
+          <h5 className="mt-3 font-display text-base text-navy">Data Map</h5>
+          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+            {c1.rawSource.name} becomes {c1.kbEntry.id} · {c1.kbEntry.title}.
+          </p>
+          <p className="mt-2 text-[12px] text-slate">
+            Owner: {c1.dataMapRow.owner}. Sensitivity: {c1.dataMapRow.sensitivity}.
+          </p>
+        </div>
+        <div className="rounded-md border border-chalk bg-white p-4">
+          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+            C2
+          </span>
+          <h5 className="mt-3 font-display text-base text-navy">Trust + Safety</h5>
+          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+            {c2.sourcePrecedence[0]}
+          </p>
+          <p className="mt-2 text-[12px] text-slate">{c2.escalationBoundary}</p>
+        </div>
+        <div className="rounded-md border border-chalk bg-white p-4">
+          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
+            C3
+          </span>
+          <h5 className="mt-3 font-display text-base text-navy">Verification</h5>
+          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
+            {c3.retrievalTest.id}: {c3.retrievalTest.userQuestion}
+          </p>
+          <p className="mt-2 text-[12px] text-slate">
+            Expected entry: {c3.retrievalTest.expectedEntry}.
+          </p>
+        </div>
       </div>
 
       <div className="rounded-md border border-chalk bg-mist/40 p-4">
         <p className="eyebrow-muted">WHAT TO CHECK IN YOUR BUSINESS</p>
         <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-          Look for missing owners, stale sources, unclear permissions, weak examples, or rules that
-          live informally in messages. You only need to name the gaps now; the full operating
+          Look for missing owners, stale sources, unclear permissions, weak tests, or rules that
+          live informally in messages. You only need to name the gaps now; the full three-component
           blueprint comes next.
         </p>
       </div>

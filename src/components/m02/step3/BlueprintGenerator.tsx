@@ -5,12 +5,11 @@ import type {
 } from "@/data/m02/blueprintSchema";
 
 export const BLUEPRINT_LOADING_LINES = [
-  "Assembling your blueprint...",
-  "· Index",
-  "· Retrieval instructions",
-  "· Test suite",
-  "· Governance register",
-  "· Forward path",
+  "Assembling your three-component blueprint...",
+  "· C1 Data Map",
+  "· C2 Trust + Safety",
+  "· C3 Verification",
+  "· Gate 1 decision",
 ] as const;
 
 interface BuildGeneratedBlueprintArgs {
@@ -55,6 +54,7 @@ export function generatedBlueprintToMarkdown(
   blueprint: M02BlueprintData,
   generated: Omit<M02GeneratedBlueprint, "markdown">,
 ): string {
+  const { c1, c2, c3 } = blueprint.components;
   const status = generated.status.toUpperCase();
   return [
     `# ${blueprint.useCaseName} Knowledge Base Blueprint`,
@@ -63,41 +63,57 @@ export function generatedBlueprintToMarkdown(
     "",
     `Generated: ${new Date(generated.generatedAt).toLocaleDateString()}`,
     "",
-    "## Section 1 - Index",
+    "## C1 - Data Map",
     "",
-    "| Entry ID | Title | Layer | Category | Source | Summary |",
-    "|---|---|---|---|---|---|",
-    ...blueprint.entries.items.map((entry) =>
-      `| ${entry.id} | ${escapeMd(entry.title)} | ${entry.layer} | ${escapeMd(entry.category)} | ${escapeMd(`${entry.source} (${entry.sourceOwner})`)} | ${escapeMd(summarizeEntry(entry.content))} |`,
-    ),
+    `Raw source: ${c1.rawSource.name}`,
+    `Format: ${c1.rawSource.format}`,
+    `Starting state: ${c1.rawSource.startingState}`,
+    `Why AI cannot use it yet: ${c1.rawSource.whyAiCannotUseItYet}`,
     "",
-    "## Section 2 - Retrieval Instructions (AI-facing)",
+    "| Field | Value |",
+    "|---|---|",
+    `| Source location | ${escapeMd(c1.dataMapRow.sourceLocation)} |`,
+    `| Owner | ${escapeMd(c1.dataMapRow.owner)} |`,
+    `| Category | ${escapeMd(c1.dataMapRow.category)} |`,
+    `| Refresh cadence | ${escapeMd(c1.dataMapRow.refreshCadence)} |`,
+    `| Sensitivity | ${escapeMd(c1.dataMapRow.sensitivity)} |`,
     "",
-    "```",
-    `Scope: ${blueprint.retrievalInstructions.scope}`,
+    "### AI-ready KB entry",
     "",
-    "Retrieval order:",
-    ...blueprint.retrievalInstructions.retrievalOrder.map((item, index) => `${index + 1}. ${item}`),
+    `Entry ID: ${c1.kbEntry.id}`,
+    `Title: ${c1.kbEntry.title}`,
+    `Source: ${c1.kbEntry.source} (${c1.kbEntry.sourceOwner})`,
+    `Content: ${c1.kbEntry.content}`,
+    `Metadata: version ${c1.kbEntry.metadata.version}; last updated ${c1.kbEntry.metadata.lastUpdated}; sensitivity ${c1.kbEntry.metadata.sensitivity}; allowed AI use ${c1.kbEntry.metadata.allowedAiUse}; tags ${c1.kbEntry.metadata.tags.join(", ")}`,
+    "",
+    "## C2 - Trust + Safety",
     "",
     "Source precedence:",
-    ...blueprint.retrievalInstructions.sourcePrecedence.map((item, index) => `${index + 1}. ${item}`),
+    ...c2.sourcePrecedence.map((item, index) => `${index + 1}. ${item}`),
     "",
-    `Citation: ${blueprint.retrievalInstructions.citation}`,
+    "Access rules:",
+    ...c2.accessRules.map((rule) => `- ${rule.level}: ${rule.appliesTo}. AI behavior: ${rule.aiBehaviour}`),
     "",
-    `Sensitivity: ${blueprint.retrievalInstructions.sensitivity}`,
+    `Allowed AI behavior: ${c2.allowedAiBehaviour}`,
+    `Escalation boundary: ${c2.escalationBoundary}`,
     "",
-    `Boundary behaviour: ${blueprint.retrievalInstructions.boundaryBehaviour}`,
-    "```",
+    "## C3 - Verification",
     "",
-    "## Section 3 - Retrieval Test Suite",
+    `Test ID: ${c3.retrievalTest.id}`,
+    `User question: ${c3.retrievalTest.userQuestion}`,
+    `Expected entry: ${c3.retrievalTest.expectedEntry}`,
+    `Expected source: ${c3.retrievalTest.expectedSource}`,
+    `Expected behavior: ${c3.retrievalTest.expectedBehaviour}`,
     "",
-    "| Test ID | Question | Expected entry | Expected source | Expected behaviour |",
-    "|---|---|---|---|---|",
-    ...blueprint.retrievalTests.tests.map((test) =>
-      `| ${test.id} | ${escapeMd(test.question)} | ${escapeMd(test.expectedEntry)} | ${escapeMd(test.expectedSource)} | ${escapeMd(test.expectedBehaviour)} |`,
-    ),
+    "Pass criteria:",
+    ...c3.passCriteria.map((item) => `- ${item}`),
     "",
-    "## Section 4 - Governance Register",
+    "Gate evidence:",
+    ...c3.gateEvidence.map((item) => `- ${item}`),
+    "",
+    "## Gate 1 Decision",
+    "",
+    `Chosen readiness status: ${status}. ${generated.statusExplanation}`,
     "",
     "Open items to address before Build:",
     "",
@@ -112,15 +128,9 @@ export function generatedBlueprintToMarkdown(
     "",
     ...(generated.namedGaps.length ? generated.namedGaps.map((gap) => `- ${gap}`) : ["- No named gaps recorded."]),
     "",
-    "## Section 5 - Forward Path",
+    "## Forward Path",
     "",
-    "In M04, this blueprint becomes the specification for a real AI assistant. The assistant should ingest this index, apply these retrieval instructions, and run this test suite before it is trusted in a workflow.",
-    "",
-    "At Gate 1, the governance register becomes the pre-Build checklist. The team should decide which open items must be resolved before building and which can move forward with named constraints.",
-    "",
-    "Your team now has a document that can be handed to a developer, vendor, CIO, or internal owner to explain what an AI-ready knowledge base for this process should look like.",
-    "",
-    `Chosen readiness status: ${status}. ${generated.statusExplanation}`,
+    "In M04, this blueprint becomes the specification for a real AI assistant. The assistant should ingest the C1 entry, apply the C2 trust and safety rules, and run the C3 verification test before it is trusted in a workflow.",
     "",
   ].join("\n");
 }
@@ -137,19 +147,10 @@ export function governanceItems(
 
 function actionForComponent(component: string): string {
   const lower = component.toLowerCase();
-  if (lower.includes("data map")) return "Confirm source locations, owners, and refresh cadence.";
-  if (lower.includes("knowledge layers")) return "Separate sources into internal facts, contextual rules, and task examples.";
-  if (lower.includes("entries")) return "Break large documents into atomic source-backed entries.";
-  if (lower.includes("metadata")) return "Add title, layer, source, owner, and usable rule/fact/example to every entry.";
-  if (lower.includes("lineage")) return "Define which source wins when records, policies, and examples conflict.";
-  if (lower.includes("access")) return "Classify entries by who can see them and what AI may do with them.";
-  if (lower.includes("retrieval")) return "Write test questions with expected entry, source, and behaviour.";
+  if (lower.includes("c1")) return "Confirm the raw source, owner, metadata, sensitivity, and KB entry ID.";
+  if (lower.includes("c2")) return "Confirm source precedence, access rules, allowed AI behavior, and escalation boundaries.";
+  if (lower.includes("c3")) return "Run the retrieval test and record PASS, PARTIAL, or FAIL with evidence.";
   return "Assign an owner and document the missing readiness work.";
-}
-
-function summarizeEntry(content: string): string {
-  const [firstSentence] = content.split(/(?<=[.!?])\s+/);
-  return firstSentence || content.slice(0, 120);
 }
 
 function escapeMd(value: string): string {

@@ -135,14 +135,14 @@ export const CORE_ASSIGNMENTS: Record<ModuleId, CoreAssignmentStep> = {
   },
   m05: {
     moduleId: "m05",
-    recommendedCaseId: "intake-review-dashboard",
-    title: "Prototype a two-screen workflow",
+    recommendedCaseId: "lovable-assistant-prototype",
+    title: "Prototype an assistant interface with Lovable",
     summary:
-      "Specify or build an intake form and review dashboard, document permissions/integrations/simulations, and produce three agent requirement cards.",
+      "Follow a Lovable website-upgrade demo, then build a sandbox prototype for your own AI assistant use case and produce three M06 agent requirement cards.",
     structuredOutputs: [
-      "prototype surface map",
-      "sandbox build brief",
-      "walkthrough findings",
+      "Lovable demo confirmation",
+      "assistant prototype prompt",
+      "what works / simulated / missing",
       "three agent requirement cards",
     ],
   },

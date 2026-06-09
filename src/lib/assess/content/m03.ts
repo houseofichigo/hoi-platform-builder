@@ -19,14 +19,14 @@ export const M03_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Prompt-Driven Automation. Prompts are workflow assets, not disposable messages. Today you move from a vague prompt to a six-element Prompt Contract, then copy the right automation-ladder prompt for the job.",
+    "Prompt-Driven Automation. AI is not reading your mind: prompts become useful when they make intent explicit. Today you move from a vague fact prompt to a six-element Prompt Contract, then see how the same logic climbs the automation ladder.",
 
   step1: {
     title: "From vague to structured",
     why:
       "Vague prompts produce vague work. Run the weak baseline first so you can see what the model has to guess before structure is added.",
     example:
-      "Start with: Sort my inbox. The missing pieces are scope, categories, source rules, output shape, confidence, and safety boundaries.",
+      "Start with: Explain EBITDA. The missing pieces are audience, depth, format, purpose, and boundaries.",
     whatToNotice: [
       "User prompts trigger work. System prompts govern behavior.",
       "Context prompts provide evidence. Workflow prompts run inside automations.",
@@ -41,7 +41,7 @@ export const M03_COURSE_CONTENT = {
     why:
       "Prompt quality compounds. The chapter defines six core elements: Goal, Context, Rules, Output Contract, Quality Bar, and Examples, plus Style and Operational overlay groups.",
     example:
-      "Same inbox intent, same model, six versions of the prompt. The output moves from vague sorting to routed, evidence-backed, auditable classification.",
+      "Same fact-explanation intent, same model, six versions of the prompt. The output moves from generic explanation to a clear, audience-specific, testable answer.",
     whatToNotice: [
       "Each rung removes a specific failure mode",
       "Examples remove ambiguity faster than explanation",
@@ -56,7 +56,7 @@ export const M03_COURSE_CONTENT = {
     why:
       "The right automation layer depends on repeatability, grounding, tools, cost, latency, and risk. Most business work lives between rungs 2 and 6.",
     example:
-      "Review all 10 rungs: vague prompt, optimized prompt, reusable prompt, Skill, file, connector, search, deep research, agent mode, and scheduled task.",
+      "Review all 10 rungs: vague prompt, optimized prompt, reusable prompt library entry, Prompt Architect Skill, file, connector, search, deep research, agent mode, and scheduled task.",
     whatToNotice: [
       "Different task types require different success criteria",
       "A prompt library entry must include safety risks, inputs, outputs, and tests",

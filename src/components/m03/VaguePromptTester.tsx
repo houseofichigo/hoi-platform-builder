@@ -13,11 +13,11 @@ const observationLabels: Array<{
   key: keyof VaguePromptTestResult["observations"];
   label: string;
 }> = [
-  { key: "askedWhichCompetitors", label: "Did the AI ask what inbox, timeframe, or categories to use?" },
-  { key: "citedSources", label: "Did the AI explain what email evidence it would rely on?" },
+  { key: "askedWhichCompetitors", label: "Did the AI ask who the explanation is for?" },
+  { key: "citedSources", label: "Did the AI explain what assumptions it was making?" },
   { key: "structuredOutput", label: "Did the AI return a structured output?" },
-  { key: "specifiedCurrency", label: "Did the AI define urgency, route, confidence, or review rules?" },
-  { key: "inventedDetails", label: "Did the AI assume categories or actions you did not specify?" },
+  { key: "specifiedCurrency", label: "Did the AI define the level of detail or decision context?" },
+  { key: "inventedDetails", label: "Did the AI assume what you meant without asking?" },
   { key: "couldDefend", label: "Could you defend this output to your team?" },
 ];
 

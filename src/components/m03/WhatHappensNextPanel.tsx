@@ -10,7 +10,7 @@ export function WhatHappensNextPanel({ data }: { data: AutomationPlaybookData })
     <section className="mx-auto max-w-[780px] rounded-lg border border-chalk bg-mist/70 p-6 space-y-4">
       <h3 className="font-display text-2xl text-navy">What happens to this Playbook next</h3>
       <ul className="space-y-2 text-[14px] leading-relaxed text-navy">
-        <li>→ Install the Prompt Improver Skill in {platform.displayName} if your platform supports Skills.</li>
+        <li>→ Install the Prompt Architect Skill in {platform.displayName} if your platform supports Skills.</li>
         <li>→ Share the prompt library with your team and mark which rungs are safe to use today.</li>
         <li>→ M04 picks up where M03 leaves off: productised AI Assistants and RAG.</li>
       </ul>

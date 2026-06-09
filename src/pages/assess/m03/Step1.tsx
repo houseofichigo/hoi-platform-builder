@@ -25,9 +25,9 @@ export function M03Step1({
     <div className="space-y-6">
       <div className="rounded-lg border border-chalk bg-mist/40 p-5">
         <p className="text-[14px] leading-relaxed text-graphite">
-          M03 starts with one simple lesson: vague prompts produce vague work. You will run a weak
-          inbox prompt, notice what is missing, then compare it with a Prompt Contract that is ready
-          to reuse.
+          M03 starts with one simple lesson: AI is not reading your mind. You will run a weak fact
+          prompt, notice what the model has to guess, then compare it with a Prompt Contract that is
+          ready to reuse.
         </p>
         {m02BridgeLabel && (
           <p className="mt-3 text-[12px] text-slate">

@@ -39,7 +39,7 @@ const DEFAULT_REFLECTION: ReflectionAnswers = {
 
 const DEFAULT_READINESS_STATUS: "PASS" | "PARTIAL" | "BLOCKED" = "PARTIAL";
 const DEFAULT_READINESS_EXPLANATION =
-  "Reference library is ready to use, but connector, agent, and scheduled rungs still require source ownership, access rules, and confirmation gates.";
+  "Reference library is ready to use, but file, connector, search, agent, and scheduled rungs still require source ownership, access rules, and confirmation gates.";
 
 export function M03Work() {
   const { workspace } = useWorkspace();
@@ -242,7 +242,7 @@ export function M03Work() {
         stepLabel="STEP 1 of 3"
         title="From vague to structured"
         why={<p>Prompt-driven automation starts by making prompt quality visible.</p>}
-        example={<p className="text-[14px] text-navy">Run the vague prompt: Sort my inbox.</p>}
+        example={<p className="text-[14px] text-navy">Run the vague prompt: Explain EBITDA.</p>}
         whatToNotice={<p>Vague intent creates vague output. A Prompt Contract fixes that.</p>}
         yourVersion={
           <M03Step1
@@ -366,8 +366,8 @@ export function M03Work() {
                 <p className="eyebrow">Ladder reviewed</p>
                 <p className="text-[14px] leading-relaxed text-graphite">
                   You have reviewed the 10 automation rungs. Generate the shareable library to keep
-                  the Prompt Contract, overlays, optimizer checklist, and copy-ready ladder prompts
-                  together.
+                  the Prompt Contract, reusable prompt library template, Prompt Improver Skill, and
+                  copy-ready ladder prompts together.
                 </p>
               </header>
               <PlaybookGenerator

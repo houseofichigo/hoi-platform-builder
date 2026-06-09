@@ -3,7 +3,7 @@ import { getRungsForPlatform, isRungAvailable } from "@/data/m03/capabilityMatri
 import { platforms } from "@/data/m03/platforms";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
 import { promptContractOverlays, promptOptimizerChecklist, v0ToV6Prompts } from "@/data/m03/useCases/competitor-pricing-monitor";
-import { contractClauseExtractorSkill, genericSkillCreationMetaPrompt, promptImproverSkill, skillToChatGPTFormat } from "@/data/m03/skillTemplate";
+import { genericSkillCreationMetaPrompt, promptImproverSkill, skillToChatGPTFormat } from "@/data/m03/skillTemplate";
 import { promptContractToMarkdown } from "./skillDownload";
 
 export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
@@ -83,11 +83,16 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         </ol>
       </DocumentSection>
 
-      <DocumentSection label="Section 5" title="Contract-clause Skill example">
-        <h4 className="font-display text-lg text-navy">{contractClauseExtractorSkill.name}</h4>
-        <p className="text-[14px] text-graphite">{contractClauseExtractorSkill.description}</p>
+      <DocumentSection label="Section 5" title="Prompt Architect Skill download">
+        <p className="text-[14px] leading-relaxed text-graphite">
+          After seeing that a structured prompt produces better results, the next automation step is
+          saving the improvement method itself as a Skill. Use this Skill whenever a rough prompt
+          needs to become a Prompt Contract.
+        </p>
+        <h4 className="mt-4 font-display text-lg text-navy">{promptImproverSkill.name}</h4>
+        <p className="text-[14px] text-graphite">{promptImproverSkill.description}</p>
         <pre className="mt-4 whitespace-pre-wrap rounded-md bg-mist p-4 font-mono text-[12px] leading-relaxed text-ink">
-          {skillToChatGPTFormat(contractClauseExtractorSkill)}
+          {skillToChatGPTFormat(promptImproverSkill)}
         </pre>
       </DocumentSection>
 
@@ -101,14 +106,13 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         </pre>
       </DocumentSection>
 
-      <DocumentSection label="Section 7" title="Optional Prompt Improver Skill example">
+      <DocumentSection label="Section 7" title="Skill install note">
         {["chatgpt", "claude", "mistral"].includes(data.platform) ? (
           <>
-            <h4 className="font-display text-lg text-navy">{promptImproverSkill.name}</h4>
-            <p className="text-[14px] text-graphite">{promptImproverSkill.description}</p>
-            <pre className="mt-4 whitespace-pre-wrap rounded-md bg-mist p-4 font-mono text-[12px] leading-relaxed text-ink">
-              {skillToChatGPTFormat(promptImproverSkill)}
-            </pre>
+            <p className="text-[14px] text-graphite">
+              Use the companion bundle's Skill file to install the Prompt Architect Skill where your
+              platform supports Skills.
+            </p>
             <ol className="mt-4 list-decimal space-y-1 pl-5 text-[13px] text-navy">
               {(platform.skillInstallSteps ?? []).map((step) => (
                 <li key={step}>{step}</li>
@@ -118,12 +122,10 @@ export function PlaybookDocument({ data }: { data: AutomationPlaybookData }) {
         ) : (
           <div className="rounded-md border border-chalk bg-mist/40 p-4">
             <p className="text-[14px] text-navy">
-              In {platform.displayName}, use the meta-prompt and Prompt Contract as saved
-              templates. M04 covers the platform's productised equivalents for Skill-like capability.
+              In {platform.displayName}, use the Prompt Contract and Skill-building meta-prompt as
+              saved templates. M04 covers the platform's productised equivalents for Skill-like
+              capability.
             </p>
-            <pre className="mt-4 whitespace-pre-wrap font-mono text-[12px] text-ink">
-              {skillToChatGPTFormat(promptImproverSkill)}
-            </pre>
           </div>
         )}
       </DocumentSection>
@@ -217,11 +219,11 @@ function SpecItem({ label, value }: { label: string; value: string }) {
 
 function observationLabel(key: string): string {
   const labels: Record<string, string> = {
-    askedWhichCompetitors: "Asked which competitors to check",
-    citedSources: "Cited specific sources",
+    askedWhichCompetitors: "Asked who the explanation is for",
+    citedSources: "Named assumptions or source limits",
     structuredOutput: "Returned structured output",
-    specifiedCurrency: "Specified what was current vs outdated",
-    inventedDetails: "Invented unverifiable details",
+    specifiedCurrency: "Defined depth, context, or format",
+    inventedDetails: "Assumed missing intent",
     couldDefend: "Defensible to the team",
   };
   return labels[key] ?? key;

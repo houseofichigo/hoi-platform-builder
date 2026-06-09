@@ -7,7 +7,7 @@ export type SetupGuide = {
 export const setupGuides: Record<string, SetupGuide> = {
   chatgpt: {
     platformName: "ChatGPT",
-    title: "How to install your Prompt Improver Skill in ChatGPT",
+    title: "How to install your Prompt Architect Skill in ChatGPT",
     sections: [
       {
         heading: "Step 1 - Open the Skills interface",
@@ -33,7 +33,7 @@ export const setupGuides: Record<string, SetupGuide> = {
   },
   claude: {
     platformName: "Claude",
-    title: "How to install your Prompt Improver Skill in Claude",
+    title: "How to install your Prompt Architect Skill in Claude",
     sections: [
       {
         heading: "Step 1 - Open Claude Skills",
@@ -59,7 +59,7 @@ export const setupGuides: Record<string, SetupGuide> = {
   },
   mistral: {
     platformName: "Mistral / Vibe",
-    title: "How to install your Prompt Improver Skill in Mistral Vibe",
+    title: "How to install your Prompt Architect Skill in Mistral Vibe",
     sections: [
       {
         heading: "Step 1 - Open Vibe Work",

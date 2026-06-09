@@ -13,7 +13,7 @@ import { setupGuides } from "@/data/m03/setupGuides";
 import { crossPlatformReference } from "@/data/m03/crossPlatformReference";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
 import { promptContractOverlays, promptOptimizerChecklist, v0ToV6Prompts } from "@/data/m03/useCases/competitor-pricing-monitor";
-import { contractClauseExtractorSkill, genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
+import { genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: "Helvetica", fontSize: 10, color: "#1E2B4D" },
@@ -122,20 +122,21 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
             <Text key={item} style={styles.row}>• {item}</Text>
           ))}
         </PDFSection>
-        <PDFSection title="5. Contract-clause Skill example">
-          <Text style={styles.body}>{contractClauseExtractorSkill.name}</Text>
-          <Text style={styles.body}>{contractClauseExtractorSkill.description}</Text>
-          <Text style={styles.monoBlock}>{contractClauseExtractorSkill.instructions}</Text>
+        <PDFSection title="5. Prompt Architect Skill download">
+          <Text style={styles.body}>
+            After seeing that a structured prompt produces better results, the next automation step is saving the improvement method itself as a Skill.
+          </Text>
+          <Text style={styles.body}>{promptImproverSkill.name}</Text>
+          <Text style={styles.body}>{promptImproverSkill.description}</Text>
+          <Text style={styles.monoBlock}>{promptImproverSkill.instructions}</Text>
         </PDFSection>
       </Page>
       <Page size="A4" style={styles.page}>
         <PDFSection title="6. Optional Skill-building meta-prompt">
           <Text style={styles.monoBlock}>{genericSkillCreationMetaPrompt}</Text>
         </PDFSection>
-        <PDFSection title="7. Optional Prompt Improver Skill">
-          <Text style={styles.body}>{promptImproverSkill.name}</Text>
-          <Text style={styles.body}>{promptImproverSkill.description}</Text>
-          <Text style={styles.monoBlock}>{promptImproverSkill.instructions}</Text>
+        <PDFSection title="7. Skill install note">
+          <Text style={styles.body}>Install the Prompt Architect Skill where your platform supports Skills. Otherwise, save the Skill-building meta-prompt and Prompt Contract as templates.</Text>
         </PDFSection>
       </Page>
       <Page size="A4" style={styles.page}>

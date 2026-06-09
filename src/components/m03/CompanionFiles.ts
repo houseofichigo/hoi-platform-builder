@@ -1,7 +1,6 @@
 import type { AutomationPlaybookData, PromptContract } from "@/data/m03/m03Schema";
 import {
   genericSkillCreationMetaPrompt,
-  contractClauseExtractorSkill,
   promptImproverSkill,
   skillToChatGPTFormat,
   skillToClaudeMarkdown,
@@ -10,8 +9,8 @@ import { competitorPricingMonitor, promptContractOverlays, promptOptimizerCheckl
 import { promptContractToMarkdown } from "./skillDownload";
 
 export function getSkillMarkdown(data: AutomationPlaybookData): string {
-  if (data.platform === "claude") return skillToClaudeMarkdown(contractClauseExtractorSkill);
-  if (data.platform === "chatgpt" || data.platform === "mistral") return skillToChatGPTFormat(contractClauseExtractorSkill);
+  if (data.platform === "claude") return skillToClaudeMarkdown(promptImproverSkill);
+  if (data.platform === "chatgpt" || data.platform === "mistral") return skillToChatGPTFormat(promptImproverSkill);
   return promptContractToMarkdown(data.promptContract, "Reusable Prompt Contract");
 }
 
@@ -58,19 +57,14 @@ export function getPromptsLibraryMarkdown(data: AutomationPlaybookData): string 
   for (const item of promptOptimizerChecklist) md += `- ${item}\n`;
   md += `\n`;
 
-  md += `## Contract-clause Skill example\n\n`;
+  md += `## Prompt Architect Skill download content\n\n`;
   md += "```markdown\n";
-  md += skillToChatGPTFormat(contractClauseExtractorSkill);
+  md += skillToChatGPTFormat(promptImproverSkill);
   md += "\n```\n\n";
 
   md += `## Optional Skill-building meta-prompt\n\n`;
   md += "```text\n";
   md += genericSkillCreationMetaPrompt;
-  md += "\n```\n\n";
-
-  md += `## Optional Prompt Improver Skill example\n\n`;
-  md += "```markdown\n";
-  md += skillToChatGPTFormat(promptImproverSkill);
   md += "\n```\n\n";
 
   for (const rungNum of data.rungsCovered) {

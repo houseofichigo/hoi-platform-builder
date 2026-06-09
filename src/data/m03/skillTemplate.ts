@@ -1,20 +1,21 @@
 import type { SkillSpec } from "./m03Schema";
 
 export const promptImproverSkill: SkillSpec = {
-  name: "Prompt Improver",
+  name: "Prompt Architect",
   description:
-    "Use when the user has a rough prompt, recurring task instruction, or draft Prompt Contract and wants it rewritten into a clearer, safer, more reusable prompt. The Skill improves the prompt without changing the user's intent.",
+    "Use when the user has a vague prompt, rough task instruction, or draft Prompt Contract and wants it rewritten into a clearer, safer, copy-paste-ready prompt using the House of Ichigo Prompt-Driven Automation method.",
   triggers: [
     "improve this prompt",
     "make this prompt better",
     "turn this into a prompt contract",
     "rewrite my prompt for work",
+    "make this automation-ready",
     "create a reusable prompt",
   ],
-  instructions: `# Prompt Improver
+  instructions: `# Prompt Architect
 
 ## When to use
-Use this Skill when the user gives a rough prompt, a recurring task instruction, or a draft Prompt Contract and wants a clearer prompt they can reuse. The goal is to preserve the user's intent while adding structure, boundaries, examples, and quality checks.
+Use this Skill when the user gives a vague prompt, rough task instruction, recurring workflow idea, or draft Prompt Contract and wants a clearer prompt they can reuse. The goal is to preserve the user's intent while adding the right structure, boundaries, examples, and quality checks.
 
 ## When not to use
 - The user is asking you to complete the underlying task instead of improving the prompt.
@@ -23,13 +24,16 @@ Use this Skill when the user gives a rough prompt, a recurring task instruction,
 - The user wants an autonomous action, connector write, purchase, message send, or external submission.
 
 ## Method
-1. Identify the intended task, audience, source material, output format, and decision the prompt should support.
-2. If the user's intent is ambiguous, ask up to three clarifying questions before rewriting.
-3. Rewrite the prompt as a Prompt Contract with these sections: Goal, Context, Inputs, Rules, Output Contract, Quality Bar, and Examples.
-4. Make source rules explicit: what the AI may use, what it must not use, and how to label missing evidence.
-5. Add safety boundaries and escalation rules for sensitive, external, or irreversible work.
-6. Include variables in braces for details the user should replace, such as {audience}, {source}, {deadline}, or {format}.
-7. Return the improved prompt first, then a short note explaining the highest-impact changes.
+1. Identify the Placement: user prompt, system prompt, context prompt, workflow prompt, Skill prompt, or app/tool instruction.
+2. Identify the Job: search, deep research, extraction, classification, generation, summarization, transformation, decision support, evaluation, guardrail, connector read/write, agent mode, scheduled task, Skill, or workflow.
+3. Identify the lowest sufficient automation Layer: vague prompt, optimized prompt, reusable prompt, Skill, prompt + file, prompt + connector, prompt + search, prompt + deep research, agent mode, or scheduled task.
+4. Identify the intended task, audience, source material, output format, and decision the prompt should support.
+5. If the user's intent is ambiguous, ask up to three clarifying questions before rewriting.
+6. Rewrite the prompt as a Prompt Contract with these sections: Goal, Context, Rules, Output Contract, Quality Bar, and Examples.
+7. Make source rules explicit: what the AI may use, what it must not use, and how to label missing evidence.
+8. Add safety boundaries and escalation rules for sensitive, external, or irreversible work.
+9. Include variables in braces for details the user should replace, such as {audience}, {source}, {deadline}, or {format}.
+10. Return one copy-paste-ready prompt block, then ask: "Do you want to apply this prompt now, or edit it first?"
 
 ## Quality bar
 - The improved prompt has a clear goal and audience.
@@ -38,6 +42,7 @@ Use this Skill when the user gives a rough prompt, a recurring task instruction,
 - The output format is concrete enough to verify.
 - The prompt includes checks for missing, stale, or conflicting information.
 - The wording is reusable by another team member without extra explanation.
+- Placement, Job, and Layer are appropriate for the task.
 
 ## Safety constraints
 - Do not invent facts, policies, citations, or source material to make the prompt look complete.
@@ -48,26 +53,32 @@ Use this Skill when the user gives a rough prompt, a recurring task instruction,
 
 ## Example
 User's rough prompt:
-"Summarize these customer emails and tell me what to do."
+"Explain EBITDA."
 
 Improved prompt:
-"Goal: Summarize customer emails so the support lead can decide next actions.
+"# Prompt Contract
 
-Context: Use only the emails provided in this conversation or the connected inbox thread I name. Do not infer customer intent from missing messages.
+## Goal
+Explain EBITDA so a non-finance founder can understand what it means, when it is useful, and what it can hide.
 
-Inputs: {email thread or file}, {product area}, {support policy}, {response deadline}.
+## Context
+The reader is reviewing a basic SaaS investor update. They need a plain-English explanation, not accounting, tax, or investment advice.
 
-Rules:
-- Identify each customer request separately.
-- Quote or cite the source email for every claim.
-- Flag missing order IDs, unclear dates, or policy gaps.
-- Do not draft an external reply unless I ask.
+## Rules
+- Use simple language.
+- Define any finance term you use.
+- Do not assume the company is profitable.
+- Do not give tax, accounting, or investment advice.
+- Separate the general concept from business interpretation.
 
-Output Contract:
-Return a table with Customer, Request, Evidence, Urgency, Suggested next action, Owner, and Open question.
+## Output Contract
+Return exactly six sections: one-sentence definition, formula, simple example, what EBITDA is useful for, what EBITDA can hide, and one question to ask a finance owner.
 
-Quality Bar:
-Every next action must map to a cited email or named policy. If the evidence is unclear, write 'Needs human review.'"
+## Quality Bar
+A non-finance reader can understand it in under 90 seconds. The formula is correct. The example uses small, round numbers. The answer does not imply EBITDA equals cash flow or profit.
+
+## Examples
+Use this tone: 'Think of EBITDA as a rough operating-performance signal before some financing, tax, and accounting effects.'"
 `,
   qualityBar: [
     "The improved prompt has a clear goal and audience",
@@ -76,6 +87,7 @@ Every next action must map to a cited email or named policy. If the evidence is 
     "The output format is concrete enough to verify",
     "The prompt includes checks for missing, stale, or conflicting information",
     "The wording is reusable by another team member",
+    "Placement, Job, and Layer fit the task",
   ],
   safetyConstraints: [
     "Do not invent facts, policies, citations, or source material",

@@ -214,6 +214,7 @@ const DEMO_STEPS: SopStep[] = [
   {
     title: "Run the first test",
     body: "Type the covered refund-window question from Step 3 and check that the assistant cites policy and stops before approval.",
+    image: "/images/m04/refund-assistant-sop/16-first-test.jpeg",
   },
 ];
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { Platform, PromptContract } from "@/data/m03/m03Schema";
 import { platforms } from "@/data/m03/platforms";
+import { promptContractOverlays, promptOptimizerChecklist, v0ToV6Prompts } from "@/data/m03/useCases/competitor-pricing-monitor";
 import { promptContractToMarkdown } from "./skillDownload";
 
 interface PromptContractRevealProps {
@@ -13,11 +14,12 @@ interface PromptContractRevealProps {
 }
 
 const changes = [
-  "Output is structured (table format)",
-  "Sources are cited",
-  "Missing data is flagged, not invented",
-  "Confidence levels appear",
-  "You could defend this output to your team",
+  "Goal names the action, object, and intended result",
+  "Context names the source material, audience, and downstream review",
+  "Rules include must-do, must-not-do, and injection defense",
+  "Output Contract makes the answer structured and testable",
+  "Quality Bar defines what good enough means",
+  "Examples show edge-case behavior",
 ];
 
 export function PromptContractReveal({
@@ -37,7 +39,9 @@ export function PromptContractReveal({
         <p className="eyebrow">The Prompt Contract</p>
         <p className="text-[14px] leading-relaxed text-graphite">
           A structured prompt has six elements: Goal, Context, Rules, Output Contract, Quality Bar,
-          and Examples. Each element constrains the AI response in a specific way.
+          and Examples. The chapter adds two overlay groups: Style overlays and Operational
+          overlays. The six elements define the contract; overlays control voice and operating
+          conditions.
         </p>
       </header>
 
@@ -77,11 +81,52 @@ export function PromptContractReveal({
             <ContractSection label="Examples">{promptContract.examples}</ContractSection>
           </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <OverlayCard
+              title={promptContractOverlays.style.label}
+              description={promptContractOverlays.style.description}
+              items={promptContractOverlays.style.items}
+            />
+            <OverlayCard
+              title={promptContractOverlays.operational.label}
+              description={promptContractOverlays.operational.description}
+              items={promptContractOverlays.operational.items}
+            />
+          </div>
+
+          <div className="rounded-lg border border-chalk bg-white p-5">
+            <p className="eyebrow-muted">V0 to V6 - each element removes uncertainty</p>
+            <div className="mt-4 space-y-3">
+              {v0ToV6Prompts.map((version) => (
+                <details key={version.versionLabel} className="rounded-md border border-chalk bg-paper/70 p-3">
+                  <summary className="cursor-pointer text-[14px] font-medium text-navy">
+                    {version.versionLabel} · {version.elementAdded}
+                  </summary>
+                  <p className="mt-2 text-[13px] text-graphite">{version.whatImproves}</p>
+                  <pre className="mt-3 whitespace-pre-wrap rounded-md bg-mist p-3 font-mono text-[11px] leading-relaxed text-ink">
+                    {version.prompt}
+                  </pre>
+                </details>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-chalk bg-white p-5">
+            <p className="eyebrow-muted">10-item optimizer checklist</p>
+            <ol className="mt-3 grid gap-2 text-[13px] text-navy md:grid-cols-2">
+              {promptOptimizerChecklist.map((item) => (
+                <li key={item} className="rounded-md bg-paper/70 p-3">
+                  {item}
+                </li>
+              ))}
+            </ol>
+          </div>
+
           <div className="space-y-3">
             <p className="eyebrow-muted">Now test this prompt in your AI</p>
             <p className="text-[14px] text-graphite">
               Copy this Prompt Contract, paste it into {platformConfig.displayName}, add your actual
-              competitor list at the top, and run it.
+              email or inbox context, and run it.
             </p>
             <div className="flex flex-wrap gap-2">
               <button
@@ -140,3 +185,26 @@ function ContractSection({ label, children }: { label: string; children: React.R
   );
 }
 
+function OverlayCard({
+  title,
+  description,
+  items,
+}: {
+  title: string;
+  description: string;
+  items: string[];
+}) {
+  return (
+    <section className="rounded-md border border-chalk bg-white p-4">
+      <p className="eyebrow-muted">{title}</p>
+      <p className="mt-2 text-[13px] leading-relaxed text-graphite">{description}</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <li key={item} className="rounded-md bg-mist px-2 py-1 font-mono text-[11px] text-navy">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}

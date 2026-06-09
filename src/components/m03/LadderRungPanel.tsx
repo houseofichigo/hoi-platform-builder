@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import type { LadderRungResult, Platform, RungSpec } from "@/data/m03/m03Schema";
+import { isRungAvailable } from "@/data/m03/capabilityMatrix";
+import { platforms } from "@/data/m03/platforms";
 
 interface LadderRungPanelProps {
   rung: RungSpec;
@@ -7,12 +10,9 @@ interface LadderRungPanelProps {
   locked: boolean;
   result?: LadderRungResult;
   onReveal: () => void;
-  onResultChange: (result: LadderRungResult) => void;
   onContinue: () => void;
   isLast: boolean;
 }
-
-const answerOptions: Array<"yes" | "no" | "maybe"> = ["yes", "no", "maybe"];
 
 export function LadderRungPanel({
   rung,
@@ -20,13 +20,14 @@ export function LadderRungPanel({
   locked,
   result,
   onReveal,
-  onResultChange,
   onContinue,
   isLast,
 }: LadderRungPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
   const revealed = Boolean(result?.revealed);
   const variant = rung.platformVariants[platform];
+  const available = isRungAvailable(rung.rungNumber, platform);
+  const platformConfig = platforms[platform];
 
   if (locked) {
     return (
@@ -99,6 +100,35 @@ export function LadderRungPanel({
             <pre className="mt-3 whitespace-pre-wrap font-mono text-[12px] leading-relaxed text-ink">
               {rung.promptOrArtifact}
             </pre>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn-ichigo btn-ichigo-primary"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(rung.promptOrArtifact);
+                  toast.success(`Rung ${rung.rungNumber} prompt copied.`);
+                }}
+              >
+                Copy rung prompt
+              </button>
+              <a
+                href={platformConfig.url}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-ichigo btn-ichigo-outline"
+              >
+                Open {platformConfig.shortName} ↗
+              </a>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-chalk bg-white p-4">
+            <p className="eyebrow-muted">Platform note</p>
+            <p className="mt-2 text-[13px] text-graphite">
+              {available
+                ? `${rung.rungName} is currently listed as available for ${platformConfig.displayName} in the M03 reference matrix.`
+                : `${rung.rungName} is not currently listed as available for ${platformConfig.displayName}. Keep this prompt as a reference for future tooling decisions.`}
+            </p>
           </div>
 
           {variant && (
@@ -133,24 +163,9 @@ export function LadderRungPanel({
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <RadioCluster
-              label="Tested this rung?"
-              value={result?.tested}
-              onChange={(tested) => onResultChange({ revealed: true, tested, relevantForTeam: result?.relevantForTeam })}
-            />
-            <RadioCluster
-              label="Relevant for your team?"
-              value={result?.relevantForTeam}
-              onChange={(relevantForTeam) =>
-                onResultChange({ revealed: true, tested: result?.tested, relevantForTeam })
-              }
-            />
-          </div>
-
           <div className="flex justify-end">
             <button type="button" className="btn-ichigo btn-ichigo-secondary" onClick={onContinue}>
-              {isLast ? "Continue → reflection" : "Continue → next rung"}
+              {isLast ? "Continue → generate library" : "Continue → next rung"}
             </button>
           </div>
         </div>
@@ -178,40 +193,5 @@ function InfoBlock({ label, children }: { label: string; children: React.ReactNo
       <p className="eyebrow-muted">{label}</p>
       <p className="mt-2 text-[13px] leading-relaxed text-graphite">{children}</p>
     </div>
-  );
-}
-
-function RadioCluster({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value?: "yes" | "no" | "maybe";
-  onChange: (value: "yes" | "no" | "maybe") => void;
-}) {
-  return (
-    <fieldset className="rounded-md border border-chalk bg-white p-4">
-      <legend className="text-sm font-medium text-navy">{label}</legend>
-      <div className="mt-3 flex gap-2">
-        {answerOptions.map((option) => (
-          <label key={option} className="cursor-pointer">
-            <input
-              type="radio"
-              checked={value === option}
-              onChange={() => onChange(option)}
-              className="sr-only"
-            />
-            <span
-              className={`inline-flex rounded-md border px-3 py-1.5 text-[13px] capitalize ${
-                value === option ? "border-terracotta bg-terracotta text-white" : "border-chalk bg-white text-navy"
-              }`}
-            >
-              {option}
-            </span>
-          </label>
-        ))}
-      </div>
-    </fieldset>
   );
 }

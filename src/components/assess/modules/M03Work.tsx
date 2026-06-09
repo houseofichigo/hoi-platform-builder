@@ -2,11 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Step } from "@/components/assess/Step";
-import { ClosingReflectionPanel } from "@/components/m03/ClosingReflectionPanel";
 import { LadderProgressIndicator } from "@/components/m03/LadderProgressIndicator";
 import { LadderRungPanel } from "@/components/m03/LadderRungPanel";
 import { PlaybookGenerator } from "@/components/m03/PlaybookGenerator";
-import { getRungsForPlatform } from "@/data/m03/capabilityMatrix";
 import type {
   AutomationPlaybookData,
   LadderRungResult,
@@ -33,19 +31,15 @@ function hasAnyObservation(value?: VaguePromptTestResult): boolean {
   return Object.values(value.observations).some(Boolean);
 }
 
-function hasReflectionAnswers(
-  reflection?: ReflectionAnswers,
-  readinessStatus?: "PASS" | "PARTIAL" | "BLOCKED",
-  readinessExplanation?: string,
-): boolean {
-  return Boolean(
-    reflection?.currentRung &&
-      reflection.targetRung &&
-      reflection.governanceGaps.length > 0 &&
-      readinessStatus &&
-      readinessExplanation?.trim(),
-  );
-}
+const DEFAULT_REFLECTION: ReflectionAnswers = {
+  currentRung: 2,
+  targetRung: 6,
+  governanceGaps: ["source_controls", "access_governance", "audit_trails", "exception_handling"],
+};
+
+const DEFAULT_READINESS_STATUS: "PASS" | "PARTIAL" | "BLOCKED" = "PARTIAL";
+const DEFAULT_READINESS_EXPLANATION =
+  "Reference library is ready to use, but connector, agent, and scheduled rungs still require source ownership, access rules, and confirmation gates.";
 
 export function M03Work() {
   const { workspace } = useWorkspace();
@@ -67,7 +61,6 @@ export function M03Work() {
 
   const [step, setStep] = useState<StepNum>(1);
   const [platform, setPlatform] = useState<Platform | undefined>();
-  const [useCaseId, setUseCaseId] = useState<string>(competitorPricingMonitor.id);
   const [vaguePromptTest, setVaguePromptTest] = useState<VaguePromptTestResult | undefined>();
   const [structuredPrompt, setStructuredPrompt] = useState<PromptContract | undefined>();
   const [skillSpec, setSkillSpec] = useState<SkillSpec | undefined>();
@@ -78,20 +71,9 @@ export function M03Work() {
   const [automationPlaybook, setAutomationPlaybook] = useState<AutomationPlaybookData | undefined>();
   const [hydrated, setHydrated] = useState(false);
 
-  const availableRungNumbers = useMemo(
-    () => (platform ? getRungsForPlatform(platform) : []),
-    [platform],
-  );
   const step3Rungs = useMemo(
-    () =>
-      competitorPricingMonitor.rungs.filter(
-        (rung) => platform && rung.rungNumber >= 5 && availableRungNumbers.includes(rung.rungNumber),
-      ),
-    [availableRungNumbers, platform],
-  );
-  const implicitRungs = useMemo(
-    () => availableRungNumbers.filter((rung) => rung < 5),
-    [availableRungNumbers],
+    () => competitorPricingMonitor.rungs,
+    [],
   );
 
   useEffect(() => {
@@ -113,7 +95,6 @@ export function M03Work() {
     }
 
     setPlatform(platformOut.value);
-    setUseCaseId(useCaseOut.value ?? competitorPricingMonitor.id);
     setVaguePromptTest(vagueOut.value);
     setStructuredPrompt(structuredOut.value);
     setSkillSpec(skillOut.value);
@@ -173,17 +154,9 @@ export function M03Work() {
   const updatePlatform = (next: Platform) => {
     setPlatform(next);
     platformOut.setValue.mutate(next);
+    useCaseOut.setValue.mutate(competitorPricingMonitor.id);
     setLadderWalkthrough({});
     ladderOut.setValue.mutate({});
-    setAutomationPlaybook(undefined);
-  };
-
-  const updateUseCase = (next: string) => {
-    setUseCaseId(next);
-    useCaseOut.setValue.mutate(next);
-    setStructuredPrompt(undefined);
-    setSkillSpec(undefined);
-    setLadderWalkthrough({});
     setAutomationPlaybook(undefined);
   };
 
@@ -193,51 +166,56 @@ export function M03Work() {
     ladderOut.setValue.mutate(next);
   };
 
-  const updateReflection = (answers: ReflectionAnswers) => {
-    setReflectionAnswers(answers);
-    reflectionOut.setValue.mutate(answers);
-  };
-
-  const updateReadiness = (status: "PASS" | "PARTIAL" | "BLOCKED", explanation: string) => {
-    setReadinessStatus(status);
-    setReadinessExplanation(explanation);
-    readinessStatusOut.setValue.mutate(status);
-    readinessExplanationOut.setValue.mutate(explanation);
-  };
-
   const allStep3RungsRevealed = step3Rungs.every(
     (rung) => ladderWalkthrough[rung.rungNumber]?.revealed,
   );
 
   const buildPlaybook = async (): Promise<AutomationPlaybookData> => {
-    if (!platform || !vaguePromptTest || !skillSpec || !reflectionAnswers || !readinessStatus) {
+    if (!platform || !vaguePromptTest) {
       throw new Error("M03 playbook prerequisites are incomplete.");
     }
 
-    const rungsCovered = Array.from(
-      new Set([
-        ...implicitRungs,
-        ...step3Rungs
-          .filter((rung) => ladderWalkthrough[rung.rungNumber]?.revealed)
-          .map((rung) => rung.rungNumber),
+    const rungsCovered = competitorPricingMonitor.rungs.map((rung) => rung.rungNumber);
+    const finalReflection = reflectionAnswers ?? DEFAULT_REFLECTION;
+    const finalReadinessStatus = readinessStatus ?? DEFAULT_READINESS_STATUS;
+    const finalReadinessExplanation = readinessExplanation || DEFAULT_READINESS_EXPLANATION;
+    const finalSkill = skillSpec ?? competitorPricingMonitor.skillSpec;
+    const finalPromptContract = structuredPrompt ?? competitorPricingMonitor.promptContract;
+    const finalWalkthrough = Object.fromEntries(
+      competitorPricingMonitor.rungs.map((rung) => [
+        rung.rungNumber,
+        ladderWalkthrough[rung.rungNumber] ?? { revealed: true },
       ]),
-    ).sort((a, b) => a - b);
+    ) as Record<number, LadderRungResult>;
 
     const next: AutomationPlaybookData = {
       generatedAt: new Date().toISOString(),
       platform,
-      useCase: useCaseId,
+      useCase: competitorPricingMonitor.id,
       rungsCovered,
       vagueResults: vaguePromptTest,
-      promptContract: structuredPrompt ?? competitorPricingMonitor.promptContract,
-      skillSpec,
-      rungWalkthrough: ladderWalkthrough,
-      reflectionAnswers,
-      readinessStatus,
-      readinessExplanation,
+      promptContract: finalPromptContract,
+      skillSpec: finalSkill,
+      rungWalkthrough: finalWalkthrough,
+      reflectionAnswers: finalReflection,
+      readinessStatus: finalReadinessStatus,
+      readinessExplanation: finalReadinessExplanation,
     };
 
     setAutomationPlaybook(next);
+    setSkillSpec(finalSkill);
+    setStructuredPrompt(finalPromptContract);
+    setLadderWalkthrough(finalWalkthrough);
+    setReflectionAnswers(finalReflection);
+    setReadinessStatus(finalReadinessStatus);
+    setReadinessExplanation(finalReadinessExplanation);
+    await useCaseOut.setValue.mutateAsync(competitorPricingMonitor.id);
+    await structuredOut.setValue.mutateAsync(finalPromptContract);
+    await skillOut.setValue.mutateAsync(finalSkill);
+    await ladderOut.setValue.mutateAsync(finalWalkthrough);
+    await reflectionOut.setValue.mutateAsync(finalReflection);
+    await readinessStatusOut.setValue.mutateAsync(finalReadinessStatus);
+    await readinessExplanationOut.setValue.mutateAsync(finalReadinessExplanation);
     await playbookOut.setValue.mutateAsync(next);
     return next;
   };
@@ -262,10 +240,10 @@ export function M03Work() {
       <Step
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 1 of 3"
-        title="Choose your tools and test the baseline"
-        why={<p>Prompt-driven automation starts with the tool your team already uses.</p>}
-        example={<p className="text-[14px] text-navy">M03 uses curated examples so each automation rung shows a different capability.</p>}
-        whatToNotice={<p>Vague intent creates vague output. Structure comes next.</p>}
+        title="From vague to structured"
+        why={<p>Prompt-driven automation starts by making prompt quality visible.</p>}
+        example={<p className="text-[14px] text-navy">Run the vague prompt: Sort my inbox.</p>}
+        whatToNotice={<p>Vague intent creates vague output. A Prompt Contract fixes that.</p>}
         yourVersion={
           <M03Step1
             platform={platform}
@@ -298,10 +276,10 @@ export function M03Work() {
       <Step
         chapterLabel={CHAPTER_LABEL}
         stepLabel="STEP 2 of 3"
-        title="From vague prompt to reusable Skill"
-        why={<p>A Prompt Contract makes source rules, output shape, and quality checks explicit.</p>}
-        example={<p className="text-[14px] text-navy">A good Prompt Contract can become a reusable Skill-building pattern.</p>}
-        whatToNotice={<p>Reuse is a governance move, not just a convenience move.</p>}
+        title="Understand the Prompt Contract"
+        why={<p>A Prompt Contract makes goal, context, rules, output shape, quality checks, and examples explicit.</p>}
+        example={<p className="text-[14px] text-navy">The chapter uses six core elements plus Style and Operational overlays.</p>}
+        whatToNotice={<p>The six elements define the contract. Overlays shape how it is used.</p>}
         yourVersion={
           <M03Step2
             platform={platform}
@@ -319,8 +297,8 @@ export function M03Work() {
           />
         }
         produces={<p className="text-[14px] text-navy">m03.structured_prompt and m03.skill_spec</p>}
-        canContinue={Boolean(structuredPrompt && skillSpec)}
-        disabledReason="Reveal the Prompt Contract and save the reusable asset before continuing."
+        canContinue={Boolean(structuredPrompt)}
+        disabledReason="Reveal the Prompt Contract before continuing."
         nextLabel="Continue to Step 3"
         onBack={() => goToStep(1)}
         onContinue={() => goToStep(3)}
@@ -336,22 +314,23 @@ export function M03Work() {
   const firstLockedIndex = step3Rungs.findIndex(
     (rung, index) => index > 0 && !ladderWalkthrough[step3Rungs[index - 1].rungNumber]?.revealed,
   );
-  const canGenerate = allStep3RungsRevealed && hasReflectionAnswers(reflectionAnswers, readinessStatus, readinessExplanation);
+  const canGenerate = allStep3RungsRevealed;
 
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
       stepLabel="STEP 3 of 3"
-      title="Climb the automation ladder"
-      why={<p>The right automation layer depends on repeatability, source needs, and risk.</p>}
-      example={<p className="text-[14px] text-navy">You will walk every platform-applicable rung from file upload onward.</p>}
-      whatToNotice={<p>Every rung adds capability and a new governance obligation.</p>}
+      title="Copy the automation ladder"
+      why={<p>The right automation layer depends on repeatability, source needs, cost, latency, and risk.</p>}
+      example={<p className="text-[14px] text-navy">Review all 10 rungs and copy the prompt artifact that matches the work.</p>}
+      whatToNotice={<p>Most business work lives between rungs 2 and 6. Do not jump to agents.</p>}
       yourVersion={
         <div className="space-y-6">
           <div className="card bg-mist/40">
             <p className="text-[14px] leading-relaxed text-graphite">
               You have a Prompt Contract and a reusable asset. Now walk the rungs available in your
-              platform, test each one if useful, and choose the rung your team should operate at today.
+              platform as a copy-ready library. Each rung adds capability and a new governance
+              obligation.
             </p>
             <LadderProgressIndicator rungs={step3Rungs} walkthrough={ladderWalkthrough} />
           </div>
@@ -368,7 +347,6 @@ export function M03Work() {
                 locked={locked}
                 result={ladderWalkthrough[rung.rungNumber]}
                 onReveal={() => updateLadder(rung.rungNumber, { ...ladderWalkthrough[rung.rungNumber], revealed: true })}
-                onResultChange={(result) => updateLadder(rung.rungNumber, result)}
                 onContinue={() => {
                   const next = step3Rungs[index + 1];
                   if (next) {
@@ -383,31 +361,31 @@ export function M03Work() {
           })}
 
           {allStep3RungsRevealed && (
-            <ClosingReflectionPanel
-              platform={platform}
-              revealedRungs={step3Rungs}
-              reflectionAnswers={reflectionAnswers}
-              readinessStatus={readinessStatus}
-              readinessExplanation={readinessExplanation}
-              onReflectionChange={updateReflection}
-              onReadinessChange={updateReadiness}
-            >
+            <section className="card space-y-5">
+              <header className="space-y-2">
+                <p className="eyebrow">Ladder reviewed</p>
+                <p className="text-[14px] leading-relaxed text-graphite">
+                  You have reviewed the 10 automation rungs. Generate the shareable library to keep
+                  the Prompt Contract, overlays, optimizer checklist, and copy-ready ladder prompts
+                  together.
+                </p>
+              </header>
               <PlaybookGenerator
                 canGenerate={canGenerate}
-                disabledReason="Answer all four reflection questions to generate your Playbook."
+                disabledReason="Review every rung to generate your library."
                 existingPlaybook={automationPlaybook}
-                rungCount={implicitRungs.length + step3Rungs.length}
+                rungCount={step3Rungs.length}
                 onGenerate={buildPlaybook}
                 onComplete={completeM03}
                 completePending={progress.markComplete.isPending || completeOut.setValue.isPending}
               />
-            </ClosingReflectionPanel>
+            </section>
           )}
         </div>
       }
-      produces={<p className="text-[14px] text-navy">m03.ladder_walkthrough, m03.reflection_answers, and m03.automation_playbook</p>}
+      produces={<p className="text-[14px] text-navy">m03.ladder_walkthrough and m03.automation_playbook</p>}
       canContinue={Boolean(automationPlaybook)}
-      disabledReason="Generate the Automation Playbook to complete M03."
+      disabledReason="Generate the Prompt Contract + Ladder Library to complete M03."
       nextLabel="Complete M03"
       onBack={() => goToStep(2)}
       onContinue={completeM03}

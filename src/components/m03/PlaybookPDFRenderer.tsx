@@ -12,8 +12,8 @@ import { platforms } from "@/data/m03/platforms";
 import { setupGuides } from "@/data/m03/setupGuides";
 import { crossPlatformReference } from "@/data/m03/crossPlatformReference";
 import { competitorPricingMonitor } from "@/data/m03/useCases/competitor-pricing-monitor";
-import { genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
-import { GOVERNANCE_GAP_LABELS } from "./m03Display";
+import { promptContractOverlays, promptOptimizerChecklist, v0ToV6Prompts } from "@/data/m03/useCases/competitor-pricing-monitor";
+import { contractClauseExtractorSkill, genericSkillCreationMetaPrompt, promptImproverSkill } from "@/data/m03/skillTemplate";
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: "Helvetica", fontSize: 10, color: "#1E2B4D" },
@@ -86,8 +86,8 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
     <Document>
       <Page size="A4" style={styles.cover}>
         <Text style={styles.eyebrow}>House of Ichigo · M03</Text>
-        <Text style={styles.title}>M03 Prompt Automation Playbook</Text>
-        <Text style={styles.subtitle}>Shareable Prompt Library</Text>
+        <Text style={styles.title}>M03 Prompt Contract + Automation Ladder Library</Text>
+        <Text style={styles.subtitle}>Six elements, overlays, optimizer checklist, and copy-ready ladder prompts</Text>
         <Text style={styles.body}>Platform: {platform.displayName}</Text>
         <Text style={styles.body}>Generated: {new Date(data.generatedAt).toLocaleString()}</Text>
       </Page>
@@ -98,23 +98,48 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
           <Text style={styles.body}>Rungs walked: {data.rungsCovered.join(", ")}</Text>
           <Text style={styles.monoBlock}>Vague prompt: {competitorPricingMonitor.vaguePrompt}</Text>
         </PDFSection>
-        <PDFSection title="2. Prompt Contract">
+        <PDFSection title="2. V0 to V6 prompt progression">
+          {v0ToV6Prompts.map((version) => (
+            <View key={version.versionLabel} style={styles.section}>
+              <Text style={styles.eyebrow}>{version.versionLabel}</Text>
+              <Text style={styles.body}>{version.whatImproves}</Text>
+              <Text style={styles.monoBlock}>{version.prompt}</Text>
+            </View>
+          ))}
+        </PDFSection>
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <PDFSection title="3. Six-element Prompt Contract">
           <Text style={styles.body}>Goal: {data.promptContract.goal}</Text>
           <Text style={styles.body}>Context: {data.promptContract.context}</Text>
           <Text style={styles.body}>Rules: {data.promptContract.rules.join("; ")}</Text>
           <Text style={styles.body}>Quality bar: {data.promptContract.qualityBar.join("; ")}</Text>
         </PDFSection>
-        <PDFSection title="3. Skill-building meta-prompt">
+        <PDFSection title="4. Overlays and optimizer checklist">
+          <Text style={styles.body}>{promptContractOverlays.style.label}: {promptContractOverlays.style.items.join(", ")}</Text>
+          <Text style={styles.body}>{promptContractOverlays.operational.label}: {promptContractOverlays.operational.items.join(", ")}</Text>
+          {promptOptimizerChecklist.map((item) => (
+            <Text key={item} style={styles.row}>• {item}</Text>
+          ))}
+        </PDFSection>
+        <PDFSection title="5. Contract-clause Skill example">
+          <Text style={styles.body}>{contractClauseExtractorSkill.name}</Text>
+          <Text style={styles.body}>{contractClauseExtractorSkill.description}</Text>
+          <Text style={styles.monoBlock}>{contractClauseExtractorSkill.instructions}</Text>
+        </PDFSection>
+      </Page>
+      <Page size="A4" style={styles.page}>
+        <PDFSection title="6. Optional Skill-building meta-prompt">
           <Text style={styles.monoBlock}>{genericSkillCreationMetaPrompt}</Text>
         </PDFSection>
-        <PDFSection title="4. Prompt Improver Skill">
+        <PDFSection title="7. Optional Prompt Improver Skill">
           <Text style={styles.body}>{promptImproverSkill.name}</Text>
           <Text style={styles.body}>{promptImproverSkill.description}</Text>
           <Text style={styles.monoBlock}>{promptImproverSkill.instructions}</Text>
         </PDFSection>
       </Page>
       <Page size="A4" style={styles.page}>
-        <PDFSection title="5. Prompt library by automation rung">
+        <PDFSection title="8. Prompt library by automation rung">
           {walked.map((rung) => (
             <View key={rung.rungNumber} style={styles.section}>
               <Text style={styles.eyebrow}>Rung {rung.rungNumber}</Text>
@@ -125,19 +150,8 @@ function PlaybookPDFDocument({ data }: { data: AutomationPlaybookData }) {
             </View>
           ))}
         </PDFSection>
-      </Page>
-      <Page size="A4" style={styles.page}>
-        <PDFSection title="6. Readiness Note">
-          <Text style={styles.body}>Current rung: {data.reflectionAnswers.currentRung}</Text>
-          <Text style={styles.body}>Target rung: {data.reflectionAnswers.targetRung}</Text>
-          <Text style={styles.body}>
-            Governance gaps: {data.reflectionAnswers.governanceGaps.map((gap) => GOVERNANCE_GAP_LABELS[gap] ?? gap).join(", ")}
-          </Text>
-          <Text style={styles.body}>Automation readiness: {data.readinessStatus}</Text>
-          <Text style={styles.body}>Reasoning: {data.readinessExplanation}</Text>
-        </PDFSection>
         <Text style={styles.footer}>
-          M03 Prompt Automation Playbook · {platform.displayName}
+          M03 Prompt Contract + Automation Ladder Library · {platform.displayName}
         </Text>
       </Page>
     </Document>

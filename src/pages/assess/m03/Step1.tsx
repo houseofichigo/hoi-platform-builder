@@ -25,13 +25,14 @@ export function M03Step1({
     <div className="space-y-6">
       <div className="rounded-lg border border-chalk bg-mist/40 p-5">
         <p className="text-[14px] leading-relaxed text-graphite">
-          In M02 you built a knowledge base blueprint: a governed source of truth for one business
-          process. M03 picks up where M02 left off: now that you have the knowledge, how do you turn
-          it into a reusable, automation-ready workflow you can actually use in your daily AI tool?
+          M03 starts with one simple lesson: vague prompts produce vague work. You will run a weak
+          inbox prompt, notice what is missing, then compare it with a Prompt Contract that is ready
+          to reuse.
         </p>
         {m02BridgeLabel && (
           <p className="mt-3 text-[12px] text-slate">
-            From your M02 selection: {m02BridgeLabel}. M03 now uses curated examples across the automation ladder so you can see different capabilities.
+            From your M02 selection: {m02BridgeLabel}. M03 now focuses on prompt quality: structure,
+            reuse, grounding, evaluation, and safety.
           </p>
         )}
       </div>

@@ -2,7 +2,7 @@ import type { Platform } from "@/data/m03/m03Schema";
 
 export const RUNG_LABELS: Record<number, string> = {
   1: "Vague prompt",
-  2: "Structured prompt",
+  2: "Optimized prompt",
   3: "Reusable prompt",
   4: "Skill",
   5: "Prompt + File",
@@ -10,7 +10,7 @@ export const RUNG_LABELS: Record<number, string> = {
   7: "Prompt + Search",
   8: "Prompt + Deep Research",
   9: "Agent mode",
-  10: "Scheduled prompt",
+  10: "Scheduled task",
 };
 
 export const GOVERNANCE_GAP_LABELS: Record<string, string> = {
@@ -42,4 +42,3 @@ export function formatPromptValue(value?: "yes" | "no" | "maybe"): string {
   if (!value) return "Not recorded";
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
-

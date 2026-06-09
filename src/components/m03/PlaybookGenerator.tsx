@@ -54,7 +54,7 @@ export function PlaybookGenerator({
         <PlaybookDocument data={playbook} />
         <div className="mx-auto max-w-[780px]">
           <button type="button" className="text-[13px] font-medium text-terracotta hover:text-navy" onClick={generate}>
-            Regenerate Playbook
+            Regenerate library
           </button>
         </div>
         <WhatHappensNextPanel data={playbook} />
@@ -71,7 +71,7 @@ export function PlaybookGenerator({
         disabled={!canGenerate}
         onClick={generate}
       >
-        Generate the M03 Prompt Automation Playbook →
+        Generate the M03 Prompt Contract + Ladder Library →
       </button>
       {!canGenerate && <p className="text-center text-[12px] italic text-slate">{disabledReason}</p>}
     </div>

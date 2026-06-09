@@ -19,51 +19,51 @@ export const M03_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Prompt-Driven Automation. Prompts are workflow assets, not disposable messages. Today you turn three business tasks into Prompt Contracts: one extraction, one classification, and one guardrail.",
+    "Prompt-Driven Automation. Prompts are workflow assets, not disposable messages. Today you move from a vague prompt to a six-element Prompt Contract, then copy the right automation-ladder prompt for the job.",
 
   step1: {
-    title: "Prompt architecture - two questions before you write anything",
+    title: "From vague to structured",
     why:
-      "Before writing a prompt, decide where it lives and what job it does. Placement defines authority. Task type defines behavior. A user prompt for extraction is not the same design as a system prompt for safety.",
+      "Vague prompts produce vague work. Run the weak baseline first so you can see what the model has to guess before structure is added.",
     example:
-      "For a contract-clause extraction task, placement is User because the learner is running it as a manual task. Task type is Extraction because the job is to pull structured clauses from a document, not classify or generate.",
+      "Start with: Sort my inbox. The missing pieces are scope, categories, source rules, output shape, confidence, and safety boundaries.",
     whatToNotice: [
       "User prompts trigger work. System prompts govern behavior.",
       "Context prompts provide evidence. Workflow prompts run inside automations.",
       "Most prompts need one primary task type; naming it sharpens the contract.",
     ],
-    produces: "Architecture decision - placement + task type for one Prompt Contract",
-    nextLabel: "Step 2 - the six-element ladder",
+    produces: "Platform choice and vague-prompt observations",
+    nextLabel: "Step 2 - understand the Prompt Contract",
   },
 
   step2: {
-    title: "The six-element ladder - same task, six prompts",
+    title: "Understand the Prompt Contract",
     why:
-      "Prompt quality compounds. Each element removes a different uncertainty: Task gives direction, Role frames the lens, Context aligns the output, Constraints prevent failure modes, Output format makes the result usable, and Examples teach the standard.",
+      "Prompt quality compounds. The chapter defines six core elements: Goal, Context, Rules, Output Contract, Quality Bar, and Examples, plus Style and Operational overlay groups.",
     example:
-      "Same support email, same model, six versions of the prompt. The output moves from a vague paragraph to a routed, policy-aware, auditable result.",
+      "Same inbox intent, same model, six versions of the prompt. The output moves from vague sorting to routed, evidence-backed, auditable classification.",
     whatToNotice: [
       "Each rung removes a specific failure mode",
       "Examples remove ambiguity faster than explanation",
       "Higher-token cost is the trade for reliability and repeatability",
     ],
-    produces: "Understanding of how the six elements compound",
-    nextLabel: "Step 3 - write your three Prompt Contracts",
+    produces: "Six-element Prompt Contract and reference Skill asset",
+    nextLabel: "Step 3 - copy the automation ladder",
   },
 
   step3: {
-    title: "Write three Prompt Contracts - extraction, classification, guardrail",
+    title: "Copy the automation ladder",
     why:
-      "M03 is where prompts become reusable assets. You will create three contracts across three business tasks: a contract-clause extractor, an inbound-email classifier, and a customer-reply guardrail.",
+      "The right automation layer depends on repeatability, grounding, tools, cost, latency, and risk. Most business work lives between rungs 2 and 6.",
     example:
-      "Each contract uses the same six-element framework, names a prompt-injection or data-leakage risk, and defines what a good output must look like.",
+      "Review all 10 rungs: vague prompt, optimized prompt, reusable prompt, Skill, file, connector, search, deep research, agent mode, and scheduled task.",
     whatToNotice: [
       "Different task types require different success criteria",
       "A prompt library entry must include safety risks, inputs, outputs, and tests",
       "Guardrails are prompts too - they define what the system must never do",
     ],
-    produces: "Three documented Prompt Contracts - drafts ready for quality review",
-    nextLabel: "Step 4 - quality bar review + complete",
+    produces: "M03 Prompt Contract + Automation Ladder Library",
+    nextLabel: "Complete M03",
   },
 
   step4: {

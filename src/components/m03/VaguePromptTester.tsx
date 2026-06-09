@@ -13,12 +13,12 @@ const observationLabels: Array<{
   key: keyof VaguePromptTestResult["observations"];
   label: string;
 }> = [
-  { key: "askedWhichCompetitors", label: "Did the AI ask which competitors to check?" },
-  { key: "citedSources", label: "Did the AI cite specific sources (URLs)?" },
-  { key: "structuredOutput", label: "Did the AI give you a structured output?" },
-  { key: "specifiedCurrency", label: "Did the AI specify what was current vs outdated?" },
-  { key: "inventedDetails", label: "Did the AI invent prices or details it could not verify?" },
-  { key: "couldDefend", label: "Could you defend the output to your team?" },
+  { key: "askedWhichCompetitors", label: "Did the AI ask what inbox, timeframe, or categories to use?" },
+  { key: "citedSources", label: "Did the AI explain what email evidence it would rely on?" },
+  { key: "structuredOutput", label: "Did the AI return a structured output?" },
+  { key: "specifiedCurrency", label: "Did the AI define urgency, route, confidence, or review rules?" },
+  { key: "inventedDetails", label: "Did the AI assume categories or actions you did not specify?" },
+  { key: "couldDefend", label: "Could you defend this output to your team?" },
 ];
 
 const emptyResult: VaguePromptTestResult = {
@@ -62,7 +62,8 @@ export function VaguePromptTester({
         <p className="eyebrow">Test the vague prompt in your AI</p>
         <p className="text-[14px] leading-relaxed text-graphite">
           Open {platformConfig.displayName} in a new tab. Copy this prompt, run it, then
-          come back and mark what you observed.
+          come back and mark what you observed. The point is not to get a perfect answer; it is to
+          see what the prompt fails to specify.
         </p>
       </header>
 
@@ -90,6 +91,14 @@ export function VaguePromptTester({
         >
           Open {platformConfig.shortName} ↗
         </a>
+        <button
+          type="button"
+          className="btn-ichigo btn-ichigo-secondary"
+          disabled
+          title="The HOI assistant link will be added when it is available."
+        >
+          HOI prompt assistant coming soon
+        </button>
       </div>
 
       <div className="space-y-3">

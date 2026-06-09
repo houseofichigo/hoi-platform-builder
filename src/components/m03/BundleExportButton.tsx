@@ -12,7 +12,7 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
       const { saveAs } = await import("file-saver");
       const { generatePlaybookPDF } = await import("./PlaybookPDFRenderer");
       const blob = await generatePlaybookPDF(data);
-      saveAs(blob, `m03-playbook-${data.platform}-${formatDateForFilename()}.pdf`);
+      saveAs(blob, `m03-prompt-contract-ladder-library-${data.platform}-${formatDateForFilename()}.pdf`);
     } catch (error) {
       console.error(error);
       toast.error("PDF export failed. Try the companion bundle or regenerate the playbook.");
@@ -45,7 +45,7 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
 
       zip.file("cross-platform-reference.pdf", await getCrossPlatformReferencePDF());
       const blob = await zip.generateAsync({ type: "blob" });
-      saveAs(blob, `m03-playbook-${data.platform}-${formatDateForFilename()}.zip`);
+      saveAs(blob, `m03-prompt-contract-ladder-library-${data.platform}-${formatDateForFilename()}.zip`);
     } catch (error) {
       console.error(error);
       toast.error("Bundle export failed. The in-page playbook is still available.");
@@ -57,7 +57,7 @@ export function BundleExportButton({ data }: { data: AutomationPlaybookData }) {
   return (
     <div className="mx-auto flex max-w-[780px] flex-wrap gap-3">
       <button type="button" className="btn-ichigo btn-ichigo-secondary" onClick={downloadPdf} disabled={busy !== null}>
-        {busy === "pdf" ? "Preparing PDF..." : "Download Playbook (PDF)"}
+        {busy === "pdf" ? "Preparing PDF..." : "Download Library (PDF)"}
       </button>
       <button type="button" className="btn-ichigo btn-ichigo-primary" onClick={downloadZip} disabled={busy !== null}>
         {busy === "zip" ? "Building bundle..." : "Download Companion Bundle (.zip)"}

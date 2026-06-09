@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,24 +7,37 @@ import { useAssessProgress, useAssessOutput } from "@/hooks/useAssess";
 import { supabase } from "@/integrations/supabase/client";
 import { Step } from "@/components/assess/Step";
 import { M02Step3Guided } from "@/components/m02/step3/M02Step3Guided";
+import { BlueprintDocument } from "@/components/m02/step3/BlueprintDocument";
+import { BlueprintExportButton } from "@/components/m02/step3/BlueprintExportButton";
 import {
   M02_DEFAULT_USE_CASE_ID,
   M02_COURSE_CONTENT,
   M02_USE_CASES,
   getM02UseCase,
 } from "@/lib/assess/content/course1";
-import type { M02UseCase, M02UseCaseSource } from "@/lib/assess/content/course1";
+import type { M02UseCase } from "@/lib/assess/content/course1";
 import { getM02Blueprint } from "@/data/m02/blueprints";
 import {
+  M02_BLUEPRINT_COMPONENTS,
   createDefaultM02Step3State,
   normalizeM02Step3State,
   type M02BlueprintData,
   type M02GeneratedBlueprint,
   type M02Step3State,
 } from "@/data/m02/blueprintSchema";
+import {
+  M02_EXAMPLE_GATE_EXPLANATION,
+  M02_EXAMPLE_GATE_STATUS,
+  buildGeneratedM02Blueprint,
+} from "@/components/m02/step3/BlueprintGenerator";
 
 const CHAPTER_LABEL = "PHASE 01 · M02 · DATA READINESS & KNOWLEDGE BASE";
 const TOTAL_STEPS = 3;
+const REFERENCE_GAPS = [
+  "Source owner must approve the entry before production",
+  "Access rules must be checked against live systems",
+  "Retrieval tests must be run and recorded before deployment",
+] as const;
 
 type StepNum = 1 | 2 | 3;
 type GateStatus = "pass" | "partial" | "blocked" | "";
@@ -58,9 +70,10 @@ interface M02KnowledgeCheckState {
 }
 
 const DEFAULT_GATE_READINESS: GateReadinessShape = {
-  status: "",
-  checks: [],
-  reasonCodes: [],
+  status: M02_EXAMPLE_GATE_STATUS,
+  checks: [...M02_BLUEPRINT_COMPONENTS],
+  reasonCodes: [...REFERENCE_GAPS],
+  explanation: M02_EXAMPLE_GATE_EXPLANATION,
 };
 
 const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
@@ -68,31 +81,30 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
     {
       id: "q1",
       type: "single",
-      question: "What is an operating knowledge base blueprint?",
+      question: "Why is the refunds policy PDF data, but not yet an operating knowledge base?",
       options: [
-        "A folder of documents for the AI to read",
-        "A three-component spec showing C1 Data Map, C2 Trust + Safety, and C3 Verification",
-        "A list of model parameters",
-        "A final production database",
+        "Because PDFs cannot contain useful information",
+        "Because it still lacks owner, metadata, rules, access boundaries, and retrieval tests",
+        "Because the AI should ignore all documents",
+        "Because the document must be converted into code first",
       ],
-      correct:
-        "A three-component spec showing C1 Data Map, C2 Trust + Safety, and C3 Verification",
+      correct: "Because it still lacks owner, metadata, rules, access boundaries, and retrieval tests",
       explanation:
-        "The M02 deliverable is an operational blueprint your team can use before building a real assistant.",
+        "The document has information. The operating KB adds the structure that makes the information retrievable, governable, and testable.",
     },
     {
       id: "q2",
       type: "single",
-      question: "What does C1 Data Map add to a raw document?",
+      question: "What does C1 Data Map add to the raw document?",
       options: [
-        "To make the document look more complete",
         "Source, owner, metadata, sensitivity, and a retrievable KB entry ID",
-        "To reduce token costs",
-        "To replace human review",
+        "A nicer file name only",
+        "A model temperature setting",
+        "A final customer answer",
       ],
       correct: "Source, owner, metadata, sensitivity, and a retrievable KB entry ID",
       explanation:
-        "C1 is how raw material becomes source-backed, owned, and retrievable knowledge.",
+        "C1 turns raw material into source-backed, owned, classified knowledge.",
     },
     {
       id: "q3",
@@ -100,9 +112,9 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
       question: "What does C2 Trust + Safety control?",
       options: [
         "Which source wins, who may see the answer, what the AI may do, and when to escalate",
-        "How creative the model should be",
-        "Which employee writes the prompt",
-        "How many documents fit in the context window",
+        "Which font the output uses",
+        "How many examples appear on the page",
+        "Whether the user likes the answer",
       ],
       correct: "Which source wins, who may see the answer, what the AI may do, and when to escalate",
       explanation:
@@ -111,21 +123,21 @@ const M02_STEP_QUIZZES: Record<M02QuizStepKey, readonly M02QuizQuestion[]> = {
     {
       id: "q4",
       type: "single",
-      question: "What makes a retrieval test useful?",
+      question: "What makes C3 Verification useful?",
       options: [
-        "It is a broad question the AI can answer however it wants",
-        "It includes a question, expected entry, expected source, and expected behavior",
         "It checks whether the AI sounds confident",
-        "It is only run after deployment",
+        "It defines the user question, expected entry, expected source, and expected behavior in advance",
+        "It replaces human review",
+        "It only runs after deployment",
       ],
-      correct: "It includes a question, expected entry, expected source, and expected behavior",
+      correct: "It defines the user question, expected entry, expected source, and expected behavior in advance",
       explanation:
-        "A retrieval test is provable because the expected evidence and behavior are defined in advance.",
+        "A retrieval test is useful because the expected evidence and behavior are defined before the AI is trusted.",
     },
     {
       id: "q5",
       type: "multi",
-      question: "Which blueprint components would you want reviewed before Build?",
+      question: "Which components turn the document into an operating KB?",
       options: [
         "C1 - Data Map",
         "C2 - Trust + Safety",
@@ -186,6 +198,32 @@ function getM02QuizStatus(
   };
 }
 
+function createReviewedM02State(useCaseId: string): M02Step3State {
+  return {
+    ...createDefaultM02Step3State(useCaseId),
+    revealedPanels: Array.from({ length: M02_BLUEPRINT_COMPONENTS.length }, () => true),
+    collapsedPanels: Array.from({ length: M02_BLUEPRINT_COMPONENTS.length }, () => true),
+    hardestComponents: [...M02_BLUEPRINT_COMPONENTS],
+    status: M02_EXAMPLE_GATE_STATUS,
+    statusExplanation: M02_EXAMPLE_GATE_EXPLANATION,
+    generated: true,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function buildReferenceBlueprint(blueprint: M02BlueprintData, state: M02Step3State) {
+  return buildGeneratedM02Blueprint({
+    blueprint,
+    state,
+    namedGaps: [...REFERENCE_GAPS],
+    selectedSources: {
+      internal: [],
+      contextual: [],
+      taskSpecific: [],
+    },
+  });
+}
+
 export function M02Work() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
@@ -202,7 +240,6 @@ export function M02Work() {
 
   const [step, setStep] = useState<StepNum>(1);
   const [selectedCaseId, setSelectedCaseId] = useState(M02_DEFAULT_USE_CASE_ID);
-  const [gapsSel, setGapsSel] = useState<string[]>([]);
   const [gateReadiness, setGateReadiness] =
     useState<GateReadinessShape>(DEFAULT_GATE_READINESS);
   const [knowledgeCheck, setKnowledgeCheck] =
@@ -211,13 +248,11 @@ export function M02Work() {
     useState<M02Step3State>(() => createDefaultM02Step3State(M02_DEFAULT_USE_CASE_ID));
   const [kbBlueprintDraft, setKbBlueprintDraft] =
     useState<M02GeneratedBlueprint | null>(null);
-  const [customGap, setCustomGap] = useState("");
   const step3SaveTimerRef = useRef<number | null>(null);
 
   const [hydrated, setHydrated] = useState({
     step: false,
     selectedCase: false,
-    gaps: false,
     gateReadiness: false,
     knowledgeCheck: false,
     step3State: false,
@@ -229,9 +264,9 @@ export function M02Work() {
     [selectedCaseId],
   );
   const selectedBlueprint = getM02Blueprint(selectedCaseId);
+  const defaultBlueprint = getM02Blueprint(M02_DEFAULT_USE_CASE_ID);
   const step3QuizStatus = getM02QuizStatus(M02_STEP_QUIZZES.step3, knowledgeCheck.step3);
 
-  // Hydrate step from progress
   useEffect(() => {
     if (hydrated.step || progress.isLoading) return;
     const status = progress.data?.status;
@@ -244,7 +279,6 @@ export function M02Work() {
     setHydrated((h) => ({ ...h, step: true }));
   }, [hydrated.step, progress.isLoading, progress.data?.current_step, progress.data?.status]);
 
-  // Mark in_progress on mount if not started
   useEffect(() => {
     if (progress.isLoading) return;
     const status = progress.data?.status;
@@ -255,32 +289,26 @@ export function M02Work() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progress.isLoading]);
 
-  // Hydrate selected use case. Older M02 progress defaults to the current reference blueprint.
   useEffect(() => {
     if (hydrated.selectedCase || selectedCaseOut.isLoading) return;
     const saved = selectedCaseOut.value;
     if (typeof saved === "string" && M02_USE_CASES.some((useCase) => useCase.id === saved)) {
       setSelectedCaseId(saved);
+    } else {
+      selectedCaseOut.setValue.mutate(M02_DEFAULT_USE_CASE_ID);
     }
     setHydrated((h) => ({ ...h, selectedCase: true }));
-  }, [hydrated.selectedCase, selectedCaseOut.isLoading, selectedCaseOut.value]);
-
-  // Hydrate local state from persisted outputs
-  useEffect(() => {
-    if (hydrated.gaps || gapsOut.isLoading) return;
-    if (Array.isArray(gapsOut.value)) setGapsSel(gapsOut.value);
-    setHydrated((h) => ({ ...h, gaps: true }));
-  }, [hydrated.gaps, gapsOut.isLoading, gapsOut.value]);
+  }, [hydrated.selectedCase, selectedCaseOut]);
 
   useEffect(() => {
     if (hydrated.gateReadiness || gateReadinessOut.isLoading) return;
     if (gateReadinessOut.value && typeof gateReadinessOut.value === "object") {
       const v = gateReadinessOut.value as Partial<GateReadinessShape>;
       setGateReadiness({
-        status: v.status ?? "",
-        checks: Array.isArray(v.checks) ? v.checks : [],
-        reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes : [],
-        explanation: typeof v.explanation === "string" ? v.explanation : "",
+        status: v.status ?? DEFAULT_GATE_READINESS.status,
+        checks: Array.isArray(v.checks) ? v.checks : DEFAULT_GATE_READINESS.checks,
+        reasonCodes: Array.isArray(v.reasonCodes) ? v.reasonCodes : DEFAULT_GATE_READINESS.reasonCodes,
+        explanation: typeof v.explanation === "string" ? v.explanation : DEFAULT_GATE_READINESS.explanation,
       });
     }
     setHydrated((h) => ({ ...h, gateReadiness: true }));
@@ -397,49 +425,16 @@ export function M02Work() {
     }, 700);
   };
 
-  const persistGeneratedBlueprint = (next: M02GeneratedBlueprint | null) => {
-    setKbBlueprintDraft(next);
-    if (next) kbBlueprintOut.setValue.mutate(next);
-  };
-
-  const selectUseCase = (caseId: string) => {
-    if (caseId !== selectedCaseId) {
-      const hasStep3Work =
-        !!kbBlueprintDraft ||
-        !!step3DraftState.generated ||
-        !!step3DraftState.revealedPanels?.some(Boolean);
-      if (hasStep3Work && !window.confirm("Changing use case will reset Step 3. Continue?")) {
-        return;
-      }
-      const resetState = createDefaultM02Step3State(caseId);
-      persistStep3DraftState(resetState, { immediate: true });
-      setKbBlueprintDraft(null);
-      setGateReadiness(DEFAULT_GATE_READINESS);
-      gateReadinessOut.setValue.mutate(DEFAULT_GATE_READINESS);
-      setGapsSel([]);
-      gapsOut.setValue.mutate([]);
-      persistKnowledgeCheck({
-        ...knowledgeCheck,
-        step3: { answers: {}, checked: false },
-      });
-    }
+  const selectReferenceExample = (caseId: string) => {
+    const blueprint = getM02Blueprint(caseId);
+    if (!blueprint) return;
+    const reviewedState = createReviewedM02State(caseId);
+    const generated = buildReferenceBlueprint(blueprint, reviewedState);
     setSelectedCaseId(caseId);
     selectedCaseOut.setValue.mutate(caseId);
-  };
-
-  const addCustomSelection = (
-    value: string,
-    selected: string[],
-    setSelected: (next: string[]) => void,
-    persist: (next: string[]) => void,
-    clear: () => void,
-  ) => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
-    const next = selected.includes(trimmed) ? selected : [...selected, trimmed];
-    setSelected(next);
-    persist(next);
-    clear();
+    persistStep3DraftState(reviewedState, { immediate: true });
+    setKbBlueprintDraft(generated);
+    kbBlueprintOut.setValue.mutate(generated);
   };
 
   const goToStep = async (next: StepNum) => {
@@ -448,13 +443,19 @@ export function M02Work() {
   };
 
   const completeM02 = async () => {
-    if (!user || !workspace) return;
+    if (!user || !workspace || !selectedBlueprint) return;
+    const reviewedState = step3DraftState.generated
+      ? step3DraftState
+      : createReviewedM02State(selectedCaseId);
+    const generated = kbBlueprintDraft?.useCaseId === selectedCaseId
+      ? kbBlueprintDraft
+      : buildReferenceBlueprint(selectedBlueprint, reviewedState);
     await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
-    await gapsOut.setValue.mutateAsync(gapsSel);
-    await gateReadinessOut.setValue.mutateAsync(gateReadiness);
+    await gapsOut.setValue.mutateAsync([...REFERENCE_GAPS]);
+    await gateReadinessOut.setValue.mutateAsync(DEFAULT_GATE_READINESS);
     await knowledgeCheckOut.setValue.mutateAsync(knowledgeCheck);
-    await step3StateOut.setValue.mutateAsync(step3DraftState);
-    if (kbBlueprintDraft) await kbBlueprintOut.setValue.mutateAsync(kbBlueprintDraft);
+    await step3StateOut.setValue.mutateAsync(reviewedState);
+    await kbBlueprintOut.setValue.mutateAsync(generated);
     const { error } = await supabase.from("assess_progress").upsert(
       {
         workspace_id: workspace.id,
@@ -480,12 +481,12 @@ export function M02Work() {
     toast.success("M02 complete. M03 Prompt-Driven Automation is unlocked.");
   };
 
-  if (!workspace) return null;
+  if (!workspace || !defaultBlueprint) return null;
 
-  // ============ STEP 1 — Three-layer knowledge map ============
+  const defaultC1 = defaultBlueprint.components.c1;
+
   if (step === 1) {
     const s = M02_COURSE_CONTENT.step1;
-
     return (
       <Step
         storyHeader={M02_COURSE_CONTENT.storyHeader}
@@ -500,80 +501,56 @@ export function M02Work() {
           </ul>
         }
         yourVersion={
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="card bg-mist/40 space-y-2">
-              <p className="eyebrow-muted">WHERE THIS IS HEADING</p>
+              <p className="eyebrow-muted">CHAPTER IDEA</p>
               <p className="text-[14px] leading-relaxed text-graphite">
-                In M01 you saw that models can sound fluent without being grounded. M02 starts
-                with a practical question: if we want AI to help with one business process, what
-                documents, files, rules, and examples must it be allowed to use?
-              </p>
-              <p className="text-[14px] leading-relaxed text-graphite">
-                Choose the business process you want to use as your lens. HOI now provides a
-                complete generated reference blueprint for each listed use case, so you can compare
-                how the same knowledge-base pattern changes by workflow.
+                A document is data. It is not always decision-ready knowledge. The refunds policy
+                PDF contains useful information, but the AI still needs meaning, rules, and proof
+                before it can use that information safely.
               </p>
             </div>
 
-            <ExamplesInTheWild items={M02_COURSE_CONTENT.step1.examplesInTheWild} />
-
-            <div className="border-t border-chalk pt-6 space-y-4">
-              <div>
-                <p className="eyebrow">PART A · PICK THE BUSINESS USE CASE</p>
-                <h4 className="mt-2 font-display text-xl text-navy">
-                  Which process should the knowledge base prepare?
+            <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="rounded-lg border border-chalk bg-white p-5">
+                <p className="eyebrow">RAW DOCUMENT</p>
+                <h4 className="mt-2 font-display text-2xl text-navy">{defaultC1.rawSource.name}</h4>
+                <div className="mt-4 space-y-3">
+                  <Fact label="Format" value={defaultC1.rawSource.format} />
+                  <Fact label="What it contains" value="Policy text, refund window, usage boundary, and exception language." />
+                  <Fact label="Starting state" value={defaultC1.rawSource.startingState} />
+                </div>
+              </div>
+              <div className="rounded-lg border border-chalk bg-paper p-5">
+                <p className="eyebrow">WHAT IT LACKS</p>
+                <h4 className="mt-2 font-display text-2xl text-navy">
+                  Useful data, not yet an operating KB
                 </h4>
-                <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-                  This is not your final capstone choice. It is the practical example you will use
-                  to learn how raw sources become AI-ready knowledge through C1, C2, and C3.
-                </p>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {M02_USE_CASES.map((useCase) => (
-                  <button
-                    key={useCase.id}
-                    type="button"
-                    onClick={() => selectUseCase(useCase.id)}
-                    className={`rounded-md border p-4 text-left transition-colors ${
-                      selectedCaseId === useCase.id
-                        ? "border-terracotta bg-terracotta/5"
-                        : "border-chalk bg-white hover:bg-mist/40"
-                    }`}
-                  >
-                    <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
-                      {useCase.shortLabel}
-                      {useCase.id === M02_DEFAULT_USE_CASE_ID ? " · recommended" : ""}
-                    </span>
-                    <span className="mt-2 block font-display text-base text-navy">
-                      {useCase.title}
-                    </span>
-                    <span className="mt-1 block text-[13px] leading-relaxed text-graphite">
-                      {useCase.businessGoal}
-                    </span>
-                  </button>
-                ))}
+                <ul className="mt-4 space-y-2 text-[14px] leading-relaxed text-graphite">
+                  <li>· No clear source owner, version, review date, or sensitivity label.</li>
+                  <li>· No entry ID the AI can retrieve and cite.</li>
+                  <li>· No allowed AI behavior or escalation boundary.</li>
+                  <li>· No source precedence rule if FAQ, macro, and policy disagree.</li>
+                  <li>· No retrieval test proving the AI finds the right source and behaves safely.</li>
+                </ul>
               </div>
             </div>
-
-            <UseCaseLayerPreview useCase={selectedUseCase} />
           </div>
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase}
-        disabledReason={!selectedUseCase ? "Choose one business use case." : undefined}
+        canContinue
         nextLabel={s.nextLabel}
         onContinue={async () => {
-          await selectedCaseOut.setValue.mutateAsync(selectedCaseId);
+          await selectedCaseOut.setValue.mutateAsync(M02_DEFAULT_USE_CASE_ID);
           await goToStep(2);
         }}
       />
     );
   }
 
-  // ============ STEP 2 — Readiness gaps ============
   if (step === 2) {
     const s = M02_COURSE_CONTENT.step2;
-    const gapOptions = Array.from(new Set([...selectedUseCase.commonGaps, ...M02_COURSE_CONTENT.gapOptions]));
+    const allPanelsRevealed = step3DraftState.revealedPanels.every(Boolean);
     return (
       <Step
         chapterLabel={CHAPTER_LABEL}
@@ -587,114 +564,43 @@ export function M02Work() {
           </ul>
         }
         yourVersion={
-          <div className="space-y-8">
-            <div className="card border-l-[3px] border-l-terracotta space-y-3">
-              <p className="eyebrow">SELECTED USE CASE</p>
-              <h4 className="font-display text-xl text-navy">{selectedUseCase.title}</h4>
-              <p className="text-[14px] leading-relaxed text-graphite">
-                {selectedUseCase.whatAiShouldDo}
-              </p>
-              <button
-                type="button"
-                onClick={() => goToStep(1)}
-                className="text-left text-[12px] font-medium text-terracotta hover:text-navy"
-              >
-                Change use case
-              </button>
-            </div>
-
-            <div className="card bg-mist/40 space-y-2">
-              <p className="eyebrow-muted">WHAT YOU ARE DOING HERE</p>
-              <p className="text-[14px] leading-relaxed text-graphite">
-                You are not building the KB yet. You are spotting what your business would need
-                before Build. HOI will show the reference blueprint in Step 3; your job here is to
-                notice where your own documents, owners, examples, or rules would be incomplete.
-              </p>
-            </div>
-
-            {selectedBlueprint ? (
-              <BlueprintReferenceMap blueprint={selectedBlueprint} />
-            ) : (
-              <UseCaseLayerPreview useCase={selectedUseCase} />
-            )}
-
-            <ExamplesInTheWild items={M02_COURSE_CONTENT.step2.examplesInTheWild} />
-
-            <ChecklistSection
-              title="Which gaps would be real in your business?"
-              hint="Pick at least one. These become the Governance Register inputs in Step 3."
-              items={gapOptions}
-              selected={gapsSel}
-              onToggle={(opt) => {
-                const next = toggle(gapsSel, opt);
-                setGapsSel(next);
-                gapsOut.setValue.mutate(next);
-              }}
-              footer={`${gapsSel.length} selected - pick at least one gap.`}
-            />
-
-            <div className="flex flex-col gap-2 rounded-md border border-chalk bg-white p-3 sm:flex-row">
-              <input
-                type="text"
-                value={customGap}
-                onChange={(event) => setCustomGap(event.target.value)}
-                placeholder="Add a gap specific to your business..."
-                className="min-w-0 flex-1 rounded border border-chalk bg-paper px-3 py-2 text-[13px] text-navy outline-none focus:border-terracotta"
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  addCustomSelection(
-                    customGap,
-                    gapsSel,
-                    setGapsSel,
-                    (next) => gapsOut.setValue.mutate(next),
-                    () => setCustomGap(""),
-                  )
-                }
-                className="rounded-md border border-terracotta/30 bg-terracotta/5 px-3 py-2 text-[12px] font-medium text-terracotta hover:bg-terracotta/10"
-              >
-                Add gap
-              </button>
-            </div>
-
-            <div className="card bg-mist/40 space-y-2">
-              <p className="eyebrow-muted">WHAT CARRIES FORWARD</p>
-              <p className="text-[14px] leading-relaxed text-graphite">
-                Step 3 will show the full HOI blueprint for {selectedUseCase.title}. Your selected
-                gaps will appear in the generated Governance Register as open items to address
-                before Build.
-              </p>
-            </div>
-          </div>
+          <M02Step3Guided
+            selectedUseCase={selectedUseCase}
+            step3State={step3DraftState}
+            onStep3StateChange={persistStep3DraftState}
+          />
         }
         produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-        canContinue={!!selectedUseCase && gapsSel.length > 0}
-        disabledReason={
-          gapsSel.length === 0
-            ? "Name at least one readiness gap before moving to the blueprint."
-            : undefined
-        }
+        canContinue={allPanelsRevealed}
+        disabledReason={!allPanelsRevealed ? "Reveal C1, C2, and C3 to continue." : undefined}
         nextLabel={s.nextLabel}
         onBack={() => goToStep(1)}
-        onContinue={() => goToStep(3)}
+        onContinue={async () => {
+          if (selectedBlueprint) {
+            const reviewedState = createReviewedM02State(selectedCaseId);
+            const generated = buildReferenceBlueprint(selectedBlueprint, reviewedState);
+            persistStep3DraftState(reviewedState, { immediate: true });
+            setGateReadiness(DEFAULT_GATE_READINESS);
+            gateReadinessOut.setValue.mutate(DEFAULT_GATE_READINESS);
+            setKbBlueprintDraft(generated);
+            kbBlueprintOut.setValue.mutate(generated);
+          }
+          await goToStep(3);
+        }}
       />
     );
   }
 
-  // ============ STEP 3 — Guided blueprint generation ============
   const s = M02_COURSE_CONTENT.step3;
-  const updateGateReadiness = (patch: Partial<GateReadinessShape>) => {
-    const next = { ...gateReadiness, ...patch };
-    setGateReadiness(next);
-    gateReadinessOut.setValue.mutate(next);
-  };
-  const canCompleteM02 = !!kbBlueprintDraft && kbBlueprintDraft.useCaseId === selectedCaseId && step3DraftState.generated;
+  const activeBlueprint = selectedBlueprint ?? defaultBlueprint;
+  const activeGenerated = kbBlueprintDraft?.useCaseId === selectedCaseId
+    ? kbBlueprintDraft
+    : buildReferenceBlueprint(activeBlueprint, createReviewedM02State(selectedCaseId));
 
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
-      stepLabel="STEP 3 of 3 · KNOWLEDGE BASE BLUEPRINT"
+      stepLabel="STEP 3 of 3 · RECAP + REFERENCE BLUEPRINT"
       title={s.title}
       why={<p>{s.why}</p>}
       example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -705,21 +611,30 @@ export function M02Work() {
       }
       yourVersion={
         <div className="space-y-8">
-          <M02Step3Guided
-            selectedUseCase={selectedUseCase}
-            namedGaps={gapsSel}
-            step3State={step3DraftState}
-            generatedBlueprint={kbBlueprintDraft?.useCaseId === selectedCaseId ? kbBlueprintDraft : null}
-            gateReadiness={gateReadiness}
-            onStep3StateChange={persistStep3DraftState}
-            onGeneratedBlueprintChange={persistGeneratedBlueprint}
-            onGateReadinessChange={updateGateReadiness}
-            onChangeUseCase={() => goToStep(1)}
+          <section className="rounded-lg border border-chalk bg-mist/40 p-5">
+            <p className="eyebrow-muted">REFERENCE BLUEPRINT READY</p>
+            <h4 className="mt-2 font-display text-2xl text-navy">
+              {activeBlueprint.useCaseName}
+            </h4>
+            <p className="mt-2 text-[14px] leading-relaxed text-graphite">
+              This is an example output, not a personalized worksheet. It shows what the operating
+              KB blueprint contains once the raw document has passed through C1, C2, and C3.
+            </p>
+            <div className="mt-4">
+              <BlueprintExportButton blueprint={activeBlueprint} generated={activeGenerated} />
+            </div>
+          </section>
+
+          <BlueprintDocument blueprint={activeBlueprint} generated={activeGenerated} />
+
+          <ReferenceExamples
+            selectedCaseId={selectedCaseId}
+            onSelect={selectReferenceExample}
           />
 
           <QuizSection
-            eyebrow="PART C · CHECK YOUR UNDERSTANDING"
-            title="Five quick checks"
+            eyebrow="FINAL CHECK · UNDERSTANDING"
+            title="Confirm the difference"
             quiz={M02_STEP_QUIZZES.step3}
             state={knowledgeCheck.step3}
             status={step3QuizStatus}
@@ -731,15 +646,13 @@ export function M02Work() {
         </div>
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
-      canContinue={canCompleteM02 && step3QuizStatus.quizPassed}
+      canContinue={step3QuizStatus.quizPassed}
       disabledReason={
-        !canCompleteM02
-          ? "Reveal all three components, answer both reflections, and generate the blueprint."
-          : !step3QuizStatus.allAnswered
-            ? "Answer all five checks before completing M02."
-            : !step3QuizStatus.quizChecked
-              ? "Click Check answers before completing M02."
-              : "You need at least 3 correct answers before completing M02."
+        !step3QuizStatus.allAnswered
+          ? "Answer all five checks before completing M02."
+          : !step3QuizStatus.quizChecked
+            ? "Click Check answers before completing M02."
+            : "You need at least 3 correct answers before completing M02."
       }
       nextLabel="Complete M02"
       onBack={() => goToStep(2)}
@@ -748,209 +661,55 @@ export function M02Work() {
   );
 }
 
-function ExamplesInTheWild({
-  items,
+function ReferenceExamples({
+  selectedCaseId,
+  onSelect,
 }: {
-  items: readonly {
-    label: string;
-    title: string;
-    body: string;
-    sourceLabel?: string;
-    sourceUrl?: string;
-  }[];
+  selectedCaseId: string;
+  onSelect: (caseId: string) => void;
 }) {
   return (
-    <div className="space-y-3">
-      <p className="eyebrow-muted">EXAMPLES IN THE WILD</p>
+    <section className="space-y-3">
+      <p className="eyebrow-muted">OPTIONAL REFERENCE EXAMPLES</p>
       <div className="grid gap-3 md:grid-cols-2">
-        {items.map((item) => (
-          <div key={item.title} className="rounded-md border border-chalk bg-white p-4">
-            <p className="eyebrow-muted">{item.label}</p>
-            <h4 className="mt-2 font-display text-base text-navy">{item.title}</h4>
-            <p className="mt-2 text-[13px] leading-relaxed text-graphite">{item.body}</p>
-            {item.sourceUrl && (
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-3 inline-flex text-[12px] font-medium text-terracotta hover:text-navy"
-              >
-                Source: {item.sourceLabel ?? "reference"} →
-              </a>
-            )}
-          </div>
-        ))}
+        {M02_USE_CASES.map((useCase) => {
+          const blueprint = getM02Blueprint(useCase.id);
+          if (!blueprint) return null;
+          const selected = selectedCaseId === useCase.id;
+          return (
+            <button
+              key={useCase.id}
+              type="button"
+              onClick={() => onSelect(useCase.id)}
+              className={`rounded-md border p-4 text-left transition-colors ${
+                selected
+                  ? "border-terracotta bg-terracotta/5"
+                  : "border-chalk bg-white hover:bg-mist/40"
+              }`}
+            >
+              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
+                {useCase.shortLabel}
+                {useCase.id === M02_DEFAULT_USE_CASE_ID ? " · default" : ""}
+              </span>
+              <span className="mt-2 block font-display text-base text-navy">
+                {useCase.title}
+              </span>
+              <span className="mt-1 block text-[13px] leading-relaxed text-graphite">
+                {blueprint.components.c1.rawSource.name} becomes {blueprint.components.c1.kbEntry.id}.
+              </span>
+            </button>
+          );
+        })}
       </div>
-    </div>
+    </section>
   );
 }
 
-function UseCaseLayerPreview({ useCase }: { useCase: M02UseCase }) {
+function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-t border-chalk pt-6 space-y-4">
-      <div>
-        <p className="eyebrow">PART B · SEE THE SOURCE FAMILIES</p>
-        <h4 className="mt-2 font-display text-xl text-navy">
-          What {useCase.shortLabel} needs before AI can help
-        </h4>
-        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-          {useCase.whatAiShouldDo}
-        </p>
-      </div>
-      <div className="grid gap-3 lg:grid-cols-3">
-        <LayerPreviewCard
-          num="01"
-          title="Internal knowledge"
-          description="The business facts, records, and documents the AI needs to know what exists."
-          sources={useCase.internalSources}
-        />
-        <LayerPreviewCard
-          num="02"
-          title="Contextual knowledge"
-          description="The policies, procedures, and boundaries that tell the AI what it is allowed to do."
-          sources={useCase.contextualRules}
-        />
-        <LayerPreviewCard
-          num="03"
-          title="Task-specific knowledge"
-          description="The real examples that show the AI what good, risky, and incomplete cases look like."
-          sources={useCase.taskSpecificSources}
-        />
-      </div>
-    </div>
-  );
-}
-
-function BlueprintReferenceMap({ blueprint }: { blueprint: M02BlueprintData }) {
-  const { c1, c2, c3 } = blueprint.components;
-  return (
-    <div className="border-t border-chalk pt-6 space-y-6">
-      <div>
-        <p className="eyebrow">REFERENCE BLUEPRINT · {blueprint.useCaseName.toUpperCase()}</p>
-        <h4 className="mt-2 font-display text-xl text-navy">
-          How one raw source becomes an operating KB
-        </h4>
-        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-          Step 3 will walk this same source through C1 Data Map, C2 Trust + Safety, and C3 Verification.
-        </p>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-3">
-        <div className="rounded-md border border-chalk bg-white p-4">
-          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-            C1
-          </span>
-          <h5 className="mt-3 font-display text-base text-navy">Data Map</h5>
-          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
-            {c1.rawSource.name} becomes {c1.kbEntry.id} · {c1.kbEntry.title}.
-          </p>
-          <p className="mt-2 text-[12px] text-slate">
-            Owner: {c1.dataMapRow.owner}. Sensitivity: {c1.dataMapRow.sensitivity}.
-          </p>
-        </div>
-        <div className="rounded-md border border-chalk bg-white p-4">
-          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-            C2
-          </span>
-          <h5 className="mt-3 font-display text-base text-navy">Trust + Safety</h5>
-          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
-            {c2.sourcePrecedence[0]}
-          </p>
-          <p className="mt-2 text-[12px] text-slate">{c2.escalationBoundary}</p>
-        </div>
-        <div className="rounded-md border border-chalk bg-white p-4">
-          <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-            C3
-          </span>
-          <h5 className="mt-3 font-display text-base text-navy">Verification</h5>
-          <p className="mt-2 text-[13px] leading-relaxed text-graphite">
-            {c3.retrievalTest.id}: {c3.retrievalTest.userQuestion}
-          </p>
-          <p className="mt-2 text-[12px] text-slate">
-            Expected entry: {c3.retrievalTest.expectedEntry}.
-          </p>
-        </div>
-      </div>
-
-      <div className="rounded-md border border-chalk bg-mist/40 p-4">
-        <p className="eyebrow-muted">WHAT TO CHECK IN YOUR BUSINESS</p>
-        <p className="mt-2 text-[14px] leading-relaxed text-graphite">
-          Look for missing owners, stale sources, unclear permissions, weak tests, or rules that
-          live informally in messages. You only need to name the gaps now; the full three-component
-          blueprint comes next.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function LayerPreviewCard({
-  num,
-  title,
-  description,
-  sources,
-}: {
-  num: string;
-  title: string;
-  description: string;
-  sources: readonly M02UseCaseSource[];
-}) {
-  return (
-    <div className="rounded-md border border-chalk bg-white p-4">
-      <span className="inline-flex items-center rounded-full border border-chalk bg-mist/60 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate">
-        LAYER {num}
-      </span>
-      <h5 className="mt-3 font-display text-base text-navy">{title}</h5>
-      <p className="mt-1 text-[12px] leading-relaxed text-slate">{description}</p>
-      <ul className="mt-3 space-y-2">
-        {sources.slice(0, 5).map((source) => (
-          <li key={source.title} className="text-[13px] text-graphite">
-            <strong className="text-navy">{source.title}</strong>
-            <span className="block text-[12px] text-slate">{source.examples.join(", ")}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function ChecklistSection({
-  title,
-  hint,
-  items,
-  selected,
-  onToggle,
-  footer,
-}: {
-  title: string;
-  hint: string;
-  items: readonly string[];
-  selected: string[];
-  onToggle: (item: string) => void;
-  footer: string;
-}) {
-  return (
-    <div className="border-t border-chalk pt-6 space-y-3">
-      <div>
-        <p className="text-sm font-medium text-navy">{title}</p>
-        <p className="mt-1 text-[12px] italic text-slate">{hint}</p>
-      </div>
-      <ul className="space-y-2">
-        {items.map((item) => (
-          <li key={item}>
-            <label className="flex cursor-pointer items-start gap-2 text-[14px] text-navy">
-              <input
-                type="checkbox"
-                checked={selected.includes(item)}
-                onChange={() => onToggle(item)}
-                className="mt-1 h-4 w-4 accent-terracotta"
-              />
-              <span>{item}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-      <p className="text-[12px] italic text-slate">{footer}</p>
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate">{label}</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-graphite">{value}</p>
     </div>
   );
 }
@@ -978,79 +737,53 @@ function QuizSection({
 }) {
   const answers = state.answers ?? {};
   return (
-    <section className="border-t border-chalk pt-6 space-y-4">
-      <div>
-        <p className="eyebrow-muted">{eyebrow}</p>
-        <h4 className="mt-2 font-display text-xl text-navy">{title}</h4>
-        <p className="mt-1 text-[13px] leading-relaxed text-slate">
-          Four questions are checked. The final reflection has no single right answer.
-        </p>
-      </div>
-
-      <div className="space-y-4">
+    <section className="rounded-lg border border-chalk bg-white p-6 shadow-sm">
+      <p className="eyebrow">{eyebrow}</p>
+      <h4 className="mt-2 font-display text-2xl text-navy">{title}</h4>
+      <div className="mt-5 space-y-5">
         {quiz.map((question, index) => {
-          const current = answers[question.id];
-          const multi = question.type === "multi";
+          const value = answers[question.id];
+          const answered = question.type === "multi"
+            ? Array.isArray(value) && value.length > 0
+            : typeof value === "string" && value.length > 0;
           const gradable = !!question.correct;
-          const isAnswered = multi
-            ? Array.isArray(current) && current.length > 0
-            : typeof current === "string" && current.length > 0;
-          const showGrading = status.quizChecked && gradable && isAnswered;
-          const isCorrect = showGrading && current === question.correct;
-
+          const isCorrect = gradable && value === question.correct;
+          const showGrading = status.quizChecked && gradable && answered;
           return (
-            <div
-              key={question.id}
-              className={`rounded-md border bg-paper p-4 ${
-                showGrading
-                  ? isCorrect
-                    ? "border-emerald-500/60 bg-emerald-500/5"
-                    : "border-danger/40 bg-danger/5"
-                  : "border-chalk"
-              }`}
-            >
+            <div key={question.id} className="rounded-md border border-chalk bg-paper p-4">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-[14px] font-semibold text-navy">
-                  Q{index + 1}. {question.question}
-                </p>
+                <div>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate">
+                    Check {index + 1}
+                  </p>
+                  <h5 className="mt-1 font-display text-base text-navy">{question.question}</h5>
+                </div>
                 {showGrading && (
-                  <span
-                    className={`shrink-0 font-mono text-[11px] uppercase tracking-[0.14em] ${
-                      isCorrect ? "text-emerald-700" : "text-danger"
-                    }`}
-                  >
-                    {isCorrect ? "Correct" : "Incorrect"}
+                  <span className={`rounded-full px-2 py-1 text-[11px] ${
+                    isCorrect ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+                  }`}>
+                    {isCorrect ? "Correct" : "Review"}
                   </span>
                 )}
               </div>
-
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 grid gap-2">
                 {question.options.map((option) => {
-                  const checked = multi
-                    ? Array.isArray(current) && current.includes(option)
-                    : current === option;
-                  const isOptionCorrect = gradable && option === question.correct;
-                  const isOptionWrongPick = showGrading && checked && !isCorrect;
-                  const rowClass = showGrading
-                    ? isOptionCorrect
-                      ? "rounded-md border border-emerald-500/60 bg-emerald-500/5 px-2 py-1"
-                      : isOptionWrongPick
-                        ? "rounded-md border border-danger/40 bg-danger/5 px-2 py-1"
-                        : "rounded-md border border-transparent px-2 py-1"
-                    : "";
+                  const checked = question.type === "multi"
+                    ? Array.isArray(value) && value.includes(option)
+                    : value === option;
                   return (
                     <label
                       key={option}
                       className={`flex items-start gap-2 text-[14px] text-graphite ${
                         status.quizChecked ? "cursor-default" : "cursor-pointer"
-                      } ${rowClass}`}
+                      }`}
                     >
                       <input
-                        type={multi ? "checkbox" : "radio"}
+                        type={question.type === "multi" ? "checkbox" : "radio"}
                         name={`${namePrefix}-${question.id}`}
                         checked={checked}
-                        onChange={() => onAnswer(question.id, option, multi)}
                         disabled={status.quizChecked}
+                        onChange={() => onAnswer(question.id, option, question.type === "multi")}
                         className="mt-1 h-4 w-4 accent-terracotta"
                       />
                       <span>{option}</span>
@@ -1058,69 +791,36 @@ function QuizSection({
                   );
                 })}
               </div>
-
-              {showGrading && question.explanation && (
-                <p className="mt-3 text-[12px] leading-relaxed text-slate">
-                  <span className="font-semibold text-navy">Why: </span>
+              {status.quizChecked && question.explanation && (
+                <p className="mt-3 rounded-md bg-mist/60 p-3 text-[13px] leading-relaxed text-graphite">
                   {question.explanation}
-                </p>
-              )}
-              {status.quizChecked && multi && (
-                <p className="mt-3 text-[12px] leading-relaxed text-slate">
-                  This is a reflection question. There is no single right answer.
                 </p>
               )}
             </div>
           );
         })}
       </div>
-
-      <div className="flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-5 flex flex-col gap-3 rounded-md border border-chalk bg-paper p-4 sm:flex-row sm:items-center sm:justify-between">
         {status.quizChecked ? (
-          <>
-            <p className="text-[14px] text-navy">
-              You got <span className="font-semibold">{status.correctCount} of {status.gradableCount}</span>{" "}
-              checked questions correct.{" "}
-              {status.quizPassed
-                ? "You can continue."
-                : `You need at least ${status.passThreshold} correct. Adjust your answers and check again.`}
-            </p>
-            <button
-              type="button"
-              onClick={onRetry}
-              className="rounded-md border border-chalk bg-white px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-navy transition-colors hover:border-terracotta hover:text-terracotta"
-            >
-              Try again
-            </button>
-          </>
+          <p className="text-[13px] text-graphite">
+            {status.quizPassed
+              ? `Passed: ${status.correctCount}/${status.gradableCount} scored checks correct.`
+              : `Score: ${status.correctCount}/${status.gradableCount}. Review and try again.`}
+          </p>
         ) : (
-          <>
-            <p className="text-[13px] text-slate">
-              Answer all five, then check your answers before moving on.
-            </p>
-            <button
-              type="button"
-              onClick={onCheck}
-              disabled={!status.allAnswered}
-              className="rounded-md bg-terracotta px-4 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-white transition-colors hover:bg-navy disabled:cursor-not-allowed disabled:bg-slate/40"
-            >
-              Check answers
-            </button>
-          </>
+          <p className="text-[13px] text-graphite">
+            Answer all checks, then confirm your understanding.
+          </p>
         )}
+        <button
+          type="button"
+          onClick={status.quizChecked ? onRetry : onCheck}
+          disabled={!status.allAnswered}
+          className="rounded-md bg-terracotta px-4 py-2 text-sm font-medium text-white hover:bg-navy disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {status.quizChecked ? "Try again" : "Check answers"}
+        </button>
       </div>
     </section>
-  );
-}
-
-export function M02WorkBackLink({ slug }: { slug: string }) {
-  return (
-    <Link
-      to="/app/$workspaceSlug/assess/$moduleId"
-      params={{ workspaceSlug: slug, moduleId: "m02" }}
-      className="inline-block text-[13px] font-medium text-slate hover:text-navy"
-    >
-      ← Back to overview
-    </Link>
   );
 }

@@ -1,6 +1,6 @@
 import type { InvoiceOcrProfileContext, OCRBlock } from "./types";
 
-export const M02_DEFAULT_USE_CASE_ID = "supplier-onboarding";
+export const M02_DEFAULT_USE_CASE_ID = "customer-support-kb";
 
 export interface M02UseCaseSource {
   title: string;
@@ -516,18 +516,18 @@ export const M02_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Data Readiness & Knowledge Base Preparation. In M01 you saw why models need verification. M02 asks what knowledge must exist before AI can be useful. Today's job: choose one business process and turn one raw source into a practical three-component knowledge base blueprint.",
+    "Data Readiness & Knowledge Base Preparation. A document is data. It is not always decision-ready knowledge. M02 shows how one raw document becomes an operating knowledge base through C1 Data Map, C2 Trust + Safety, and C3 Verification.",
 
   step1: {
-    title: "Choose the use case and preview the source families",
+    title: "A raw document is data",
     why:
-      "Before a model can answer, route, summarize, or draft reliably, it needs a specific business situation. Start by choosing the process, then look at the source families the AI would need.",
+      "The refunds policy PDF contains useful information, but the AI cannot safely rely on it yet. First, see what the document contains and what it lacks.",
     example:
-      "For a customer support knowledge base, the AI needs product and FAQ sources, policy and escalation rules, plus real examples of clean, ambiguous, escalated, and unsafe support cases.",
+      "Refunds policy PDF contains policy text, a refund window, and a usage boundary. It still lacks owner, version, sensitivity, allowed AI behavior, source precedence, and a retrieval test.",
     whatToNotice: [
-      "A use case turns abstract data readiness into a concrete source map",
-      "The same source families show up across support, HR, sales, RFP, and supplier workflows",
-      "Step 3 will turn one raw source into C1 Data Map, C2 Trust + Safety, and C3 Verification",
+      "A document can contain the right information and still not be an operating KB",
+      "The missing pieces are meaning, governance, and proof",
+      "The next step turns this same document into C1, C2, and C3",
     ],
     examplesInTheWild: [
       {
@@ -547,20 +547,20 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://help.netflix.com/en/node/100639",
       },
     ],
-    produces: "Selected use case and source-family preview",
-    nextLabel: "Step 2 - review readiness gaps",
+    produces: "Raw document reviewed as data, not yet operating knowledge",
+    nextLabel: "Step 2 - turn it into an operating KB",
   },
 
   step2: {
-    title: "Review the map and name the gaps",
+    title: "Turn it into an operating KB",
     why:
-      "Now compare HOI's reference map to your own business. You are not building the KB yet. You are spotting what your business would need before Build: owners, current sources, access rules, examples, and review boundaries.",
+      "Now watch the same document move through the three components. C1 makes it visible and owned. C2 makes it safe to use. C3 proves the AI can retrieve and behave correctly.",
     example:
-      "A support workflow may need product docs, FAQs, tickets, refund rules, escalation paths, and privacy boundaries. The readiness question is not 'can I list sources?' It is 'which of these would be missing, stale, ownerless, or risky in my business?'",
+      "Refunds policy PDF becomes CS-CTX-003. C1 adds source, owner, metadata, and sensitivity. C2 adds precedence and access rules. C3 adds TEST-01: refund at 19 days.",
     whatToNotice: [
-      "Step 2 is diagnosis, not curation",
-      "A missing owner is a readiness gap even when the document exists",
-      "The gaps you name become the Governance Register in the generated blueprint",
+      "The source does not change; its operating wrapper changes",
+      "C1, C2, and C3 build on each other in order",
+      "The result is knowledge the AI can retrieve, cite, and use within boundaries",
     ],
     examplesInTheWild: [
       {
@@ -580,20 +580,20 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
       },
     ],
-    produces: "Readiness gaps for the selected use case",
-    nextLabel: "Step 3 - build the blueprint",
+    produces: "C1, C2, and C3 walkthrough reviewed",
+    nextLabel: "Step 3 - review the reference blueprint",
   },
 
   step3: {
-    title: "Build the KB blueprint",
+    title: "Recap the reference blueprint",
     why:
-      "The final M02 deliverable is a generated operating blueprint, not another curation exercise. HOI now shows the complete reference blueprint for your chosen use case, then turns it into a document your team can use.",
+      "The final screen shows the operating KB blueprint as a shareable reference example. You are not writing it from scratch; you are learning what good looks like.",
     example:
       "For each use case, the blueprint walks one raw source through C1 Data Map, C2 Trust + Safety, and C3 Verification.",
     whatToNotice: [
-      "The learner is not expected to invent the operating standard from scratch",
+      "The blueprint is an example output, not a personalized worksheet",
       "A strong blueprint explains what the AI can retrieve, what it must cite, and when it must stop",
-      "PASS, PARTIAL, or BLOCKED should reflect the governance work still needed before Build",
+      "Gate 1 is shown as an evidence-based readiness example",
     ],
     examplesInTheWild: [
       {
@@ -613,7 +613,7 @@ export const M02_COURSE_CONTENT = {
         sourceUrl: "https://support.atlassian.com/jira-service-management-cloud/docs/use-internal-articles-in-the-knowledge-base-panel/",
       },
     ],
-    produces: "Generated operating knowledge-base blueprint and Gate 1 readiness decision",
+    produces: "Reference operating knowledge-base blueprint and understanding check",
     nextLabel: "Complete M02",
   },
 

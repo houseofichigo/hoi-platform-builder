@@ -93,10 +93,10 @@ export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentPro
         </div>
       </BlueprintSection>
 
-      <BlueprintSection title="Gate 1 Decision">
+      <BlueprintSection title="Example Gate 1 Decision">
         <div className="space-y-3">
           <p className="rounded-md bg-terracotta/5 p-4 font-medium text-navy">
-            Chosen readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
+            Example readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
           </p>
           {governanceItems(generated).map((item) => (
             <div key={item.title} className="rounded-md border border-chalk bg-paper p-4">
@@ -108,12 +108,12 @@ export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentPro
             </div>
           ))}
           <div className="rounded-md bg-mist/50 p-4">
-            <p className="eyebrow-muted">NAMED GAPS FROM STEP 2</p>
+            <p className="eyebrow-muted">REFERENCE GAPS SHOWN IN THIS EXAMPLE</p>
             <ul className="mt-3 space-y-1 text-[13px] text-graphite">
               {generated.namedGaps.length ? (
                 generated.namedGaps.map((gap) => <li key={gap}>· {gap}</li>)
               ) : (
-                <li>· No named gaps recorded.</li>
+                <li>· Source owner must approve the entry before production.</li>
               )}
             </ul>
           </div>

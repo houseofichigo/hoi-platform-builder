@@ -1,11 +1,16 @@
 import type {
+  M02BlueprintStatus,
   M02BlueprintData,
   M02GeneratedBlueprint,
   M02Step3State,
 } from "@/data/m02/blueprintSchema";
 
+export const M02_EXAMPLE_GATE_STATUS: M02BlueprintStatus = "partial";
+export const M02_EXAMPLE_GATE_EXPLANATION =
+  "The KB pattern is clear, but production readiness still depends on source ownership, access rules, and tests being approved by the business.";
+
 export const BLUEPRINT_LOADING_LINES = [
-  "Assembling your three-component blueprint...",
+  "Assembling the reference blueprint...",
   "· C1 Data Map",
   "· C2 Trust + Safety",
   "· C3 Verification",
@@ -29,9 +34,6 @@ export function buildGeneratedM02Blueprint({
   namedGaps,
   selectedSources,
 }: BuildGeneratedBlueprintArgs): M02GeneratedBlueprint {
-  if (!state.status) {
-    throw new Error("Cannot generate M02 blueprint without readiness status.");
-  }
   const generatedAt = new Date().toISOString();
   const base: Omit<M02GeneratedBlueprint, "markdown"> = {
     useCaseId: blueprint.useCaseId,
@@ -39,10 +41,12 @@ export function buildGeneratedM02Blueprint({
     generatedAt,
     namedGaps,
     selectedSources,
-    hardestComponents: state.hardestComponents,
+    hardestComponents: state.hardestComponents.length
+      ? state.hardestComponents
+      : ["C1 - Data Map", "C2 - Trust + Safety", "C3 - Verification"],
     componentNotes: state.componentNotes,
-    status: state.status,
-    statusExplanation: state.statusExplanation,
+    status: state.status || M02_EXAMPLE_GATE_STATUS,
+    statusExplanation: state.statusExplanation || M02_EXAMPLE_GATE_EXPLANATION,
   };
   return {
     ...base,
@@ -111,11 +115,11 @@ export function generatedBlueprintToMarkdown(
     "Gate evidence:",
     ...c3.gateEvidence.map((item) => `- ${item}`),
     "",
-    "## Gate 1 Decision",
+    "## Example Gate 1 Decision",
     "",
-    `Chosen readiness status: ${status}. ${generated.statusExplanation}`,
+    `Example readiness status: ${status}. ${generated.statusExplanation}`,
     "",
-    "Open items to address before Build:",
+    "Example open items before Build:",
     "",
     ...governanceItems(generated).flatMap((item) => [
       `- ${item.title}: ${item.note}`,
@@ -124,9 +128,13 @@ export function generatedBlueprintToMarkdown(
       "  - Target date: TBD",
     ]),
     "",
-    "Named gaps from Step 2:",
+    "Reference gaps shown in this example:",
     "",
-    ...(generated.namedGaps.length ? generated.namedGaps.map((gap) => `- ${gap}`) : ["- No named gaps recorded."]),
+    ...(generated.namedGaps.length ? generated.namedGaps.map((gap) => `- ${gap}`) : [
+      "- Source owner must approve the entry",
+      "- Access rules must be checked against live systems",
+      "- Retrieval tests must be run before deployment",
+    ]),
     "",
     "## Forward Path",
     "",
@@ -140,7 +148,7 @@ export function governanceItems(
 ) {
   return generated.hardestComponents.map((component) => ({
     title: component,
-    note: generated.componentNotes[component]?.trim() || "Learner flagged this component as hard to put in place.",
+    note: generated.componentNotes[component]?.trim() || exampleNoteForComponent(component),
     action: actionForComponent(component),
   }));
 }
@@ -151,6 +159,14 @@ function actionForComponent(component: string): string {
   if (lower.includes("c2")) return "Confirm source precedence, access rules, allowed AI behavior, and escalation boundaries.";
   if (lower.includes("c3")) return "Run the retrieval test and record PASS, PARTIAL, or FAIL with evidence.";
   return "Assign an owner and document the missing readiness work.";
+}
+
+function exampleNoteForComponent(component: string): string {
+  const lower = component.toLowerCase();
+  if (lower.includes("c1")) return "The source is now mapped, but the owner still needs to approve version, sensitivity, and refresh cadence.";
+  if (lower.includes("c2")) return "The safety rules are drafted, but access and escalation rules must be confirmed before production use.";
+  if (lower.includes("c3")) return "The test is written, but the team still needs to run it and record PASS, PARTIAL, or FAIL.";
+  return "This is an example readiness item to review before Build.";
 }
 
 function escapeMd(value: string): string {

@@ -100,9 +100,9 @@ export function BlueprintPdfDocument({
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.h2}>Gate 1 Decision</Text>
+          <Text style={styles.h2}>Example Gate 1 Decision</Text>
           <Text>
-            Chosen readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
+            Example readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
           </Text>
           {governanceItems(generated).map((item) => (
             <View key={item.title} style={styles.card}>
@@ -113,11 +113,11 @@ export function BlueprintPdfDocument({
               <Text style={styles.muted}>Target date: TBD</Text>
             </View>
           ))}
-          <Text style={styles.h3}>Named gaps from Step 2</Text>
+          <Text style={styles.h3}>Reference gaps shown in this example</Text>
           {generated.namedGaps.length ? (
             generated.namedGaps.map((gap) => <Text key={gap}>- {gap}</Text>)
           ) : (
-            <Text>- No named gaps recorded.</Text>
+            <Text>- Source owner must approve the entry before production.</Text>
           )}
         </View>
 

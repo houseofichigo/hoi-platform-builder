@@ -1,30 +1,16 @@
 ## Problem
-The live preview is not working because the preview server is crashing before the app loads.
+The preview loads (HTTP 200, Vite running fine on port 8080) but immediately renders the "This page didn't load" error screen. Root cause: `.env` is missing from the project root, so `import.meta.env.VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are `undefined`. The Supabase client in `src/integrations/supabase/client.ts` throws on first access, which happens immediately because `AuthProvider` (mounted in `src/routes/__root.tsx`) calls `supabase.auth.onAuthStateChange` on mount. The error bubbles into the root `errorComponent`.
 
-## Root cause
-A required native Rollup package is missing in the sandbox install:
-- Missing module: `@rollup/rollup-linux-x64-gnu`
-- Crash happens during `vite dev`, so the preview never starts
-
-There is also dependency drift in the repo:
-- `package.json` and `package-lock.json` are not fully aligned
-- `bun.lock` references a different Rollup version than the installed `node_modules`
-- The npm lockfile does not contain the missing native Rollup package entry
+The `.env` was recreated in a prior turn but did not survive — likely a sandbox reset wiped it (it's gitignored, so it never came back from the repo).
 
 ## Plan
-1. Clean up dependency drift so the project uses one consistent install state.
-2. Reinstall dependencies so the required Rollup native package is restored.
-3. Restart the dev server / preview.
-4. Verify the preview loads normally after the dependency repair.
+1. Recreate `.env` at the project root with the Lovable Cloud values for this project:
+   - `VITE_SUPABASE_PROJECT_ID=hqliaebgjwjyhmfpwxti`
+   - `VITE_SUPABASE_URL=https://hqliaebgjwjyhmfpwxti.supabase.co`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY=<anon key>`
+2. Restart the Vite dev server so it picks up the new env (Vite only reads `.env` at startup).
+3. Verify the preview renders the app (not the error screen) by checking dev-server logs and hitting `/`.
 
-## Technical details
-Current evidence from the project:
-- Dev server log shows: `Cannot find module '@rollup/rollup-linux-x64-gnu'`
-- Installed versions currently observed:
-  - `vite`: `7.3.5`
-  - `rollup`: `4.61.0`
-- `bun.lock` still references Rollup `4.60.2`
-- `package-lock.json` does not include `node_modules/@rollup/rollup-linux-x64-gnu`
-
-## Expected outcome
-Once dependencies are resynced and reinstalled, the preview should start again normally.
+## Notes
+- No code changes needed; `client.ts` already reads `import.meta.env.VITE_SUPABASE_*` with a clear error when missing.
+- If `.env` keeps disappearing across sandbox resets, the next step would be to look at why the managed env isn't being restored, but one recreate-and-verify pass first is the right move.

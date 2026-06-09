@@ -217,14 +217,80 @@ const DEMO_STEPS: SopStep[] = [
 ];
 
 const COACH_STEPS: SopStep[] = [
-  { title: "Open GPT Builder Coach", body: "Open the GPT Builder Coach link from this assignment." },
-  { title: "Paste your blueprint", body: "Paste your five-line assistant blueprint." },
-  { title: "Generate the prompt", body: "Ask it to generate a system prompt." },
-  { title: "Copy the draft", body: "Copy the Draft System Prompt it returns." },
-  { title: "Create your GPT", body: "Open ChatGPT, Explore GPTs, then Create." },
-  { title: "Paste instructions", body: "Paste the generated instructions." },
-  { title: "Add knowledge", body: "Add recommended knowledge files if needed." },
-  { title: "Save and test", body: "Save, share, and test." },
+  {
+    title: "Open GPT Builder Coach",
+    body: "Open the GPT Builder Coach link from this assignment.",
+    image: "/images/m04/gpt-builder-coach-sop/01-open-coach.jpeg",
+  },
+  {
+    title: "Paste your requirements",
+    body: "Paste your five-line blueprint. Replace the example with your own use case and approved knowledge base.",
+    image: "/images/m04/gpt-builder-coach-sop/02-paste-requirements.jpeg",
+  },
+  {
+    title: "Generate assistant instructions",
+    body: "Send the message so GPT Builder Coach can create the Draft System Prompt and setup recommendations.",
+    image: "/images/m04/gpt-builder-coach-sop/03-send-generate.jpeg",
+  },
+  {
+    title: "Copy the Draft System Prompt",
+    body: "Copy only the Draft System Prompt or final instructions. Do not copy the analysis notes into the GPT.",
+  },
+  {
+    title: "Open Explore GPTs",
+    body: "Click Explore GPTs in the ChatGPT sidebar.",
+    image: "/images/m04/gpt-builder-coach-sop/04-explore-gpts.jpeg",
+  },
+  {
+    title: "Create a new GPT",
+    body: "Click Create to open the GPT editor.",
+    image: "/images/m04/gpt-builder-coach-sop/05-create-editor.jpeg",
+  },
+  {
+    title: "Paste generated instructions",
+    body: "Paste the Draft System Prompt into the Instructions field.",
+    image: "/images/m04/gpt-builder-coach-sop/06-paste-instructions.jpeg",
+  },
+  {
+    title: "Enter assistant name",
+    body: "Add a clear name for your assistant, such as HR Policy Assistant or your own chosen use case.",
+    image: "/images/m04/gpt-builder-coach-sop/07-assistant-name.jpeg",
+  },
+  {
+    title: "Enter assistant description",
+    body: "Add a short description that says who the assistant helps and what approved sources it uses.",
+    image: "/images/m04/gpt-builder-coach-sop/08-assistant-description.jpeg",
+  },
+  {
+    title: "Upload knowledge documents",
+    body: "Upload your own approved knowledge base under Knowledge. Do not upload sensitive or unapproved files.",
+    image: "/images/m04/gpt-builder-coach-sop/09-upload-files.jpeg",
+  },
+  {
+    title: "Enable file/data capability if needed",
+    body: "Enable Code Interpreter & Data Analysis only if the GPT needs to read uploaded files. Actions are not required in M04.",
+    image: "/images/m04/gpt-builder-coach-sop/10-code-interpreter.jpeg",
+  },
+  {
+    title: "Create the GPT",
+    body: "Click Create when the instructions, name, description, knowledge, and capabilities are ready.",
+    image: "/images/m04/gpt-builder-coach-sop/11-create.jpeg",
+  },
+  {
+    title: "Update the GPT",
+    body: "Click Update to publish or save the latest configuration.",
+    image: "/images/m04/gpt-builder-coach-sop/12-update.jpeg",
+  },
+  {
+    title: "View GPT",
+    body: "Open the finished assistant and prepare to run covered, missing, and unsafe tests.",
+    image: "/images/m04/gpt-builder-coach-sop/13-view-gpt.jpeg",
+  },
+  {
+    title: "Optional coach review",
+    body: "Return to GPT Builder Coach if you want it to review your assistant details before testing.",
+    image: "/images/m04/gpt-builder-coach-sop/14-return-to-coach.jpeg",
+  },
 ];
 
 const TESTS = [
@@ -442,6 +508,46 @@ Out of scope: ${blueprint.outOfScope}
 Output format/refusal line: ${blueprint.outputFormat}
 
 Generate a complete Draft System Prompt for this Custom GPT. Include identity, purpose, users, sources, refusal behavior, uncertainty behavior, output format, knowledge guidance, and three test questions: covered, missing/out-of-scope, and unsafe.`;
+
+  const knowledgePlanningPrompt = `Act as an AI knowledge-base architect.
+
+Help me design the knowledge base for this Custom GPT assistant.
+
+Assistant use case:
+Purpose: ${blueprint.purpose}
+Users: ${blueprint.users}
+Sources: ${blueprint.sources}
+Out of scope: ${blueprint.outOfScope}
+
+The assistant should answer only from approved uploaded documents. It must not invent facts, make final decisions, or answer outside the approved source set.
+
+Create a recommended knowledge base for this assistant.
+
+Return the answer in this structure:
+
+1. Knowledge base name
+
+2. Documents to include
+For each document, include:
+- Document name
+- What it should cover
+- Why the assistant needs it
+- Example questions it can support
+
+3. Documents NOT to include
+List sensitive, private, risky, or unapproved files that should not be uploaded.
+
+4. Metadata to add to each document
+Include owner, version, approval date, sensitivity, and review cadence.
+
+5. Gaps to resolve before publishing
+List missing policies, unclear ownership, outdated documents, or approval questions.
+
+6. Upload checklist
+Give me a simple checklist I can use before uploading the files into a Custom GPT.
+
+Important:
+Replace any example documents with my own approved knowledge base before building the GPT.`;
 
   const completeM04 = async () => {
     if (!user || !workspace) return;
@@ -664,6 +770,24 @@ Generate a complete Draft System Prompt for this Custom GPT. Include identity, p
         whatToNotice={<p>Use the simplest architecture that solves the job. Actions are optional and not required in M04.</p>}
         yourVersion={
           <div className="space-y-6">
+            <div className="rounded-md border border-terracotta/30 bg-terracotta/10 p-4">
+              <p className="eyebrow-muted">REPLACE THE EXAMPLE</p>
+              <p className="mt-2 text-[14px] leading-relaxed text-navy">
+                The HR Policy Assistant is only an example. Before building, replace it with your
+                own use case, your own approved knowledge base, and your own boundaries.
+              </p>
+              <div className="mt-3 rounded border border-chalk bg-white p-3 font-mono text-[12px] leading-relaxed text-navy">
+                Assistant name: [your assistant name]
+                <br />
+                Purpose: [what the assistant helps users do]
+                <br />
+                Users: [who will use the assistant]
+                <br />
+                Approved knowledge files: [documents your assistant is allowed to answer from]
+                <br />
+                Do not upload: [sensitive or unapproved files]
+              </div>
+            </div>
             <div className="grid gap-3 md:grid-cols-2">
               {USE_CASES.map((useCase) => (
                 <button
@@ -682,12 +806,16 @@ Generate a complete Draft System Prompt for this Custom GPT. Include identity, p
             </div>
             <BlueprintEditor value={blueprint} onChange={setBlueprint} />
             <PromptBlock label="Copy this blueprint into GPT Builder Coach" text={blueprintPrompt} />
+            <PromptBlock
+              label="Optional: use this if you do not yet know what files your assistant needs"
+              text={knowledgePlanningPrompt}
+            />
             <div className="flex flex-wrap gap-3">
               <a href={GPT_BUILDER_COACH_URL} target="_blank" rel="noreferrer" className="btn-ichigo btn-ichigo-primary">
                 Open GPT Builder Coach <ExternalLink className="h-4 w-4" />
               </a>
             </div>
-            <SopWalkthrough title="Simplified GPT Builder Coach SOP" steps={COACH_STEPS} />
+            <SopWalkthrough title="Build your own Custom GPT SOP" steps={COACH_STEPS} />
             <div className="space-y-2">
               <label className="block text-[13px] font-medium text-navy" htmlFor="m04-own-knowledge">
                 Own assistant knowledge source

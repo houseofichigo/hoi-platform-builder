@@ -194,6 +194,7 @@ const DEMO_STEPS: SopStep[] = [
   {
     title: "Choose sharing access",
     body: "Choose the appropriate sharing setting for the exercise, such as anyone with the link.",
+    image: "/images/m04/refund-assistant-sop/12-sharing-access.jpeg",
   },
   {
     title: "Update the GPT",

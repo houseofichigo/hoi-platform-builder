@@ -237,6 +237,7 @@ const COACH_STEPS: SopStep[] = [
   {
     title: "Copy the Draft System Prompt",
     body: "Copy only the Draft System Prompt or final instructions. Do not copy the analysis notes into the GPT.",
+    image: "/images/m04/gpt-builder-coach-sop/04-copy-draft-prompt.png",
   },
   {
     title: "Open Explore GPTs",

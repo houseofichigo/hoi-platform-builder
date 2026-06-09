@@ -130,32 +130,101 @@ const USE_CASES = [
   "Supplier Onboarding Assistant",
 ];
 
-const DEMO_STEPS = [
-  "Open ChatGPT.",
-  "Click Explore GPTs.",
-  "Click Create.",
-  "Open Configure.",
-  "Name the GPT: Refund Policy Assistant.",
-  "Add a short description.",
-  "Paste the system prompt into Instructions.",
-  "Upload refund-policy-operating-kb.pdf under Knowledge.",
-  "Enable file/data capability only if the builder requires it for uploaded files.",
-  "Click Create.",
-  "Choose a sharing setting.",
-  "Click Update.",
-  "Click View GPT.",
-  "Test in the Ask anything field.",
+interface SopStep {
+  title: string;
+  body: string;
+  image?: string;
+}
+
+const DEMO_STEPS: SopStep[] = [
+  {
+    title: "Open ChatGPT",
+    body: "Navigate to chatgpt.com and sign in to the account where you will build the Custom GPT.",
+  },
+  {
+    title: "Open Explore GPTs",
+    body: "Click Explore GPTs from the ChatGPT sidebar.",
+    image: "/images/m04/refund-assistant-sop/02-explore-gpts.jpeg",
+  },
+  {
+    title: "Create a new GPT",
+    body: "Click Create to start a new Custom GPT.",
+    image: "/images/m04/refund-assistant-sop/03-create.jpeg",
+  },
+  {
+    title: "Open Configure",
+    body: "Switch to Configure so you can edit the name, description, instructions, knowledge, and capabilities.",
+    image: "/images/m04/refund-assistant-sop/04-configure.jpeg",
+  },
+  {
+    title: "Add the name",
+    body: "Type Refund Policy Assistant in the Name field.",
+    image: "/images/m04/refund-assistant-sop/05-name.jpeg",
+  },
+  {
+    title: "Add the description",
+    body: "Use a simple description, for example: Answer questions related to our refund policy.",
+    image: "/images/m04/refund-assistant-sop/06-description.jpeg",
+  },
+  {
+    title: "Paste the system prompt",
+    body: "Copy the system prompt from this assignment and paste it into the Instructions field.",
+    image: "/images/m04/refund-assistant-sop/07-system-prompt.jpeg",
+  },
+  {
+    title: "Upload the operating KB",
+    body: "Upload refund-policy-operating-kb.pdf under Knowledge. Do not upload the raw policy as the primary source.",
+    image: "/images/m04/refund-assistant-sop/08-upload-files.jpeg",
+  },
+  {
+    title: "Confirm file/data capability",
+    body: "Enable Code Interpreter & Data Analysis only if the builder requires it for uploaded files.",
+    image: "/images/m04/refund-assistant-sop/09-code-interpreter.jpeg",
+  },
+  {
+    title: "Create the GPT",
+    body: "Click Create to save the Custom GPT.",
+    image: "/images/m04/refund-assistant-sop/10-create-save.jpeg",
+  },
+  {
+    title: "Open sharing settings",
+    body: "Click the sharing icon to choose who can access the GPT.",
+    image: "/images/m04/refund-assistant-sop/11-sharing-icon.jpeg",
+  },
+  {
+    title: "Choose sharing access",
+    body: "Choose the appropriate sharing setting for the exercise, such as anyone with the link.",
+  },
+  {
+    title: "Update the GPT",
+    body: "Click Update to apply the sharing and configuration changes.",
+    image: "/images/m04/refund-assistant-sop/13-update.jpeg",
+  },
+  {
+    title: "View GPT",
+    body: "Click View GPT to open the finished assistant.",
+    image: "/images/m04/refund-assistant-sop/14-view-gpt.jpeg",
+  },
+  {
+    title: "Open the test field",
+    body: "Click the Ask anything field to begin testing.",
+    image: "/images/m04/refund-assistant-sop/15-ask-anything.jpeg",
+  },
+  {
+    title: "Run the first test",
+    body: "Type the covered refund-window question from Step 3 and check that the assistant cites policy and stops before approval.",
+  },
 ];
 
-const COACH_STEPS = [
-  "Open GPT Builder Coach.",
-  "Paste your five-line assistant blueprint.",
-  "Ask it to generate a system prompt.",
-  "Copy the Draft System Prompt it returns.",
-  "Open ChatGPT, Explore GPTs, then Create.",
-  "Paste the generated instructions.",
-  "Add recommended knowledge files if needed.",
-  "Save, share, and test.",
+const COACH_STEPS: SopStep[] = [
+  { title: "Open GPT Builder Coach", body: "Open the GPT Builder Coach link from this assignment." },
+  { title: "Paste your blueprint", body: "Paste your five-line assistant blueprint." },
+  { title: "Generate the prompt", body: "Ask it to generate a system prompt." },
+  { title: "Copy the draft", body: "Copy the Draft System Prompt it returns." },
+  { title: "Create your GPT", body: "Open ChatGPT, Explore GPTs, then Create." },
+  { title: "Paste instructions", body: "Paste the generated instructions." },
+  { title: "Add knowledge", body: "Add recommended knowledge files if needed." },
+  { title: "Save and test", body: "Save, share, and test." },
 ];
 
 const TESTS = [
@@ -765,24 +834,39 @@ function DownloadCard({
   );
 }
 
-function SopWalkthrough({ title, steps }: { title: string; steps: string[] }) {
+function SopWalkthrough({ title, steps }: { title: string; steps: SopStep[] }) {
   return (
     <section className="card space-y-4">
       <header className="space-y-1">
         <p className="eyebrow">{title}</p>
         <p className="text-[13px] text-graphite">
-          Screenshot slots are shown in order. Add the final screenshot images to these slots when
-          they are ready.
+          Follow the steps in order. Screenshot cards show the exact area to use where an image is
+          available.
         </p>
       </header>
       <ol className="grid gap-3 md:grid-cols-2">
         {steps.map((step, index) => (
-          <li key={step} className="rounded-md border border-chalk bg-paper/70 p-3">
+          <li key={`${step.title}-${index}`} className="overflow-hidden rounded-md border border-chalk bg-white">
+            {step.image ? (
+              <div className="aspect-video bg-paper">
+                <img
+                  src={step.image}
+                  alt={step.title}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-video items-center justify-center border-b border-chalk bg-paper px-4 text-center text-[12px] text-slate">
+                Screenshot not required for this step.
+              </div>
+            )}
+            <div className="space-y-1 p-3">
             <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-terracotta">
-              Screenshot {index + 1}
+              Step {index + 1}
             </p>
-            <div className="mt-2 flex aspect-video items-center justify-center rounded-md border border-dashed border-chalk bg-white text-center text-[12px] text-slate">
-              {step}
+              <p className="text-sm font-medium text-navy">{step.title}</p>
+              <p className="text-[13px] leading-relaxed text-graphite">{step.body}</p>
             </div>
           </li>
         ))}

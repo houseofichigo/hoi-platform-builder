@@ -489,6 +489,17 @@ Generate a complete Draft System Prompt for this Custom GPT. Include identity, p
         whatToNotice={<p>Assistants answer. Agents act. Actions are optional and not required in this module.</p>}
         yourVersion={
           <div className="space-y-6">
+            <figure className="overflow-hidden rounded-lg border border-chalk bg-navy">
+              <img
+                src="/images/m04/chatgpt-home.png"
+                alt="ChatGPT home screen showing the sidebar with Agents and GPTs, including a custom House of Ichigo Assistant"
+                className="w-full"
+                loading="lazy"
+              />
+              <figcaption className="px-4 py-2 text-[12px] text-slate bg-white border-t border-chalk">
+                A ChatGPT workspace with custom Agents and GPTs — assistants are scoped, named, and reusable, not just one-off prompts.
+              </figcaption>
+            </figure>
             <div className="grid gap-4 md:grid-cols-2">
               <ConceptCard title="Raw LLM" body="Tries to answer almost anything, even when no source is available." />
               <ConceptCard title="AI Assistant" body="Has identity, a job, allowed sources, refusal rules, and tests." />

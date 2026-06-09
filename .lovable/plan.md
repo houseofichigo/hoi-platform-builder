@@ -1,33 +1,30 @@
-# M02: Consolidate to a single knowledge check on Step 3
+## Problem
+The live preview is not working because the preview server is crashing before the app loads.
 
-## Goal
-Today M02 renders a separate quiz on each of the 3 steps. Keep only the Step 3 quiz (the last step) and remove the Step 1 and Step 2 quizzes, so learners do one knowledge check at the end of the module.
+## Root cause
+A required native Rollup package is missing in the sandbox install:
+- Missing module: `@rollup/rollup-linux-x64-gnu`
+- Crash happens during `vite dev`, so the preview never starts
 
-## Scope
-Frontend-only change inside `src/components/assess/modules/M02Work.tsx`. No schema changes, no changes to other modules, no changes to the Step 3 Guided Build (`M02Step3Guided`) or the blueprint generator.
+There is also dependency drift in the repo:
+- `package.json` and `package-lock.json` are not fully aligned
+- `bun.lock` references a different Rollup version than the installed `node_modules`
+- The npm lockfile does not contain the missing native Rollup package entry
 
-## Changes
+## Plan
+1. Clean up dependency drift so the project uses one consistent install state.
+2. Reinstall dependencies so the required Rollup native package is restored.
+3. Restart the dev server / preview.
+4. Verify the preview loads normally after the dependency repair.
 
-1. **Remove Step 1 and Step 2 quiz UI**
-   - Drop the quiz section currently rendered inside the Step 1 and Step 2 `<Step>` content.
-   - Remove the quiz from any "can continue" / disabled-reason logic on Steps 1 and 2, so progression depends only on the existing assignment outputs (sources / gaps), not on a quiz.
+## Technical details
+Current evidence from the project:
+- Dev server log shows: `Cannot find module '@rollup/rollup-linux-x64-gnu'`
+- Installed versions currently observed:
+  - `vite`: `7.3.5`
+  - `rollup`: `4.61.0`
+- `bun.lock` still references Rollup `4.60.2`
+- `package-lock.json` does not include `node_modules/@rollup/rollup-linux-x64-gnu`
 
-2. **Keep the Step 3 quiz as the single end-of-module knowledge check**
-   - Leave `M02_STEP_QUIZZES.step3` and its rendering on Step 3 intact.
-   - Step 3's existing gating (blueprint generated + Gate 1 readiness + quiz pass) remains, so the final quiz still acts as the module's knowledge check.
-
-3. **Trim dead code**
-   - Remove `M02_STEP_QUIZZES.step1` and `M02_STEP_QUIZZES.step2` entries.
-   - Remove `step1QuizStatus` and `step2QuizStatus` derivations and any references to them.
-   - Narrow `M02QuizStepKey` to just `"step3"` and simplify `M02KnowledgeCheckState` / `createDefaultM02KnowledgeCheck` / `normalizeM02KnowledgeCheck` to only track `step3`.
-   - Persisted `m02.knowledge_check` output continues to be written; `normalizeM02KnowledgeCheck` will safely ignore any legacy `step1`/`step2` fields from prior saves (backward compatible — no migration needed).
-
-## Out of scope
-- No changes to `M01`–`M12` other than M02.
-- No changes to assess output keys, completion artifacts, or gate logic.
-- No visual redesign of the Step 3 quiz itself.
-
-## Verification
-- Step 1 and Step 2 no longer show a "Knowledge check" block; Continue is enabled once their existing assignment inputs are filled.
-- Step 3 still shows the knowledge check and still requires passing it (alongside blueprint + Gate 1) to complete M02.
-- Reloading a workspace that previously answered Step 1/Step 2 quizzes does not error — legacy fields are ignored.
+## Expected outcome
+Once dependencies are resynced and reinstalled, the preview should start again normally.

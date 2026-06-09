@@ -10,52 +10,52 @@ export const M05_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "A prototype is a rehearsal. It makes the workflow visible before an agent can touch systems, customer data, or operational decisions.",
+    "M04 built the assistant. M05 builds the surface where users experience it.",
 
   step1: {
-    title: "Prototype scope - four surfaces",
+    title: "Why prototype?",
     why:
-      "Before writing a brief, name the four surfaces the prototype must show. Intake, review, decision, and audit are the minimum loop for an AI-supported workflow.",
+      "A working assistant in a chat window is not yet a product. The prototype reveals what users see, edit, approve, escalate, and expect to be logged.",
     example:
-      "For a support-triage prototype: intake captures a request, review shows classification and evidence, decision captures human approval or routing, and audit shows the timeline.",
+      "A spec can say users review the AI output. A prototype shows the fields, status, source evidence, approval button, refusal state, and audit trail.",
     whatToNotice: [
       "Each surface answers one question - collapsing two surfaces hides the failure mode",
       "Confidence and evidence belong on the review surface, not buried in audit",
       "The decision surface is where HITL becomes real, not theoretical",
       "Audit is for the reviewer who arrives later, not for the builder",
     ],
-    produces: "Four acknowledged surfaces - the blueprint for the no-code brief",
-    nextLabel: "Step 2 - no-code build brief",
+    produces: "A clear prototype mindset before using Lovable",
+    nextLabel: "Step 2 - guided Lovable demo",
   },
 
   step2: {
-    title: "No-code build brief",
+    title: "Guided demo - upgrade a website with Lovable",
     why:
-      "A no-code brief is a contract with the builder. It states what the prototype must show, what it must fake, and what it must never do.",
+      "The website demo teaches the Lovable workflow once: screenshot, prompt, generate, review, iterate.",
     example:
-      "The brief seeds Dashboard, Intake, Review, Decision, and Audit screens; pins a MOCK DATA badge to every view; forbids real auth, real AI calls, real CRM writes, and production integrations.",
+      "Pick a public homepage or landing page, use the Lovable Prompt Coach to generate a build prompt, paste it into Lovable, and iterate.",
     whatToNotice: [
       "Mock data only - no real customer, employee, supplier, or contract data",
       "Sandbox rules go in the brief, not in code comments",
       "Frontend only - no production data or system writes",
       "MOCK DATA badge is always visible so no one mistakes it for the agent",
     ],
-    produces: "A Lovable-ready no-code prototype brief",
-    nextLabel: "Step 3 - walkthrough -> agent requirements",
+    produces: "A repeatable Lovable workflow for fast prototypes",
+    nextLabel: "Step 3 - build your assistant prototype",
   },
 
   step3: {
-    title: "Walkthrough findings -> agent requirements",
+    title: "Build your own assistant prototype",
     why:
-      "The prototype only earns its keep if the walkthrough turns friction into requirements. Five prompts force the team to name what the prototype faked and what the M06 agent must actually do.",
+      "Learners reuse the same Lovable method for their own AI assistant use case, with mock data and clear sandbox boundaries.",
     example:
-      "Three requirement cards come out: input extraction the prototype faked, system sync the prototype faked, and HITL queue/audit persistence the prototype faked.",
+      "An RFP, proposal, support, HR, supplier, SEO, or internal knowledge assistant can all start as a clickable interface prototype.",
     whatToNotice: [
       "Walkthrough answers are evidence - agent requirements are commitments",
       "Every fake in the prototype is a job the agent will inherit",
       "Three cards is enough - more dilutes the M06 scope",
     ],
-    produces: "Three agent requirement cards ready to feed M06",
+    produces: "A Lovable prompt for the learner's own assistant interface",
   },
 
   surfaces: [

@@ -1,16 +1,17 @@
-## Problem
-The preview loads (HTTP 200, Vite running fine on port 8080) but immediately renders the "This page didn't load" error screen. Root cause: `.env` is missing from the project root, so `import.meta.env.VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are `undefined`. The Supabase client in `src/integrations/supabase/client.ts` throws on first access, which happens immediately because `AuthProvider` (mounted in `src/routes/__root.tsx`) calls `supabase.auth.onAuthStateChange` on mount. The error bubbles into the root `errorComponent`.
+## Add screenshot to Step 4 of "Build your own Custom GPT SOP"
 
-The `.env` was recreated in a prior turn but did not survive — likely a sandbox reset wiped it (it's gitignored, so it never came back from the repo).
+Step 4 in `COACH_STEPS` is **"Copy the Draft System Prompt"** and currently has no image. The uploaded screenshot shows the GPT Builder Coach with the drafted instructions ready to copy — a perfect fit.
 
-## Plan
-1. Recreate `.env` at the project root with the Lovable Cloud values for this project:
-   - `VITE_SUPABASE_PROJECT_ID=hqliaebgjwjyhmfpwxti`
-   - `VITE_SUPABASE_URL=https://hqliaebgjwjyhmfpwxti.supabase.co`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY=<anon key>`
-2. Restart the Vite dev server so it picks up the new env (Vite only reads `.env` at startup).
-3. Verify the preview renders the app (not the error screen) by checking dev-server logs and hitting `/`.
+### Changes
 
-## Notes
-- No code changes needed; `client.ts` already reads `import.meta.env.VITE_SUPABASE_*` with a clear error when missing.
-- If `.env` keeps disappearing across sandbox resets, the next step would be to look at why the managed env isn't being restored, but one recreate-and-verify pass first is the right move.
+1. Copy the uploaded screenshot to `public/images/m04/gpt-builder-coach-sop/04-copy-draft-prompt.png`.
+2. In `src/components/assess/modules/M04Work.tsx`, on the `COACH_STEPS` entry titled "Copy the Draft System Prompt" (line 237–240), add:
+   ```ts
+   image: "/images/m04/gpt-builder-coach-sop/04-copy-draft-prompt.png",
+   ```
+
+No other steps or copy change.
+
+### Note (carryover from prior plan)
+
+These `public/images/...` references still render in the Vite dev preview but 404 on the published Worker build (no Cloudflare `assets` binding). Migrating all M04 screenshots to Lovable Assets CDN is the proper fix and is tracked in the previous plan. This change keeps consistency with the existing pattern; the Lovable Assets migration can sweep them all together later.

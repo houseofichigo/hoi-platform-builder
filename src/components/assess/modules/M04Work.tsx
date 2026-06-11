@@ -854,8 +854,9 @@ Replace any example documents with my own approved knowledge base before buildin
             <div className="rounded-md border border-terracotta/30 bg-terracotta/10 p-4">
               <p className="eyebrow-muted">REPLACE THE EXAMPLE</p>
               <p className="mt-2 text-[14px] leading-relaxed text-navy">
-                The HR Policy Assistant is only an example. Before building, replace it with your
-                own use case, your own approved knowledge base, and your own boundaries.
+                The selected use case is a starting example. Before building, replace it with your
+                own scope, your own approved knowledge base, and your own boundaries — or pick
+                "Build your own" to start from a blank blueprint.
               </p>
               <div className="mt-3 rounded border border-chalk bg-white p-3 font-mono text-[12px] leading-relaxed text-navy">
                 Assistant name: [your assistant name]
@@ -1143,12 +1144,32 @@ function BlueprintEditor({
   value: AssistantBlueprint;
   onChange: (value: AssistantBlueprint) => void;
 }) {
-  const fields: Array<{ key: keyof AssistantBlueprint; label: string }> = [
-    { key: "purpose", label: "Purpose" },
-    { key: "users", label: "Users" },
-    { key: "sources", label: "Sources" },
-    { key: "outOfScope", label: "Out of scope" },
-    { key: "outputFormat", label: "Output format / refusal line" },
+  const fields: Array<{ key: keyof AssistantBlueprint; label: string; helper: string }> = [
+    {
+      key: "purpose",
+      label: "Purpose",
+      helper: "What concrete job does this assistant do? e.g., answer questions about a bounded policy.",
+    },
+    {
+      key: "users",
+      label: "Users",
+      helper: "Who will use it day to day? e.g., internal support team, procurement, marketing.",
+    },
+    {
+      key: "sources",
+      label: "Sources",
+      helper: "Which approved files/knowledge base may it answer from? List doc types.",
+    },
+    {
+      key: "outOfScope",
+      label: "Out of scope",
+      helper: "What must it refuse or escalate? e.g., don't invent facts, don't take actions, don't promise refunds.",
+    },
+    {
+      key: "outputFormat",
+      label: "Output format / refusal line",
+      helper: "What structure should every answer follow? Include a clear refusal line for unknown/unsafe asks.",
+    },
   ];
 
   return (
@@ -1159,17 +1180,24 @@ function BlueprintEditor({
           GPT Builder Coach uses these lines to produce your Draft System Prompt.
         </p>
       </header>
-      {fields.map((field) => (
-        <label key={field.key} className="block space-y-1">
-          <span className="text-[13px] font-medium text-navy">{field.label}</span>
-          <textarea
-            value={value[field.key]}
-            onChange={(event) => onChange({ ...value, [field.key]: event.target.value })}
-            rows={2}
-            className="w-full rounded-md border border-chalk bg-paper p-3 text-[13px] text-navy outline-none focus:border-terracotta"
-          />
-        </label>
-      ))}
+      {fields.map((field) => {
+        const isEmpty = value[field.key].trim() === "";
+        return (
+          <label key={field.key} className="block space-y-1">
+            <span className="text-[13px] font-medium text-navy">{field.label}</span>
+            {isEmpty && (
+              <span className="block text-[12px] italic text-slate">{field.helper}</span>
+            )}
+            <textarea
+              value={value[field.key]}
+              onChange={(event) => onChange({ ...value, [field.key]: event.target.value })}
+              rows={2}
+              placeholder={field.helper}
+              className="w-full rounded-md border border-chalk bg-paper p-3 text-[13px] text-navy outline-none focus:border-terracotta"
+            />
+          </label>
+        );
+      })}
     </section>
   );
 }

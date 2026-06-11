@@ -406,7 +406,7 @@ function normalizeArchitecture(value: unknown): ArchitectureOutput {
     selectedUseCase: typeof source.selectedUseCase === "string" ? source.selectedUseCase : undefined,
     ownBlueprint:
       source.ownBlueprint && typeof source.ownBlueprint === "object"
-        ? { ...DEFAULT_BLUEPRINT, ...source.ownBlueprint }
+        ? { ...EMPTY_BLUEPRINT, ...source.ownBlueprint }
         : undefined,
   };
 }
@@ -499,7 +499,7 @@ export function M04Work() {
     ownGptBuilt: false,
     finalAcknowledged: false,
   });
-  const [blueprint, setBlueprint] = useState<AssistantBlueprint>(DEFAULT_BLUEPRINT);
+  const [blueprint, setBlueprint] = useState<AssistantBlueprint>(DEFAULT_USE_CASE.blueprint);
 
   const hydrated = useMemo(
     () =>
@@ -528,7 +528,10 @@ export function M04Work() {
     const nextReadiness = normalizeReadiness(readinessOut.value);
     setReadiness(nextReadiness);
     const savedArchitecture = normalizeArchitecture(architectureOut.value);
-    setBlueprint(savedArchitecture.ownBlueprint ?? DEFAULT_BLUEPRINT);
+    const savedUseCase = findUseCase(savedArchitecture.selectedUseCase);
+    setBlueprint(
+      savedArchitecture.ownBlueprint ?? (savedUseCase ? savedUseCase.blueprint : DEFAULT_USE_CASE.blueprint),
+    );
 
     const status = progress.data?.status;
     if (status === "complete") setStep(5);
@@ -867,20 +870,36 @@ Replace any example documents with my own approved knowledge base before buildin
               </div>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              {USE_CASES.map((useCase) => (
-                <button
-                  key={useCase}
-                  type="button"
-                  onClick={() => updateArchitecture({ ...architecture, selectedUseCase: useCase })}
-                  className={`rounded-md border p-4 text-left text-[14px] transition-colors ${
-                    selectedUseCase === useCase
-                      ? "border-terracotta bg-mist text-navy"
-                      : "border-chalk bg-white text-graphite hover:bg-paper"
-                  }`}
-                >
-                  {useCase}
-                </button>
-              ))}
+              {USE_CASE_CATALOG.map((useCase) => {
+                const isSelected = selectedUseCase === useCase.label;
+                const dashed = useCase.isBuildYourOwn ? "border-dashed" : "";
+                return (
+                  <button
+                    key={useCase.id}
+                    type="button"
+                    onClick={() => {
+                      updateArchitecture({
+                        ...architecture,
+                        selectedUseCase: useCase.label,
+                        ownBlueprint: useCase.blueprint,
+                      });
+                      setBlueprint(useCase.blueprint);
+                    }}
+                    className={`rounded-md border p-4 text-left text-[14px] transition-colors ${dashed} ${
+                      isSelected
+                        ? "border-terracotta bg-mist text-navy"
+                        : "border-chalk bg-white text-graphite hover:bg-paper"
+                    }`}
+                  >
+                    <span className="block font-medium">{useCase.label}</span>
+                    {useCase.isBuildYourOwn && (
+                      <span className="mt-1 block text-[12px] text-slate">
+                        Start from a blank blueprint and fill each line yourself.
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             <BlueprintEditor value={blueprint} onChange={setBlueprint} />
             <PromptBlock label="Copy this blueprint into GPT Builder Coach" text={blueprintPrompt} />

@@ -1,17 +1,10 @@
-## Add screenshot to Step 4 of "Build your own Custom GPT SOP"
+# Move ChatGPT home screenshot to Demo SOP Step 1
 
-Step 4 in `COACH_STEPS` is **"Copy the Draft System Prompt"** and currently has no image. The uploaded screenshot shows the GPT Builder Coach with the drafted instructions ready to copy — a perfect fit.
+The `chatgpt-home.png` screenshot currently appears in the "What is an AI assistant?" section (Step 1 of the chapter). It belongs to Step 1 of the Demo SOP ("Open ChatGPT") instead.
 
-### Changes
+## Changes in `src/components/assess/modules/M04Work.tsx`
 
-1. Copy the uploaded screenshot to `public/images/m04/gpt-builder-coach-sop/04-copy-draft-prompt.png`.
-2. In `src/components/assess/modules/M04Work.tsx`, on the `COACH_STEPS` entry titled "Copy the Draft System Prompt" (line 237–240), add:
-   ```ts
-   image: "/images/m04/gpt-builder-coach-sop/04-copy-draft-prompt.png",
-   ```
+1. Add `image: "/images/m04/chatgpt-home.png"` to the first entry of `DEMO_STEPS` ("Open ChatGPT") around line 140–143.
+2. Remove the `<figure>` block (lines ~601–611) that renders the same image inside the "What is an AI assistant?" `yourVersion`.
 
-No other steps or copy change.
-
-### Note (carryover from prior plan)
-
-These `public/images/...` references still render in the Vite dev preview but 404 on the published Worker build (no Cloudflare `assets` binding). Migrating all M04 screenshots to Lovable Assets CDN is the proper fix and is tracked in the previous plan. This change keeps consistency with the existing pattern; the Lovable Assets migration can sweep them all together later.
+No other copy or logic changes.

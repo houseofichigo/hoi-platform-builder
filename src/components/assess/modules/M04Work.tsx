@@ -113,22 +113,96 @@ Return:
 4. Human review needed: Yes/No
 5. Suggested next step`;
 
-const DEFAULT_BLUEPRINT: AssistantBlueprint = {
-  purpose: "Help internal team members answer questions about a bounded policy or workflow.",
-  users: "Internal team members who need fast, source-backed answers.",
-  sources: "Approved policy, SOP, FAQ, or operating knowledge-base files.",
-  outOfScope: "Do not invent facts, make final decisions, send messages, or take actions.",
-  outputFormat:
-    "Return a short answer, source basis, missing information, human review flag, and suggested next step.",
+const EMPTY_BLUEPRINT: AssistantBlueprint = {
+  purpose: "",
+  users: "",
+  sources: "",
+  outOfScope: "",
+  outputFormat: "",
 };
 
-const USE_CASES = [
-  "Customer Support Policy Assistant",
-  "HR Policy Assistant",
-  "Sales Enablement Assistant",
-  "SEO Content Assistant",
-  "Supplier Onboarding Assistant",
+interface UseCaseOption {
+  id: string;
+  label: string;
+  blueprint: AssistantBlueprint;
+  isBuildYourOwn?: boolean;
+}
+
+const USE_CASE_CATALOG: UseCaseOption[] = [
+  {
+    id: "customer_support",
+    label: "Customer Support Policy Assistant",
+    blueprint: {
+      purpose: "Help support agents answer customer-facing policy questions using only approved policy documents.",
+      users: "Tier-1 customer support agents handling inbound tickets and chats.",
+      sources: "Approved refund, returns, and SLA policies plus the customer FAQ.",
+      outOfScope: "Do not issue refunds, promise exceptions, or commit to compensation. Do not invent policy.",
+      outputFormat:
+        "Return a short answer, policy basis, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "hr_policy",
+    label: "HR Policy Assistant",
+    blueprint: {
+      purpose: "Help internal team members answer questions about a bounded HR policy or workflow.",
+      users: "Internal employees and people managers who need fast, source-backed HR answers.",
+      sources: "Approved HR policy, SOP, FAQ, or operating knowledge-base files.",
+      outOfScope: "Do not invent facts, make final decisions, send messages, or take actions on behalf of HR.",
+      outputFormat:
+        "Return a short answer, source basis, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "sales_enablement",
+    label: "Sales Enablement Assistant",
+    blueprint: {
+      purpose: "Help reps find approved messaging, pricing, and objection-handling answers from sales collateral.",
+      users: "Account executives and SDRs preparing for calls or replying to prospects.",
+      sources: "Approved battlecards, pricing sheet, ICP document, and objection-handling playbook.",
+      outOfScope: "Do not quote custom discounts, commit to contract terms, or invent product capabilities.",
+      outputFormat:
+        "Return a short answer, source used, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "seo_content",
+    label: "SEO Content Assistant",
+    blueprint: {
+      purpose: "Draft on-brand SEO briefs and outlines from approved brand and SEO guidelines.",
+      users: "Content and marketing team members planning new pages or articles.",
+      sources: "Brand voice guide, approved keyword list, and internal SEO playbook.",
+      outOfScope: "Do not publish content, invent statistics, or cite sources that are not in the knowledge base.",
+      outputFormat:
+        "Return a brief outline, sources used, gaps to fill, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "supplier_onboarding",
+    label: "Supplier Onboarding Assistant",
+    blueprint: {
+      purpose: "Guide procurement through supplier intake and compliance checks using approved SOPs.",
+      users: "Procurement team members onboarding new suppliers.",
+      sources: "Supplier onboarding SOP, compliance checklist, and approved supplier categories list.",
+      outOfScope: "Do not approve suppliers, sign NDAs, or accept documents on behalf of the company.",
+      outputFormat:
+        "Return the required next step, policy basis, missing documents, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "build_your_own",
+    label: "Build your own",
+    isBuildYourOwn: true,
+    blueprint: EMPTY_BLUEPRINT,
+  },
 ];
+
+const DEFAULT_USE_CASE = USE_CASE_CATALOG[0];
+
+function findUseCase(selected: string | undefined): UseCaseOption | undefined {
+  if (!selected) return undefined;
+  return USE_CASE_CATALOG.find((u) => u.label === selected || u.id === selected);
+}
 
 interface SopStep {
   title: string;

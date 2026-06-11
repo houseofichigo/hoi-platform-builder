@@ -113,22 +113,96 @@ Return:
 4. Human review needed: Yes/No
 5. Suggested next step`;
 
-const DEFAULT_BLUEPRINT: AssistantBlueprint = {
-  purpose: "Help internal team members answer questions about a bounded policy or workflow.",
-  users: "Internal team members who need fast, source-backed answers.",
-  sources: "Approved policy, SOP, FAQ, or operating knowledge-base files.",
-  outOfScope: "Do not invent facts, make final decisions, send messages, or take actions.",
-  outputFormat:
-    "Return a short answer, source basis, missing information, human review flag, and suggested next step.",
+const EMPTY_BLUEPRINT: AssistantBlueprint = {
+  purpose: "",
+  users: "",
+  sources: "",
+  outOfScope: "",
+  outputFormat: "",
 };
 
-const USE_CASES = [
-  "Customer Support Policy Assistant",
-  "HR Policy Assistant",
-  "Sales Enablement Assistant",
-  "SEO Content Assistant",
-  "Supplier Onboarding Assistant",
+interface UseCaseOption {
+  id: string;
+  label: string;
+  blueprint: AssistantBlueprint;
+  isBuildYourOwn?: boolean;
+}
+
+const USE_CASE_CATALOG: UseCaseOption[] = [
+  {
+    id: "customer_support",
+    label: "Customer Support Policy Assistant",
+    blueprint: {
+      purpose: "Help support agents answer customer-facing policy questions using only approved policy documents.",
+      users: "Tier-1 customer support agents handling inbound tickets and chats.",
+      sources: "Approved refund, returns, and SLA policies plus the customer FAQ.",
+      outOfScope: "Do not issue refunds, promise exceptions, or commit to compensation. Do not invent policy.",
+      outputFormat:
+        "Return a short answer, policy basis, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "hr_policy",
+    label: "HR Policy Assistant",
+    blueprint: {
+      purpose: "Help internal team members answer questions about a bounded HR policy or workflow.",
+      users: "Internal employees and people managers who need fast, source-backed HR answers.",
+      sources: "Approved HR policy, SOP, FAQ, or operating knowledge-base files.",
+      outOfScope: "Do not invent facts, make final decisions, send messages, or take actions on behalf of HR.",
+      outputFormat:
+        "Return a short answer, source basis, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "sales_enablement",
+    label: "Sales Enablement Assistant",
+    blueprint: {
+      purpose: "Help reps find approved messaging, pricing, and objection-handling answers from sales collateral.",
+      users: "Account executives and SDRs preparing for calls or replying to prospects.",
+      sources: "Approved battlecards, pricing sheet, ICP document, and objection-handling playbook.",
+      outOfScope: "Do not quote custom discounts, commit to contract terms, or invent product capabilities.",
+      outputFormat:
+        "Return a short answer, source used, missing information, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "seo_content",
+    label: "SEO Content Assistant",
+    blueprint: {
+      purpose: "Draft on-brand SEO briefs and outlines from approved brand and SEO guidelines.",
+      users: "Content and marketing team members planning new pages or articles.",
+      sources: "Brand voice guide, approved keyword list, and internal SEO playbook.",
+      outOfScope: "Do not publish content, invent statistics, or cite sources that are not in the knowledge base.",
+      outputFormat:
+        "Return a brief outline, sources used, gaps to fill, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "supplier_onboarding",
+    label: "Supplier Onboarding Assistant",
+    blueprint: {
+      purpose: "Guide procurement through supplier intake and compliance checks using approved SOPs.",
+      users: "Procurement team members onboarding new suppliers.",
+      sources: "Supplier onboarding SOP, compliance checklist, and approved supplier categories list.",
+      outOfScope: "Do not approve suppliers, sign NDAs, or accept documents on behalf of the company.",
+      outputFormat:
+        "Return the required next step, policy basis, missing documents, human review flag, and suggested next step.",
+    },
+  },
+  {
+    id: "build_your_own",
+    label: "Build your own",
+    isBuildYourOwn: true,
+    blueprint: EMPTY_BLUEPRINT,
+  },
 ];
+
+const DEFAULT_USE_CASE = USE_CASE_CATALOG[0];
+
+function findUseCase(selected: string | undefined): UseCaseOption | undefined {
+  if (!selected) return undefined;
+  return USE_CASE_CATALOG.find((u) => u.label === selected || u.id === selected);
+}
 
 interface SopStep {
   title: string;
@@ -332,7 +406,7 @@ function normalizeArchitecture(value: unknown): ArchitectureOutput {
     selectedUseCase: typeof source.selectedUseCase === "string" ? source.selectedUseCase : undefined,
     ownBlueprint:
       source.ownBlueprint && typeof source.ownBlueprint === "object"
-        ? { ...DEFAULT_BLUEPRINT, ...source.ownBlueprint }
+        ? { ...EMPTY_BLUEPRINT, ...source.ownBlueprint }
         : undefined,
   };
 }
@@ -425,7 +499,7 @@ export function M04Work() {
     ownGptBuilt: false,
     finalAcknowledged: false,
   });
-  const [blueprint, setBlueprint] = useState<AssistantBlueprint>(DEFAULT_BLUEPRINT);
+  const [blueprint, setBlueprint] = useState<AssistantBlueprint>(DEFAULT_USE_CASE.blueprint);
 
   const hydrated = useMemo(
     () =>
@@ -454,7 +528,10 @@ export function M04Work() {
     const nextReadiness = normalizeReadiness(readinessOut.value);
     setReadiness(nextReadiness);
     const savedArchitecture = normalizeArchitecture(architectureOut.value);
-    setBlueprint(savedArchitecture.ownBlueprint ?? DEFAULT_BLUEPRINT);
+    const savedUseCase = findUseCase(savedArchitecture.selectedUseCase);
+    setBlueprint(
+      savedArchitecture.ownBlueprint ?? (savedUseCase ? savedUseCase.blueprint : DEFAULT_USE_CASE.blueprint),
+    );
 
     const status = progress.data?.status;
     if (status === "complete") setStep(5);
@@ -777,8 +854,9 @@ Replace any example documents with my own approved knowledge base before buildin
             <div className="rounded-md border border-terracotta/30 bg-terracotta/10 p-4">
               <p className="eyebrow-muted">REPLACE THE EXAMPLE</p>
               <p className="mt-2 text-[14px] leading-relaxed text-navy">
-                The HR Policy Assistant is only an example. Before building, replace it with your
-                own use case, your own approved knowledge base, and your own boundaries.
+                The selected use case is a starting example. Before building, replace it with your
+                own scope, your own approved knowledge base, and your own boundaries — or pick
+                "Build your own" to start from a blank blueprint.
               </p>
               <div className="mt-3 rounded border border-chalk bg-white p-3 font-mono text-[12px] leading-relaxed text-navy">
                 Assistant name: [your assistant name]
@@ -793,20 +871,36 @@ Replace any example documents with my own approved knowledge base before buildin
               </div>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
-              {USE_CASES.map((useCase) => (
-                <button
-                  key={useCase}
-                  type="button"
-                  onClick={() => updateArchitecture({ ...architecture, selectedUseCase: useCase })}
-                  className={`rounded-md border p-4 text-left text-[14px] transition-colors ${
-                    selectedUseCase === useCase
-                      ? "border-terracotta bg-mist text-navy"
-                      : "border-chalk bg-white text-graphite hover:bg-paper"
-                  }`}
-                >
-                  {useCase}
-                </button>
-              ))}
+              {USE_CASE_CATALOG.map((useCase) => {
+                const isSelected = selectedUseCase === useCase.label;
+                const dashed = useCase.isBuildYourOwn ? "border-dashed" : "";
+                return (
+                  <button
+                    key={useCase.id}
+                    type="button"
+                    onClick={() => {
+                      updateArchitecture({
+                        ...architecture,
+                        selectedUseCase: useCase.label,
+                        ownBlueprint: useCase.blueprint,
+                      });
+                      setBlueprint(useCase.blueprint);
+                    }}
+                    className={`rounded-md border p-4 text-left text-[14px] transition-colors ${dashed} ${
+                      isSelected
+                        ? "border-terracotta bg-mist text-navy"
+                        : "border-chalk bg-white text-graphite hover:bg-paper"
+                    }`}
+                  >
+                    <span className="block font-medium">{useCase.label}</span>
+                    {useCase.isBuildYourOwn && (
+                      <span className="mt-1 block text-[12px] text-slate">
+                        Start from a blank blueprint and fill each line yourself.
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
             <BlueprintEditor value={blueprint} onChange={setBlueprint} />
             <PromptBlock label="Copy this blueprint into GPT Builder Coach" text={blueprintPrompt} />
@@ -1050,12 +1144,32 @@ function BlueprintEditor({
   value: AssistantBlueprint;
   onChange: (value: AssistantBlueprint) => void;
 }) {
-  const fields: Array<{ key: keyof AssistantBlueprint; label: string }> = [
-    { key: "purpose", label: "Purpose" },
-    { key: "users", label: "Users" },
-    { key: "sources", label: "Sources" },
-    { key: "outOfScope", label: "Out of scope" },
-    { key: "outputFormat", label: "Output format / refusal line" },
+  const fields: Array<{ key: keyof AssistantBlueprint; label: string; helper: string }> = [
+    {
+      key: "purpose",
+      label: "Purpose",
+      helper: "What concrete job does this assistant do? e.g., answer questions about a bounded policy.",
+    },
+    {
+      key: "users",
+      label: "Users",
+      helper: "Who will use it day to day? e.g., internal support team, procurement, marketing.",
+    },
+    {
+      key: "sources",
+      label: "Sources",
+      helper: "Which approved files/knowledge base may it answer from? List doc types.",
+    },
+    {
+      key: "outOfScope",
+      label: "Out of scope",
+      helper: "What must it refuse or escalate? e.g., don't invent facts, don't take actions, don't promise refunds.",
+    },
+    {
+      key: "outputFormat",
+      label: "Output format / refusal line",
+      helper: "What structure should every answer follow? Include a clear refusal line for unknown/unsafe asks.",
+    },
   ];
 
   return (
@@ -1066,17 +1180,24 @@ function BlueprintEditor({
           GPT Builder Coach uses these lines to produce your Draft System Prompt.
         </p>
       </header>
-      {fields.map((field) => (
-        <label key={field.key} className="block space-y-1">
-          <span className="text-[13px] font-medium text-navy">{field.label}</span>
-          <textarea
-            value={value[field.key]}
-            onChange={(event) => onChange({ ...value, [field.key]: event.target.value })}
-            rows={2}
-            className="w-full rounded-md border border-chalk bg-paper p-3 text-[13px] text-navy outline-none focus:border-terracotta"
-          />
-        </label>
-      ))}
+      {fields.map((field) => {
+        const isEmpty = value[field.key].trim() === "";
+        return (
+          <label key={field.key} className="block space-y-1">
+            <span className="text-[13px] font-medium text-navy">{field.label}</span>
+            {isEmpty && (
+              <span className="block text-[12px] italic text-slate">{field.helper}</span>
+            )}
+            <textarea
+              value={value[field.key]}
+              onChange={(event) => onChange({ ...value, [field.key]: event.target.value })}
+              rows={2}
+              placeholder={field.helper}
+              className="w-full rounded-md border border-chalk bg-paper p-3 text-[13px] text-navy outline-none focus:border-terracotta"
+            />
+          </label>
+        );
+      })}
     </section>
   );
 }

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
-import { BarChart3, CreditCard, ReceiptText, Settings, Shield, Users } from "lucide-react";
+import { BarChart3, CreditCard, ReceiptText, Settings, Shield, UserCog, Users } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin")({
@@ -8,6 +8,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/admin")({
 
 const tabs = [
   { to: "/app/$workspaceSlug/admin", label: "Overview", icon: Shield, exact: true },
+  { to: "/app/$workspaceSlug/admin/onboarding", label: "Setup", icon: UserCog, exact: false },
   { to: "/app/$workspaceSlug/admin/members", label: "Members", icon: Users, exact: false },
   { to: "/app/$workspaceSlug/admin/analytics", label: "Analytics", icon: BarChart3, exact: false },
   { to: "/app/$workspaceSlug/admin/billing", label: "Billing", icon: CreditCard, exact: false },

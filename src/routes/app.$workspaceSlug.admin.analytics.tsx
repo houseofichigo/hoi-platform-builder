@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getWorkspaceAdminOverview } from "@/lib/workspace-admin.functions";
+import { getBuildOverview } from "@/lib/db/build-analytics";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin/analytics")({
   component: WorkspaceAdminAnalyticsPage,
@@ -15,6 +16,11 @@ function WorkspaceAdminAnalyticsPage() {
     enabled: !!workspace,
     queryKey: ["workspace-admin", "overview", workspace?.id],
     queryFn: () => getOverview({ data: { workspaceId: workspace!.id } }),
+  });
+  const { data: buildOverview } = useQuery({
+    enabled: !!workspace,
+    queryKey: ["build-overview", workspace?.id],
+    queryFn: () => getBuildOverview(workspace!.id),
   });
 
   if (!workspace) return null;
@@ -36,7 +42,7 @@ function WorkspaceAdminAnalyticsPage() {
     <div className="space-y-6">
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <AnalyticsCard title="Assess completion" value={`${assessPct}%`} detail={`${data.counts.assessComplete} of ${data.counts.assessTotal} modules complete`} />
-        <AnalyticsCard title="Use cases captured" value={data.counts.useCases} detail={`${data.counts.scoredUseCases} scored and ${data.counts.approvedUseCases} approved`} />
+        <AnalyticsCard title="Processes mapped" value={buildOverview?.total ?? 0} detail={`${buildOverview?.awaiting_decision ?? 0} awaiting decision and ${buildOverview?.approved ?? 0} approved`} />
         <AnalyticsCard title="Scale work" value={data.counts.activeRoadmap} detail={`${data.counts.openGovernanceFlags} open governance flags`} />
       </section>
 
@@ -62,8 +68,8 @@ function WorkspaceAdminAnalyticsPage() {
             slug={workspace.slug}
           />
           <AttentionRow
-            label="Approved Build use cases"
-            value={data.counts.approvedUseCases}
+            label="Approved Build processes"
+            value={buildOverview?.approved ?? 0}
             to="/app/$workspaceSlug/build/library"
             slug={workspace.slug}
           />

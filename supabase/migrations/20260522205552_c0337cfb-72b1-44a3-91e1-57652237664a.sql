@@ -1,7 +1,7 @@
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- Tables
--- =========================================
+-- ---------------------------------------------------------------------
 
 create table public.workspaces (
   id uuid primary key default gen_random_uuid(),
@@ -34,9 +34,9 @@ create table public.profiles (
   updated_at timestamptz not null default now()
 );
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- Security definer helpers (avoid RLS recursion)
--- =========================================
+-- ---------------------------------------------------------------------
 
 create or replace function public.is_workspace_member(_workspace_id uuid, _user_id uuid)
 returns boolean
@@ -67,17 +67,17 @@ as $$
   )
 $$;
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- Enable RLS
--- =========================================
+-- ---------------------------------------------------------------------
 
 alter table public.workspaces enable row level security;
 alter table public.workspace_members enable row level security;
 alter table public.profiles enable row level security;
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- workspaces policies
--- =========================================
+-- ---------------------------------------------------------------------
 
 create policy "Members can view their workspaces"
 on public.workspaces for select
@@ -100,9 +100,9 @@ on public.workspaces for delete
 to authenticated
 using (public.has_workspace_role(id, auth.uid(), array['owner']));
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- workspace_members policies
--- =========================================
+-- ---------------------------------------------------------------------
 
 create policy "Members can view co-members"
 on public.workspace_members for select
@@ -146,9 +146,9 @@ using (
   or user_id = auth.uid()
 );
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- profiles policies
--- =========================================
+-- ---------------------------------------------------------------------
 
 create policy "Authenticated users can view any profile"
 on public.profiles for select
@@ -171,9 +171,9 @@ on public.profiles for delete
 to authenticated
 using (user_id = auth.uid());
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- updated_at triggers
--- =========================================
+-- ---------------------------------------------------------------------
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -193,9 +193,9 @@ create trigger profiles_set_updated_at
 before update on public.profiles
 for each row execute function public.set_updated_at();
 
--- =========================================
+-- ---------------------------------------------------------------------
 -- Auth signup -> profile trigger
--- =========================================
+-- ---------------------------------------------------------------------
 
 create or replace function public.handle_new_user()
 returns trigger

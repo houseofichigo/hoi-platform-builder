@@ -3,17 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { MODULES } from "@/lib/curriculum";
+import { getBuildOverview } from "@/lib/db/build-analytics";
 
 export interface ResumeData {
   assess: { moduleNum: number; moduleTitle: string; progress: number; started: boolean };
-  build: { total: number; readyToScore: number; scored: number; submitted: number; pending: number };
+  build: { total: number; readyToScore: number; scored: number; submitted: number; pending: number; approved: number };
   scale: { active: number; pilot: number; live: number; openFlags: number; pendingReviews: number; pendingApproval: number };
 }
 
 export interface TeamStatus {
   assess: { completed: number; total: number; membersStarted: number };
   discover: { items: number };
-  build: { total: number; scored: number; pending: number };
+  build: { total: number; scored: number; pending: number; approved: number };
   scale: { live: number; pilot: number; active: number; openFlags: number; pendingReviews: number };
 }
 
@@ -51,26 +52,15 @@ export function useUserProfile() {
 }
 
 async function fetchBuildCounts(workspaceId: string) {
-  const [ucRes, scoresRes, approvalsRes] = await Promise.all([
-    supabase.from("use_cases").select("id, status").eq("workspace_id", workspaceId),
-    supabase
-      .from("use_case_scores")
-      .select("use_case_id, use_cases!inner(workspace_id)")
-      .eq("use_cases.workspace_id", workspaceId),
-    supabase
-      .from("use_case_approvals")
-      .select("decision, use_case_id, use_cases!inner(workspace_id)")
-      .eq("use_cases.workspace_id", workspaceId),
-  ]);
-  const useCases = ucRes.data ?? [];
-  const scoredIds = new Set((scoresRes.data ?? []).map((s: { use_case_id: string }) => s.use_case_id));
-  const approvals = approvalsRes.data ?? [];
-  const total = useCases.length;
-  const scored = scoredIds.size;
-  const submitted = useCases.filter((u) => u.status === "submitted").length;
-  const pending = approvals.filter((a: { decision: string }) => a.decision === "pending").length;
-  const readyToScore = useCases.filter((u) => !scoredIds.has(u.id) && u.status !== "draft").length;
-  return { total, scored, submitted, pending, readyToScore };
+  const overview = await getBuildOverview(workspaceId);
+  return {
+    total: overview.total,
+    scored: overview.approved,
+    approved: overview.approved,
+    submitted: overview.submitted,
+    pending: overview.awaiting_decision,
+    readyToScore: overview.submitted + overview.under_review,
+  };
 }
 
 async function fetchScaleCounts(workspaceId: string) {
@@ -196,10 +186,10 @@ export function useAttentionItems() {
             .eq("status", "pending")
             .gte("created_at", sevenDaysAgo),
           supabase
-            .from("use_case_approvals")
-            .select("id, decision, use_cases!inner(workspace_id)")
-            .eq("decision", "pending")
-            .eq("use_cases.workspace_id", workspace!.id),
+            .from("process")
+            .select("id, status")
+            .eq("workspace_id", workspace!.id)
+            .in("status", ["submitted", "under_review"]),
           supabase
             .from("governance_flags")
             .select("id, severity, status")
@@ -240,7 +230,7 @@ export function useAttentionItems() {
         items.push({
           id: "pending-approvals",
           kind: "urgent",
-          description: `${pendingApprovals} use case${pendingApprovals === 1 ? "" : "s"} waiting for your approval`,
+          description: `${pendingApprovals} process${pendingApprovals === 1 ? "" : "es"} waiting for your approval`,
           timestamp: "Build",
           actionLabel: "Review",
           actionTo: `/app/${slug}/build/approvals`,

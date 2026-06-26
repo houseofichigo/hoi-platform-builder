@@ -118,9 +118,9 @@ export const getWorkspaceAdminOverview = createServerFn({ method: "POST" })
       members,
       pendingInvites,
       assessComplete,
-      useCases,
-      scoredUseCases,
-      approvedUseCases,
+      processes,
+      submittedProcesses,
+      approvedProcesses,
       activeRoadmap,
       openGovernanceFlags,
       pilotRoadmap,
@@ -149,23 +149,26 @@ export const getWorkspaceAdminOverview = createServerFn({ method: "POST" })
       ),
       countRows(
         supabaseAdmin
-          .from("use_cases")
+          .from("process")
           .select("id", { count: "exact", head: true })
-          .eq("workspace_id", data.workspaceId),
+          .eq("workspace_id", data.workspaceId)
+          .is("archived_at", null),
       ),
       countRows(
         supabaseAdmin
-          .from("use_cases")
+          .from("process")
           .select("id", { count: "exact", head: true })
           .eq("workspace_id", data.workspaceId)
-          .in("status", ["scored", "submitted", "approved"]),
+          .is("archived_at", null)
+          .in("status", ["submitted", "under_review"]),
       ),
       countRows(
         supabaseAdmin
-          .from("use_cases")
+          .from("process")
           .select("id", { count: "exact", head: true })
           .eq("workspace_id", data.workspaceId)
-          .eq("status", "approved"),
+          .is("archived_at", null)
+          .in("status", ["approved", "merged"]),
       ),
       countRows(
         supabaseAdmin
@@ -225,9 +228,9 @@ export const getWorkspaceAdminOverview = createServerFn({ method: "POST" })
         pendingInvites,
         assessComplete,
         assessTotal: MODULES.length,
-        useCases,
-        scoredUseCases,
-        approvedUseCases,
+        useCases: processes,
+        scoredUseCases: submittedProcesses,
+        approvedUseCases: approvedProcesses,
         activeRoadmap,
         openGovernanceFlags,
         pendingPilotReviews,

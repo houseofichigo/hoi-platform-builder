@@ -1,7 +1,7 @@
 
--- =====================================================================
+-- ---------------------------------------------------------------------
 -- SCALE PHASE TABLES
--- =====================================================================
+-- ---------------------------------------------------------------------
 
 -- Roadmap entries
 CREATE TABLE public.roadmap_entries (
@@ -190,9 +190,9 @@ CREATE POLICY "Admins delete post pilot reviews"
   USING (public.has_workspace_role(workspace_id, auth.uid(), ARRAY['owner','admin']));
 
 
--- =====================================================================
+-- ---------------------------------------------------------------------
 -- BUILD APPROVAL -> SCALE ROADMAP INTEGRATION
--- =====================================================================
+-- ---------------------------------------------------------------------
 -- When a use case transitions to status 'approved', upsert a roadmap_entries
 -- row in 'backlog', record stage history, and write an audit_log entry.
 -- Idempotent via UNIQUE(use_case_id) on roadmap_entries.

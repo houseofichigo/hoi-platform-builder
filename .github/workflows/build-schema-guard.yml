@@ -1,0 +1,41 @@
+name: Build schema guard
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  conflict-markers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check migration conflict markers
+        run: |
+          if grep -rn "<<<<<<<\|=======\|>>>>>>>" supabase/migrations; then
+            echo "Conflict markers found in supabase/migrations"
+            exit 1
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install
+      - name: Production build
+        run: bun run build
+
+  supabase-reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start Supabase
+        run: supabase start
+      - name: Reset local database
+        run: supabase db reset

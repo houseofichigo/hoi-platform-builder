@@ -134,12 +134,12 @@ function ResumeSection({ slug }: { slug: string }) {
             onClick={() => go("build")}
             loading={isLoading}
             empty={(data?.build.total ?? 0) === 0}
-            emptyTitle="No use cases yet"
-            emptyCta="Capture your first"
+            emptyTitle="No processes yet"
+            emptyCta="Map your first"
           >
-            <p className="h-heading-md">{data?.build.total} use cases</p>
+            <p className="h-heading-md">{data?.build.total} processes</p>
             <p className="mt-1 text-[13px] text-graphite">
-              {data?.build.readyToScore} ready to score
+              {data?.build.pending} pending approval
             </p>
           </ResumeTile>
 
@@ -228,8 +228,8 @@ function TeamStatusSection({ slug }: { slug: string }) {
     {
       eyebrow: "STAGE 03 · BUILD",
       stat: `${data?.build.scored ?? 0}`,
-      label: "USE CASES SCORED",
-      context: `${data?.build.pending ?? 0} pending approval`,
+      label: "PROCESSES MAPPED",
+      context: `${data?.build.pending ?? 0} pending approval · ${data?.build.approved ?? 0} approved`,
     },
     {
       eyebrow: "STAGE 04 · SCALE",

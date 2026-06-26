@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getWorkspaceAdminOverview } from "@/lib/workspace-admin.functions";
 import { getBuildOverview } from "@/lib/db/build-analytics";
+import { AdminOverview as PfsAdminOverview } from "@/components/build/pfs/admin-overview";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin/analytics")({
   component: WorkspaceAdminAnalyticsPage,
@@ -73,6 +74,13 @@ function WorkspaceAdminAnalyticsPage() {
             to="/app/$workspaceSlug/build/library"
             slug={workspace.slug}
           />
+        </div>
+      </section>
+
+      <section className="rounded-md border border-chalk bg-white p-5">
+        <p className="eyebrow-muted">Process platform analytics</p>
+        <div className="mt-4">
+          <PfsAdminOverview />
         </div>
       </section>
     </div>

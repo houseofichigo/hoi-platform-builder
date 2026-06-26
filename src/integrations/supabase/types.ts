@@ -3180,6 +3180,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_overview: { Args: { p_org_id?: string }; Returns: Json }
       can_access_use_case: {
         Args: { _use_case_id: string; _user_id: string }
         Returns: boolean

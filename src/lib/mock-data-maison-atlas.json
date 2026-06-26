@@ -1,0 +1,138 @@
+{
+  "profile": {
+    "industry": "Retail/ecommerce",
+    "subIndustry": "Premium home goods and interior styling",
+    "size": "51-250",
+    "revenueRange": "€5M-€25M",
+    "growthStage": "Growth",
+    "businessModel": "Hybrid",
+    "customerType": "Consumers",
+    "locations": ["France", "Morocco", "UAE"],
+    "overview": "Maison Atlas designs and sells premium homeware through ecommerce, retail partners, and boutique hospitality projects.",
+    "mission": "Bring contemporary North African craft into modern homes with reliable service and responsible sourcing.",
+    "valueProposition": "Curated interiors, artisan supply, and responsive client service for design-conscious customers.",
+    "languages": ["English", "French", "Arabic"]
+  },
+  "regulatory": {
+    "primaryJurisdiction": "EU",
+    "dataResidency": ["EU"],
+    "isRegulated": true,
+    "regulatoryRegimes": ["GDPR"],
+    "sellsTraining": false
+  },
+  "readiness": {
+    "decisionAuthority": "central",
+    "hasAiOwner": true,
+    "literacyCoverage": "broad",
+    "deliveryPosture": "balanced",
+    "governanceBody": "ad_hoc",
+    "riskRegister": "partial"
+  },
+  "products": [
+    {
+      "name": "Maison Atlas Ecommerce",
+      "category": "Core product",
+      "description": "Online catalogue and direct-to-consumer order experience.",
+      "targetCustomer": "Consumer",
+      "revenueContribution": 55,
+      "strategicImportance": 5,
+      "deliveryComplexity": 3
+    },
+    {
+      "name": "Trade & Hospitality Projects",
+      "category": "Service line",
+      "description": "Curated product packages for interior designers, hotels, and restaurants.",
+      "targetCustomer": "Enterprise",
+      "revenueContribution": 30,
+      "strategicImportance": 4,
+      "deliveryComplexity": 4
+    },
+    {
+      "name": "After-sales Support",
+      "category": "Support service",
+      "description": "Customer support, replacements, returns, and care guidance.",
+      "targetCustomer": "Consumer",
+      "revenueContribution": 15,
+      "strategicImportance": 4,
+      "deliveryComplexity": 2
+    }
+  ],
+  "audiences": [
+    { "name": "All staff", "description": "Company-wide shared knowledge", "scope": "all_staff" },
+    { "name": "Leadership", "description": "Executive and department leadership", "scope": "leadership" },
+    { "name": "Client delivery", "description": "Teams serving trade and hospitality accounts", "scope": "client" }
+  ],
+  "clients": [
+    {
+      "name": "Atlas Hotels Group",
+      "kind": "client",
+      "sector": "Hospitality",
+      "engagementType": "Trade account",
+      "underNda": true,
+      "reusableIp": true,
+      "dataResidency": "EU",
+      "internalAudience": ["Client delivery", "Leadership"],
+      "notes": "High-value project account with reusable proposal and sourcing patterns."
+    },
+    {
+      "name": "Riad Collection",
+      "kind": "client",
+      "sector": "Hospitality",
+      "engagementType": "Interior package",
+      "underNda": true,
+      "reusableIp": true,
+      "dataResidency": "EU",
+      "internalAudience": ["Client delivery"],
+      "notes": "Repeat customer for boutique-property collections."
+    }
+  ],
+  "departments": [
+    { "name": "Sales", "holds_sensitive_data": false, "lead": "Ines Caron" },
+    { "name": "Finance", "holds_sensitive_data": true, "lead": "Karim Haddad" },
+    { "name": "Human Resources", "holds_sensitive_data": true, "lead": "Sophie Lemaire" },
+    { "name": "Operations", "holds_sensitive_data": false, "lead": "Marco Bianchi" },
+    { "name": "Marketing", "holds_sensitive_data": false, "lead": "Yasmine Toumi" },
+    { "name": "Customer Success", "holds_sensitive_data": true, "lead": "Daniel Okafor" },
+    { "name": "Legal", "holds_sensitive_data": true, "lead": "Claire Dubois" },
+    { "name": "IT", "holds_sensitive_data": false, "lead": "Rami Nasser" }
+  ],
+  "members": [
+    { "name": "Ines Caron", "role": "Head of Sales", "department": "Sales" },
+    { "name": "Lucas Moreau", "role": "Account Executive", "department": "Sales" },
+    { "name": "Karim Haddad", "role": "Finance Director", "department": "Finance" },
+    { "name": "Amelie Roy", "role": "Financial Controller", "department": "Finance" },
+    { "name": "Sophie Lemaire", "role": "HR Manager", "department": "Human Resources" },
+    { "name": "Nadia Belkacem", "role": "People Operations", "department": "Human Resources" },
+    { "name": "Marco Bianchi", "role": "Operations Lead", "department": "Operations" },
+    { "name": "Elena Rossi", "role": "Supply Coordinator", "department": "Operations" },
+    { "name": "Yasmine Toumi", "role": "Marketing Manager", "department": "Marketing" },
+    { "name": "Tom Berger", "role": "Content Lead", "department": "Marketing" },
+    { "name": "Daniel Okafor", "role": "CS Lead", "department": "Customer Success" },
+    { "name": "Aisha Rahman", "role": "Support Specialist", "department": "Customer Success" },
+    { "name": "Claire Dubois", "role": "Legal Counsel", "department": "Legal" },
+    { "name": "Rami Nasser", "role": "IT Manager", "department": "IT" },
+    { "name": "Omar Saleh", "role": "Systems Admin", "department": "IT" }
+  ],
+  "tools": [
+    { "name": "Gmail", "catalog_slug": "gmail", "category": "Communication", "criticality": "high", "api_available": true },
+    { "name": "Slack", "catalog_slug": "slack", "category": "Communication", "criticality": "high", "api_available": true },
+    { "name": "Salesforce", "catalog_slug": "salesforce", "category": "Sales & CRM", "criticality": "high", "api_available": true },
+    { "name": "HubSpot", "catalog_slug": "hubspot", "category": "Sales & CRM", "criticality": "standard", "api_available": true },
+    { "name": "Notion", "catalog_slug": "notion", "category": "Productivity", "criticality": "standard", "api_available": true },
+    { "name": "Airtable", "catalog_slug": "airtable", "category": "Productivity", "criticality": "standard", "api_available": true },
+    { "name": "Google Sheets", "catalog_slug": "google-sheets", "category": "Productivity", "criticality": "high", "api_available": true },
+    { "name": "Google Drive", "catalog_slug": "google-drive", "category": "Content & Files", "criticality": "high", "api_available": true },
+    { "name": "Quickbooks Online", "catalog_slug": "quickbooks", "category": "Accounting", "criticality": "critical", "api_available": true },
+    { "name": "Stripe", "catalog_slug": "stripe", "category": "Commerce", "criticality": "critical", "api_available": true },
+    { "name": "BambooHR", "catalog_slug": "bamboohr", "category": "Human Resources", "criticality": "high", "api_available": true },
+    { "name": "Zendesk", "catalog_slug": "zendesk", "category": "Customer Support", "criticality": "standard", "api_available": true },
+    { "name": "Asana", "catalog_slug": "asana", "category": "Productivity", "criticality": "standard", "api_available": true },
+    { "name": "Mailchimp", "catalog_slug": "mailchimp", "category": "Marketing", "criticality": "standard", "api_available": true }
+  ],
+  "priorities": {
+    "primaryReason": "AI readiness",
+    "priorities": ["reduce cycle time", "improve customer experience", "improve data quality"],
+    "topGoals": ["automate handoffs", "reduce errors", "improve visibility"],
+    "priorityDepartments": ["Sales", "Finance", "Customer Success", "Operations"]
+  }
+}

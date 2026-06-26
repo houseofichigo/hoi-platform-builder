@@ -18,7 +18,7 @@ import {
 } from "@/lib/db/pfs/onboarding";
 import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
 import { persistVaults } from "@/lib/db/pfs/vaults";
-import { deriveVaults } from "@/lib/build/pfs/vault-derivation";
+import { deriveVaults } from "@/lib/vault-derivation";
 
 type DemoData = typeof maisonAtlas;
 

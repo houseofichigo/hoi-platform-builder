@@ -2,10 +2,10 @@ import * as XLSX from "xlsx";
 
 import { supabase } from "@/integrations/supabase/client";
 import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
-import type { Database } from "@/integrations/supabase/types";
 
-type Role = Database["public"]["Enums"]["membership_role"];
-const VALID_ROLES: Role[] = ["admin", "reviewer", "employee", "viewer"] as Role[];
+// HOI workspace_members.role union (no Postgres enum in this project).
+type Role = "owner" | "admin" | "member" | "viewer";
+const VALID_ROLES: Role[] = ["owner", "admin", "member", "viewer"];
 
 export type ParsedDepartmentRow = {
   name: string;

@@ -26,14 +26,15 @@ export function useRoadmap() {
     queryFn: async () => {
       const gate = await requireActiveOrg();
       const { data, error } = await db
-        .from("roadmap_item")
-        .select("*, opportunity:opportunity_id(problem, recommended_solution, type)")
+        // HOI uses `roadmap_entries`; keep the shape loose since this list is
+        // replaced by the Scale roadmap UI elsewhere in the app.
+        .from("roadmap_entries")
+        .select("*")
         .eq("workspace_id", gate.workspaceId)
-        .is("archived_at", null)
-        .order("impact", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return (data ?? []) as Array<Row<"roadmap_item"> & { opportunity?: { problem?: string; recommended_solution?: string; type?: string } }>;
+      return (data ?? []) as Array<Row<"roadmap_entries">>;
     },
   });
 }

@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type { Database } from "@/integrations/supabase/types";
 import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
 
-type Role = Database["public"]["Enums"]["membership_role"];
+// HOI workspace_members.role union (no Postgres enum in this project).
+type Role = "owner" | "admin" | "member" | "viewer";
 
 export type OrgDepartment = {
   id: string;

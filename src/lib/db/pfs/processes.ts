@@ -61,7 +61,7 @@ export function processToRecord(row: ProcessRow): ProcessRecord {
     id: row.id,
     name: row.name,
     department: row.department?.name ?? "Unassigned department",
-    owner: row.owner_user_id ?? row.created_by,
+    owner: (row as any).owner_user_id ?? (row as any).owner_member_id ?? row.created_by,
     status: statusLabel[row.status] ?? "Draft",
     maturity,
     automationValue,
@@ -78,7 +78,7 @@ export function processToRecord(row: ProcessRow): ProcessRecord {
     readiness,
     riskTier: (row.risk_tier ?? (risk.tier as RiskTier | undefined) ?? computedRisk.tier) as RiskTier,
     riskReason: stringFrom(risk.reason, computedRisk.reason),
-    dataValidated: Boolean(asRecord(row.governance_flags).data_validated),
+    dataValidated: Boolean(asRecord((row as any).governance_flags).data_validated),
   };
 }
 

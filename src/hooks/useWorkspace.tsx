@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { setActiveWorkspaceId } from "@/lib/db/pfs/auth";
 
 export interface Workspace {
   id: string;
@@ -65,6 +66,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const workspace = data?.workspace ?? null;
   const role = data?.role ?? null;
+
+  // Keep the PFS adapter layer's active-workspace pointer in sync with the
+  // workspace context so ported queries scope correctly.
+  useEffect(() => {
+    setActiveWorkspaceId(workspace?.id ?? null);
+    return () => setActiveWorkspaceId(null);
+  }, [workspace?.id]);
 
   const value: WorkspaceContextValue = {
     workspace,

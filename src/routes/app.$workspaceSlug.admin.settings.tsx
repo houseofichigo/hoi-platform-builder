@@ -27,13 +27,6 @@ function WorkspaceAdminSettingsPage() {
         slug={workspace.slug}
       />
       <ShortcutCard
-        icon={Building2}
-        title="Use-case profile"
-        body="Primary use-case context used to tailor the learning and Build experience."
-        to="/app/$workspaceSlug/onboarding/use-case-profile"
-        slug={workspace.slug}
-      />
-      <ShortcutCard
         icon={UserPlus}
         title="Invite team"
         body="Invite members and viewers. Owner/admin promotions are handled by House of Ichigo."
@@ -57,7 +50,6 @@ function ShortcutCard({
   to:
     | "/app/$workspaceSlug/settings"
     | "/app/$workspaceSlug/onboarding/workspace-profile"
-    | "/app/$workspaceSlug/onboarding/use-case-profile"
     | "/app/$workspaceSlug/invite";
   slug: string;
 }) {

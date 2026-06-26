@@ -116,7 +116,9 @@ export async function fetchOrgChart(workspaceId: string): Promise<OrgChartPayloa
     : { data: [], error: null };
   if (profilesError) throw profilesError;
 
-  const profileByUser = new Map((profiles ?? []).map((profile: any) => [profile.user_id, profile]));
+  const profileByUser = new Map<string, { full_name?: string | null; avatar_url?: string | null; job_role?: string | null }>(
+    (profiles ?? []).map((profile: any) => [profile.user_id, profile])
+  );
   const directReports = new Map<string, number>();
   for (const member of members) {
     if (member.manager_member_id) {

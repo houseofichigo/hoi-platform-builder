@@ -293,6 +293,73 @@ export type Database = {
           },
         ]
       }
+      department: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          description: string | null
+          distinct_audience: boolean
+          headcount: number | null
+          holds_sensitive_data: boolean
+          id: string
+          lead_member_id: string | null
+          name: string
+          parent_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          distinct_audience?: boolean
+          headcount?: number | null
+          holds_sensitive_data?: boolean
+          id?: string
+          lead_member_id?: string | null
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          distinct_audience?: boolean
+          headcount?: number | null
+          holds_sensitive_data?: boolean
+          id?: string
+          lead_member_id?: string | null
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_lead_member_id_fkey"
+            columns: ["lead_member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       governance_flags: {
         Row: {
           assignee_id: string | null
@@ -808,6 +875,219 @@ export type Database = {
           },
         ]
       }
+      process: {
+        Row: {
+          approved_at: string | null
+          archived_at: string | null
+          capture: Json
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          name: string
+          owner_member_id: string | null
+          risk_tier: string | null
+          scores: Json
+          status: Database["public"]["Enums"]["process_status"]
+          submitted_at: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          archived_at?: string | null
+          capture?: Json
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          owner_member_id?: string | null
+          risk_tier?: string | null
+          scores?: Json
+          status?: Database["public"]["Enums"]["process_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          archived_at?: string | null
+          capture?: Json
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          owner_member_id?: string | null
+          risk_tier?: string | null
+          scores?: Json
+          status?: Database["public"]["Enums"]["process_status"]
+          submitted_at?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_owner_member_id_fkey"
+            columns: ["owner_member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_status_audit: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: Database["public"]["Enums"]["process_status"] | null
+          id: string
+          note: string | null
+          process_id: string
+          to_status: Database["public"]["Enums"]["process_status"]
+          workspace_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["process_status"] | null
+          id?: string
+          note?: string | null
+          process_id: string
+          to_status: Database["public"]["Enums"]["process_status"]
+          workspace_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: Database["public"]["Enums"]["process_status"] | null
+          id?: string
+          note?: string | null
+          process_id?: string
+          to_status?: Database["public"]["Enums"]["process_status"]
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_status_audit_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "process"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_status_audit_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_step: {
+        Row: {
+          actor_member_id: string | null
+          actor_type: string | null
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          input_data: string | null
+          metadata: Json
+          output_data: string | null
+          process_id: string
+          risk_notes: string | null
+          step_order: number
+          title: string
+          tool_name: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          actor_member_id?: string | null
+          actor_type?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          input_data?: string | null
+          metadata?: Json
+          output_data?: string | null
+          process_id: string
+          risk_notes?: string | null
+          step_order?: number
+          title: string
+          tool_name?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          actor_member_id?: string | null
+          actor_type?: string | null
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          input_data?: string | null
+          metadata?: Json
+          output_data?: string | null
+          process_id?: string
+          risk_notes?: string | null
+          step_order?: number
+          title?: string
+          tool_name?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_step_actor_member_id_fkey"
+            columns: ["actor_member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_step_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_step_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "process"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_step_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1293,10 +1573,12 @@ export type Database = {
           accepted_at: string | null
           accepted_by: string | null
           created_at: string
+          department_id: string | null
           email: string
           expires_at: string
           id: string
           invited_by: string | null
+          manager_member_id: string | null
           role: string
           status: string
           token: string
@@ -1306,10 +1588,12 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          department_id?: string | null
           email: string
           expires_at?: string
           id?: string
           invited_by?: string | null
+          manager_member_id?: string | null
           role: string
           status?: string
           token: string
@@ -1319,16 +1603,32 @@ export type Database = {
           accepted_at?: string | null
           accepted_by?: string | null
           created_at?: string
+          department_id?: string | null
           email?: string
           expires_at?: string
           id?: string
           invited_by?: string | null
+          manager_member_id?: string | null
           role?: string
           status?: string
           token?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspace_invitations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invitations_manager_member_id_fkey"
+            columns: ["manager_member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workspace_invitations_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1340,30 +1640,50 @@ export type Database = {
       }
       workspace_members: {
         Row: {
+          department_id: string | null
           id: string
           invited_by: string | null
           joined_at: string
+          manager_member_id: string | null
           role: string
           user_id: string
           workspace_id: string
         }
         Insert: {
+          department_id?: string | null
           id?: string
           invited_by?: string | null
           joined_at?: string
+          manager_member_id?: string | null
           role: string
           user_id: string
           workspace_id: string
         }
         Update: {
+          department_id?: string | null
           id?: string
           invited_by?: string | null
           joined_at?: string
+          manager_member_id?: string | null
           role?: string
           user_id?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspace_members_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_manager_member_id_fkey"
+            columns: ["manager_member_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workspace_members_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1477,9 +1797,11 @@ export type Database = {
       accept_workspace_invitation: {
         Args: { p_token: string }
         Returns: {
+          department_id: string | null
           id: string
           invited_by: string | null
           joined_at: string
+          manager_member_id: string | null
           role: string
           user_id: string
           workspace_id: string
@@ -1516,6 +1838,33 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "workspaces"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      decide_process: {
+        Args: { p_decision: string; p_note?: string; p_process_id: string }
+        Returns: {
+          approved_at: string | null
+          archived_at: string | null
+          capture: Json
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          name: string
+          owner_member_id: string | null
+          risk_tier: string | null
+          scores: Json
+          status: Database["public"]["Enums"]["process_status"]
+          submitted_at: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "process"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1566,9 +1915,20 @@ export type Database = {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
+      workspace_build_overview: {
+        Args: { p_workspace_id: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      process_status:
+        | "draft"
+        | "submitted"
+        | "under_review"
+        | "changes_requested"
+        | "approved"
+        | "merged"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1695,6 +2055,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      process_status: [
+        "draft",
+        "submitted",
+        "under_review",
+        "changes_requested",
+        "approved",
+        "merged",
+        "archived",
+      ],
+    },
   },
 } as const

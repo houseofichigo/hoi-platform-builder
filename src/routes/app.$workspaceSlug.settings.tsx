@@ -162,8 +162,6 @@ function WorkspaceSettings() {
         )}
       </div>
 
-      <UseCaseProfileCard slug={workspace.slug} />
-
       <UserProfileCard />
 
       <NotificationPreferencesCard />

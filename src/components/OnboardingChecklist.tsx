@@ -18,24 +18,13 @@ import {
   type ChecklistItemId,
 } from "@/hooks/useOnboardingChecklist";
 
-import { getPublishedWorkedExamples } from "@/lib/worked-examples";
-
-const EXAMPLE_OPTIONS = getPublishedWorkedExamples().map((e) => ({
-  value: e.id,
-  title: e.shortName,
-  tag: e.industry,
-  blurb: e.description,
-}));
-
 export function OnboardingChecklist() {
   const { workspace } = useWorkspace();
   const { data, isLoading } = useOnboardingChecklist();
-  const { updateWorkedExample, markTourCompleted, markLibraryVisited, dismissChecklist } = useOnboardingMutations();
+  const { markTourCompleted, markLibraryVisited, dismissChecklist } = useOnboardingMutations();
   const navigate = useNavigate();
 
-  const [exampleOpen, setExampleOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
-  const [selectedExample, setSelectedExample] = useState<string>("");
 
   if (isLoading || !data || !workspace) return null;
   if (!data.shouldRender) return null;
@@ -49,16 +38,6 @@ export function OnboardingChecklist() {
           to: "/app/$workspaceSlug/onboarding/workspace-profile",
           params: { workspaceSlug: slug },
         });
-        break;
-      case "use_case_profile":
-        navigate({
-          to: "/app/$workspaceSlug/onboarding/use-case-profile",
-          params: { workspaceSlug: slug },
-        });
-        break;
-      case "example":
-        setSelectedExample(data.workedExample ?? "");
-        setExampleOpen(true);
         break;
       case "invite":
         navigate({

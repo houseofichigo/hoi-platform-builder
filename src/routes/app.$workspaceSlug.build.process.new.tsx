@@ -405,7 +405,7 @@ function nodeKindLabel(kind: NodeKind) {
 const nodeTypes = { processNode: ProcessNode, stickyNode: StickyNode };
 const edgeTypes = { insertEdge: InsertEdge };
 
-export const Route = createFileRoute("/process/new")({
+export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>) => ({
     template: typeof search.template === "string" ? search.template : undefined,

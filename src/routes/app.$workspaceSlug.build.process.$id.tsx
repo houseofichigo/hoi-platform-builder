@@ -11,7 +11,7 @@ import { useApproveProcess, useProcess, useValidateProcessData } from "@/lib/db/
 import { asRecord } from "@/lib/db/shared";
 import { riskTierMeta } from "@/lib/risk-tier";
 
-export const Route = createFileRoute("/process/$id")({
+export const Route = createFileRoute("/app/$workspaceSlug/build/process/$id")({
   component: ProcessDetailRoute,
 });
 

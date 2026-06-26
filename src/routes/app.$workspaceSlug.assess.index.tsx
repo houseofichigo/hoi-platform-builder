@@ -139,8 +139,6 @@ function CourseHero({
   course,
   workspaceName,
   slug,
-  workedName,
-  workedIndustry,
   percent,
   completed,
   inProgress,
@@ -153,8 +151,6 @@ function CourseHero({
   course: AssessCourseMeta;
   workspaceName: string;
   slug: string;
-  workedName?: string;
-  workedIndustry?: string;
   percent: number;
   completed: number;
   inProgress: number;

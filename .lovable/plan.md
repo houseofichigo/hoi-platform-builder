@@ -1,42 +1,39 @@
-## Remaining work on Process Flow Studio Build integration
+# Deploy-Readiness — Final Pass
 
-Based on the last sync, the Build foundation is live (tables `department`, `process`, `process_step`, `process_status_audit` exist with grants + RLS, Build routes use them, isolation test passes, orphaned `useBuild` / `approvals.functions.ts` / `dashboardBuckets.ts` were deleted, CI guardrail in place).
+Fresh security scan came back clean: **0 errors, 6 warnings**, and all 6 are the app-facing RPCs already documented as accepted in `@security-memory`. Nothing left to fix on the database/security side.
 
-What's still open:
+## What's left before publish
 
-### 1. Retire the legacy `use_case*` tables
-Blocked by remaining callers outside Build. Need to migrate or remove these before dropping the tables:
-- `src/routes/app.$workspaceSlug.scale.index.tsx`
-- `src/routes/app.$workspaceSlug.scale.roadmap.tsx`
-- `src/routes/app.$workspaceSlug.scale.reviews.tsx`
-- `src/routes/app.$workspaceSlug.scale.governance.tsx`
-- `src/routes/app.$workspaceSlug.scale.audit.tsx`
-- `src/routes/app.$workspaceSlug.scale.$useCaseId.review.tsx`
-- `src/lib/scale/*` (queries, scale.functions, governanceFlags, notify)
-- `src/routes/app.$workspaceSlug.discover.*`
-- `src/lib/library/roadmap.functions.ts`
+### 1. Verify root metadata (`src/routes/__root.tsx`)
+`preview_ui--publish` requires real title, description, `og:title`, `og:description`, `og:type`, `twitter:card`, `twitter:title`, `twitter:description`, and a favicon. I'll read the current `head()` and patch any placeholders ("Lovable App", "Vite App", "Lovable Generated Project") with the real HOI Platform identity.
 
-Path: repoint Scale + Discover to read from `process` (+ `roadmap_entries`, `governance_flags`, `post_pilot_reviews`), then ship a drop migration for `use_cases`, `use_case_captures`, `use_case_scores`, `use_case_approvals`, `use_case_score_snapshots`.
+### 2. Confirm production build is green
+Harness runs typecheck/build automatically; we just confirm the last result is clean before publishing.
 
-### 2. Org-chart hardening (`src/lib/db/org-chart.ts`)
-Profiles read is cast through `any` and silently falls back to "Member <id>" if schema drifts. Type it against `Database["public"]["Tables"]["profiles"]` and surface an error instead of swallowing.
+### 3. Smoke test in preview (manual, by you)
+- Sign in.
+- `/app/<workspace>/build` — list renders, decision flow works.
+- `/app/<workspace>/scale` — roadmap loads.
+- Approve a process in Build → confirm a `use_cases` row appears (bridge trigger).
+- Open a different workspace → confirm you can't see the first one's data.
 
-### 3. Supabase linter warnings (36 pre-existing)
-Not introduced this turn, but worth a dedicated pass:
-- mutable `search_path` on legacy SECURITY DEFINER functions
-- anon-executable SECURITY DEFINERs
-- public storage bucket listing
+### 4. Publish
+Call `preview_ui--publish` with the metadata preflight summary.
 
-### 4. Local verification we couldn't run in the sandbox
-- `supabase db reset` against a local DB
-- `scripts/build-isolation.sql` run locally (only ran against cloud)
-- `bun run build` full production build
+## What is explicitly NOT in this pass
 
-### Suggested order
-1. Scale → `process` migration (biggest blocker for table drop).
-2. Discover → `process` migration.
-3. Drop `use_case*` tables + delete `src/lib/scale/*` legacy pieces.
-4. Org-chart typing fix.
-5. Linter warning sweep.
+- Scale → `process` full cutover (Path B).
+- Discover migration decision.
+- Dropping legacy `use_case*` tables.
+- The 6 accepted-RPC linter warnings (documented).
 
-Tell me which of these you want to tackle first (my recommendation: #1 Scale migration) and I'll switch to build mode with a focused plan for that slice.
+## Order of execution
+
+1. Audit + update `src/routes/__root.tsx` metadata.
+2. Confirm clean build.
+3. Hand back to you for the smoke test.
+4. You say "publish" → I call `preview_ui--publish`.
+
+## Question
+
+Anything you want to include or exclude before step 1? Otherwise I'll proceed straight through to handing the preview back to you for the smoke test.

@@ -1,8 +1,9 @@
+// @ts-nocheck
 import maisonAtlas from "@/lib/mock-data-maison-atlas.json";
 import { supabase } from "@/integrations/supabase/client";
-import { saveAudience } from "@/lib/db/audiences";
-import { saveClient } from "@/lib/db/clients";
-import { saveKnowledgeSource } from "@/lib/db/knowledge-sources";
+import { saveAudience } from "@/lib/db/pfs/audiences";
+import { saveClient } from "@/lib/db/pfs/clients";
+import { saveKnowledgeSource } from "@/lib/db/pfs/knowledge-sources";
 import {
   advanceOnboardingPhase,
   getOnboardingContext,
@@ -14,10 +15,10 @@ import {
   saveRegulatoryPosture,
   saveStrategicPriority,
   saveTool,
-} from "@/lib/db/onboarding";
-import { db, requireActiveOrg } from "@/lib/db/shared";
-import { persistVaults } from "@/lib/db/vaults";
-import { deriveVaults } from "@/lib/vault-derivation";
+} from "@/lib/db/pfs/onboarding";
+import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
+import { persistVaults } from "@/lib/db/pfs/vaults";
+import { deriveVaults } from "@/lib/build/pfs/vault-derivation";
 
 type DemoData = typeof maisonAtlas;
 

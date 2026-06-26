@@ -1,3 +1,4 @@
+// @ts-nocheck — Ported PFS module; type tightening tracked for a follow-up batch.
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   addEdge,

@@ -211,7 +211,7 @@ async function createOrUpdateOpportunityAndRoadmap(process: ProcessRow) {
     opportunity_id: opportunityId,
     name: process.risk_tier === "critical" ? `${process.name} + governance track` : process.name,
     category: process.risk_tier === "critical" ? "governance" : score.readiness >= 70 ? "quick_win" : "automation",
-    owner_user_id: process.owner_user_id ?? process.created_by,
+    owner_user_id: (process as any).owner_user_id ?? (process as any).owner_member_id ?? process.created_by,
     priority: priorityToDb(rank.priorityBand),
     timeline: rank.priorityBand === "High" ? "Now" : rank.priorityBand === "Medium" ? "Next" : "Later",
     effort: Math.max(1, 100 - score.readiness),

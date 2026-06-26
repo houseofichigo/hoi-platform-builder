@@ -72,13 +72,19 @@ export function sortToolCatalogCategories(categories: string[]) {
   });
 }
 
-export function toolCatalogLogoUrl(row?: Pick<ToolCatalogRow, "logo_mirror_key"> | null) {
+export function toolCatalogLogoUrl(row?: { logo_mirror_key?: string | null } | null) {
   const key = row?.logo_mirror_key?.replace(/^tool-logos\//, "");
   if (!key) return "";
   return supabase.storage.from("tool-logos").getPublicUrl(key).data.publicUrl;
 }
 
-export function catalogProfileDefaults(row?: Partial<ToolCatalogRow> | null): Omit<DataProfile, "source"> | null {
+export function catalogProfileDefaults(
+  row?: (Partial<ToolCatalogRow> & {
+    default_data_structure?: string | null;
+    default_data_sensitivity?: string | null;
+    default_accessibility?: string | null;
+  }) | null,
+): Omit<DataProfile, "source"> | null {
   if (!row) return null;
   const structure = row.default_data_structure;
   const sensitivity = row.default_data_sensitivity;

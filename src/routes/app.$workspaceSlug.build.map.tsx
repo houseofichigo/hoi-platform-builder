@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProcessMapStudio } from "@/components/build/ProcessMapStudio";
+import { MappingScreen } from "@/components/build/pfs/process-platform";
 
 export const Route = createFileRoute("/app/$workspaceSlug/build/map")({
   component: BuildMap,
 });
 
 function BuildMap() {
-  return <ProcessMapStudio />;
+  return <MappingScreen />;
 }

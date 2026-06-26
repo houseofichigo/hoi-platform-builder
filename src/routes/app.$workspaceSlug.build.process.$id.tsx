@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AppShell } from "@/components/process-platform";
-import { RiskTierBadge } from "@/components/risk-tier-badge";
+import { AppShell } from "@/components/build/pfs/process-platform";
+import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useApproveProcess, useProcess, useValidateProcessData } from "@/lib/db/processes";
-import { asRecord } from "@/lib/db/shared";
+import { useApproveProcess, useProcess, useValidateProcessData } from "@/lib/db/pfs/processes";
+import { asRecord } from "@/lib/db/pfs/shared";
 import { riskTierMeta } from "@/lib/risk-tier";
 
 export const Route = createFileRoute("/app/$workspaceSlug/build/process/$id")({

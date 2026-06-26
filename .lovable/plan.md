@@ -1,98 +1,35 @@
-# Supabase Linter Cleanup — 36 Warnings
+## Root cause
 
-All findings are SECURITY-category warnings on the cloud DB. Breakdown:
+The GitHub Action `Build schema guard / supabase-reset` runs `supabase db reset`, which replays every migration in `supabase/migrations/` against a fresh local Postgres. Two recent migrations reference a function that is **never created** by any migration:
 
-| # | Warning | Action |
-|---|---------|--------|
-| 1 | Function `search_path` mutable (1 fn) | Set `search_path = public` on the offender |
-| 1 | Public bucket `library-files` allows listing | Tighten `storage.objects` SELECT policy |
-| 16 | `anon` can EXECUTE `SECURITY DEFINER` fns | Revoke EXECUTE from `anon` on all 16 |
-| 18 | `authenticated` can EXECUTE `SECURITY DEFINER` fns | Keep app-facing RPCs; revoke on internal helpers |
-
----
-
-## 1. Function search_path
-
-One function is missing `SET search_path`. Identify via `pg_proc` and add `SET search_path = public`. All other functions already have it set (visible in the DB function dump).
-
-## 2. Public bucket `library-files`
-
-Currently anyone can list every file. Replace the broad SELECT policy on `storage.objects` with one of:
-- **Recommended**: keep the bucket public for reads-by-known-path (downloads still work via signed-ish public URLs), but drop the broad `select` policy so clients can't enumerate.
-- Alternative: scope SELECT to workspace members via a join through `library_items.storage_path`.
-
-Default pick: drop the listing policy, keep object reads working by URL. Confirm with you before applying if it would break existing UI.
-
-## 3. Revoke EXECUTE from `anon` (16 functions)
-
-Every `SECURITY DEFINER` function in this project starts with `if auth.uid() is null then raise exception 'not authenticated'`, so `anon` callers already fail — but they shouldn't even be able to call them. Blanket revoke:
-
-```sql
-REVOKE EXECUTE ON FUNCTION public.<fn>(...) FROM anon;
+```
+20260626225900_…sql:22  REVOKE EXECUTE ON FUNCTION public.set_use_case_approval_workspace() FROM anon;
+20260626225900_…sql:46  REVOKE EXECUTE ON FUNCTION public.set_use_case_approval_workspace() FROM authenticated;
+20260626225922_…sql:19  REVOKE EXECUTE ON FUNCTION public.set_use_case_approval_workspace() FROM PUBLIC;
 ```
 
-Applies to: `create_workspace`, `accept_workspace_invitation`, `decide_process`, `workspace_build_overview`, `get_invitation_by_token`, `get_audit_log_with_diffs`, `has_workspace_role`, `is_workspace_member`, `is_hoi_admin`, `is_super_admin`, `can_access_use_case`, `can_modify_use_case`, `is_use_case_admin`, `handle_new_user`, `notify_inviter_on_acceptance`, `enforce_workspace_role_escalation_limits`.
+The function exists in the live cloud database (it's a trigger function that backfills `use_case_approvals.workspace_id`), but it was created out-of-band — no migration file defines it. On a fresh reset the REVOKE fails with "function … does not exist", which aborts the migration and fails the CI job. The other two jobs (`conflict-markers`, `build`) pass.
 
-Zero behavior change for the app.
+The preview "This page didn't load" error is separate; the local dev server returns HTTP 200 with the full SSR shell. Likely a transient SSR/HMR hiccup — once the CI fix lands and Cloud redeploys, a hard refresh should clear it. If it persists after, we debug it as a follow-up.
 
-## 4. Revoke EXECUTE from `authenticated` on internal-only helpers (selective)
+## Fix
 
-Of the 18 `authenticated`-executable SECURITY DEFINER fns, split into two groups:
+1. **New migration** `supabase/migrations/20260627130000_restore_use_case_approval_workspace_fn.sql` that recreates the missing function and its trigger exactly as they exist in cloud, so fresh resets converge to the same state:
+   - `CREATE OR REPLACE FUNCTION public.set_use_case_approval_workspace()` (security definer, sets `workspace_id` from parent `use_cases` row).
+   - `DROP TRIGGER IF EXISTS … ; CREATE TRIGGER …` on `public.use_case_approvals` before insert.
+   - Re-apply the same REVOKE/GRANT pattern the linter migrations expected (revoke from PUBLIC/anon/authenticated; service_role keeps execute).
 
-**Keep EXECUTE for authenticated** (called as RPCs from client/server fns):
-- `create_workspace`
-- `accept_workspace_invitation`
-- `decide_process`
-- `workspace_build_overview`
-- `get_invitation_by_token`
-- `get_audit_log_with_diffs`
+2. **Patch the two failing migration files** so they no longer hard-fail on a fresh reset even if the function isn't there yet — wrap the three offending `REVOKE` lines in a `DO` block guarded by `pg_proc` lookup. This keeps already-applied cloud state untouched while making the files self-healing for `db reset`:
 
-**Revoke EXECUTE from authenticated** (used only inside RLS policies / triggers, never called directly):
-- `has_workspace_role`
-- `is_workspace_member`
-- `is_hoi_admin`
-- `is_super_admin`
-- `can_access_use_case`
-- `can_modify_use_case`
-- `is_use_case_admin`
-- `handle_new_user` (trigger only)
-- `notify_inviter_on_acceptance` (trigger only)
-- `enforce_workspace_role_escalation_limits` (trigger only)
-- `set_use_case_approval_workspace` (trigger only)
-- `add_use_case_to_roadmap_on_approval` (trigger only)
+   ```sql
+   do $$ begin
+     if exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                where n.nspname='public' and p.proname='set_use_case_approval_workspace') then
+       execute 'revoke execute on function public.set_use_case_approval_workspace() from anon';
+     end if;
+   end $$;
+   ```
 
-RLS policies still resolve them (Postgres evaluates SECURITY DEFINER fns in policies regardless of caller EXECUTE), and triggers run as the table owner — so revoking is safe.
+3. **Verify** by re-reading the migrations end to end (no other referenced functions are missing — I already checked the full list).
 
-## 5. Single migration
-
-One migration file with all REVOKEs + the `search_path` fix + the storage policy tightening, in this order:
-
-```sql
--- 5a. search_path fix
-ALTER FUNCTION public.<offender>() SET search_path = public;
-
--- 5b. revoke anon EXECUTE on all 16
-REVOKE EXECUTE ON FUNCTION public.create_workspace(text, text) FROM anon;
--- ...etc
-
--- 5c. revoke authenticated EXECUTE on the 12 internal-only fns
-REVOKE EXECUTE ON FUNCTION public.has_workspace_role(uuid, uuid, text[]) FROM authenticated;
--- ...etc
-
--- 5d. tighten library-files SELECT
-DROP POLICY IF EXISTS "<broad listing policy>" ON storage.objects;
--- (add scoped policy if needed)
-```
-
-## 6. Verify
-
-After apply: re-run `supabase--linter`. Target: 0 warnings, or only items we consciously kept (e.g. the 6 app-facing RPCs that legitimately need `authenticated` EXECUTE — those will still show because the linter can't tell intent; we'll document them as expected).
-
-Smoke test in preview: sign in, open Build dashboard, approve a process, accept an invitation. If any RPC 403s we missed an EXECUTE grant and add it back targeted.
-
----
-
-## Questions before I run
-
-1. **Storage bucket**: OK to drop the broad listing policy on `library-files`? Files stay reachable by direct URL but clients can no longer enumerate. (Alternative: scope to workspace members — more work.)
-2. **App-facing RPC EXECUTE**: The 6 RPCs above will still show as linter warnings after this pass since they're legitimately callable by authenticated users. Leave as accepted findings, or you want me to wrap each in an extra authorization check and document the suppression?
+After merging, the GitHub workflow should go green on the next push. No app code changes are needed; the preview should recover with a hard refresh.

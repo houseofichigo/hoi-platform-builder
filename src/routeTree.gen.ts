@@ -46,7 +46,6 @@ import { Route as AppWorkspaceSlugScaleReviewsRouteImport } from './routes/app.$
 import { Route as AppWorkspaceSlugScaleGovernanceRouteImport } from './routes/app.$workspaceSlug.scale.governance'
 import { Route as AppWorkspaceSlugScaleAuditRouteImport } from './routes/app.$workspaceSlug.scale.audit'
 import { Route as AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport } from './routes/app.$workspaceSlug.onboarding.workspace-profile'
-import { Route as AppWorkspaceSlugOnboardingUseCaseProfileRouteImport } from './routes/app.$workspaceSlug.onboarding.use-case-profile'
 import { Route as AppWorkspaceSlugDiscoverSplatRouteImport } from './routes/app.$workspaceSlug.discover.$'
 import { Route as AppWorkspaceSlugBuildLibraryRouteImport } from './routes/app.$workspaceSlug.build.library'
 import { Route as AppWorkspaceSlugBuildDashboardRouteImport } from './routes/app.$workspaceSlug.build.dashboard'
@@ -60,15 +59,12 @@ import { Route as AppWorkspaceSlugAdminInvoicesRouteImport } from './routes/app.
 import { Route as AppWorkspaceSlugAdminBillingRouteImport } from './routes/app.$workspaceSlug.admin.billing'
 import { Route as AppWorkspaceSlugAdminAnalyticsRouteImport } from './routes/app.$workspaceSlug.admin.analytics'
 import { Route as AppWorkspaceSlugBuildCaptureIndexRouteImport } from './routes/app.$workspaceSlug.build.capture.index'
-import { Route as AppWorkspaceSlugAssessUseCasesIndexRouteImport } from './routes/app.$workspaceSlug.assess.use-cases.index'
 import { Route as AppWorkspaceSlugAssessModuleIdIndexRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.index'
 import { Route as AppWorkspaceSlugScaleUseCaseIdReviewRouteImport } from './routes/app.$workspaceSlug.scale.$useCaseId.review'
 import { Route as AppWorkspaceSlugBuildCaptureUseCaseIdRouteImport } from './routes/app.$workspaceSlug.build.capture.$useCaseId'
-import { Route as AppWorkspaceSlugAssessUseCasesTrackIdRouteImport } from './routes/app.$workspaceSlug.assess.use-cases.$trackId'
 import { Route as AppWorkspaceSlugAssessModuleIdWorkRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.work'
 import { Route as AppWorkspaceSlugAssessModuleIdStudyRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.study'
 import { Route as AppWorkspaceSlugAssessModuleIdGateRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.gate'
-import { Route as AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRouteImport } from './routes/app.$workspaceSlug.assess.use-cases.$trackId.$moduleId'
 
 const VerifyRoute = VerifyRouteImport.update({
   id: '/verify',
@@ -268,12 +264,6 @@ const AppWorkspaceSlugOnboardingWorkspaceProfileRoute =
     path: '/onboarding/workspace-profile',
     getParentRoute: () => AppWorkspaceSlugRoute,
   } as any)
-const AppWorkspaceSlugOnboardingUseCaseProfileRoute =
-  AppWorkspaceSlugOnboardingUseCaseProfileRouteImport.update({
-    id: '/onboarding/use-case-profile',
-    path: '/onboarding/use-case-profile',
-    getParentRoute: () => AppWorkspaceSlugRoute,
-  } as any)
 const AppWorkspaceSlugDiscoverSplatRoute =
   AppWorkspaceSlugDiscoverSplatRouteImport.update({
     id: '/$',
@@ -352,12 +342,6 @@ const AppWorkspaceSlugBuildCaptureIndexRoute =
     path: '/capture/',
     getParentRoute: () => AppWorkspaceSlugBuildRoute,
   } as any)
-const AppWorkspaceSlugAssessUseCasesIndexRoute =
-  AppWorkspaceSlugAssessUseCasesIndexRouteImport.update({
-    id: '/assess/use-cases/',
-    path: '/assess/use-cases/',
-    getParentRoute: () => AppWorkspaceSlugRoute,
-  } as any)
 const AppWorkspaceSlugAssessModuleIdIndexRoute =
   AppWorkspaceSlugAssessModuleIdIndexRouteImport.update({
     id: '/',
@@ -376,12 +360,6 @@ const AppWorkspaceSlugBuildCaptureUseCaseIdRoute =
     path: '/capture/$useCaseId',
     getParentRoute: () => AppWorkspaceSlugBuildRoute,
   } as any)
-const AppWorkspaceSlugAssessUseCasesTrackIdRoute =
-  AppWorkspaceSlugAssessUseCasesTrackIdRouteImport.update({
-    id: '/assess/use-cases/$trackId',
-    path: '/assess/use-cases/$trackId',
-    getParentRoute: () => AppWorkspaceSlugRoute,
-  } as any)
 const AppWorkspaceSlugAssessModuleIdWorkRoute =
   AppWorkspaceSlugAssessModuleIdWorkRouteImport.update({
     id: '/work',
@@ -399,12 +377,6 @@ const AppWorkspaceSlugAssessModuleIdGateRoute =
     id: '/gate',
     path: '/gate',
     getParentRoute: () => AppWorkspaceSlugAssessModuleIdRoute,
-  } as any)
-const AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute =
-  AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRouteImport.update({
-    id: '/$moduleId',
-    path: '/$moduleId',
-    getParentRoute: () => AppWorkspaceSlugAssessUseCasesTrackIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -447,7 +419,6 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/build/dashboard': typeof AppWorkspaceSlugBuildDashboardRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/use-case-profile': typeof AppWorkspaceSlugOnboardingUseCaseProfileRoute
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -461,13 +432,10 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId': typeof AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren
   '/app/$workspaceSlug/build/capture/$useCaseId': typeof AppWorkspaceSlugBuildCaptureUseCaseIdRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId/': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
-  '/app/$workspaceSlug/assess/use-cases/': typeof AppWorkspaceSlugAssessUseCasesIndexRoute
   '/app/$workspaceSlug/build/capture/': typeof AppWorkspaceSlugBuildCaptureIndexRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId': typeof AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -502,7 +470,6 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/build/dashboard': typeof AppWorkspaceSlugBuildDashboardRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/use-case-profile': typeof AppWorkspaceSlugOnboardingUseCaseProfileRoute
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -516,13 +483,10 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId': typeof AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren
   '/app/$workspaceSlug/build/capture/$useCaseId': typeof AppWorkspaceSlugBuildCaptureUseCaseIdRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
-  '/app/$workspaceSlug/assess/use-cases': typeof AppWorkspaceSlugAssessUseCasesIndexRoute
   '/app/$workspaceSlug/build/capture': typeof AppWorkspaceSlugBuildCaptureIndexRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId': typeof AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -565,7 +529,6 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/build/dashboard': typeof AppWorkspaceSlugBuildDashboardRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/use-case-profile': typeof AppWorkspaceSlugOnboardingUseCaseProfileRoute
   '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -579,13 +542,10 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId': typeof AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren
   '/app/$workspaceSlug/build/capture/$useCaseId': typeof AppWorkspaceSlugBuildCaptureUseCaseIdRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId/': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
-  '/app/$workspaceSlug/assess/use-cases/': typeof AppWorkspaceSlugAssessUseCasesIndexRoute
   '/app/$workspaceSlug/build/capture/': typeof AppWorkspaceSlugBuildCaptureIndexRoute
-  '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId': typeof AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -629,7 +589,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/dashboard'
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/use-case-profile'
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -643,13 +602,10 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId'
     | '/app/$workspaceSlug/build/capture/$useCaseId'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId/'
-    | '/app/$workspaceSlug/assess/use-cases/'
     | '/app/$workspaceSlug/build/capture/'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -684,7 +640,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/dashboard'
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/use-case-profile'
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -698,13 +653,10 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId'
     | '/app/$workspaceSlug/build/capture/$useCaseId'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId'
-    | '/app/$workspaceSlug/assess/use-cases'
     | '/app/$workspaceSlug/build/capture'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId'
   id:
     | '__root__'
     | '/'
@@ -746,7 +698,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/dashboard'
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/use-case-profile'
     | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -760,13 +711,10 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId'
     | '/app/$workspaceSlug/build/capture/$useCaseId'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId/'
-    | '/app/$workspaceSlug/assess/use-cases/'
     | '/app/$workspaceSlug/build/capture/'
-    | '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1050,13 +998,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport
       parentRoute: typeof AppWorkspaceSlugRoute
     }
-    '/app/$workspaceSlug/onboarding/use-case-profile': {
-      id: '/app/$workspaceSlug/onboarding/use-case-profile'
-      path: '/onboarding/use-case-profile'
-      fullPath: '/app/$workspaceSlug/onboarding/use-case-profile'
-      preLoaderRoute: typeof AppWorkspaceSlugOnboardingUseCaseProfileRouteImport
-      parentRoute: typeof AppWorkspaceSlugRoute
-    }
     '/app/$workspaceSlug/discover/$': {
       id: '/app/$workspaceSlug/discover/$'
       path: '/$'
@@ -1148,13 +1089,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugBuildCaptureIndexRouteImport
       parentRoute: typeof AppWorkspaceSlugBuildRoute
     }
-    '/app/$workspaceSlug/assess/use-cases/': {
-      id: '/app/$workspaceSlug/assess/use-cases/'
-      path: '/assess/use-cases'
-      fullPath: '/app/$workspaceSlug/assess/use-cases/'
-      preLoaderRoute: typeof AppWorkspaceSlugAssessUseCasesIndexRouteImport
-      parentRoute: typeof AppWorkspaceSlugRoute
-    }
     '/app/$workspaceSlug/assess/$moduleId/': {
       id: '/app/$workspaceSlug/assess/$moduleId/'
       path: '/'
@@ -1176,13 +1110,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugBuildCaptureUseCaseIdRouteImport
       parentRoute: typeof AppWorkspaceSlugBuildRoute
     }
-    '/app/$workspaceSlug/assess/use-cases/$trackId': {
-      id: '/app/$workspaceSlug/assess/use-cases/$trackId'
-      path: '/assess/use-cases/$trackId'
-      fullPath: '/app/$workspaceSlug/assess/use-cases/$trackId'
-      preLoaderRoute: typeof AppWorkspaceSlugAssessUseCasesTrackIdRouteImport
-      parentRoute: typeof AppWorkspaceSlugRoute
-    }
     '/app/$workspaceSlug/assess/$moduleId/work': {
       id: '/app/$workspaceSlug/assess/$moduleId/work'
       path: '/work'
@@ -1203,13 +1130,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/$workspaceSlug/assess/$moduleId/gate'
       preLoaderRoute: typeof AppWorkspaceSlugAssessModuleIdGateRouteImport
       parentRoute: typeof AppWorkspaceSlugAssessModuleIdRoute
-    }
-    '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId': {
-      id: '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId'
-      path: '/$moduleId'
-      fullPath: '/app/$workspaceSlug/assess/use-cases/$trackId/$moduleId'
-      preLoaderRoute: typeof AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRouteImport
-      parentRoute: typeof AppWorkspaceSlugAssessUseCasesTrackIdRoute
     }
   }
 }
@@ -1326,21 +1246,6 @@ const AppWorkspaceSlugAssessModuleIdRouteWithChildren =
     AppWorkspaceSlugAssessModuleIdRouteChildren,
   )
 
-interface AppWorkspaceSlugAssessUseCasesTrackIdRouteChildren {
-  AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute: typeof AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute
-}
-
-const AppWorkspaceSlugAssessUseCasesTrackIdRouteChildren: AppWorkspaceSlugAssessUseCasesTrackIdRouteChildren =
-  {
-    AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute:
-      AppWorkspaceSlugAssessUseCasesTrackIdModuleIdRoute,
-  }
-
-const AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren =
-  AppWorkspaceSlugAssessUseCasesTrackIdRoute._addFileChildren(
-    AppWorkspaceSlugAssessUseCasesTrackIdRouteChildren,
-  )
-
 interface AppWorkspaceSlugRouteChildren {
   AppWorkspaceSlugAdminRoute: typeof AppWorkspaceSlugAdminRouteWithChildren
   AppWorkspaceSlugBuildRoute: typeof AppWorkspaceSlugBuildRouteWithChildren
@@ -1352,11 +1257,8 @@ interface AppWorkspaceSlugRouteChildren {
   AppWorkspaceSlugAssessModuleIdRoute: typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   AppWorkspaceSlugAssessAssignmentsRoute: typeof AppWorkspaceSlugAssessAssignmentsRoute
   AppWorkspaceSlugAssessCompleteRoute: typeof AppWorkspaceSlugAssessCompleteRoute
-  AppWorkspaceSlugOnboardingUseCaseProfileRoute: typeof AppWorkspaceSlugOnboardingUseCaseProfileRoute
   AppWorkspaceSlugOnboardingWorkspaceProfileRoute: typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   AppWorkspaceSlugAssessIndexRoute: typeof AppWorkspaceSlugAssessIndexRoute
-  AppWorkspaceSlugAssessUseCasesTrackIdRoute: typeof AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren
-  AppWorkspaceSlugAssessUseCasesIndexRoute: typeof AppWorkspaceSlugAssessUseCasesIndexRoute
 }
 
 const AppWorkspaceSlugRouteChildren: AppWorkspaceSlugRouteChildren = {
@@ -1372,15 +1274,9 @@ const AppWorkspaceSlugRouteChildren: AppWorkspaceSlugRouteChildren = {
   AppWorkspaceSlugAssessAssignmentsRoute:
     AppWorkspaceSlugAssessAssignmentsRoute,
   AppWorkspaceSlugAssessCompleteRoute: AppWorkspaceSlugAssessCompleteRoute,
-  AppWorkspaceSlugOnboardingUseCaseProfileRoute:
-    AppWorkspaceSlugOnboardingUseCaseProfileRoute,
   AppWorkspaceSlugOnboardingWorkspaceProfileRoute:
     AppWorkspaceSlugOnboardingWorkspaceProfileRoute,
   AppWorkspaceSlugAssessIndexRoute: AppWorkspaceSlugAssessIndexRoute,
-  AppWorkspaceSlugAssessUseCasesTrackIdRoute:
-    AppWorkspaceSlugAssessUseCasesTrackIdRouteWithChildren,
-  AppWorkspaceSlugAssessUseCasesIndexRoute:
-    AppWorkspaceSlugAssessUseCasesIndexRoute,
 }
 
 const AppWorkspaceSlugRouteWithChildren =

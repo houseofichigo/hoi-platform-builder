@@ -160,7 +160,7 @@ export function useTeamStatus() {
       return {
         assess: { completed, total: 12, membersStarted },
         discover: { items: libraryRes.count ?? 0 },
-        build: { total: build.total, scored: build.scored, pending: build.pending },
+        build: { total: build.total, scored: build.scored, pending: build.pending, approved: build.approved },
         scale,
       };
     },

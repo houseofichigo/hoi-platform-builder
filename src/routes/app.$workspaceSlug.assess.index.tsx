@@ -177,7 +177,7 @@ function CourseHero({
           </h1>
           <p className="lead mt-5 max-w-[64ch]">
             Start with {course.title}: {course.framing}. Learn the universal method here;
-            apply it later to a chosen capstone case for certification.
+            earn certification by completing the assignments and gates.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
@@ -300,13 +300,6 @@ function CourseShelf({
               >
                 Resume
               </Link>
-              <Link
-                to="/app/$workspaceSlug/assess/use-cases"
-                params={{ workspaceSlug: slug }}
-                className="btn-ichigo btn-ichigo-outline"
-              >
-                Use case tracks
-              </Link>
             </div>
           </div>
         </div>
@@ -348,7 +341,7 @@ function NoticeCard({
   title: string;
   body: string;
   actionLabel: string;
-  to: "/app/$workspaceSlug" | "/app/$workspaceSlug/onboarding/use-case-profile" | "/app/$workspaceSlug/assess/complete";
+  to: "/app/$workspaceSlug" | "/app/$workspaceSlug/assess/complete";
   slug: string;
   search?: Record<string, string>;
 }) {

@@ -4,12 +4,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { WORKSPACE_PROFILE_SCHEMA } from "@/lib/profile/workspace-profile";
 import { isProfileComplete, type ProfileValues } from "@/lib/profile/schema";
-import { resolveWorkedExample } from "@/lib/worked-examples";
 
 export type ChecklistItemId =
   | "workspace_profile"
-  | "use_case_profile"
-  | "example"
   | "invite"
   | "tour"
   | "library";
@@ -57,7 +54,7 @@ export function useOnboardingChecklist() {
       ] = await Promise.all([
         supabase
           .from("workspaces")
-          .select("created_at, worked_example, onboarding_dismissed_at, workspace_profile, use_case_profile")
+          .select("created_at, onboarding_dismissed_at, workspace_profile")
           .eq("id", workspace!.id)
           .maybeSingle(),
         supabase
@@ -99,14 +96,6 @@ export function useOnboardingChecklist() {
           WORKSPACE_PROFILE_SCHEMA,
           ws.workspace_profile as ProfileValues,
         );
-      const workedExampleMeta = resolveWorkedExample(ws?.worked_example ?? null);
-      const useCaseProfileValues = workedExampleMeta
-        ? ((ws?.use_case_profile as Record<string, ProfileValues> | null)?.[workedExampleMeta.id] ?? null)
-        : null;
-      const useCaseProfileComplete =
-        !!workedExampleMeta &&
-        !!useCaseProfileValues &&
-        isProfileComplete(workedExampleMeta.useCaseProfileSchema, useCaseProfileValues);
 
       // "Invite your team" is complete when ANY of these are true, so the
       // item can't get stuck:
@@ -119,7 +108,6 @@ export function useOnboardingChecklist() {
         safeMemberCount > 1 ||
         safeAcceptedInvites > 0 ||
         safeActivePendingInvites > 0;
-      const exampleComplete = !!ws?.worked_example;
       const tourComplete = !!profile?.tour_completed_at;
       const libraryComplete = !!profile?.library_visited_at;
 
@@ -131,24 +119,6 @@ export function useOnboardingChecklist() {
             "Five quick questions about your company. Every example in your training is generated from this context — no fictional profile.",
           complete: workspaceProfileComplete,
           actionLabel: "Set up company profile",
-        },
-        {
-          id: "example",
-          title: "Choose an applied track",
-          description:
-            "Optional: preview the capstone-style workflow you want to use after the core course. Invoice OCR is the first active track.",
-          complete: exampleComplete,
-          actionLabel: "Pick track",
-          optional: true,
-        },
-        {
-          id: "use_case_profile",
-          title: "Personalize the applied track",
-          description:
-            "Optional: add your team context for the applied track. Core assignments stay generic and do not require this setup.",
-          complete: useCaseProfileComplete,
-          actionLabel: "Add track context",
-          optional: true,
         },
         {
           id: "invite",
@@ -184,7 +154,7 @@ export function useOnboardingChecklist() {
         hasFewMembers,
         isAdmin,
         firstName,
-        workedExample: ws?.worked_example ?? null,
+        workedExample: null,
         items,
         completedCount: requiredItems.filter((i) => i.complete).length,
         totalCount: requiredItems.length,
@@ -210,38 +180,6 @@ export function useOnboardingMutations() {
       metadata: metadata as never,
     } as never);
   };
-
-  const updateWorkedExample = useMutation({
-    mutationFn: async (value: string) => {
-      // Read current worked example so we can reset use-case profile completion
-      // when the user switches to a different example (or clears a missing one).
-      const { data: current, error: readError } = await supabase
-        .from("workspaces")
-        .select("worked_example")
-        .eq("id", workspace!.id)
-        .maybeSingle();
-      if (readError) throw readError;
-
-      const changed = (current?.worked_example ?? null) !== value;
-      const update: { worked_example: string; use_case_profile?: Record<string, never> } = {
-        worked_example: value,
-      };
-      if (changed) {
-        // Reset stored use-case profile so the checklist item flips back to
-        // incomplete and stale data from the previous example is discarded.
-        update.use_case_profile = {};
-      }
-
-      const { error } = await supabase
-        .from("workspaces")
-        .update(update)
-        .eq("id", workspace!.id);
-      if (error) throw error;
-      await trackEvent("worked_example_selected", { worked_example: value, changed });
-    },
-    onSuccess: invalidate,
-  });
-
 
   const markTourCompleted = useMutation({
     mutationFn: async () => {
@@ -292,7 +230,6 @@ export function useOnboardingMutations() {
   });
 
   return {
-    updateWorkedExample,
     markTourCompleted,
     markLibraryVisited,
     dismissChecklist,

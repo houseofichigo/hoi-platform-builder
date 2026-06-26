@@ -23,7 +23,7 @@ export function useGovernanceThresholds() {
       const gate = await requireActiveOrg();
       const { data, error } = await db
         .from("strategic_priority")
-        .select("id, weights")
+        .select("id, metadata")
         .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false })
@@ -32,7 +32,7 @@ export function useGovernanceThresholds() {
       if (error) throw error;
       return {
         id: data?.id ?? null,
-        thresholds: thresholdsFrom(data?.weights),
+        thresholds: thresholdsFrom((data as { metadata?: unknown } | null)?.metadata),
       };
     },
   });
@@ -45,20 +45,23 @@ export function useSaveGovernanceThresholds() {
       const gate = await requireActiveOrg();
       const { data: existing } = await db
         .from("strategic_priority")
-        .select("id, weights")
+        .select("id, metadata")
         .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      const weights = { ...asRecord(existing?.weights), governance: next };
+      const metadata = {
+        ...asRecord((existing as { metadata?: unknown } | null)?.metadata),
+        governance: next,
+      };
       if (existing?.id) {
-        const { error } = await db.from("strategic_priority").update({ weights }).eq("id", existing.id);
+        const { error } = await db.from("strategic_priority").update({ metadata }).eq("id", existing.id);
         if (error) throw error;
       } else {
         const { error } = await db
           .from("strategic_priority")
-          .insert({ workspace_id: gate.workspaceId, weights });
+          .insert({ workspace_id: gate.workspaceId, name: "Governance settings", metadata });
         if (error) throw error;
       }
     },

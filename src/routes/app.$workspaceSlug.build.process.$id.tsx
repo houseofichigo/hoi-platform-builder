@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AppShell } from "@/components/build/pfs/process-platform";
 import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,8 +22,8 @@ function ProcessDetailRoute() {
   const approve = useApproveProcess(id);
 
   return (
-    <AppShell>
-      {processQuery.isLoading ? (
+    <>
+{processQuery.isLoading ? (
         <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
           <p className="font-display text-[30px] text-[var(--ichigo-navy)]">Loading process</p>
           <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">Fetching the live process record.</p>
@@ -115,7 +114,7 @@ function ProcessDetailRoute() {
           ) : null}
         </div>
       )}
-    </AppShell>
+</>
   );
 }
 

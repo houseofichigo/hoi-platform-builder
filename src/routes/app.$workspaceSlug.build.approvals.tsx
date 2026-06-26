@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ProcessApprovals } from "@/components/build/ProcessApprovals";
+import { PendingTasks } from "@/components/build/pfs/process-platform";
 
 export const Route = createFileRoute("/app/$workspaceSlug/build/approvals")({
   component: BuildApprovals,
 });
 
 function BuildApprovals() {
-  return <ProcessApprovals />;
+  return <PendingTasks />;
 }

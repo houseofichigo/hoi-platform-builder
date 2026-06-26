@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BuildOverviewPanel } from "@/components/build/BuildOverviewPanel";
+import { DashboardScreen } from "@/components/build/pfs/process-platform";
 
 export const Route = createFileRoute("/app/$workspaceSlug/build/")({
   component: BuildIndex,
 });
 
 function BuildIndex() {
-  return <BuildOverviewPanel />;
+  return <DashboardScreen />;
 }

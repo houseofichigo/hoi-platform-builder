@@ -61,6 +61,8 @@ import { Route as AppWorkspaceSlugAdminBillingRouteImport } from './routes/app.$
 import { Route as AppWorkspaceSlugAdminAnalyticsRouteImport } from './routes/app.$workspaceSlug.admin.analytics'
 import { Route as AppWorkspaceSlugAssessModuleIdIndexRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.index'
 import { Route as AppWorkspaceSlugScaleUseCaseIdReviewRouteImport } from './routes/app.$workspaceSlug.scale.$useCaseId.review'
+import { Route as AppWorkspaceSlugBuildProcessNewRouteImport } from './routes/app.$workspaceSlug.build.process.new'
+import { Route as AppWorkspaceSlugBuildProcessIdRouteImport } from './routes/app.$workspaceSlug.build.process.$id'
 import { Route as AppWorkspaceSlugAssessModuleIdWorkRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.work'
 import { Route as AppWorkspaceSlugAssessModuleIdStudyRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.study'
 import { Route as AppWorkspaceSlugAssessModuleIdGateRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId.gate'
@@ -353,6 +355,18 @@ const AppWorkspaceSlugScaleUseCaseIdReviewRoute =
     path: '/$useCaseId/review',
     getParentRoute: () => AppWorkspaceSlugScaleRoute,
   } as any)
+const AppWorkspaceSlugBuildProcessNewRoute =
+  AppWorkspaceSlugBuildProcessNewRouteImport.update({
+    id: '/process/new',
+    path: '/process/new',
+    getParentRoute: () => AppWorkspaceSlugBuildRoute,
+  } as any)
+const AppWorkspaceSlugBuildProcessIdRoute =
+  AppWorkspaceSlugBuildProcessIdRouteImport.update({
+    id: '/process/$id',
+    path: '/process/$id',
+    getParentRoute: () => AppWorkspaceSlugBuildRoute,
+  } as any)
 const AppWorkspaceSlugAssessModuleIdWorkRoute =
   AppWorkspaceSlugAssessModuleIdWorkRouteImport.update({
     id: '/work',
@@ -426,6 +440,8 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
+  '/app/$workspaceSlug/build/process/$id': typeof AppWorkspaceSlugBuildProcessIdRoute
+  '/app/$workspaceSlug/build/process/new': typeof AppWorkspaceSlugBuildProcessNewRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId/': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
 }
@@ -476,6 +492,8 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
+  '/app/$workspaceSlug/build/process/$id': typeof AppWorkspaceSlugBuildProcessIdRoute
+  '/app/$workspaceSlug/build/process/new': typeof AppWorkspaceSlugBuildProcessNewRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
 }
@@ -534,6 +552,8 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/assess/$moduleId/gate': typeof AppWorkspaceSlugAssessModuleIdGateRoute
   '/app/$workspaceSlug/assess/$moduleId/study': typeof AppWorkspaceSlugAssessModuleIdStudyRoute
   '/app/$workspaceSlug/assess/$moduleId/work': typeof AppWorkspaceSlugAssessModuleIdWorkRoute
+  '/app/$workspaceSlug/build/process/$id': typeof AppWorkspaceSlugBuildProcessIdRoute
+  '/app/$workspaceSlug/build/process/new': typeof AppWorkspaceSlugBuildProcessNewRoute
   '/app/$workspaceSlug/scale/$useCaseId/review': typeof AppWorkspaceSlugScaleUseCaseIdReviewRoute
   '/app/$workspaceSlug/assess/$moduleId/': typeof AppWorkspaceSlugAssessModuleIdIndexRoute
 }
@@ -593,6 +613,8 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
+    | '/app/$workspaceSlug/build/process/$id'
+    | '/app/$workspaceSlug/build/process/new'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId/'
   fileRoutesByTo: FileRoutesByTo
@@ -643,6 +665,8 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
+    | '/app/$workspaceSlug/build/process/$id'
+    | '/app/$workspaceSlug/build/process/new'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId'
   id:
@@ -700,6 +724,8 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/$moduleId/gate'
     | '/app/$workspaceSlug/assess/$moduleId/study'
     | '/app/$workspaceSlug/assess/$moduleId/work'
+    | '/app/$workspaceSlug/build/process/$id'
+    | '/app/$workspaceSlug/build/process/new'
     | '/app/$workspaceSlug/scale/$useCaseId/review'
     | '/app/$workspaceSlug/assess/$moduleId/'
   fileRoutesById: FileRoutesById
@@ -1090,6 +1116,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugScaleUseCaseIdReviewRouteImport
       parentRoute: typeof AppWorkspaceSlugScaleRoute
     }
+    '/app/$workspaceSlug/build/process/new': {
+      id: '/app/$workspaceSlug/build/process/new'
+      path: '/process/new'
+      fullPath: '/app/$workspaceSlug/build/process/new'
+      preLoaderRoute: typeof AppWorkspaceSlugBuildProcessNewRouteImport
+      parentRoute: typeof AppWorkspaceSlugBuildRoute
+    }
+    '/app/$workspaceSlug/build/process/$id': {
+      id: '/app/$workspaceSlug/build/process/$id'
+      path: '/process/$id'
+      fullPath: '/app/$workspaceSlug/build/process/$id'
+      preLoaderRoute: typeof AppWorkspaceSlugBuildProcessIdRouteImport
+      parentRoute: typeof AppWorkspaceSlugBuildRoute
+    }
     '/app/$workspaceSlug/assess/$moduleId/work': {
       id: '/app/$workspaceSlug/assess/$moduleId/work'
       path: '/work'
@@ -1144,6 +1184,8 @@ interface AppWorkspaceSlugBuildRouteChildren {
   AppWorkspaceSlugBuildLibraryRoute: typeof AppWorkspaceSlugBuildLibraryRoute
   AppWorkspaceSlugBuildMapRoute: typeof AppWorkspaceSlugBuildMapRoute
   AppWorkspaceSlugBuildIndexRoute: typeof AppWorkspaceSlugBuildIndexRoute
+  AppWorkspaceSlugBuildProcessIdRoute: typeof AppWorkspaceSlugBuildProcessIdRoute
+  AppWorkspaceSlugBuildProcessNewRoute: typeof AppWorkspaceSlugBuildProcessNewRoute
 }
 
 const AppWorkspaceSlugBuildRouteChildren: AppWorkspaceSlugBuildRouteChildren = {
@@ -1151,6 +1193,8 @@ const AppWorkspaceSlugBuildRouteChildren: AppWorkspaceSlugBuildRouteChildren = {
   AppWorkspaceSlugBuildLibraryRoute: AppWorkspaceSlugBuildLibraryRoute,
   AppWorkspaceSlugBuildMapRoute: AppWorkspaceSlugBuildMapRoute,
   AppWorkspaceSlugBuildIndexRoute: AppWorkspaceSlugBuildIndexRoute,
+  AppWorkspaceSlugBuildProcessIdRoute: AppWorkspaceSlugBuildProcessIdRoute,
+  AppWorkspaceSlugBuildProcessNewRoute: AppWorkspaceSlugBuildProcessNewRoute,
 }
 
 const AppWorkspaceSlugBuildRouteWithChildren =

@@ -19,22 +19,19 @@ import {
 import {
   currentResumeModule,
   useAssessAllProgress,
-  useWorkedExample,
   type AssessProgressRow,
 } from "@/hooks/useAssess";
 import { CourseMediaBlock } from "@/components/assess/CourseMediaBlock";
-import { USE_CASE_TRACKS, type UseCaseTrack } from "@/lib/assess/use-case-tracks";
 
 export const Route = createFileRoute("/app/$workspaceSlug/assess/")({
   component: AssessHome,
 });
 
-type CourseTab = "courses" | "curriculum" | "useCases" | "artifacts" | "gates" | "about";
+type CourseTab = "courses" | "curriculum" | "artifacts" | "gates" | "about";
 
 function AssessHome() {
   const { workspace } = useWorkspace();
   const { data: progress } = useAssessAllProgress();
-  const { data: worked } = useWorkedExample();
   const [tab, setTab] = useState<CourseTab>("courses");
   const course = getCourse(DEFAULT_ASSESS_COURSE_ID)!;
   const courseModules = useMemo(() => getCourseModules(course.id), [course.id]);
@@ -65,8 +62,6 @@ function AssessHome() {
         course={course}
         workspaceName={workspace.name}
         slug={slug}
-        workedName={worked?.name}
-        workedIndustry={worked?.industry}
         percent={stats.percent}
         completed={stats.completed}
         inProgress={stats.inProgress}
@@ -93,7 +88,6 @@ function AssessHome() {
           {([
             ["courses", "Courses"],
             ["curriculum", "Current course"],
-            ["useCases", "Capstone Library"],
             ["artifacts", "Artifacts"],
             ["gates", "Gates"],
             ["about", "About"],
@@ -127,9 +121,6 @@ function AssessHome() {
             <CurriculumPanel slug={slug} progress={progress ?? {}} />
           </div>
         )}
-        {tab === "useCases" && (
-          <UseCaseTracksPanel slug={slug} />
-        )}
         {tab === "artifacts" && (
           <ArtifactsPanel slug={slug} progress={progress ?? {}} />
         )}
@@ -137,7 +128,7 @@ function AssessHome() {
           <GatesPanel slug={slug} progress={progress ?? {}} />
         )}
         {tab === "about" && (
-          <AboutPanel course={course} workedName={worked?.name} />
+          <AboutPanel course={course} />
         )}
       </section>
     </div>

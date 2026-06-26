@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
 import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
-import { useUseCaseProfile } from "@/hooks/useUseCaseProfile";
 import { useOnboardingChecklist, useOnboardingMutations } from "@/hooks/useOnboardingChecklist";
 import { WORKSPACE_PROFILE_SCHEMA } from "@/lib/profile/workspace-profile";
 import { supabase } from "@/integrations/supabase/client";

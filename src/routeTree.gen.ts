@@ -54,6 +54,7 @@ import { Route as AppWorkspaceSlugAssessCompleteRouteImport } from './routes/app
 import { Route as AppWorkspaceSlugAssessAssignmentsRouteImport } from './routes/app.$workspaceSlug.assess.assignments'
 import { Route as AppWorkspaceSlugAssessModuleIdRouteImport } from './routes/app.$workspaceSlug.assess.$moduleId'
 import { Route as AppWorkspaceSlugAdminSettingsRouteImport } from './routes/app.$workspaceSlug.admin.settings'
+import { Route as AppWorkspaceSlugAdminReviewPolicyRouteImport } from './routes/app.$workspaceSlug.admin.review-policy'
 import { Route as AppWorkspaceSlugAdminOnboardingRouteImport } from './routes/app.$workspaceSlug.admin.onboarding'
 import { Route as AppWorkspaceSlugAdminMembersRouteImport } from './routes/app.$workspaceSlug.admin.members'
 import { Route as AppWorkspaceSlugAdminInvoicesRouteImport } from './routes/app.$workspaceSlug.admin.invoices'
@@ -313,6 +314,12 @@ const AppWorkspaceSlugAdminSettingsRoute =
     path: '/settings',
     getParentRoute: () => AppWorkspaceSlugAdminRoute,
   } as any)
+const AppWorkspaceSlugAdminReviewPolicyRoute =
+  AppWorkspaceSlugAdminReviewPolicyRouteImport.update({
+    id: '/review-policy',
+    path: '/review-policy',
+    getParentRoute: () => AppWorkspaceSlugAdminRoute,
+  } as any)
 const AppWorkspaceSlugAdminOnboardingRoute =
   AppWorkspaceSlugAdminOnboardingRouteImport.update({
     id: '/onboarding',
@@ -419,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
   '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
   '/app/$workspaceSlug/admin/onboarding': typeof AppWorkspaceSlugAdminOnboardingRoute
+  '/app/$workspaceSlug/admin/review-policy': typeof AppWorkspaceSlugAdminReviewPolicyRoute
   '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
@@ -472,6 +480,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
   '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
   '/app/$workspaceSlug/admin/onboarding': typeof AppWorkspaceSlugAdminOnboardingRoute
+  '/app/$workspaceSlug/admin/review-policy': typeof AppWorkspaceSlugAdminReviewPolicyRoute
   '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
@@ -531,6 +540,7 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/admin/invoices': typeof AppWorkspaceSlugAdminInvoicesRoute
   '/app/$workspaceSlug/admin/members': typeof AppWorkspaceSlugAdminMembersRoute
   '/app/$workspaceSlug/admin/onboarding': typeof AppWorkspaceSlugAdminOnboardingRoute
+  '/app/$workspaceSlug/admin/review-policy': typeof AppWorkspaceSlugAdminReviewPolicyRoute
   '/app/$workspaceSlug/admin/settings': typeof AppWorkspaceSlugAdminSettingsRoute
   '/app/$workspaceSlug/assess/$moduleId': typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   '/app/$workspaceSlug/assess/assignments': typeof AppWorkspaceSlugAssessAssignmentsRoute
@@ -592,6 +602,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/admin/invoices'
     | '/app/$workspaceSlug/admin/members'
     | '/app/$workspaceSlug/admin/onboarding'
+    | '/app/$workspaceSlug/admin/review-policy'
     | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/admin/invoices'
     | '/app/$workspaceSlug/admin/members'
     | '/app/$workspaceSlug/admin/onboarding'
+    | '/app/$workspaceSlug/admin/review-policy'
     | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/assignments'
     | '/app/$workspaceSlug/assess/complete'
@@ -703,6 +715,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/admin/invoices'
     | '/app/$workspaceSlug/admin/members'
     | '/app/$workspaceSlug/admin/onboarding'
+    | '/app/$workspaceSlug/admin/review-policy'
     | '/app/$workspaceSlug/admin/settings'
     | '/app/$workspaceSlug/assess/$moduleId'
     | '/app/$workspaceSlug/assess/assignments'
@@ -1067,6 +1080,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugAdminSettingsRouteImport
       parentRoute: typeof AppWorkspaceSlugAdminRoute
     }
+    '/app/$workspaceSlug/admin/review-policy': {
+      id: '/app/$workspaceSlug/admin/review-policy'
+      path: '/review-policy'
+      fullPath: '/app/$workspaceSlug/admin/review-policy'
+      preLoaderRoute: typeof AppWorkspaceSlugAdminReviewPolicyRouteImport
+      parentRoute: typeof AppWorkspaceSlugAdminRoute
+    }
     '/app/$workspaceSlug/admin/onboarding': {
       id: '/app/$workspaceSlug/admin/onboarding'
       path: '/onboarding'
@@ -1160,6 +1180,7 @@ interface AppWorkspaceSlugAdminRouteChildren {
   AppWorkspaceSlugAdminInvoicesRoute: typeof AppWorkspaceSlugAdminInvoicesRoute
   AppWorkspaceSlugAdminMembersRoute: typeof AppWorkspaceSlugAdminMembersRoute
   AppWorkspaceSlugAdminOnboardingRoute: typeof AppWorkspaceSlugAdminOnboardingRoute
+  AppWorkspaceSlugAdminReviewPolicyRoute: typeof AppWorkspaceSlugAdminReviewPolicyRoute
   AppWorkspaceSlugAdminSettingsRoute: typeof AppWorkspaceSlugAdminSettingsRoute
   AppWorkspaceSlugAdminIndexRoute: typeof AppWorkspaceSlugAdminIndexRoute
 }
@@ -1170,6 +1191,8 @@ const AppWorkspaceSlugAdminRouteChildren: AppWorkspaceSlugAdminRouteChildren = {
   AppWorkspaceSlugAdminInvoicesRoute: AppWorkspaceSlugAdminInvoicesRoute,
   AppWorkspaceSlugAdminMembersRoute: AppWorkspaceSlugAdminMembersRoute,
   AppWorkspaceSlugAdminOnboardingRoute: AppWorkspaceSlugAdminOnboardingRoute,
+  AppWorkspaceSlugAdminReviewPolicyRoute:
+    AppWorkspaceSlugAdminReviewPolicyRoute,
   AppWorkspaceSlugAdminSettingsRoute: AppWorkspaceSlugAdminSettingsRoute,
   AppWorkspaceSlugAdminIndexRoute: AppWorkspaceSlugAdminIndexRoute,
 }
@@ -1338,13 +1361,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

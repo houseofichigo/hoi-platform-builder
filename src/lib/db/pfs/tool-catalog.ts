@@ -5,7 +5,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { db, requireActiveOrg, type Row } from "@/lib/db/pfs/shared";
 import type { DataAccessibility, DataProfile, DataSensitivity, DataStructure } from "@/lib/process-data";
 
-export type ToolCatalogRow = Row<"tool_catalog">;
+export type ToolCatalogRow = Row<"tool_catalog"> & {
+  default_data_sensitivity?: string | null;
+  default_data_structure?: string | null;
+  default_data_accessibility?: string | null;
+  default_api_available?: boolean | null;
+  logo_mirror_key?: string | null;
+  description?: string | null;
+  website?: string | null;
+};
 export type ToolRow = Row<"tool">;
 
 export type ToolCatalogFilters = {

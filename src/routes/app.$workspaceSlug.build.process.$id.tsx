@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { AppShell } from "@/components/build/pfs/process-platform";
+// AppShell removed (outer build layout provides chrome)
 import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ function ProcessDetailRoute() {
   const approve = useApproveProcess(id);
 
   return (
-    <AppShell>
+    <>
       {processQuery.isLoading ? (
         <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
           <p className="font-display text-[30px] text-[var(--ichigo-navy)]">Loading process</p>
@@ -116,7 +116,7 @@ function ProcessDetailRoute() {
           ) : null}
         </div>
       )}
-    </AppShell>
+    </>
   );
 }
 

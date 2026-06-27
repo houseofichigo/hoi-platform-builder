@@ -419,7 +419,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
   loader: () => ({}),
   component: NewProcessRoute,
   errorComponent: ({ error }) => (
-    <AppShell>
+    <>
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
         <p className="font-display text-[30px] font-medium tracking-normal text-[var(--ichigo-navy)]">
           Process builder did not load
@@ -428,7 +428,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
           {error.message || "Something interrupted the process builder. Refresh or start a new map."}
         </p>
       </Card>
-    </AppShell>
+    </>
   ),
 });
 
@@ -675,11 +675,11 @@ function templateToBuilderState(template: ProcessTemplate): { nodes: BuilderNode
 
 function NewProcessRoute() {
   return (
-    <AppShell>
+    <>
       <ReactFlowProvider>
         <ProcessBuilder />
       </ReactFlowProvider>
-    </AppShell>
+    </>
   );
 }
 

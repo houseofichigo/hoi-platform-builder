@@ -124,6 +124,7 @@ export const sendWorkspaceInvite = createServerFn({ method: "POST" })
         .from("workspace_invitations")
         .insert({
           workspace_id: data.workspace_id,
+          organization_id: data.workspace_id,
           email: data.email,
           role: data.role,
           invited_by: userId,

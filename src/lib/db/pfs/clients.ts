@@ -6,7 +6,7 @@ import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
 
 export type ClientRow = {
   id: string;
-  organization_id: string;
+  workspace_id: string;
   name: string;
   kind: string;
   sector: string | null;
@@ -40,7 +40,7 @@ export async function listClients() {
   const { data, error } = await db
     .from("client")
     .select("*")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null)
     .order("name");
   if (error) throw error;
@@ -51,7 +51,7 @@ export async function saveClient(input: ClientInput) {
   const gate = await requireActiveOrg();
   const parsed = clientSchema.parse(input);
   const { error } = await db.from("client").insert({
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     name: parsed.name,
     kind: parsed.kind,
     sector: parsed.sector,

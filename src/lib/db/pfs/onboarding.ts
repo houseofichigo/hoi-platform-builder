@@ -35,7 +35,7 @@ export type OnboardingContext = {
   profile: Row<"company_profile"> | null;
   products: Row<"product_service">[];
   departments: Row<"department">[];
-  invitations: Row<"invitation">[];
+  invitations: Row<"workspace_invitations">[];
   tools: Row<"tool">[];
   dataSources: Row<"data_source">[];
   audiences: AudienceRow[];
@@ -70,6 +70,12 @@ export type ReadinessAssessmentRow = {
 
 type Role = Database["public"]["Enums"]["membership_role"];
 type StringList = string | string[];
+
+function toWorkspaceRole(role: string) {
+  if (role === "admin" || role === "reviewer") return "admin";
+  if (role === "viewer") return "viewer";
+  return "member";
+}
 
 function asList(value: StringList) {
   if (Array.isArray(value)) return value.map((item) => item.trim()).filter(Boolean);
@@ -193,7 +199,7 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
         .is("archived_at", null)
         .order("name"),
       db
-        .from("invitation")
+        .from("workspace_invitations")
         .select("*")
         .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
@@ -241,14 +247,13 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
         .eq("workspace_id", gate.workspaceId)
         .maybeSingle(),
       db
-        .from("membership")
+        .from("workspace_members")
         .select("id, user_id, role, department_id")
-        .eq("workspace_id", gate.workspaceId),
-      db
-        .from("member_profile")
-        .select("membership_id, display_name, job_title")
         .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null),
+      db
+        .from("profiles")
+        .select("user_id, full_name, job_role"),
       db
         .from("strategic_priority")
         .select("*")
@@ -272,9 +277,9 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
   )?.error;
   if (firstError) throw firstError;
 
-  const profileByMembership = new Map(
-    ((memberProfiles.data ?? []) as Array<{ membership_id: string; display_name: string | null; job_title: string | null }>).map(
-      (memberProfile) => [memberProfile.membership_id, memberProfile] as const,
+  const profileByUser = new Map(
+    ((memberProfiles.data ?? []) as Array<{ user_id: string; full_name: string | null; job_role: string | null }>).map(
+      (memberProfile) => [memberProfile.user_id, memberProfile] as const,
     ),
   );
 
@@ -293,8 +298,8 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
     readiness: (readiness.data as ReadinessAssessmentRow | null) ?? null,
     members: ((members.data ?? []) as Array<{ id: string; user_id: string; role: Role; department_id: string | null }>).map((member) => ({
       ...member,
-      display_name: profileByMembership.get(member.id)?.display_name ?? null,
-      job_title: profileByMembership.get(member.id)?.job_title ?? null,
+      display_name: profileByUser.get(member.user_id)?.full_name ?? null,
+      job_title: profileByUser.get(member.user_id)?.job_role ?? null,
     })),
     priorities: priorities.data ?? null,
     campaign: campaign.data ?? null,
@@ -531,13 +536,13 @@ export async function saveInvitation(input: {
   const payload = {
     workspace_id: gate.workspaceId,
     email: input.email,
-    role: input.role,
+    role: toWorkspaceRole(input.role),
     department_id: input.departmentId,
   };
   if (!input.id) {
     // Idempotent: avoid duplicate pending invites for the same email in this org.
     const { data: existing } = await db
-      .from("invitation")
+      .from("workspace_invitations")
       .select("id")
       .eq("workspace_id", gate.workspaceId)
       .ilike("email", input.email)
@@ -547,7 +552,7 @@ export async function saveInvitation(input: {
       .maybeSingle();
     if (existing?.id) {
       const { error: updateError } = await db
-        .from("invitation")
+        .from("workspace_invitations")
         .update(payload)
         .eq("id", existing.id)
         .eq("workspace_id", gate.workspaceId);
@@ -557,14 +562,15 @@ export async function saveInvitation(input: {
     }
   }
   const query = input.id
-    ? db.from("invitation").update(payload).eq("id", input.id).eq("workspace_id", gate.workspaceId)
+    ? db.from("workspace_invitations").update(payload).eq("id", input.id).eq("workspace_id", gate.workspaceId)
     : db
-        .from("invitation")
+        .from("workspace_invitations")
         .insert({
           ...payload,
           token: inviteToken,
           expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
           status: "pending",
+          invited_by: gate.userId,
         })
         .select("id")
         .single();
@@ -576,7 +582,7 @@ export async function saveInvitation(input: {
 export async function archiveInvitation(id: string) {
   const gate = await requireActiveOrg();
   const { error } = await db
-    .from("invitation")
+    .from("workspace_invitations")
     .update({ archived_at: new Date().toISOString() })
     .eq("id", id)
     .eq("workspace_id", gate.workspaceId)
@@ -584,10 +590,26 @@ export async function archiveInvitation(id: string) {
   if (error) throw error;
 }
 
-// Single source of truth for sending invites lives in src/lib/org-chart/import.ts
-// (writes send_state, queued_at, sent_at, last_error). Re-export so the
-// onboarding "Invites" step and the org-chart canvas share one sender.
-export { sendPendingInvitations } from "@/lib/org-chart/import";
+export async function sendPendingInvitations() {
+  const gate = await requireActiveOrg();
+  const now = new Date().toISOString();
+  const { data: pending, error: readError } = await db
+    .from("workspace_invitations")
+    .select("id")
+    .eq("workspace_id", gate.workspaceId)
+    .eq("status", "pending")
+    .is("archived_at", null);
+  if (readError) throw readError;
+  const ids = (pending ?? []).map((invite: { id: string }) => invite.id);
+  if (!ids.length) return { queued: 0, failed: 0 };
+  const { error } = await db
+    .from("workspace_invitations")
+    .update({ send_state: "queued", queued_at: now, last_error: null })
+    .in("id", ids)
+    .eq("workspace_id", gate.workspaceId);
+  if (error) throw error;
+  return { queued: ids.length, failed: 0 };
+}
 
 export async function advanceOnboardingPhase(phase: OnboardingPhase) {
   const gate = await requireActiveOrg();

@@ -26,10 +26,8 @@ export async function listMembers(): Promise<MemberSuggestion[]> {
         .select("id, user_id, role, department_id")
         .eq("workspace_id", gate.workspaceId),
       db
-        .from("member_profile")
-        .select("membership_id, user_id, display_name, job_title")
-        .eq("workspace_id", gate.workspaceId)
-        .is("archived_at", null),
+        .from("profiles")
+        .select("user_id, full_name, job_role"),
       db
         .from("department")
         .select("id, name")
@@ -41,16 +39,16 @@ export async function listMembers(): Promise<MemberSuggestion[]> {
   if (profileError) throw profileError;
   if (departmentError) throw departmentError;
 
-  const profileByMembership = new Map<string, any>((profiles ?? []).map((profile: any) => [profile.membership_id, profile]));
+  const profileByUser = new Map<string, any>((profiles ?? []).map((profile: any) => [profile.user_id, profile]));
   const departmentById = new Map((departments ?? []).map((department: any) => [department.id, department.name]));
 
   return (memberships ?? []).map((membership: any) => {
-    const profile = profileByMembership.get(membership.id);
-    const role = profile?.job_title || titleFromRole(membership.role);
+    const profile = profileByUser.get(membership.user_id);
+    const role = profile?.job_role || titleFromRole(membership.role);
     const shortUser = String(membership.user_id ?? "").slice(0, 8);
     return {
       id: membership.user_id,
-      name: profile?.display_name || role || `Member ${shortUser}`,
+      name: profile?.full_name || role || `Member ${shortUser}`,
       role,
       department: departmentById.get(membership.department_id) ?? "",
     };

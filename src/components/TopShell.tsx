@@ -73,14 +73,12 @@ export function buildPhases(opts?: { isAdmin?: boolean }): NavPhase[] {
   }));
 
   const buildItems: NavSubItem[] = [
-    { label: "Priority Dashboard", to: "/app/$workspaceSlug/build", icon: Hammer },
+    { label: "Overview", to: "/app/$workspaceSlug/build", icon: Hammer },
     { label: "Map Process", to: "/app/$workspaceSlug/build/process/new", icon: ClipboardList },
     { label: "Process Library", to: "/app/$workspaceSlug/build/library", icon: LibraryIcon },
     { label: "Template Library", to: "/app/$workspaceSlug/build/templates", icon: LibraryIcon },
+    { label: "Approvals", to: "/app/$workspaceSlug/build/approvals", icon: Inbox },
   ];
-  if (!opts?.isAdmin) {
-    buildItems.push({ label: "Pending Approvals", to: "/app/$workspaceSlug/build/approvals", icon: Inbox });
-  }
 
   return [
     {

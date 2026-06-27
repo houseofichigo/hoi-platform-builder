@@ -44,7 +44,7 @@ const BASE_STEPS: TourStep[] = [
     route: "/app/$workspaceSlug/build",
     eyebrow: "Step 4 · Build",
     title: "Map and prioritize",
-    body: "Capture processes, score use cases, and surface blockers. Use the Priority Dashboard, Map Process, Process Library, and Template Library to plan delivery.",
+    body: "Map processes, review approvals, and surface blockers. Use Overview, Map Process, Process Library, and Template Library to plan delivery.",
   },
   {
     route: "/app/$workspaceSlug/scale",
@@ -58,7 +58,7 @@ const ADMIN_STEP: TourStep = {
   route: "/app/$workspaceSlug/admin",
   eyebrow: "Step 6 · Admin",
   title: "Run the workspace",
-  body: "Manage members, billing, review policy, and the Company Setup wizard. House of Ichigo controls owner and admin promotions.",
+  body: "Manage company setup, members, approvals, billing, and workspace controls. House of Ichigo controls owner and admin promotions.",
 };
 
 export function GuidedTour() {

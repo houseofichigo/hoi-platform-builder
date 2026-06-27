@@ -36,12 +36,13 @@ async function catalogBySlug(slugs: string[]) {
   return new Map((data ?? []).map((row: any) => [row.slug, row.id]));
 }
 
-async function seedMembers(organizationId: string, data: DemoData) {
+async function seedMembers(workspaceId: string, data: DemoData) {
   const context = await getOnboardingContext();
   const departments = byName(context.departments);
   const { error } = await supabase.functions.invoke("seed-demo-members", {
     body: {
-      organizationId,
+      workspaceId,
+      organizationId: workspaceId,
       members: data.members.map((member) => ({
         ...member,
         departmentId: departments.get(lower(member.department))?.id ?? null,
@@ -53,7 +54,7 @@ async function seedMembers(organizationId: string, data: DemoData) {
 
 export async function loadMaisonAtlasDemo() {
   const gate = await requireActiveOrg();
-  if (gate.role !== "admin") throw new Error("Only admins can load the demo company.");
+  if (gate.role !== "admin" && gate.role !== "owner") throw new Error("Only admins can load the demo company.");
   const data = maisonAtlas;
 
   await saveCompanyProfile(data.profile);
@@ -97,7 +98,7 @@ export async function loadMaisonAtlasDemo() {
 
   context = await getOnboardingContext();
   departments = byName(context.departments);
-  await seedMembers(gate.organizationId, data);
+  await seedMembers(gate.workspaceId, data);
 
   context = await getOnboardingContext();
   const tools = byName(context.tools);
@@ -169,5 +170,5 @@ export async function loadMaisonAtlasDemo() {
   await persistVaults(proposed);
   await advanceOnboardingPhase("activation");
 
-  return { organizationId: gate.organizationId };
+  return { workspaceId: gate.workspaceId, organizationId: gate.workspaceId };
 }

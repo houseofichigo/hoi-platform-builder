@@ -1,79 +1,73 @@
-## Goal
+## Goals
 
-Fully replace the Build phase with the v24 Process Flow Studio workspace bundle (`workspace-section.zip`), wired into HOI's `/app/$workspaceSlug/build/*` shell. Sub-tabs become: **Priority Dashboard · Map Process · Process Library · Template Library · Pending Approvals**, with Pending Approvals visible only to non-admin members.
+1. Top-nav Build dropdown must match the Build sub-tabs.
+2. Company Setup must load (currently errors because the existing tenant tables are missing the PFS columns the ported code reads).
+3. Priority Dashboard must show Heatmap / Blocked / Insights even when the workspace has no processes yet.
 
-## Scope
+---
 
-**In scope**
-- Re-port the 5 component files and 8 `lib/db/*` files from the zip into the existing PFS folders, overwriting current copies and refreshing `process-data.ts`, `maturity-stage.ts`, `risk-tier.ts`.
-- Rebuild the Build tab nav and routes.
-- Role-gate the Approvals tab + route on non-admin membership.
+## 1. Top-nav Build dropdown
 
-**Out of scope (kept as-is)**
-- Workspace Admin (Company Setup, Analytics, Review Policy) ported in earlier batches.
-- Auth / workspace resolution / Supabase schema. PFS's `shared.ts` and `auth.ts` shims stay (org→workspace mapping).
-- HOI's `AppShell` chrome — we keep the existing Build layout (PhaseNav/TopShell) and drop PFS's `AppShell`; we mount the screens directly.
-- `__root.tsx`, `welcome.tsx`, `settings.tsx`, `tasks.tsx`, `import.tsx`, `process.templates.tsx` from the zip — not needed; HOI owns these.
+File: `src/components/TopShell.tsx` (`buildPhases()`).
 
-## Files to port (overwrite under existing paths)
+Replace the current items with the same labels and routes used by `src/routes/app.$workspaceSlug.build.tsx`:
 
-Components → `src/components/build/pfs/`
-- `process-platform.tsx` (2079L — AppShell, DashboardScreen, MappingScreen, MaturityStagePanel, MaturityScoringTab, PendingTasks, ProcessLibrary, TemplateLibrary)
-- `process-template-library.tsx`
-- `risk-tier-badge.tsx`
-- `tool-catalog-picker.tsx`
-
-Data layer → `src/lib/db/pfs/`
-- `processes.ts`, `scores.ts`, `governance.ts`, `reference.ts`, `onboarding.ts`, `admin.ts`, `tool-catalog.ts`
-- `shared.ts` / `auth.ts` — KEEP the existing HOI-shimmed versions; only merge any new exports the zip's processes/scores need.
-
-Libs → `src/lib/`
-- `maturity-stage.ts`, `process-data.ts`, `risk-tier.ts` overwritten
-
-All ported files get imports rewritten:
-- `@/lib/db/*` → `@/lib/db/pfs/*`
-- `@/components/*` (PFS internals) → `@/components/build/pfs/*`
-- PFS `Link` usage → existing workspace-aware `_link.tsx` shim
-- `// @ts-nocheck` at the top to match the rest of the ported PFS.
-
-## Route changes (under `src/routes/`)
-
-Update `app.$workspaceSlug.build.tsx` tab list:
 ```
-Priority Dashboard  → /app/$slug/build
-Map Process         → /app/$slug/build/process/new
-Process Library     → /app/$slug/build/library
-Template Library    → /app/$slug/build/templates
-Pending Approvals   → /app/$slug/build/approvals   (hidden when role === 'admin'|'owner')
+Priority Dashboard → /app/$workspaceSlug/build
+Map Process       → /app/$workspaceSlug/build/process/new
+Process Library   → /app/$workspaceSlug/build/library
+Template Library  → /app/$workspaceSlug/build/templates
+Pending Approvals → /app/$workspaceSlug/build/approvals   (members only; hidden for admins/owners)
 ```
 
-Route files:
-- `app.$workspaceSlug.build.index.tsx` → render `DashboardScreen` (replaces current overview).
-- `app.$workspaceSlug.build.process.new.tsx` → mount PFS process editor (`routes/process.new.tsx`, 4471L) inline; strip its `createFileRoute` wrapper and reuse the component.
-- `app.$workspaceSlug.build.templates.tsx` → **new**, mounts `TemplateLibrary`.
-- `app.$workspaceSlug.build.library.tsx` → keep, swap to new `ProcessLibrary`.
-- `app.$workspaceSlug.build.approvals.tsx` → mount new `PendingTasks`; `beforeLoad` redirects admins/owners to `/build`.
-- `app.$workspaceSlug.build.map.tsx` → DELETE (replaced by `process/new`).
-- `app.$workspaceSlug.build.process.$id.tsx` → keep, but swap detail body to PFS's `process.$id.tsx` content.
+Hide "Pending Approvals" using the existing `useWorkspace().isAdmin` flag, matching how the sub-tab bar gates it.
 
-Tab gating uses `useWorkspace().role` (existing hook). Approvals tab item is filtered out when role is admin/owner; the route's `beforeLoad` enforces the same server-side.
+---
 
-## Schema
+## 2. Restore Company Setup
 
-No migrations. The earlier batches already added `organization_id` sync, `roadmap_item`, `tool_catalog`, `vault`, `member_profile`, etc., which are what these screens read. If a runtime "missing column/table" surfaces during smoke test, fix it as a follow-up.
+The PFS port assumes a richer `company_profile` (plus several other tenant tables) than what currently exists in the database. The earlier "PFS process-mapping schema" migration used `CREATE TABLE IF NOT EXISTS`, so existing tables were skipped and never got the new columns.
 
-## Cleanup
+Add ONE corrective migration that:
 
-Delete legacy Build files no longer referenced:
-- `src/routes/app.$workspaceSlug.build.map.tsx`
-- Any stale `src/components/build/*` that the old Map/Overview used (verified with `rg` before deletion).
+- Adds missing columns to **company_profile** to match PFS:
+  `id uuid (pk default gen_random_uuid)`, `industry, sub_industry, size, revenue_range, business_model, customer_type, locations jsonb, growth_stage, mission, overview, value_proposition, primary_jurisdiction, regulatory_regimes jsonb, data_residency jsonb, languages jsonb, is_regulated bool, sells_training bool, onboarding_step int default 0, onboarding_phase text default 'foundation', onboarding_completed_at, archived_at`.
+- Defensively `ADD COLUMN IF NOT EXISTS` for every column the PFS schema declares on each tenant table touched by Company Setup: `department`, `member_profile`, `readiness_assessment`, `strategic_priority`, `product_service`, `audience`, `client`, `tool`, `data_source`, `knowledge_source`, `vault`, `vault_reference`, `process_template`, `process_template_alias`, `campaign`, `opportunity`, `roadmap_item`, `company_score`, `department_score`. This guarantees the PFS adapters in `src/lib/db/pfs/*` can read/write without column-not-found errors.
+- Ensures the read-shim views the adapters expect exist (`invitation` already exists; add `membership` and `organization` views if missing, scoped to `workspace_members` and `workspaces`).
+- Idempotent: every statement uses `IF NOT EXISTS` / `CREATE OR REPLACE VIEW`.
 
-## Verification
+No code changes in this step beyond the migration.
 
-1. `bun run build:dev` clean.
-2. Smoke per tab as admin: Dashboard renders, Map Process opens editor, Library + Templates list, Approvals tab hidden + `/build/approvals` redirects.
-3. Smoke as a member (non-admin): Approvals tab visible, route opens.
+---
 
-## Batches
+## 3. Priority Dashboard always shows Heatmap / Blocked / Insights
 
-Single batch — files are bounded (~13.9K LOC, all ports) and changes are isolated to `src/components/build/pfs/`, `src/lib/db/pfs/`, three `lib/` files, and the Build route layer.
+File: `src/components/build/pfs/process-platform.tsx` (`DashboardScreen`, lines ~485-531).
+
+Currently, when `processes.length === 0`, the screen short-circuits to an "empty" card and the Tabs (Board / Heatmap / Blockers / Insights) and KPI cards (incl. **Blocked**) are not rendered.
+
+Change behavior so the full dashboard chrome — KPI strip, quick filters, and the four tabs — always renders, with each panel showing its own zero-state copy:
+
+- Keep `MaturityStagePanel` at the top.
+- Always render `<Dashboard aggregate={…} processItems={[]} maturityStage={…} />`.
+- Add a small "Map your first process" CTA banner above the tabs when `processItems.length === 0`, instead of replacing the whole screen.
+
+No other Dashboard logic changes; the existing `PortfolioHeatmap`, blocker counters, and `InsightsPanel` already handle empty arrays.
+
+---
+
+## Technical details (for the implementer)
+
+- Tab list source of truth: `BuildLayout` in `src/routes/app.$workspaceSlug.build.tsx`. Mirror its `tabs` array in `buildPhases()`; also gate Approvals with `isAdmin` (same hook).
+- Migration approach: one `supabase--migration` call. Re-run the same column list per table from the prior PFS migration but wrapped in `do $$ ... alter table … add column if not exists … $$` blocks so pre-existing tables get back-filled. No data writes.
+- Do NOT drop or rename any existing column on `company_profile` (legal_name, hq_country, etc.) — keep them for backward compatibility.
+- After migration, regenerated Supabase types will let the PFS adapters compile cleanly; no app code changes needed for #2.
+- For #3, leave the loader/error guards untouched; only remove the `processes.length === 0` early return and gate the CTA banner on that condition.
+
+---
+
+## Out of scope
+
+- Visual redesign of dashboard cards, heatmap, or insights panels.
+- Backfilling existing rows; new columns ship nullable with sensible defaults.
+- Touching Scale / Roadmap / Assess routes.

@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck — Ported PFS module.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -113,7 +113,7 @@ export async function ensureOrgToolFromCatalog(catalogId: string) {
   const { data: existing, error: existingError } = await db
     .from("tool")
     .select("*")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .eq("catalog_id", catalogId)
     .is("archived_at", null)
     .limit(1)
@@ -133,7 +133,7 @@ export async function ensureOrgToolFromCatalog(catalogId: string) {
   const { data, error } = await db
     .from("tool")
     .insert({
-      organization_id: gate.organizationId,
+      workspace_id: gate.workspaceId,
       catalog_id: catalog.id,
       name: catalog.name,
       category: catalog.category,

@@ -4325,6 +4325,7 @@ export type Database = {
           send_state: string | null
           status: string | null
           token: string | null
+          workspace_id: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -4345,6 +4346,7 @@ export type Database = {
           send_state?: string | null
           status?: string | null
           token?: string | null
+          workspace_id?: string | null
         }
         Update: {
           accepted_at?: string | null
@@ -4365,6 +4367,7 @@ export type Database = {
           send_state?: string | null
           status?: string | null
           token?: string | null
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -4390,9 +4393,23 @@ export type Database = {
           },
           {
             foreignKeyName: "workspace_invitations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invitations_workspace_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invitations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
           {
@@ -4414,6 +4431,7 @@ export type Database = {
           organization_id: string | null
           role: string | null
           user_id: string | null
+          workspace_id: string | null
         }
         Insert: {
           archived_at?: string | null
@@ -4424,6 +4442,7 @@ export type Database = {
           organization_id?: string | null
           role?: string | null
           user_id?: string | null
+          workspace_id?: string | null
         }
         Update: {
           archived_at?: string | null
@@ -4434,6 +4453,7 @@ export type Database = {
           organization_id?: string | null
           role?: string | null
           user_id?: string | null
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -4466,9 +4486,23 @@ export type Database = {
           },
           {
             foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
           {

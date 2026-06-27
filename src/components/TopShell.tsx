@@ -64,13 +64,23 @@ interface NavPhase {
   items: NavSubItem[];
 }
 
-export function buildPhases(): NavPhase[] {
+export function buildPhases(opts?: { isAdmin?: boolean }): NavPhase[] {
   const libraryCategories = TYPE_LIST.map((s) => ({
     label: s.plural,
     to: "/app/$workspaceSlug/discover/$",
     splat: s.slug,
     icon: s.icon,
   }));
+
+  const buildItems: NavSubItem[] = [
+    { label: "Priority Dashboard", to: "/app/$workspaceSlug/build", icon: Hammer },
+    { label: "Map Process", to: "/app/$workspaceSlug/build/process/new", icon: ClipboardList },
+    { label: "Process Library", to: "/app/$workspaceSlug/build/library", icon: LibraryIcon },
+    { label: "Template Library", to: "/app/$workspaceSlug/build/templates", icon: LibraryIcon },
+  ];
+  if (!opts?.isAdmin) {
+    buildItems.push({ label: "Pending Approvals", to: "/app/$workspaceSlug/build/approvals", icon: Inbox });
+  }
 
   return [
     {
@@ -99,12 +109,7 @@ export function buildPhases(): NavPhase[] {
       label: "Build",
       icon: Hammer,
       to: "/app/$workspaceSlug/build",
-      items: [
-        { label: "Overview", to: "/app/$workspaceSlug/build", icon: Hammer },
-        { label: "Map", to: "/app/$workspaceSlug/build/process/new", icon: ClipboardList },
-        { label: "Process Library", to: "/app/$workspaceSlug/build/library", icon: LibraryIcon },
-        { label: "Approvals", to: "/app/$workspaceSlug/build/approvals", icon: Inbox },
-      ],
+      items: buildItems,
     },
     {
       id: "scale",
@@ -142,7 +147,7 @@ export function TopShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const phases = useMemo(buildPhases, []);
+  const phases = useMemo(() => buildPhases({ isAdmin }), [isAdmin]);
 
   if (loading || !workspace) {
     return (

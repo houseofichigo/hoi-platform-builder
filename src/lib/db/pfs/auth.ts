@@ -19,6 +19,7 @@ export type AuthGateState =
       userId: string;
       membershipId: string | null;
       workspaceId: string | null;
+      organizationId: string | null;
       role: MembershipRole | null;
       departmentId: string | null;
       onboardingComplete: boolean;
@@ -77,6 +78,7 @@ export async function getAuthGateState(): Promise<AuthGateState> {
       userId: user.id,
       membershipId: null,
       workspaceId: null,
+      organizationId: null,
       role: null,
       departmentId: null,
       onboardingComplete: false,
@@ -118,6 +120,7 @@ export async function getAuthGateState(): Promise<AuthGateState> {
     userId: user.id,
     membershipId,
     workspaceId,
+    organizationId: workspaceId,
     role,
     departmentId,
     onboardingComplete: Boolean((profileCount ?? 0) > 0),

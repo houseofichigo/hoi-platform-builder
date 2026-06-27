@@ -14,11 +14,11 @@
 
 @theme inline {
   /* Brand colors as Tailwind utilities (bg-navy, text-terracotta, ...) */
-  --color-navy: var(--ichigo-navy);
-  --color-ink: var(--ichigo-ink);
-  --color-terracotta: var(--ichigo-orange);
-  --color-azure: var(--ichigo-azure);
-  --color-mist: var(--ichigo-mist);
+  --color-navy: var(--navy);
+  --color-ink: var(--ink);
+  --color-terracotta: var(--terracotta);
+  --color-azure: var(--azure);
+  --color-mist: var(--mist);
   --color-paper: var(--paper);
   --color-chalk: var(--chalk);
   --color-graphite: var(--graphite);
@@ -71,13 +71,20 @@
 
 :root {
   /* Primary */
-  --ichigo-navy: #1E2B4D;
-  --ichigo-ink: #0A0E27;
-  --ichigo-orange: #CF5B2B;
+  --navy: #1E2B4D;
+  --ink: #0A0E27;
+  --terracotta: #CF5B2B;
 
   /* Secondary */
-  --ichigo-azure: #3B82F6;
-  --ichigo-mist: #EFF3FB;
+  --azure: #3B82F6;
+  --mist: #EFF3FB;
+
+  /* Legacy PFS aliases. Keep the port rendering while platform tokens remain canonical. */
+  --ichigo-navy: var(--navy);
+  --ichigo-ink: var(--ink);
+  --ichigo-orange: var(--terracotta);
+  --ichigo-azure: var(--azure);
+  --ichigo-mist: var(--mist);
 
   /* Neutrals */
   --paper: #FAFAF7;
@@ -124,32 +131,32 @@
   /* shadcn semantic tokens remapped to brand */
   --radius: 8px;
   --background: var(--paper);
-  --foreground: var(--ichigo-navy);
+  --foreground: var(--navy);
   --card: var(--white);
-  --card-foreground: var(--ichigo-navy);
+  --card-foreground: var(--navy);
   --popover: var(--white);
-  --popover-foreground: var(--ichigo-navy);
-  --primary: var(--ichigo-orange);
+  --popover-foreground: var(--navy);
+  --primary: var(--terracotta);
   --primary-foreground: var(--white);
-  --secondary: var(--ichigo-mist);
-  --secondary-foreground: var(--ichigo-navy);
-  --muted: var(--ichigo-mist);
+  --secondary: var(--mist);
+  --secondary-foreground: var(--navy);
+  --muted: var(--mist);
   --muted-foreground: var(--slate);
-  --accent: var(--ichigo-mist);
-  --accent-foreground: var(--ichigo-navy);
+  --accent: var(--mist);
+  --accent-foreground: var(--navy);
   --destructive: var(--danger);
   --destructive-foreground: var(--white);
   --border: var(--chalk);
   --input: var(--chalk);
-  --ring: var(--ichigo-orange);
+  --ring: var(--terracotta);
   --sidebar: var(--paper);
-  --sidebar-foreground: var(--ichigo-navy);
-  --sidebar-primary: var(--ichigo-orange);
+  --sidebar-foreground: var(--navy);
+  --sidebar-primary: var(--terracotta);
   --sidebar-primary-foreground: var(--white);
-  --sidebar-accent: var(--ichigo-mist);
-  --sidebar-accent-foreground: var(--ichigo-navy);
+  --sidebar-accent: var(--mist);
+  --sidebar-accent-foreground: var(--navy);
   --sidebar-border: var(--chalk);
-  --sidebar-ring: var(--ichigo-orange);
+  --sidebar-ring: var(--terracotta);
 }
 
 .dark {

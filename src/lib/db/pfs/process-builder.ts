@@ -71,8 +71,7 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
       created_by: gate.userId,
       owner_user_id: gate.userId,
       name: input.name,
-      status: "submitted",
-      submitted_at: new Date().toISOString(),
+      status: "draft",
       trigger: String(input.frame.trigger ?? ""),
       output: String(input.frame.output ?? ""),
       frequency: String(input.globalPass.frequency ?? ""),
@@ -100,11 +99,18 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
   const rows = input.steps.map((step) => ({
     workspace_id: gate.workspaceId,
     process_id: process.id,
+    step_order: input.steps.indexOf(step),
+    title: step.label,
+    description: step.description ?? null,
     node_id: step.nodeId,
     label: step.label,
     kind: step.kind,
     actor: step.actor,
+    actor_type: step.actor,
     tool_id: step.toolId,
+    tool_name: null,
+    input_data: step.inputType,
+    output_data: step.output,
     automation_level: step.automationLevel,
     hitl: step.hitl,
     is_checkpoint: ["approval", "decision"].includes(step.kind),
@@ -130,6 +136,13 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
     const { error: stepsError } = await db.from("process_step").insert(rows);
     if (stepsError) throw stepsError;
   }
+
+  const { error: submitError } = await db
+    .from("process")
+    .update({ status: "submitted", submitted_at: new Date().toISOString() })
+    .eq("id", process.id)
+    .eq("workspace_id", gate.workspaceId);
+  if (submitError) throw submitError;
 
   const exportJson = {
     schemaVersion: 1,
@@ -157,7 +170,7 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
     export_json: exportJson,
     created_by: gate.userId,
   });
-  if (exportError) throw exportError;
+  if (exportError && exportError.code !== "42501") throw exportError;
 
   const { data: processLibraryVault, error: vaultError } = await db
     .from("vault")
@@ -197,7 +210,7 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
     };
     if (!existingReference) {
       const { error: referenceError } = await db.from("vault_reference").insert(referencePayload);
-      if (referenceError) throw referenceError;
+      if (referenceError && referenceError.code !== "42501") throw referenceError;
     }
   }
 

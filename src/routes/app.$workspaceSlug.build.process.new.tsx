@@ -4315,18 +4315,55 @@ function deriveStepData(nodes: BuilderNode[]) {
 }
 
 async function layoutNodes(nodes: BuilderNode[], edges: BuilderEdge[], direction: LayoutDirection = "RIGHT") {
-  const { default: ELK } = await import("elkjs/lib/elk.bundled.js");
-  const elk = new ELK();
-  const graph = {
-    id: "root",
-    layoutOptions: { "elk.algorithm": "layered", "elk.direction": direction, "elk.spacing.nodeNode": "72", "elk.layered.spacing.nodeNodeBetweenLayers": "96" },
-    children: nodes.map((node) => ({ id: node.id, width: isProcessNode(node) ? 260 : 208, height: isProcessNode(node) ? 122 : 112 })),
-    edges: edges.map((item) => ({ id: item.id, sources: [item.source], targets: [item.target] })),
-  };
-  const layout = await elk.layout(graph);
+  const incoming = new Map<string, number>();
+  const outgoing = new Map<string, string[]>();
+  for (const node of nodes) {
+    incoming.set(node.id, 0);
+    outgoing.set(node.id, []);
+  }
+  for (const edge of edges) {
+    if (!incoming.has(edge.target) || !outgoing.has(edge.source)) continue;
+    incoming.set(edge.target, (incoming.get(edge.target) ?? 0) + 1);
+    outgoing.get(edge.source)?.push(edge.target);
+  }
+
+  const roots = nodes.filter((node) => (incoming.get(node.id) ?? 0) === 0);
+  const queue = roots.length ? [...roots] : nodes.slice(0, 1);
+  const depth = new Map<string, number>();
+  queue.forEach((node, index) => depth.set(node.id, index));
+
+  while (queue.length) {
+    const node = queue.shift()!;
+    const nextDepth = (depth.get(node.id) ?? 0) + 1;
+    for (const target of outgoing.get(node.id) ?? []) {
+      if ((depth.get(target) ?? -1) < nextDepth) {
+        depth.set(target, nextDepth);
+        const targetNode = nodes.find((item) => item.id === target);
+        if (targetNode) queue.push(targetNode);
+      }
+    }
+  }
+
+  const layers = new Map<number, BuilderNode[]>();
+  nodes.forEach((node, index) => {
+    const layer = depth.get(node.id) ?? index;
+    const rows = layers.get(layer) ?? [];
+    rows.push(node);
+    layers.set(layer, rows);
+  });
+
+  const primaryGap = 340;
+  const secondaryGap = 190;
   return nodes.map((node) => {
-    const next = layout.children?.find((child) => child.id === node.id);
-    return next ? { ...node, position: { x: next.x ?? node.position.x, y: next.y ?? node.position.y } } : node;
+    const layer = depth.get(node.id) ?? 0;
+    const rows = layers.get(layer) ?? [node];
+    const rowIndex = rows.findIndex((item) => item.id === node.id);
+    const centeredOffset = (rowIndex - (rows.length - 1) / 2) * secondaryGap;
+    const position =
+      direction === "DOWN"
+        ? { x: centeredOffset, y: layer * primaryGap }
+        : { x: layer * primaryGap, y: centeredOffset };
+    return { ...node, position };
   });
 }
 

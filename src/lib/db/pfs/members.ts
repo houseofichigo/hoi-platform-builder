@@ -22,19 +22,18 @@ export async function listMembers(): Promise<MemberSuggestion[]> {
   const [{ data: memberships, error: membershipError }, { data: profiles, error: profileError }, { data: departments, error: departmentError }] =
     await Promise.all([
       db
-        .from("membership")
+        .from("workspace_members")
         .select("id, user_id, role, department_id")
-        .eq("organization_id", gate.organizationId)
-        .is("archived_at", null),
+        .eq("workspace_id", gate.workspaceId),
       db
         .from("member_profile")
         .select("membership_id, user_id, display_name, job_title")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null),
       db
         .from("department")
         .select("id, name")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null),
     ]);
 

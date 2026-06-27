@@ -246,6 +246,7 @@ export type Database = {
           metadata: Json
           name: string
           organization_id: string | null
+          scope: string | null
           segment: string | null
           updated_at: string
           workspace_id: string
@@ -259,6 +260,7 @@ export type Database = {
           metadata?: Json
           name: string
           organization_id?: string | null
+          scope?: string | null
           segment?: string | null
           updated_at?: string
           workspace_id: string
@@ -272,6 +274,7 @@ export type Database = {
           metadata?: Json
           name?: string
           organization_id?: string | null
+          scope?: string | null
           segment?: string | null
           updated_at?: string
           workspace_id?: string
@@ -397,45 +400,66 @@ export type Database = {
           archived_at: string | null
           created_at: string
           created_by: string | null
+          deadline: string | null
           end_date: string | null
           id: string
+          merge_duplicates_mode: string | null
           metadata: Json
           name: string
           organization_id: string | null
+          participating_departments: Json
+          participating_users: Json
+          require_lead_review: boolean
+          reviewers: Json
           start_date: string | null
           status: string
           summary: string | null
           updated_at: string
+          workflows_per_employee: number | null
           workspace_id: string
         }
         Insert: {
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          deadline?: string | null
           end_date?: string | null
           id?: string
+          merge_duplicates_mode?: string | null
           metadata?: Json
           name: string
           organization_id?: string | null
+          participating_departments?: Json
+          participating_users?: Json
+          require_lead_review?: boolean
+          reviewers?: Json
           start_date?: string | null
           status?: string
           summary?: string | null
           updated_at?: string
+          workflows_per_employee?: number | null
           workspace_id: string
         }
         Update: {
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          deadline?: string | null
           end_date?: string | null
           id?: string
+          merge_duplicates_mode?: string | null
           metadata?: Json
           name?: string
           organization_id?: string | null
+          participating_departments?: Json
+          participating_users?: Json
+          require_lead_review?: boolean
+          reviewers?: Json
           start_date?: string | null
           status?: string
           summary?: string | null
           updated_at?: string
+          workflows_per_employee?: number | null
           workspace_id?: string
         }
         Relationships: [
@@ -461,12 +485,21 @@ export type Database = {
           country: string | null
           created_at: string
           created_by: string | null
+          data_residency: string | null
+          engagement_type: string | null
           id: string
+          internal_audience: Json
+          kind: string | null
           metadata: Json
           name: string
+          notes: string | null
           organization_id: string | null
+          reusable_ip: boolean
+          sector: string | null
           segment: string | null
+          status: string | null
           tier: string | null
+          under_nda: boolean
           updated_at: string
           workspace_id: string
         }
@@ -475,12 +508,21 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          data_residency?: string | null
+          engagement_type?: string | null
           id?: string
+          internal_audience?: Json
+          kind?: string | null
           metadata?: Json
           name: string
+          notes?: string | null
           organization_id?: string | null
+          reusable_ip?: boolean
+          sector?: string | null
           segment?: string | null
+          status?: string | null
           tier?: string | null
+          under_nda?: boolean
           updated_at?: string
           workspace_id: string
         }
@@ -489,12 +531,21 @@ export type Database = {
           country?: string | null
           created_at?: string
           created_by?: string | null
+          data_residency?: string | null
+          engagement_type?: string | null
           id?: string
+          internal_audience?: Json
+          kind?: string | null
           metadata?: Json
           name?: string
+          notes?: string | null
           organization_id?: string | null
+          reusable_ip?: boolean
+          sector?: string | null
           segment?: string | null
+          status?: string | null
           tier?: string | null
+          under_nda?: boolean
           updated_at?: string
           workspace_id?: string
         }
@@ -517,55 +568,115 @@ export type Database = {
       }
       company_profile: {
         Row: {
+          archived_at: string | null
           brand: Json
+          business_model: string | null
           created_at: string
+          customer_type: string | null
+          data_residency: Json
           fiscal_year_end: string | null
+          growth_stage: string | null
           hq_city: string | null
           hq_country: string | null
+          id: string
           industry: string | null
+          is_regulated: boolean
+          languages: Json
           legal_name: string | null
+          locations: Json
           metadata: Json
           mission: string | null
+          onboarding_completed_at: string | null
+          onboarding_phase: string
+          onboarding_step: number
           organization_id: string | null
+          overview: string | null
+          primary_jurisdiction: string | null
           primary_language: string | null
+          regulatory_regimes: Json
+          revenue_range: string | null
+          sells_training: boolean
+          size: string | null
           size_band: string | null
+          sub_industry: string | null
           updated_at: string
+          value_proposition: string | null
           values: Json
           vision: string | null
           workspace_id: string
         }
         Insert: {
+          archived_at?: string | null
           brand?: Json
+          business_model?: string | null
           created_at?: string
+          customer_type?: string | null
+          data_residency?: Json
           fiscal_year_end?: string | null
+          growth_stage?: string | null
           hq_city?: string | null
           hq_country?: string | null
+          id?: string
           industry?: string | null
+          is_regulated?: boolean
+          languages?: Json
           legal_name?: string | null
+          locations?: Json
           metadata?: Json
           mission?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_phase?: string
+          onboarding_step?: number
           organization_id?: string | null
+          overview?: string | null
+          primary_jurisdiction?: string | null
           primary_language?: string | null
+          regulatory_regimes?: Json
+          revenue_range?: string | null
+          sells_training?: boolean
+          size?: string | null
           size_band?: string | null
+          sub_industry?: string | null
           updated_at?: string
+          value_proposition?: string | null
           values?: Json
           vision?: string | null
           workspace_id: string
         }
         Update: {
+          archived_at?: string | null
           brand?: Json
+          business_model?: string | null
           created_at?: string
+          customer_type?: string | null
+          data_residency?: Json
           fiscal_year_end?: string | null
+          growth_stage?: string | null
           hq_city?: string | null
           hq_country?: string | null
+          id?: string
           industry?: string | null
+          is_regulated?: boolean
+          languages?: Json
           legal_name?: string | null
+          locations?: Json
           metadata?: Json
           mission?: string | null
+          onboarding_completed_at?: string | null
+          onboarding_phase?: string
+          onboarding_step?: number
           organization_id?: string | null
+          overview?: string | null
+          primary_jurisdiction?: string | null
           primary_language?: string | null
+          regulatory_regimes?: Json
+          revenue_range?: string | null
+          sells_training?: boolean
+          size?: string | null
           size_band?: string | null
+          sub_industry?: string | null
           updated_at?: string
+          value_proposition?: string | null
           values?: Json
           vision?: string | null
           workspace_id?: string
@@ -589,38 +700,59 @@ export type Database = {
       }
       company_score: {
         Row: {
+          ai_score: number | null
+          automation_score: number | null
           computed_at: string
+          confidence: string | null
+          data_score: number | null
           data_total: number | null
           details: Json
           ebitda_total: number | null
           effort_total: number | null
           error_total: number | null
+          maturity_score: number | null
+          n_processes: number
           organization_id: string | null
           overall_score: number | null
+          pct_approved: number | null
           stage: string | null
           workspace_id: string
         }
         Insert: {
+          ai_score?: number | null
+          automation_score?: number | null
           computed_at?: string
+          confidence?: string | null
+          data_score?: number | null
           data_total?: number | null
           details?: Json
           ebitda_total?: number | null
           effort_total?: number | null
           error_total?: number | null
+          maturity_score?: number | null
+          n_processes?: number
           organization_id?: string | null
           overall_score?: number | null
+          pct_approved?: number | null
           stage?: string | null
           workspace_id: string
         }
         Update: {
+          ai_score?: number | null
+          automation_score?: number | null
           computed_at?: string
+          confidence?: string | null
+          data_score?: number | null
           data_total?: number | null
           details?: Json
           ebitda_total?: number | null
           effort_total?: number | null
           error_total?: number | null
+          maturity_score?: number | null
+          n_processes?: number
           organization_id?: string | null
           overall_score?: number | null
+          pct_approved?: number | null
           stage?: string | null
           workspace_id?: string
         }
@@ -643,51 +775,86 @@ export type Database = {
       }
       data_source: {
         Row: {
+          accessibility: string | null
           archived_at: string | null
           created_at: string
           created_by: string | null
+          data_type: string | null
+          department_owner_id: string | null
           id: string
           metadata: Json
           name: string
           organization_id: string | null
           owner: string | null
+          reliability: string | null
+          sensitivity_level: string | null
           source_type: string | null
           status: string | null
           system: string | null
+          tool_id: string | null
+          update_frequency: string | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          accessibility?: string | null
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          data_type?: string | null
+          department_owner_id?: string | null
           id?: string
           metadata?: Json
           name: string
           organization_id?: string | null
           owner?: string | null
+          reliability?: string | null
+          sensitivity_level?: string | null
           source_type?: string | null
           status?: string | null
           system?: string | null
+          tool_id?: string | null
+          update_frequency?: string | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          accessibility?: string | null
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          data_type?: string | null
+          department_owner_id?: string | null
           id?: string
           metadata?: Json
           name?: string
           organization_id?: string | null
           owner?: string | null
+          reliability?: string | null
+          sensitivity_level?: string | null
           source_type?: string | null
           status?: string | null
           system?: string | null
+          tool_id?: string | null
+          update_frequency?: string | null
           updated_at?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "data_source_department_owner_id_fkey"
+            columns: ["department_owner_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "data_source_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tool"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "data_source_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -707,55 +874,79 @@ export type Database = {
       department: {
         Row: {
           archived_at: string | null
+          audience_id: string | null
           color: string | null
+          core_tools: Json
           created_at: string
           description: string | null
           distinct_audience: boolean
+          goals: Json
           head_count: number | null
           headcount: number | null
           holds_sensitive_data: boolean
           id: string
+          knowledge_owner_user_id: string | null
           lead_member_id: string | null
           lead_membership_id: string | null
+          lead_user_id: string | null
           name: string
           organization_id: string | null
+          pain_points: Json
           parent_id: string | null
+          products_supported: Json
+          responsibilities: Json
           updated_at: string
           workspace_id: string
         }
         Insert: {
           archived_at?: string | null
+          audience_id?: string | null
           color?: string | null
+          core_tools?: Json
           created_at?: string
           description?: string | null
           distinct_audience?: boolean
+          goals?: Json
           head_count?: number | null
           headcount?: number | null
           holds_sensitive_data?: boolean
           id?: string
+          knowledge_owner_user_id?: string | null
           lead_member_id?: string | null
           lead_membership_id?: string | null
+          lead_user_id?: string | null
           name: string
           organization_id?: string | null
+          pain_points?: Json
           parent_id?: string | null
+          products_supported?: Json
+          responsibilities?: Json
           updated_at?: string
           workspace_id: string
         }
         Update: {
           archived_at?: string | null
+          audience_id?: string | null
           color?: string | null
+          core_tools?: Json
           created_at?: string
           description?: string | null
           distinct_audience?: boolean
+          goals?: Json
           head_count?: number | null
           headcount?: number | null
           holds_sensitive_data?: boolean
           id?: string
+          knowledge_owner_user_id?: string | null
           lead_member_id?: string | null
           lead_membership_id?: string | null
+          lead_user_id?: string | null
           name?: string
           organization_id?: string | null
+          pain_points?: Json
           parent_id?: string | null
+          products_supported?: Json
+          responsibilities?: Json
           updated_at?: string
           workspace_id?: string
         }
@@ -799,7 +990,11 @@ export type Database = {
       }
       department_score: {
         Row: {
+          ai_score: number | null
+          automation_score: number | null
           computed_at: string
+          confidence: string | null
+          data_score: number | null
           data_total: number | null
           department_id: string
           details: Json
@@ -807,12 +1002,19 @@ export type Database = {
           effort_total: number | null
           error_total: number | null
           id: string
+          maturity_score: number | null
+          n_processes: number
           organization_id: string | null
           overall_score: number | null
+          pct_approved: number | null
           workspace_id: string
         }
         Insert: {
+          ai_score?: number | null
+          automation_score?: number | null
           computed_at?: string
+          confidence?: string | null
+          data_score?: number | null
           data_total?: number | null
           department_id: string
           details?: Json
@@ -820,12 +1022,19 @@ export type Database = {
           effort_total?: number | null
           error_total?: number | null
           id?: string
+          maturity_score?: number | null
+          n_processes?: number
           organization_id?: string | null
           overall_score?: number | null
+          pct_approved?: number | null
           workspace_id: string
         }
         Update: {
+          ai_score?: number | null
+          automation_score?: number | null
           computed_at?: string
+          confidence?: string | null
+          data_score?: number | null
           data_total?: number | null
           department_id?: string
           details?: Json
@@ -833,8 +1042,11 @@ export type Database = {
           effort_total?: number | null
           error_total?: number | null
           id?: string
+          maturity_score?: number | null
+          n_processes?: number
           organization_id?: string | null
           overall_score?: number | null
+          pct_approved?: number | null
           workspace_id?: string
         }
         Relationships: [
@@ -1115,13 +1327,20 @@ export type Database = {
       knowledge_source: {
         Row: {
           archived_at: string | null
+          connector_status: string | null
           created_at: string
           created_by: string | null
+          data_residency: string | null
           id: string
+          ingestion_status: string | null
+          location_uri: string | null
           metadata: Json
           name: string
           organization_id: string | null
           owner: string | null
+          owner_client_id: string | null
+          owner_department_id: string | null
+          sensitivity_level: string | null
           source_type: string | null
           status: string | null
           updated_at: string
@@ -1130,13 +1349,20 @@ export type Database = {
         }
         Insert: {
           archived_at?: string | null
+          connector_status?: string | null
           created_at?: string
           created_by?: string | null
+          data_residency?: string | null
           id?: string
+          ingestion_status?: string | null
+          location_uri?: string | null
           metadata?: Json
           name: string
           organization_id?: string | null
           owner?: string | null
+          owner_client_id?: string | null
+          owner_department_id?: string | null
+          sensitivity_level?: string | null
           source_type?: string | null
           status?: string | null
           updated_at?: string
@@ -1145,13 +1371,20 @@ export type Database = {
         }
         Update: {
           archived_at?: string | null
+          connector_status?: string | null
           created_at?: string
           created_by?: string | null
+          data_residency?: string | null
           id?: string
+          ingestion_status?: string | null
+          location_uri?: string | null
           metadata?: Json
           name?: string
           organization_id?: string | null
           owner?: string | null
+          owner_client_id?: string | null
+          owner_department_id?: string | null
+          sensitivity_level?: string | null
           source_type?: string | null
           status?: string | null
           updated_at?: string
@@ -1159,6 +1392,20 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "knowledge_source_owner_client_id_fkey"
+            columns: ["owner_client_id"]
+            isOneToOne: false
+            referencedRelation: "client"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_source_owner_department_id_fkey"
+            columns: ["owner_department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "knowledge_source_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1288,55 +1535,79 @@ export type Database = {
       member_profile: {
         Row: {
           ai_literacy: string | null
+          archived_at: string | null
           bio: string | null
+          collaborators: Json
+          completed_at: string | null
           created_at: string
+          daily_tool_ids: Json
+          decisions_made: Json
           display_name: string | null
           expertise: string[]
+          is_demo: boolean
           job_title: string | null
           languages: string[]
           membership_id: string | null
           metadata: Json
           organization_id: string | null
           preferences: Json
+          responsibilities: Json
           role_context: Json
           timezone: string | null
           updated_at: string
+          user_id: string | null
           workspace_id: string
           workspace_member_id: string
         }
         Insert: {
           ai_literacy?: string | null
+          archived_at?: string | null
           bio?: string | null
+          collaborators?: Json
+          completed_at?: string | null
           created_at?: string
+          daily_tool_ids?: Json
+          decisions_made?: Json
           display_name?: string | null
           expertise?: string[]
+          is_demo?: boolean
           job_title?: string | null
           languages?: string[]
           membership_id?: string | null
           metadata?: Json
           organization_id?: string | null
           preferences?: Json
+          responsibilities?: Json
           role_context?: Json
           timezone?: string | null
           updated_at?: string
+          user_id?: string | null
           workspace_id: string
           workspace_member_id: string
         }
         Update: {
           ai_literacy?: string | null
+          archived_at?: string | null
           bio?: string | null
+          collaborators?: Json
+          completed_at?: string | null
           created_at?: string
+          daily_tool_ids?: Json
+          decisions_made?: Json
           display_name?: string | null
           expertise?: string[]
+          is_demo?: boolean
           job_title?: string | null
           languages?: string[]
           membership_id?: string | null
           metadata?: Json
           organization_id?: string | null
           preferences?: Json
+          responsibilities?: Json
           role_context?: Json
           timezone?: string | null
           updated_at?: string
+          user_id?: string | null
           workspace_id?: string
           workspace_member_id?: string
         }
@@ -1491,15 +1762,24 @@ export type Database = {
           created_at: string
           created_by: string | null
           data_value: number | null
+          department_id: string | null
           ebitda_impact: number | null
+          effort: string | null
           effort_savings: number | null
           error_reduction: number | null
           id: string
           metadata: Json
           name: string
           organization_id: string | null
+          problem: string | null
+          process_id: string | null
+          recommended_solution: string | null
+          roi: Json | null
           status: string
+          step_node_id: string | null
+          strategic_alignment: number | null
           summary: string | null
+          type: string | null
           updated_at: string
           workspace_id: string
         }
@@ -1508,15 +1788,24 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_value?: number | null
+          department_id?: string | null
           ebitda_impact?: number | null
+          effort?: string | null
           effort_savings?: number | null
           error_reduction?: number | null
           id?: string
           metadata?: Json
           name: string
           organization_id?: string | null
+          problem?: string | null
+          process_id?: string | null
+          recommended_solution?: string | null
+          roi?: Json | null
           status?: string
+          step_node_id?: string | null
+          strategic_alignment?: number | null
           summary?: string | null
+          type?: string | null
           updated_at?: string
           workspace_id: string
         }
@@ -1525,19 +1814,42 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data_value?: number | null
+          department_id?: string | null
           ebitda_impact?: number | null
+          effort?: string | null
           effort_savings?: number | null
           error_reduction?: number | null
           id?: string
           metadata?: Json
           name?: string
           organization_id?: string | null
+          problem?: string | null
+          process_id?: string | null
+          recommended_solution?: string | null
+          roi?: Json | null
           status?: string
+          step_node_id?: string | null
+          strategic_alignment?: number | null
           summary?: string | null
+          type?: string | null
           updated_at?: string
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "opportunity_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "process"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "opportunity_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -2062,8 +2374,10 @@ export type Database = {
           archived_at: string | null
           capture_json: Json
           category: string | null
+          complexity: string | null
           created_at: string
           created_by: string | null
+          department_hint: string | null
           description: string | null
           diagram_json: Json
           id: string
@@ -2071,8 +2385,11 @@ export type Database = {
           metadata: Json
           name: string
           organization_id: string | null
+          recommended_tools: Json
           risk_tier: string | null
           slug: string | null
+          tags: Json
+          template_json: Json
           updated_at: string
           workspace_id: string | null
         }
@@ -2080,8 +2397,10 @@ export type Database = {
           archived_at?: string | null
           capture_json?: Json
           category?: string | null
+          complexity?: string | null
           created_at?: string
           created_by?: string | null
+          department_hint?: string | null
           description?: string | null
           diagram_json?: Json
           id?: string
@@ -2089,8 +2408,11 @@ export type Database = {
           metadata?: Json
           name: string
           organization_id?: string | null
+          recommended_tools?: Json
           risk_tier?: string | null
           slug?: string | null
+          tags?: Json
+          template_json?: Json
           updated_at?: string
           workspace_id?: string | null
         }
@@ -2098,8 +2420,10 @@ export type Database = {
           archived_at?: string | null
           capture_json?: Json
           category?: string | null
+          complexity?: string | null
           created_at?: string
           created_by?: string | null
+          department_hint?: string | null
           description?: string | null
           diagram_json?: Json
           id?: string
@@ -2107,8 +2431,11 @@ export type Database = {
           metadata?: Json
           name?: string
           organization_id?: string | null
+          recommended_tools?: Json
           risk_tier?: string | null
           slug?: string | null
+          tags?: Json
+          template_json?: Json
           updated_at?: string
           workspace_id?: string | null
         }
@@ -2181,12 +2508,18 @@ export type Database = {
           category: string | null
           created_at: string
           created_by: string | null
+          delivery_complexity: number | null
+          departments: Json
           description: string | null
           id: string
           lifecycle: string | null
           metadata: Json
           name: string
           organization_id: string | null
+          revenue_contribution: number | null
+          strategic_importance: number | null
+          target_customer: string | null
+          tools: Json
           updated_at: string
           workspace_id: string
         }
@@ -2195,12 +2528,18 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          delivery_complexity?: number | null
+          departments?: Json
           description?: string | null
           id?: string
           lifecycle?: string | null
           metadata?: Json
           name: string
           organization_id?: string | null
+          revenue_contribution?: number | null
+          strategic_importance?: number | null
+          target_customer?: string | null
+          tools?: Json
           updated_at?: string
           workspace_id: string
         }
@@ -2209,12 +2548,18 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string | null
+          delivery_complexity?: number | null
+          departments?: Json
           description?: string | null
           id?: string
           lifecycle?: string | null
           metadata?: Json
           name?: string
           organization_id?: string | null
+          revenue_contribution?: number | null
+          strategic_importance?: number | null
+          target_customer?: string | null
+          tools?: Json
           updated_at?: string
           workspace_id?: string
         }
@@ -2588,10 +2933,16 @@ export type Database = {
           id: string
           metadata: Json
           name: string
+          operational_risks: Json
           organization_id: string | null
           position: number
+          primary_reason: string | null
+          priorities: Json
+          priority_departments: Json
           status: string | null
+          top_goals: Json
           updated_at: string
+          weights: Json
           workspace_id: string
         }
         Insert: {
@@ -2603,10 +2954,16 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
+          operational_risks?: Json
           organization_id?: string | null
           position?: number
+          primary_reason?: string | null
+          priorities?: Json
+          priority_departments?: Json
           status?: string | null
+          top_goals?: Json
           updated_at?: string
+          weights?: Json
           workspace_id: string
         }
         Update: {
@@ -2618,10 +2975,16 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
+          operational_risks?: Json
           organization_id?: string | null
           position?: number
+          primary_reason?: string | null
+          priorities?: Json
+          priority_departments?: Json
           status?: string | null
+          top_goals?: Json
           updated_at?: string
+          weights?: Json
           workspace_id?: string
         }
         Relationships: [
@@ -2643,48 +3006,72 @@ export type Database = {
       }
       tool: {
         Row: {
+          api_available: boolean | null
           archived_at: string | null
           catalog_id: string | null
           category: string | null
           created_at: string
           created_by: string | null
+          criticality: string | null
+          data_stored: string | null
+          departments: Json
           id: string
+          integration_status: number | null
+          main_use_case: string | null
           metadata: Json
           name: string
           notes: string | null
           organization_id: string | null
+          owner_user_id: string | null
+          pain_level: number | null
           slug: string | null
           status: string
           updated_at: string
           workspace_id: string
         }
         Insert: {
+          api_available?: boolean | null
           archived_at?: string | null
           catalog_id?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
+          criticality?: string | null
+          data_stored?: string | null
+          departments?: Json
           id?: string
+          integration_status?: number | null
+          main_use_case?: string | null
           metadata?: Json
           name: string
           notes?: string | null
           organization_id?: string | null
+          owner_user_id?: string | null
+          pain_level?: number | null
           slug?: string | null
           status?: string
           updated_at?: string
           workspace_id: string
         }
         Update: {
+          api_available?: boolean | null
           archived_at?: string | null
           catalog_id?: string | null
           category?: string | null
           created_at?: string
           created_by?: string | null
+          criticality?: string | null
+          data_stored?: string | null
+          departments?: Json
           id?: string
+          integration_status?: number | null
+          main_use_case?: string | null
           metadata?: Json
           name?: string
           notes?: string | null
           organization_id?: string | null
+          owner_user_id?: string | null
+          pain_level?: number | null
           slug?: string | null
           status?: string
           updated_at?: string
@@ -3386,19 +3773,25 @@ export type Database = {
           agent_constitution: Json
           archived_at: string | null
           audience: string | null
+          audience_id: string | null
           core_context: Json
           created_at: string
           id: string
+          is_readonly: boolean
           isolation: string
+          jurisdiction: string | null
           knowledge_config: Json
           metadata: Json
           name: string
           organization_id: string | null
           owner: string | null
           purpose: string | null
+          references_vault_ids: Json
           residency: string | null
           routing_rules: Json
           sensitivity_ceiling: string | null
+          source_client_id: string | null
+          source_department_id: string | null
           status: string
           tier: number | null
           updated_at: string
@@ -3411,19 +3804,25 @@ export type Database = {
           agent_constitution?: Json
           archived_at?: string | null
           audience?: string | null
+          audience_id?: string | null
           core_context?: Json
           created_at?: string
           id?: string
+          is_readonly?: boolean
           isolation?: string
+          jurisdiction?: string | null
           knowledge_config?: Json
           metadata?: Json
           name: string
           organization_id?: string | null
           owner?: string | null
           purpose?: string | null
+          references_vault_ids?: Json
           residency?: string | null
           routing_rules?: Json
           sensitivity_ceiling?: string | null
+          source_client_id?: string | null
+          source_department_id?: string | null
           status?: string
           tier?: number | null
           updated_at?: string
@@ -3436,19 +3835,25 @@ export type Database = {
           agent_constitution?: Json
           archived_at?: string | null
           audience?: string | null
+          audience_id?: string | null
           core_context?: Json
           created_at?: string
           id?: string
+          is_readonly?: boolean
           isolation?: string
+          jurisdiction?: string | null
           knowledge_config?: Json
           metadata?: Json
           name?: string
           organization_id?: string | null
           owner?: string | null
           purpose?: string | null
+          references_vault_ids?: Json
           residency?: string | null
           routing_rules?: Json
           sensitivity_ceiling?: string | null
+          source_client_id?: string | null
+          source_department_id?: string | null
           status?: string
           tier?: number | null
           updated_at?: string
@@ -3458,6 +3863,27 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vault_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "audience"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_source_client_id_fkey"
+            columns: ["source_client_id"]
+            isOneToOne: false
+            referencedRelation: "client"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_source_department_id_fkey"
+            columns: ["source_department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vault_workspace_id_fkey"
             columns: ["workspace_id"]

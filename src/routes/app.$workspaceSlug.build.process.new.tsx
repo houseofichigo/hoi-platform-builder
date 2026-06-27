@@ -1763,10 +1763,9 @@ function DiagramStep(props: {
   );
 
   return (
-    <div className="space-y-5">
-      <div className="relative">
-        <Card className="overflow-hidden rounded-[var(--r-md)] border-[var(--chalk)] bg-[var(--paper)] shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--chalk)] bg-white/90 p-4">
+    <div className="fixed inset-x-0 bottom-0 top-[56px] z-30 flex bg-[var(--paper)]">
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--chalk)] bg-white/90 p-4">
             <div>
               <p className="font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">Process canvas</p>
               <p className="font-sans text-[13px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
@@ -1816,8 +1815,8 @@ function DiagramStep(props: {
                 Review & submit
               </Button>
             </div>
-          </div>
-          <div className="relative h-[calc(100vh-280px)] min-h-[620px] bg-[var(--paper)]">
+        </div>
+        <div className="relative min-h-0 flex-1 bg-[var(--paper)]">
             <ReactFlow
               nodes={renderNodes}
               edges={props.edges}
@@ -1833,7 +1832,13 @@ function DiagramStep(props: {
                 if (nodes[0]) props.onSelect(nodes[0].id);
                 else if (edges[0]) props.onSelectEdge(edges[0].id);
               }}
+              className="h-full w-full"
               fitView
+              fitViewOptions={{ padding: 0.25, minZoom: 0.6, maxZoom: 1.4 }}
+              minZoom={0.4}
+              maxZoom={1.75}
+              defaultEdgeOptions={{ type: "smoothstep" }}
+              proOptions={{ hideAttribution: true }}
             >
               <Background color="var(--chalk)" gap={22} size={1.2} />
               <CanvasToolbar
@@ -1874,8 +1879,15 @@ function DiagramStep(props: {
                 onClose={props.onCloseTriggerPicker}
               />
             ) : null}
-          </div>
-          <div className="border-t border-[var(--chalk)] bg-white">
+            {props.nodes.length > 0 ? (
+              <div className="pointer-events-none absolute bottom-4 right-4 z-30 w-[min(420px,calc(100%-2rem))]">
+                <div className="pointer-events-auto">
+                  <CopilotDrawer state={assistantState} onApplyPatch={props.onApplyAssistantPatch} />
+                </div>
+              </div>
+            ) : null}
+        </div>
+        <div className="border-t border-[var(--chalk)] bg-white">
             <div className="flex flex-wrap items-center justify-between gap-3 p-3">
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--slate)]">Readiness / activity</p>
@@ -1890,26 +1902,19 @@ function DiagramStep(props: {
                 <Metric label="data" value={props.derivedData.dataReadiness} />
               </div>
             </div>
-          </div>
-        </Card>
-        {props.selected ? (
-          <div className="fixed bottom-0 right-0 top-0 z-40 w-full max-w-[390px] border-l border-[var(--chalk)] bg-white shadow-2xl">
-            <SidePanel
-              node={props.selected}
-              tools={props.tools}
-              toolCatalog={props.toolCatalog}
-              dataSources={props.dataSources}
-              members={props.members}
-              onChange={props.onUpdateSelected}
-            />
-          </div>
-        ) : null}
+        </div>
       </div>
-      {props.nodes.length > 0 ? (
-        <CopilotDrawer
-          state={assistantState}
-          onApplyPatch={props.onApplyAssistantPatch}
-        />
+      {props.selected ? (
+        <aside className="flex w-[360px] shrink-0 flex-col overflow-y-auto border-l border-[var(--chalk)] bg-white">
+          <SidePanel
+            node={props.selected}
+            tools={props.tools}
+            toolCatalog={props.toolCatalog}
+            dataSources={props.dataSources}
+            members={props.members}
+            onChange={props.onUpdateSelected}
+          />
+        </aside>
       ) : null}
     </div>
   );

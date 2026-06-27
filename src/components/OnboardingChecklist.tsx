@@ -1,15 +1,6 @@
-import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import {
   useOnboardingChecklist,
@@ -17,14 +8,14 @@ import {
   type ChecklistItem,
   type ChecklistItemId,
 } from "@/hooks/useOnboardingChecklist";
+import { useTour } from "@/contexts/TourContext";
 
 export function OnboardingChecklist() {
   const { workspace } = useWorkspace();
   const { data, isLoading } = useOnboardingChecklist();
-  const { markTourCompleted, markLibraryVisited, dismissChecklist } = useOnboardingMutations();
+  const { markLibraryVisited, dismissChecklist } = useOnboardingMutations();
   const navigate = useNavigate();
-
-  const [tourOpen, setTourOpen] = useState(false);
+  const { startTour } = useTour();
 
   if (isLoading || !data || !workspace) return null;
   if (!data.shouldRender) return null;
@@ -46,7 +37,7 @@ export function OnboardingChecklist() {
         });
         break;
       case "tour":
-        setTourOpen(true);
+        startTour();
         break;
       case "library":
         markLibraryVisited.mutate(undefined, {

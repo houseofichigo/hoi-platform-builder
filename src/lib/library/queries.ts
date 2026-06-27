@@ -9,6 +9,13 @@ import type {
 
 type Row = Omit<LibraryItem, "metadata"> & { metadata: unknown };
 
+// Public (non-admin) reads must never expose editorial-only fields such as
+// internal_notes, reviewer_id, or last_reviewed_at. Admin paths opt in by
+// passing includeUnpublished/includeArchived (gated by HOI admin RLS).
+const PUBLIC_COLUMNS =
+  "id, type, title, summary, module_ids, phase_ids, tags, published, content_url, metadata, workspace_id, version, created_at, updated_at, created_by, content_owner_id, published_at, archived_at";
+const ADMIN_COLUMNS = "*";
+
 function normalize(row: Row): LibraryItem {
   return {
     ...row,
@@ -17,9 +24,12 @@ function normalize(row: Row): LibraryItem {
 }
 
 export async function listLibraryItems(filters: LibraryListFilters = {}): Promise<LibraryItem[]> {
+  const isAdminContext = Boolean(
+    filters.includeUnpublished || filters.includeArchived || filters.editorialStatus,
+  );
   let q: any = supabase
     .from("library_items")
-    .select("*")
+    .select(isAdminContext ? ADMIN_COLUMNS : PUBLIC_COLUMNS)
     .is("workspace_id", null)
     .order("created_at", { ascending: false });
 
@@ -42,7 +52,13 @@ export async function listLibraryItems(filters: LibraryListFilters = {}): Promis
 }
 
 export async function getLibraryItem(id: string): Promise<LibraryItem | null> {
-  const { data, error } = await supabase.from("library_items").select("*").eq("id", id).maybeSingle();
+  // Always returns admin columns; only invoked from admin update/archive paths
+  // where the caller has HOI admin RLS access.
+  const { data, error } = await supabase
+    .from("library_items")
+    .select(ADMIN_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw error;
   return data ? normalize(data as Row) : null;
 }

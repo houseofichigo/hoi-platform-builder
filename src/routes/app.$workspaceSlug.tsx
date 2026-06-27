@@ -1,6 +1,8 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import { WorkspaceProvider } from "@/hooks/useWorkspace";
 import { WorkspaceLayout } from "@/components/WorkspaceLayout";
+import { TourProvider } from "@/contexts/TourContext";
+import { GuidedTour } from "@/components/GuidedTour";
 
 export const Route = createFileRoute("/app/$workspaceSlug")({
   component: WorkspaceRouteLayout,
@@ -9,9 +11,12 @@ export const Route = createFileRoute("/app/$workspaceSlug")({
 function WorkspaceRouteLayout() {
   return (
     <WorkspaceProvider>
-      <WorkspaceLayout>
-        <Outlet />
-      </WorkspaceLayout>
+      <TourProvider>
+        <WorkspaceLayout>
+          <Outlet />
+        </WorkspaceLayout>
+        <GuidedTour />
+      </TourProvider>
     </WorkspaceProvider>
   );
 }

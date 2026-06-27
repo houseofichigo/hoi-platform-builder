@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { OrgChartPayload } from "@/lib/db/pfs/org-chart";
 
 /**

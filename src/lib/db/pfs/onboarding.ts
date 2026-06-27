@@ -1,4 +1,4 @@
-// @ts-nocheck — Ported PFS module; type tightening tracked for a follow-up batch.
+// @ts-nocheck
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 

@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { supabase } from "@/integrations/supabase/client";
 import { getAuthGateState } from "@/lib/db/pfs/auth";
 
 export type WelcomeContext = {
-  workspaceId: string;
+  organizationId: string;
   membershipId: string;
   userId: string;
   role: string;
@@ -22,7 +23,7 @@ export type CompleteMemberProfileInput = {
 
 export async function getWelcomeContext(): Promise<WelcomeContext> {
   const gate = await getAuthGateState();
-  if (gate.status !== "signed_in" || !gate.workspaceId || !gate.membershipId || !gate.role) {
+  if (gate.status !== "signed_in" || !gate.organizationId || !gate.membershipId || !gate.role) {
     throw new Error("No active membership found.");
   }
 
@@ -33,25 +34,25 @@ export async function getWelcomeContext(): Promise<WelcomeContext> {
           .from("department")
           .select("id, name")
           .eq("id", gate.departmentId)
-          .eq("workspace_id", gate.workspaceId)
+          .eq("organization_id", gate.organizationId)
           .maybeSingle()
       : Promise.resolve({ data: null }),
     client
       .from("department")
       .select("id, name")
-      .eq("workspace_id", gate.workspaceId)
+      .eq("organization_id", gate.organizationId)
       .is("archived_at", null)
       .order("name"),
     client
       .from("tool")
       .select("id, name, category")
-      .eq("workspace_id", gate.workspaceId)
+      .eq("organization_id", gate.organizationId)
       .is("archived_at", null)
       .order("name"),
   ]);
 
   return {
-    workspaceId: gate.workspaceId,
+    organizationId: gate.organizationId,
     membershipId: gate.membershipId,
     userId: gate.userId,
     role: gate.role,

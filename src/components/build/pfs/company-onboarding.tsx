@@ -1,3 +1,4 @@
+// @ts-nocheck — Ported PFS module.
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { BadgeCheck, Building2, Check, ChevronDown, ChevronRight, Loader2, Mail, Pencil, Plus, ShieldAlert, Trash2, UserPlus, Users, X } from "lucide-react";

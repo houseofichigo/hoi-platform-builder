@@ -1,114 +1,125 @@
-## Goal
+# Re-sync Company Setup to uploaded PFS package
 
-Replace HOI's current Build phase with the Process Flow Studio (PFS) codebase, and lift PFS's Company Setup + Analytics + Review Policy into our **workspace admin** (every workspace gets its own). Everything stays multi-tenant: scoped by `workspace_id`, gated by `is_workspace_member`, surfaced under `/app/$workspaceSlug/...`.
+Goal: make Company Setup (admin/onboarding) match the uploaded `admin-setup-section.zip` byte-for-byte after the workspace shim, align the admin Settings tab with what the package actually owns, fold the legacy homepage "Workspace profile" flow into the new wizard, and delete leftover code.
 
-## Architectural translation (one-time)
+## Scope
 
-PFS is single-tenant; HOI is multi-tenant. I will translate at the data-access layer once, then port PFS UI almost verbatim.
+In scope
+- `src/components/build/pfs/` — re-port the 6 PFS UI files from the zip; add the missing `org-chart-admin.tsx`.
+- `src/lib/db/pfs/` — re-port the 13 db files from the zip; keep `shared.ts` and `auth.ts` as the workspace-scoping seam (do NOT overwrite those two with the org-scoped originals).
+- `src/lib/org-chart/` — re-port `import.ts`, `readiness.ts`, `template.ts`.
+- Admin routes: rewrite `app.$workspaceSlug.admin.settings.tsx`, simplify `app.$workspaceSlug.admin.onboarding.tsx`, keep the existing admin layout/tabs.
+- Legacy homepage flow: delete `app.$workspaceSlug.onboarding.workspace-profile.tsx` and the OnboardingChecklist "Workspace profile" entry; redirect any deep-link to the new Setup wizard.
 
-| PFS concept            | HOI equivalent                          |
-| ---------------------- | --------------------------------------- |
-| `organization`         | `workspaces`                            |
-| `membership` + role    | `workspace_members` + role              |
-| `requireActiveOrg()`   | new `requireWorkspace()` reading slug   |
-| `getAuthGateState`     | existing supabase session + `useWorkspace` |
-| `/process/*`, `/admin/*` (top-level) | `/app/$slug/build/*`, `/app/$slug/admin/*` |
+Out of scope
+- Schema migrations (Batch 1 already created all needed tables).
+- The Build/Map/Library/Approvals phase (already swapped in Batches 3–5).
+- The Scale phase and `use_cases` bridge (kept as-is).
+- The user profile form (`PersonalFieldsForm`) — kept; it's used by `/app/$workspaceSlug/settings`.
 
-## Six batches
+## What the zip says vs. what we have
 
-### Batch 1 — DB foundation (schema only, additive)
+The zip is the canonical Company Setup. Current ports are close but drifted (line counts differ by 1, and `admin-overview.tsx` grew from 172 → 208 lines). The README's integration seams that must be preserved are:
+1. `lib/db/shared.ts` — workspace scope (not org). Current `shared.ts` (84 lines) is the workspace shim; keep it.
+2. `auth.ts` — current (126 lines) is the HOI auth shim; keep it.
+3. `AdminShell` import — already replaced by the HOI admin layout route.
+4. Supabase client + types — already use HOI client.
 
-One migration that adds every PFS table the new Build/Admin code reads, all scoped by `workspace_id`, with `is_workspace_member` RLS and explicit GRANTs:
+Everything else should match the zip exactly.
 
-- `process_template`, `process_template_step`, `process_template_diagram`
-- `tool_catalog`, `tool_action_catalog` (global reference — `workspace_id NULL = shared`)
-- `org_tool`, `org_tool_action` (per-workspace adoption)
-- `vault`, `vault_field`, `vault_entry` (governed vault skeleton)
-- `readiness_assessment`, `governance_threshold`
-- `member_profile` extension columns on `workspace_members` (role context, languages, etc.)
-- `department` already exists — add any missing PFS columns (head_count, color, etc.)
-- Extend existing `process` / `process_step` with PFS columns (risk_tier, ebitda_impact, effort_savings, error_reduction, data_value, diagram_json, capture_json, score_json) — nullable so existing rows survive.
-- Seed global `process_template` + `tool_catalog` rows (`workspace_id = NULL`).
+## Plan
 
-No data destruction yet. Existing Build/Scale keeps working.
+### 1. Re-port PFS UI to match zip (with minimal HOI shims)
+Overwrite from `/tmp/admin-setup/src/components/` into `src/components/build/pfs/`:
+- `company-onboarding.tsx`
+- `org-chart-canvas.tsx` (keep synchronous tree layout, no `elkjs`)
+- `org-node-editor-drawer.tsx`
+- `tool-catalog-picker.tsx`
+- `admin-overview.tsx` (revert to the 172-line zip version)
 
-### Batch 2 — DB adapter layer (`src/lib/`)
+Add the missing file:
+- `org-chart-admin.tsx` (723 lines, not currently in the project)
 
-Port PFS libs but rewrite the auth/scoping seam so every query takes a `workspace_id`:
+Adjust imports in each file:
+- `@/integrations/supabase/types` → keep (HOI types exist).
+- `@/components/org-chart-canvas` → `./org-chart-canvas` (relative within `pfs/`).
+- `@/lib/db/<x>` → `@/lib/db/pfs/<x>`.
+- `@/lib/org-chart/<x>` → `@/lib/org-chart/<x>` (unchanged).
+- `Link`/router calls already shimmed via `./_link`; preserve.
 
-- New `src/lib/db/workspace.ts` exporting `useActiveWorkspace()` and `requireWorkspace(slug)` that returns `{ workspaceId, membershipId, role }` from `workspace_members` (mirrors PFS's `requireActiveOrg` shape so the rest of PFS code compiles).
-- Port: `process-data.ts`, `risk-tier.ts`, `maturity-stage.ts`, `vault-derivation.ts`, `node-field-schema.ts`, `diagram-patch.ts`, `scoring/process-score.ts`, `org-chart/*`.
-- Port `src/lib/db/*`: `processes.ts`, `process-templates.ts`, `process-builder.ts`, `tool-catalog.ts`, `tool-actions.ts`, `governance.ts`, `org-chart.ts`, `onboarding.ts`, `members.ts`, `member-profile.ts`, `vaults.ts`, `audiences.ts`, `clients.ts`, `knowledge-sources.ts`, `opportunities.ts`, `scores.ts`, `reference.ts`, `diagram-assistant.ts`, `admin.ts`, `shared.ts`. Every hook reads `workspaceId` from the new helper instead of `organization_id`.
-- Skip `demo-loader.ts` (no Maison Atlas seeding).
+### 2. Re-port `lib/db/pfs/*` to match zip
+Overwrite from `/tmp/admin-setup/src/lib/db/` into `src/lib/db/pfs/`:
+- `org-chart.ts`, `onboarding.ts`, `admin.ts`, `members.ts`, `member-profile.ts`,
+  `tool-catalog.ts`, `clients.ts`, `audiences.ts`, `knowledge-sources.ts`,
+  `vaults.ts`, `demo-loader.ts`
 
-No UI changes yet — this batch is just imports + typechecks.
+Do NOT overwrite:
+- `shared.ts` (HOI workspace shim)
+- `auth.ts` (HOI auth shim)
 
-### Batch 3 — Build phase swap
+In each ported file, rewrite imports:
+- `@/lib/db/shared` → `./shared`
+- `@/lib/db/auth` → `./auth`
+- `@/integrations/supabase/client` → `@/integrations/supabase/client` (unchanged)
+- `@/integrations/supabase/types` → unchanged
 
-Delete the four existing files:
+### 3. Re-port `lib/org-chart/*` to match zip
+Overwrite `import.ts`, `readiness.ts`, `template.ts`. Same import remapping for `@/lib/db/*` → `@/lib/db/pfs/*`.
 
-- `src/routes/app.$workspaceSlug.build.tsx` (layout)
-- `src/routes/app.$workspaceSlug.build.index.tsx`
-- `src/routes/app.$workspaceSlug.build.map.tsx`
-- `src/routes/app.$workspaceSlug.build.library.tsx`
-- `src/routes/app.$workspaceSlug.build.approvals.tsx`
+### 4. Align the admin Settings tab
+The zip has no "Settings" sub-page — the wizard owns company/profile/team/tools. Current `admin.settings.tsx` is a 3-card link shelf pointing at legacy routes.
 
-Add new routes under `/app/$workspaceSlug/build/`:
+Replace `app.$workspaceSlug.admin.settings.tsx` with a thin settings page that owns only what's NOT in the wizard:
+- Workspace name + slug (read-only, with "Contact House of Ichigo to rename")
+- Notification preferences (link to `/app/$workspaceSlug/settings` personal area)
+- Danger zone placeholder (archive workspace — owner-only, disabled with explanatory copy)
 
-- `build.tsx` — new tabbed shell (Dashboard · Map · Templates · Library · Approvals · Tasks)
-- `build.index.tsx` — PFS dashboard view from `process-platform.tsx`
-- `build.map.tsx` — PFS Map screen
-- `build.templates.tsx` — `process-template-library.tsx`
-- `build.library.tsx` — PFS Library
-- `build.approvals.tsx` — PFS Approvals
-- `build.tasks.tsx` — PFS Tasks
-- `build.process.new.tsx` — the 4,471-line PFS map editor
-- `build.process.$id.tsx` — PFS process detail
+Remove the "Company profile" and "Invite team" cards (both are now inside the Setup wizard).
 
-Port components: `process-platform.tsx`, `process-template-library.tsx`, `tool-catalog-picker.tsx`, `risk-tier-badge.tsx`. Rewrite all `<Link to="/process/...">` to `to="/app/$workspaceSlug/build/process/..." params={{ workspaceSlug }}`. Replace PFS's admin gate with our workspace `role` check (`owner`/`admin`).
+### 5. Fold the homepage "Workspace profile" flow into Setup
+- Delete `src/routes/app.$workspaceSlug.onboarding.workspace-profile.tsx`.
+- In `src/components/OnboardingChecklist.tsx`, change the "Workspace profile" step's `to` from `/app/$workspaceSlug/onboarding/workspace-profile` to `/app/$workspaceSlug/admin/onboarding` (admin-only; non-admins see a "Ask your admin to complete setup" state — already handled by the admin gate).
+- In `src/routes/app.$workspaceSlug.settings.tsx`, replace the legacy `workspace-profile` link with a link to `/app/$workspaceSlug/admin/onboarding` (admins) or a static "Company setup is managed by your admin" panel (non-admins).
+- `src/routes/app.$workspaceSlug.invite.tsx`, `invite.accept.tsx`, `app.onboarding.create-workspace.tsx`: untouched — these are platform-level flows the wizard doesn't replace.
 
-After this batch the Build phase is fully PFS, scoped per workspace.
+### 6. Remove leftovers
+- Delete `src/lib/profile/workspace-profile.ts` (the legacy WORKSPACE_PROFILE_DEFAULTS/SCHEMA) only if no other route imports it after step 5; verify with a grep first and skip if still referenced.
+- Delete `src/components/profile/ProfileForm.tsx` only if unused after step 5 (same check).
+- Keep `PersonalFieldsForm` and `useUserProfile` (used by `/app/$workspaceSlug/settings`).
 
-### Batch 4 — Workspace Admin: Company Setup (with Org Chart + Tool Stack folded in)
-
-- Route: `app.$workspaceSlug.admin.setup.tsx` hosts PFS's `CompanyOnboarding` wizard (which already contains Org chart + Tool stack steps).
-- Replace existing thin `app.$workspaceSlug.admin.onboarding.tsx` with a redirect to `/admin/setup`.
-- Port components: `company-onboarding.tsx`, `org-chart-admin.tsx`, `org-chart-canvas.tsx`, `org-chart-add-employee-dialog.tsx`, `org-chart-import-dialog.tsx`, `org-node-editor-drawer.tsx`.
-- Update workspace admin nav (`app.$workspaceSlug.admin.tsx`) with a "Company Setup" tab.
-- Workspace owner/admin can also **invite employees** from inside this wizard (PFS's existing flow, re-pointed at our `workspace_invitations` table).
-
-### Batch 5 — Workspace Admin: Analytics + Review Policy
-
-- Route: `app.$workspaceSlug.admin.analytics.tsx` — replace/augment existing analytics page with PFS's `AdminOverview` (process volume, risk distribution, EBITDA/effort/error/data charts, department breakdown).
-- Route: `app.$workspaceSlug.admin.review-policy.tsx` — PFS `ReviewPolicy` (governance thresholds: auto-approve cutoffs, required reviewers, risk-tier gates).
-- Tabs added to workspace admin nav.
-
-### Batch 6 — Cleanup & cutover
-
-- Delete now-unused legacy files: any old build/process components no longer imported, the old `process`↔`use_cases` bridge if Scale doesn't read from it (verify first).
-- Remove PFS's top-level routes that don't fit (`/process/*`, `/admin/*` at root, `/welcome`, `/templates`, `/template-library`, `/tasks`, `/approvals`, `/library`, `/onboarding`, `/invite/$token`, `/login`, `/mapping`, `/import`, `/settings`) — we already have equivalents or they belong inside the workspace shell.
-- Run Supabase linter, fix any new warnings introduced by Batch 1.
-- Smoke test Sabri's super-admin flow + a regular workspace owner flow.
-- Update sidebar/nav copy.
+### 7. Verify
+- `bun run build:dev` succeeds.
+- `/app/$workspaceSlug/admin/onboarding` renders the wizard with all 6+ steps from the zip.
+- Org chart in the wizard lays out departments side-by-side (synchronous tree layout, no ELK).
+- Admin nav unchanged: Overview · Setup · Members · Analytics · Review policy · Billing · Invoices · Settings.
+- Settings tab shows only workspace name / notifications link / danger zone — no "Company profile" or "Invite team" shortcuts.
+- `/app/$workspaceSlug/onboarding/workspace-profile` returns 404 (route deleted) and OnboardingChecklist points to `/admin/onboarding`.
 
 ## Technical notes
 
-- **Tenant scoping**: every PFS query gets a `.eq("workspace_id", workspaceId)` added in the adapter (Batch 2). The UI components stay PFS-shaped and stay agnostic of multi-tenancy.
-- **Process editor**: `process.new.tsx` (4,471 lines) is the most fragile port — I will keep it intact except for the route path, the workspace-scoped fetch hooks, and the back-link target.
-- **Existing `process` schema**: extended additively in Batch 1 so existing rows keep working; new fields are nullable.
-- **Scale**: `roadmap_entries` already reads `use_case_id`; we keep the existing bridge trigger so an approved PFS process still lands in Scale. Retiring `use_cases` is a separate follow-up after this six-batch sequence is stable.
-- **Auth**: no changes to top-level `/admin/*` (HOI super-admin) — Sabri keeps existing access. PFS admin features go to workspace admin only.
-- **No demo data**: only global templates + tool catalog are seeded; tenants start empty.
+- The README explicitly says: do NOT reintroduce `elkjs` for the org chart — the zip's `org-chart-canvas.tsx` uses a synchronous tree layout. We will keep `elkjs` installed because the Build phase canvas uses it; just don't import it in `org-chart-canvas.tsx`.
+- Role mapping (already in `shared.ts`): `admin→admin`, `department_lead→member`, `employee→member`, `reviewer→admin`, `viewer→viewer`. No change needed.
+- All ported files keep `// @ts-nocheck` at the top to avoid blocking on PFS-vs-HOI type drift; types regen happens automatically when migrations run.
+- No new migrations — Batch 1 already created `tool_catalog`, `vault`, `member_profile`, `audience`, `client`, `knowledge_source`, `readiness_assessment`, `strategic_priority`, `product_service`, `data_source`, `campaign`, and the `department` / `process` extensions.
 
-## What you'll see after each batch
+## Files changed
 
-| Batch | Visible result |
-| ----- | -------------- |
-| 1 | Nothing visible; new tables ready. |
-| 2 | Nothing visible; new lib code typechecks. |
-| 3 | `/app/<slug>/build/*` is the PFS process platform. |
-| 4 | Workspace admin gains "Company Setup" with org chart + tool stack + invites. |
-| 5 | Workspace admin gains "Analytics" + "Review Policy". |
-| 6 | Dead code gone, navigation cleaned, linter clean. |
+Re-written (overwrite from zip + import remap):
+- `src/components/build/pfs/company-onboarding.tsx`
+- `src/components/build/pfs/org-chart-canvas.tsx`
+- `src/components/build/pfs/org-node-editor-drawer.tsx`
+- `src/components/build/pfs/tool-catalog-picker.tsx`
+- `src/components/build/pfs/admin-overview.tsx`
+- `src/lib/db/pfs/{org-chart,onboarding,admin,members,member-profile,tool-catalog,clients,audiences,knowledge-sources,vaults,demo-loader}.ts`
+- `src/lib/org-chart/{import,readiness,template}.ts`
+- `src/routes/app.$workspaceSlug.admin.settings.tsx`
+- `src/routes/app.$workspaceSlug.settings.tsx` (only the workspace-profile link)
+- `src/components/OnboardingChecklist.tsx` (only the workspace-profile step target)
 
-Approve and I'll execute Batch 1 first.
+Added:
+- `src/components/build/pfs/org-chart-admin.tsx` (from zip)
+
+Deleted:
+- `src/routes/app.$workspaceSlug.onboarding.workspace-profile.tsx`
+- `src/lib/profile/workspace-profile.ts` (if unreferenced after step 5)
+- `src/components/profile/ProfileForm.tsx` (if unreferenced after step 5)

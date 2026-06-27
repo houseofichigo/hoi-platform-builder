@@ -45,7 +45,6 @@ import { Route as AppWorkspaceSlugScaleRoadmapRouteImport } from './routes/app.$
 import { Route as AppWorkspaceSlugScaleReviewsRouteImport } from './routes/app.$workspaceSlug.scale.reviews'
 import { Route as AppWorkspaceSlugScaleGovernanceRouteImport } from './routes/app.$workspaceSlug.scale.governance'
 import { Route as AppWorkspaceSlugScaleAuditRouteImport } from './routes/app.$workspaceSlug.scale.audit'
-import { Route as AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport } from './routes/app.$workspaceSlug.onboarding.workspace-profile'
 import { Route as AppWorkspaceSlugDiscoverSplatRouteImport } from './routes/app.$workspaceSlug.discover.$'
 import { Route as AppWorkspaceSlugBuildMapRouteImport } from './routes/app.$workspaceSlug.build.map'
 import { Route as AppWorkspaceSlugBuildLibraryRouteImport } from './routes/app.$workspaceSlug.build.library'
@@ -260,12 +259,6 @@ const AppWorkspaceSlugScaleAuditRoute =
     path: '/audit',
     getParentRoute: () => AppWorkspaceSlugScaleRoute,
   } as any)
-const AppWorkspaceSlugOnboardingWorkspaceProfileRoute =
-  AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport.update({
-    id: '/onboarding/workspace-profile',
-    path: '/onboarding/workspace-profile',
-    getParentRoute: () => AppWorkspaceSlugRoute,
-  } as any)
 const AppWorkspaceSlugDiscoverSplatRoute =
   AppWorkspaceSlugDiscoverSplatRouteImport.update({
     id: '/$',
@@ -435,7 +428,6 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
   '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
@@ -488,7 +480,6 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
   '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
@@ -549,7 +540,6 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
   '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
-  '/app/$workspaceSlug/onboarding/workspace-profile': typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
   '/app/$workspaceSlug/scale/reviews': typeof AppWorkspaceSlugScaleReviewsRoute
@@ -611,7 +601,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/build/map'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
     | '/app/$workspaceSlug/scale/reviews'
@@ -664,7 +653,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/build/map'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
     | '/app/$workspaceSlug/scale/reviews'
@@ -724,7 +712,6 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/build/library'
     | '/app/$workspaceSlug/build/map'
     | '/app/$workspaceSlug/discover/$'
-    | '/app/$workspaceSlug/onboarding/workspace-profile'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
     | '/app/$workspaceSlug/scale/reviews'
@@ -1017,13 +1004,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugScaleAuditRouteImport
       parentRoute: typeof AppWorkspaceSlugScaleRoute
     }
-    '/app/$workspaceSlug/onboarding/workspace-profile': {
-      id: '/app/$workspaceSlug/onboarding/workspace-profile'
-      path: '/onboarding/workspace-profile'
-      fullPath: '/app/$workspaceSlug/onboarding/workspace-profile'
-      preLoaderRoute: typeof AppWorkspaceSlugOnboardingWorkspaceProfileRouteImport
-      parentRoute: typeof AppWorkspaceSlugRoute
-    }
     '/app/$workspaceSlug/discover/$': {
       id: '/app/$workspaceSlug/discover/$'
       path: '/$'
@@ -1300,7 +1280,6 @@ interface AppWorkspaceSlugRouteChildren {
   AppWorkspaceSlugAssessModuleIdRoute: typeof AppWorkspaceSlugAssessModuleIdRouteWithChildren
   AppWorkspaceSlugAssessAssignmentsRoute: typeof AppWorkspaceSlugAssessAssignmentsRoute
   AppWorkspaceSlugAssessCompleteRoute: typeof AppWorkspaceSlugAssessCompleteRoute
-  AppWorkspaceSlugOnboardingWorkspaceProfileRoute: typeof AppWorkspaceSlugOnboardingWorkspaceProfileRoute
   AppWorkspaceSlugAssessIndexRoute: typeof AppWorkspaceSlugAssessIndexRoute
 }
 
@@ -1317,8 +1296,6 @@ const AppWorkspaceSlugRouteChildren: AppWorkspaceSlugRouteChildren = {
   AppWorkspaceSlugAssessAssignmentsRoute:
     AppWorkspaceSlugAssessAssignmentsRoute,
   AppWorkspaceSlugAssessCompleteRoute: AppWorkspaceSlugAssessCompleteRoute,
-  AppWorkspaceSlugOnboardingWorkspaceProfileRoute:
-    AppWorkspaceSlugOnboardingWorkspaceProfileRoute,
   AppWorkspaceSlugAssessIndexRoute: AppWorkspaceSlugAssessIndexRoute,
 }
 

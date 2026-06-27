@@ -35,7 +35,7 @@ export function OnboardingChecklist() {
     switch (item.id as ChecklistItemId) {
       case "workspace_profile":
         navigate({
-          to: "/app/$workspaceSlug/onboarding/workspace-profile",
+          to: "/app/$workspaceSlug/admin/onboarding",
           params: { workspaceSlug: slug },
         });
         break;

@@ -2,9 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useAuth } from "@/hooks/useAuth";
-import { useWorkspaceProfile } from "@/hooks/useWorkspaceProfile";
 import { useOnboardingChecklist, useOnboardingMutations } from "@/hooks/useOnboardingChecklist";
-import { WORKSPACE_PROFILE_SCHEMA } from "@/lib/profile/workspace-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { UserProfileCard } from "@/components/profile/UserProfileCard";
 import { NotificationPreferencesCard } from "@/components/profile/NotificationPreferencesCard";
@@ -17,7 +15,6 @@ export const Route = createFileRoute("/app/$workspaceSlug/settings")({
 function WorkspaceSettings() {
   const { workspace, isAdmin } = useWorkspace();
   const { user } = useAuth();
-  const { data, isComplete } = useWorkspaceProfile();
   const { data: checklist } = useOnboardingChecklist();
   const { restoreChecklist } = useOnboardingMutations();
   const qc = useQueryClient();
@@ -123,43 +120,23 @@ function WorkspaceSettings() {
       <div className="card mt-6 max-w-[560px]">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="eyebrow-muted">Company profile</p>
+            <p className="eyebrow-muted">Company setup</p>
             <p className="mt-2 text-[14px] text-graphite">
-              {isComplete
-                ? "Your company profile is set. Examples, Discover recommendations, and EU governance guidance use these values."
-                : "Set up your company profile so examples, recommendations, and EU/HOI governance guidance use your real context."}
+              {isAdmin
+                ? "Company profile, org chart, tool stack, and launch readiness now live in the admin Company Setup wizard."
+                : "Company profile, org chart, and tool stack are managed by your workspace admin."}
             </p>
           </div>
-          <Link
-            to="/app/$workspaceSlug/onboarding/workspace-profile"
-            params={{ workspaceSlug: workspace.slug }}
-            search={{ return_to: `/app/${workspace.slug}/settings` }}
-            className={
-              isComplete
-                ? "btn-ichigo btn-ichigo-outline shrink-0 text-[13px]"
-                : "btn-ichigo btn-ichigo-primary shrink-0 text-[13px]"
-            }
-          >
-            {isComplete ? "Edit" : "Set up"}
-          </Link>
+          {isAdmin && (
+            <Link
+              to="/app/$workspaceSlug/admin/onboarding"
+              params={{ workspaceSlug: workspace.slug }}
+              className="btn-ichigo btn-ichigo-outline shrink-0 text-[13px]"
+            >
+              Open setup
+            </Link>
+          )}
         </div>
-
-        {isComplete && data && (
-          <dl className="mt-5 divide-y divide-chalk border-t border-chalk">
-            {WORKSPACE_PROFILE_SCHEMA.map((field) => {
-              const v = data[field.key];
-              const display = Array.isArray(v) ? v.join(", ") : (v as string) ?? "—";
-              return (
-                <div key={field.key} className="grid grid-cols-3 gap-3 py-3">
-                  <dt className="text-[12px] font-mono uppercase tracking-[0.16em] text-slate">
-                    {field.label}
-                  </dt>
-                  <dd className="col-span-2 text-[14px] text-navy">{display || "—"}</dd>
-                </div>
-              );
-            })}
-          </dl>
-        )}
       </div>
 
       <UserProfileCard />

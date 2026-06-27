@@ -1597,6 +1597,46 @@ function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect:
   );
 }
 
+function BuilderStepNav({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
+  const navSteps = builderSteps.filter((item) => item.id !== "start");
+  const currentIndex = navSteps.findIndex((item) => item.id === current);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {navSteps.map((item, index) => {
+        const active = item.id === current;
+        const complete = currentIndex >= 0 && index < currentIndex;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onSelect(item.id)}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 font-sans text-[12px] font-medium transition ${
+              active
+                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
+                : complete
+                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)] hover:bg-[var(--paper)]"
+                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
+            }`}
+          >
+            <span
+              className={`flex h-5 w-5 items-center justify-center rounded-full font-mono text-[11px] ${
+                active
+                  ? "bg-white text-[var(--ichigo-navy)]"
+                  : complete
+                    ? "bg-[var(--ichigo-navy)] text-white"
+                    : "bg-[var(--paper)] text-[var(--slate)]"
+              }`}
+            >
+              {complete ? <Check className="h-3 w-3" /> : index + 1}
+            </span>
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function FrameStep({
   frame,
   setFrame,

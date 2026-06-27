@@ -245,7 +245,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           segment: string | null
           updated_at: string
           workspace_id: string
@@ -258,7 +258,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           segment?: string | null
           updated_at?: string
           workspace_id: string
@@ -271,7 +271,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           segment?: string | null
           updated_at?: string
           workspace_id?: string
@@ -401,7 +401,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           start_date: string | null
           status: string
           summary: string | null
@@ -416,7 +416,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           start_date?: string | null
           status?: string
           summary?: string | null
@@ -431,7 +431,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           start_date?: string | null
           status?: string
           summary?: string | null
@@ -464,7 +464,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           segment: string | null
           tier: string | null
           updated_at: string
@@ -478,7 +478,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           segment?: string | null
           tier?: string | null
           updated_at?: string
@@ -492,7 +492,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           segment?: string | null
           tier?: string | null
           updated_at?: string
@@ -526,7 +526,7 @@ export type Database = {
           legal_name: string | null
           metadata: Json
           mission: string | null
-          organization_id: string
+          organization_id: string | null
           primary_language: string | null
           size_band: string | null
           updated_at: string
@@ -544,7 +544,7 @@ export type Database = {
           legal_name?: string | null
           metadata?: Json
           mission?: string | null
-          organization_id: string
+          organization_id?: string | null
           primary_language?: string | null
           size_band?: string | null
           updated_at?: string
@@ -562,7 +562,7 @@ export type Database = {
           legal_name?: string | null
           metadata?: Json
           mission?: string | null
-          organization_id?: string
+          organization_id?: string | null
           primary_language?: string | null
           size_band?: string | null
           updated_at?: string
@@ -595,7 +595,7 @@ export type Database = {
           ebitda_total: number | null
           effort_total: number | null
           error_total: number | null
-          organization_id: string
+          organization_id: string | null
           overall_score: number | null
           stage: string | null
           workspace_id: string
@@ -607,7 +607,7 @@ export type Database = {
           ebitda_total?: number | null
           effort_total?: number | null
           error_total?: number | null
-          organization_id: string
+          organization_id?: string | null
           overall_score?: number | null
           stage?: string | null
           workspace_id: string
@@ -619,7 +619,7 @@ export type Database = {
           ebitda_total?: number | null
           effort_total?: number | null
           error_total?: number | null
-          organization_id?: string
+          organization_id?: string | null
           overall_score?: number | null
           stage?: string | null
           workspace_id?: string
@@ -649,7 +649,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           owner: string | null
           source_type: string | null
           status: string | null
@@ -664,7 +664,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           owner?: string | null
           source_type?: string | null
           status?: string | null
@@ -679,7 +679,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           owner?: string | null
           source_type?: string | null
           status?: string | null
@@ -718,7 +718,7 @@ export type Database = {
           lead_member_id: string | null
           lead_membership_id: string | null
           name: string
-          organization_id: string
+          organization_id: string | null
           parent_id: string | null
           updated_at: string
           workspace_id: string
@@ -736,7 +736,7 @@ export type Database = {
           lead_member_id?: string | null
           lead_membership_id?: string | null
           name: string
-          organization_id: string
+          organization_id?: string | null
           parent_id?: string | null
           updated_at?: string
           workspace_id: string
@@ -754,7 +754,7 @@ export type Database = {
           lead_member_id?: string | null
           lead_membership_id?: string | null
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           parent_id?: string | null
           updated_at?: string
           workspace_id?: string
@@ -807,7 +807,7 @@ export type Database = {
           effort_total: number | null
           error_total: number | null
           id: string
-          organization_id: string
+          organization_id: string | null
           overall_score: number | null
           workspace_id: string
         }
@@ -820,7 +820,7 @@ export type Database = {
           effort_total?: number | null
           error_total?: number | null
           id?: string
-          organization_id: string
+          organization_id?: string | null
           overall_score?: number | null
           workspace_id: string
         }
@@ -833,7 +833,7 @@ export type Database = {
           effort_total?: number | null
           error_total?: number | null
           id?: string
-          organization_id?: string
+          organization_id?: string | null
           overall_score?: number | null
           workspace_id?: string
         }
@@ -1120,7 +1120,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           owner: string | null
           source_type: string | null
           status: string | null
@@ -1135,7 +1135,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           owner?: string | null
           source_type?: string | null
           status?: string | null
@@ -1150,7 +1150,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           owner?: string | null
           source_type?: string | null
           status?: string | null
@@ -1296,7 +1296,7 @@ export type Database = {
           languages: string[]
           membership_id: string | null
           metadata: Json
-          organization_id: string
+          organization_id: string | null
           preferences: Json
           role_context: Json
           timezone: string | null
@@ -1314,7 +1314,7 @@ export type Database = {
           languages?: string[]
           membership_id?: string | null
           metadata?: Json
-          organization_id: string
+          organization_id?: string | null
           preferences?: Json
           role_context?: Json
           timezone?: string | null
@@ -1332,7 +1332,7 @@ export type Database = {
           languages?: string[]
           membership_id?: string | null
           metadata?: Json
-          organization_id?: string
+          organization_id?: string | null
           preferences?: Json
           role_context?: Json
           timezone?: string | null
@@ -1497,7 +1497,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           status: string
           summary: string | null
           updated_at: string
@@ -1514,7 +1514,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           status?: string
           summary?: string | null
           updated_at?: string
@@ -1531,7 +1531,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           status?: string
           summary?: string | null
           updated_at?: string
@@ -1691,7 +1691,7 @@ export type Database = {
           id: string
           maturity_stage: string | null
           name: string
-          organization_id: string
+          organization_id: string | null
           owner_member_id: string | null
           risk_tier: string | null
           score_json: Json
@@ -1719,7 +1719,7 @@ export type Database = {
           id?: string
           maturity_stage?: string | null
           name: string
-          organization_id: string
+          organization_id?: string | null
           owner_member_id?: string | null
           risk_tier?: string | null
           score_json?: Json
@@ -1747,7 +1747,7 @@ export type Database = {
           id?: string
           maturity_stage?: string | null
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           owner_member_id?: string | null
           risk_tier?: string | null
           score_json?: Json
@@ -1810,7 +1810,7 @@ export type Database = {
           format: string
           generated_by: string | null
           id: string
-          organization_id: string
+          organization_id: string | null
           payload: Json
           process_id: string
           storage_path: string | null
@@ -1822,7 +1822,7 @@ export type Database = {
           format?: string
           generated_by?: string | null
           id?: string
-          organization_id: string
+          organization_id?: string | null
           payload?: Json
           process_id: string
           storage_path?: string | null
@@ -1834,7 +1834,7 @@ export type Database = {
           format?: string
           generated_by?: string | null
           id?: string
-          organization_id?: string
+          organization_id?: string | null
           payload?: Json
           process_id?: string
           storage_path?: string | null
@@ -1871,7 +1871,7 @@ export type Database = {
           from_status: Database["public"]["Enums"]["process_status"] | null
           id: string
           note: string | null
-          organization_id: string
+          organization_id: string | null
           process_id: string
           to_status: Database["public"]["Enums"]["process_status"]
           workspace_id: string
@@ -1882,7 +1882,7 @@ export type Database = {
           from_status?: Database["public"]["Enums"]["process_status"] | null
           id?: string
           note?: string | null
-          organization_id: string
+          organization_id?: string | null
           process_id: string
           to_status: Database["public"]["Enums"]["process_status"]
           workspace_id: string
@@ -1893,7 +1893,7 @@ export type Database = {
           from_status?: Database["public"]["Enums"]["process_status"] | null
           id?: string
           note?: string | null
-          organization_id?: string
+          organization_id?: string | null
           process_id?: string
           to_status?: Database["public"]["Enums"]["process_status"]
           workspace_id?: string
@@ -1936,7 +1936,7 @@ export type Database = {
           input_data: string | null
           metadata: Json
           node_type: string | null
-          organization_id: string
+          organization_id: string | null
           output_data: string | null
           process_id: string
           risk_notes: string | null
@@ -1961,7 +1961,7 @@ export type Database = {
           input_data?: string | null
           metadata?: Json
           node_type?: string | null
-          organization_id: string
+          organization_id?: string | null
           output_data?: string | null
           process_id: string
           risk_notes?: string | null
@@ -1986,7 +1986,7 @@ export type Database = {
           input_data?: string | null
           metadata?: Json
           node_type?: string | null
-          organization_id?: string
+          organization_id?: string | null
           output_data?: string | null
           process_id?: string
           risk_notes?: string | null
@@ -2070,7 +2070,7 @@ export type Database = {
           is_active: boolean
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           risk_tier: string | null
           slug: string | null
           updated_at: string
@@ -2088,7 +2088,7 @@ export type Database = {
           is_active?: boolean
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           risk_tier?: string | null
           slug?: string | null
           updated_at?: string
@@ -2106,7 +2106,7 @@ export type Database = {
           is_active?: boolean
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           risk_tier?: string | null
           slug?: string | null
           updated_at?: string
@@ -2169,7 +2169,7 @@ export type Database = {
           lifecycle: string | null
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           updated_at: string
           workspace_id: string
         }
@@ -2183,7 +2183,7 @@ export type Database = {
           lifecycle?: string | null
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           updated_at?: string
           workspace_id: string
         }
@@ -2197,7 +2197,7 @@ export type Database = {
           lifecycle?: string | null
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           updated_at?: string
           workspace_id?: string
         }
@@ -2286,7 +2286,7 @@ export type Database = {
           governance_body: string | null
           has_ai_owner: boolean
           literacy_coverage: string | null
-          organization_id: string
+          organization_id: string | null
           organization_score: number | null
           organization_stage: string | null
           risk_register: string | null
@@ -2303,7 +2303,7 @@ export type Database = {
           governance_body?: string | null
           has_ai_owner?: boolean
           literacy_coverage?: string | null
-          organization_id: string
+          organization_id?: string | null
           organization_score?: number | null
           organization_stage?: string | null
           risk_register?: string | null
@@ -2320,7 +2320,7 @@ export type Database = {
           governance_body?: string | null
           has_ai_owner?: boolean
           literacy_coverage?: string | null
-          organization_id?: string
+          organization_id?: string | null
           organization_score?: number | null
           organization_stage?: string | null
           risk_register?: string | null
@@ -2351,7 +2351,7 @@ export type Database = {
           evidence_summary: Json
           gate_status: Json
           id: string
-          organization_id: string
+          organization_id: string | null
           owner_id: string | null
           priority_score: number | null
           source_metadata: Json
@@ -2367,7 +2367,7 @@ export type Database = {
           evidence_summary?: Json
           gate_status?: Json
           id?: string
-          organization_id: string
+          organization_id?: string | null
           owner_id?: string | null
           priority_score?: number | null
           source_metadata?: Json
@@ -2383,7 +2383,7 @@ export type Database = {
           evidence_summary?: Json
           gate_status?: Json
           id?: string
-          organization_id?: string
+          organization_id?: string | null
           owner_id?: string | null
           priority_score?: number | null
           source_metadata?: Json
@@ -2428,7 +2428,7 @@ export type Database = {
           impact: number | null
           name: string
           opportunity_id: string | null
-          organization_id: string
+          organization_id: string | null
           owner_user_id: string | null
           priority: string | null
           status: string
@@ -2446,7 +2446,7 @@ export type Database = {
           impact?: number | null
           name: string
           opportunity_id?: string | null
-          organization_id: string
+          organization_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
           status?: string
@@ -2464,7 +2464,7 @@ export type Database = {
           impact?: number | null
           name?: string
           opportunity_id?: string | null
-          organization_id?: string
+          organization_id?: string | null
           owner_user_id?: string | null
           priority?: string | null
           status?: string
@@ -2571,7 +2571,7 @@ export type Database = {
           id: string
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           position: number
           status: string | null
           updated_at: string
@@ -2586,7 +2586,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           position?: number
           status?: string | null
           updated_at?: string
@@ -2601,7 +2601,7 @@ export type Database = {
           id?: string
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           position?: number
           status?: string | null
           updated_at?: string
@@ -2635,7 +2635,7 @@ export type Database = {
           metadata: Json
           name: string
           notes: string | null
-          organization_id: string
+          organization_id: string | null
           slug: string | null
           status: string
           updated_at: string
@@ -2651,7 +2651,7 @@ export type Database = {
           metadata?: Json
           name: string
           notes?: string | null
-          organization_id: string
+          organization_id?: string | null
           slug?: string | null
           status?: string
           updated_at?: string
@@ -2667,7 +2667,7 @@ export type Database = {
           metadata?: Json
           name?: string
           notes?: string | null
-          organization_id?: string
+          organization_id?: string | null
           slug?: string | null
           status?: string
           updated_at?: string
@@ -2708,7 +2708,7 @@ export type Database = {
           id: string
           metadata: Json
           notes: string | null
-          organization_id: string
+          organization_id: string | null
           tool_id: string
           workspace_id: string
         }
@@ -2722,7 +2722,7 @@ export type Database = {
           id?: string
           metadata?: Json
           notes?: string | null
-          organization_id: string
+          organization_id?: string | null
           tool_id: string
           workspace_id: string
         }
@@ -2736,7 +2736,7 @@ export type Database = {
           id?: string
           metadata?: Json
           notes?: string | null
-          organization_id?: string
+          organization_id?: string | null
           tool_id?: string
           workspace_id?: string
         }
@@ -3250,7 +3250,7 @@ export type Database = {
           knowledge_config: Json
           metadata: Json
           name: string
-          organization_id: string
+          organization_id: string | null
           owner: string | null
           purpose: string | null
           residency: string | null
@@ -3275,7 +3275,7 @@ export type Database = {
           knowledge_config?: Json
           metadata?: Json
           name: string
-          organization_id: string
+          organization_id?: string | null
           owner?: string | null
           purpose?: string | null
           residency?: string | null
@@ -3300,7 +3300,7 @@ export type Database = {
           knowledge_config?: Json
           metadata?: Json
           name?: string
-          organization_id?: string
+          organization_id?: string | null
           owner?: string | null
           purpose?: string | null
           residency?: string | null
@@ -3340,7 +3340,7 @@ export type Database = {
           entity_type: string
           id: string
           metadata: Json
-          organization_id: string
+          organization_id: string | null
           title: string
           vault_id: string
           workspace_id: string
@@ -3353,7 +3353,7 @@ export type Database = {
           entity_type: string
           id?: string
           metadata?: Json
-          organization_id: string
+          organization_id?: string | null
           title: string
           vault_id: string
           workspace_id: string
@@ -3366,7 +3366,7 @@ export type Database = {
           entity_type?: string
           id?: string
           metadata?: Json
-          organization_id?: string
+          organization_id?: string | null
           title?: string
           vault_id?: string
           workspace_id?: string
@@ -3409,7 +3409,7 @@ export type Database = {
           invited_by: string | null
           last_name: string | null
           manager_member_id: string | null
-          organization_id: string
+          organization_id: string | null
           position: string | null
           role: string
           send_state: string
@@ -3430,7 +3430,7 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           manager_member_id?: string | null
-          organization_id: string
+          organization_id?: string | null
           position?: string | null
           role: string
           send_state?: string
@@ -3451,7 +3451,7 @@ export type Database = {
           invited_by?: string | null
           last_name?: string | null
           manager_member_id?: string | null
-          organization_id?: string
+          organization_id?: string | null
           position?: string | null
           role?: string
           send_state?: string
@@ -3506,7 +3506,7 @@ export type Database = {
           joined_at: string
           languages: string[]
           manager_member_id: string | null
-          organization_id: string
+          organization_id: string | null
           role: string
           role_context: Json
           user_id: string
@@ -3520,7 +3520,7 @@ export type Database = {
           joined_at?: string
           languages?: string[]
           manager_member_id?: string | null
-          organization_id: string
+          organization_id?: string | null
           role: string
           role_context?: Json
           user_id: string
@@ -3534,7 +3534,7 @@ export type Database = {
           joined_at?: string
           languages?: string[]
           manager_member_id?: string | null
-          organization_id?: string
+          organization_id?: string | null
           role?: string
           role_context?: Json
           user_id?: string
@@ -3896,7 +3896,7 @@ export type Database = {
           joined_at: string
           languages: string[]
           manager_member_id: string | null
-          organization_id: string
+          organization_id: string | null
           role: string
           role_context: Json
           user_id: string
@@ -3959,7 +3959,7 @@ export type Database = {
           id: string
           maturity_stage: string | null
           name: string
-          organization_id: string
+          organization_id: string | null
           owner_member_id: string | null
           risk_tier: string | null
           score_json: Json

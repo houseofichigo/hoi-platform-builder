@@ -1728,6 +1728,12 @@ function DiagramStep(props: {
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const canDelete = Boolean(props.selected || props.selectedEdgeId);
   const { fitView } = useReactFlow();
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      fitView({ padding: 0.25, duration: 300, minZoom: 0.6, maxZoom: 1.4 });
+    }, 60);
+    return () => window.clearTimeout(id);
+  }, [fitView, props.nodes.length, props.edges.length, props.layoutDirection]);
   const toolById = useMemo(() => new Map(props.tools.map((tool) => [tool.id, tool])), [props.tools]);
   const catalogById = useMemo(() => new Map(props.toolCatalog.map((tool) => [tool.id, tool])), [props.toolCatalog]);
   const renderNodes = useMemo(

@@ -2135,18 +2135,21 @@ export type Database = {
           created_at: string
           id: string
           template_id: string
+          workspace_id: string | null
         }
         Insert: {
           alias: string
           created_at?: string
           id?: string
           template_id: string
+          workspace_id?: string | null
         }
         Update: {
           alias?: string
           created_at?: string
           id?: string
           template_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -2154,6 +2157,20 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "process_template"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_template_alias_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_template_alias_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -2872,6 +2889,132 @@ export type Database = {
           },
         ]
       }
+      tool_action_catalog_import_rejection: {
+        Row: {
+          created_at: string
+          id: string
+          import_batch_id: string | null
+          raw_payload: Json | null
+          rejection_reason: string | null
+          source_row_number: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          import_batch_id?: string | null
+          raw_payload?: Json | null
+          rejection_reason?: string | null
+          source_row_number?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          import_batch_id?: string | null
+          raw_payload?: Json | null
+          rejection_reason?: string | null
+          source_row_number?: number | null
+        }
+        Relationships: []
+      }
+      tool_action_catalog_import_stage: {
+        Row: {
+          action_family: string | null
+          automation_readiness: string | null
+          business_action: string | null
+          business_object: string | null
+          business_use_case: string | null
+          capability_type: string | null
+          confidence_level: string | null
+          created_at: string
+          data_sensitivity: string | null
+          evidence_notes: string | null
+          evidence_url: string | null
+          id: string
+          import_batch_id: string | null
+          input_data_needed: string | null
+          integration_found: string | null
+          integration_source: string | null
+          is_active: boolean
+          needs_manual_review: boolean
+          operation_group: string | null
+          output_data_created: string | null
+          process_mapping_category: string | null
+          raw_source_label: string | null
+          source_row_number: number | null
+          tool_category: string | null
+          tool_description: string | null
+          tool_id: string | null
+          tool_name: string | null
+          tool_slug: string | null
+          tool_source: string | null
+          trigger_event: string | null
+        }
+        Insert: {
+          action_family?: string | null
+          automation_readiness?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_level?: string | null
+          created_at?: string
+          data_sensitivity?: string | null
+          evidence_notes?: string | null
+          evidence_url?: string | null
+          id?: string
+          import_batch_id?: string | null
+          input_data_needed?: string | null
+          integration_found?: string | null
+          integration_source?: string | null
+          is_active?: boolean
+          needs_manual_review?: boolean
+          operation_group?: string | null
+          output_data_created?: string | null
+          process_mapping_category?: string | null
+          raw_source_label?: string | null
+          source_row_number?: number | null
+          tool_category?: string | null
+          tool_description?: string | null
+          tool_id?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+          tool_source?: string | null
+          trigger_event?: string | null
+        }
+        Update: {
+          action_family?: string | null
+          automation_readiness?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_level?: string | null
+          created_at?: string
+          data_sensitivity?: string | null
+          evidence_notes?: string | null
+          evidence_url?: string | null
+          id?: string
+          import_batch_id?: string | null
+          input_data_needed?: string | null
+          integration_found?: string | null
+          integration_source?: string | null
+          is_active?: boolean
+          needs_manual_review?: boolean
+          operation_group?: string | null
+          output_data_created?: string | null
+          process_mapping_category?: string | null
+          raw_source_label?: string | null
+          source_row_number?: number | null
+          tool_category?: string | null
+          tool_description?: string | null
+          tool_id?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+          tool_source?: string | null
+          trigger_event?: string | null
+        }
+        Relationships: []
+      }
       tool_catalog: {
         Row: {
           category: string
@@ -3407,12 +3550,16 @@ export type Database = {
           first_name: string | null
           id: string
           invited_by: string | null
+          last_error: string | null
           last_name: string | null
+          manager_id: string | null
           manager_member_id: string | null
           organization_id: string | null
           position: string | null
+          queued_at: string | null
           role: string
           send_state: string
+          sent_at: string | null
           status: string
           token: string
           workspace_id: string
@@ -3428,12 +3575,16 @@ export type Database = {
           first_name?: string | null
           id?: string
           invited_by?: string | null
+          last_error?: string | null
           last_name?: string | null
+          manager_id?: string | null
           manager_member_id?: string | null
           organization_id?: string | null
           position?: string | null
+          queued_at?: string | null
           role: string
           send_state?: string
+          sent_at?: string | null
           status?: string
           token: string
           workspace_id: string
@@ -3449,12 +3600,16 @@ export type Database = {
           first_name?: string | null
           id?: string
           invited_by?: string | null
+          last_error?: string | null
           last_name?: string | null
+          manager_id?: string | null
           manager_member_id?: string | null
           organization_id?: string | null
           position?: string | null
+          queued_at?: string | null
           role?: string
           send_state?: string
+          sent_at?: string | null
           status?: string
           token?: string
           workspace_id?: string
@@ -3465,6 +3620,20 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invitations_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "membership"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_invitations_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
             referencedColumns: ["id"]
           },
           {
@@ -3505,6 +3674,7 @@ export type Database = {
           invited_by: string | null
           joined_at: string
           languages: string[]
+          manager_id: string | null
           manager_member_id: string | null
           organization_id: string | null
           role: string
@@ -3519,6 +3689,7 @@ export type Database = {
           invited_by?: string | null
           joined_at?: string
           languages?: string[]
+          manager_id?: string | null
           manager_member_id?: string | null
           organization_id?: string | null
           role: string
@@ -3533,6 +3704,7 @@ export type Database = {
           invited_by?: string | null
           joined_at?: string
           languages?: string[]
+          manager_id?: string | null
           manager_member_id?: string | null
           organization_id?: string | null
           role?: string
@@ -3542,10 +3714,31 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "workspace_members_department_fk"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workspace_members_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "membership"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_members_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
             referencedColumns: ["id"]
           },
           {
@@ -3818,6 +4011,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "workspace_members_department_fk"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "department"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workspace_members_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
@@ -3895,6 +4095,7 @@ export type Database = {
           invited_by: string | null
           joined_at: string
           languages: string[]
+          manager_id: string | null
           manager_member_id: string | null
           organization_id: string | null
           role: string

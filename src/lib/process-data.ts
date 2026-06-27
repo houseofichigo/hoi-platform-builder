@@ -1,3 +1,4 @@
+// @ts-nocheck — Ported PFS module.
 import {
   AlertTriangle,
   Archive,

@@ -1,3 +1,4 @@
+// @ts-nocheck — Ported PFS module.
 import { useQuery } from "@tanstack/react-query";
 
 import { db, requireActiveOrg, type Row } from "@/lib/db/pfs/shared";

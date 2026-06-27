@@ -46,7 +46,7 @@ import { Route as AppWorkspaceSlugScaleReviewsRouteImport } from './routes/app.$
 import { Route as AppWorkspaceSlugScaleGovernanceRouteImport } from './routes/app.$workspaceSlug.scale.governance'
 import { Route as AppWorkspaceSlugScaleAuditRouteImport } from './routes/app.$workspaceSlug.scale.audit'
 import { Route as AppWorkspaceSlugDiscoverSplatRouteImport } from './routes/app.$workspaceSlug.discover.$'
-import { Route as AppWorkspaceSlugBuildMapRouteImport } from './routes/app.$workspaceSlug.build.map'
+import { Route as AppWorkspaceSlugBuildTemplatesRouteImport } from './routes/app.$workspaceSlug.build.templates'
 import { Route as AppWorkspaceSlugBuildLibraryRouteImport } from './routes/app.$workspaceSlug.build.library'
 import { Route as AppWorkspaceSlugBuildApprovalsRouteImport } from './routes/app.$workspaceSlug.build.approvals'
 import { Route as AppWorkspaceSlugAssessCompleteRouteImport } from './routes/app.$workspaceSlug.assess.complete'
@@ -265,10 +265,10 @@ const AppWorkspaceSlugDiscoverSplatRoute =
     path: '/$',
     getParentRoute: () => AppWorkspaceSlugDiscoverRoute,
   } as any)
-const AppWorkspaceSlugBuildMapRoute =
-  AppWorkspaceSlugBuildMapRouteImport.update({
-    id: '/map',
-    path: '/map',
+const AppWorkspaceSlugBuildTemplatesRoute =
+  AppWorkspaceSlugBuildTemplatesRouteImport.update({
+    id: '/templates',
+    path: '/templates',
     getParentRoute: () => AppWorkspaceSlugBuildRoute,
   } as any)
 const AppWorkspaceSlugBuildLibraryRoute =
@@ -426,7 +426,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
-  '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
+  '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -478,7 +478,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
-  '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
+  '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -538,7 +538,7 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
-  '/app/$workspaceSlug/build/map': typeof AppWorkspaceSlugBuildMapRoute
+  '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
   '/app/$workspaceSlug/scale/governance': typeof AppWorkspaceSlugScaleGovernanceRoute
@@ -599,7 +599,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
-    | '/app/$workspaceSlug/build/map'
+    | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -651,7 +651,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
-    | '/app/$workspaceSlug/build/map'
+    | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -710,7 +710,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
-    | '/app/$workspaceSlug/build/map'
+    | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
     | '/app/$workspaceSlug/scale/governance'
@@ -1011,11 +1011,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugDiscoverSplatRouteImport
       parentRoute: typeof AppWorkspaceSlugDiscoverRoute
     }
-    '/app/$workspaceSlug/build/map': {
-      id: '/app/$workspaceSlug/build/map'
-      path: '/map'
-      fullPath: '/app/$workspaceSlug/build/map'
-      preLoaderRoute: typeof AppWorkspaceSlugBuildMapRouteImport
+    '/app/$workspaceSlug/build/templates': {
+      id: '/app/$workspaceSlug/build/templates'
+      path: '/templates'
+      fullPath: '/app/$workspaceSlug/build/templates'
+      preLoaderRoute: typeof AppWorkspaceSlugBuildTemplatesRouteImport
       parentRoute: typeof AppWorkspaceSlugBuildRoute
     }
     '/app/$workspaceSlug/build/library': {
@@ -1185,7 +1185,7 @@ const AppWorkspaceSlugAdminRouteWithChildren =
 interface AppWorkspaceSlugBuildRouteChildren {
   AppWorkspaceSlugBuildApprovalsRoute: typeof AppWorkspaceSlugBuildApprovalsRoute
   AppWorkspaceSlugBuildLibraryRoute: typeof AppWorkspaceSlugBuildLibraryRoute
-  AppWorkspaceSlugBuildMapRoute: typeof AppWorkspaceSlugBuildMapRoute
+  AppWorkspaceSlugBuildTemplatesRoute: typeof AppWorkspaceSlugBuildTemplatesRoute
   AppWorkspaceSlugBuildIndexRoute: typeof AppWorkspaceSlugBuildIndexRoute
   AppWorkspaceSlugBuildProcessIdRoute: typeof AppWorkspaceSlugBuildProcessIdRoute
   AppWorkspaceSlugBuildProcessNewRoute: typeof AppWorkspaceSlugBuildProcessNewRoute
@@ -1194,7 +1194,7 @@ interface AppWorkspaceSlugBuildRouteChildren {
 const AppWorkspaceSlugBuildRouteChildren: AppWorkspaceSlugBuildRouteChildren = {
   AppWorkspaceSlugBuildApprovalsRoute: AppWorkspaceSlugBuildApprovalsRoute,
   AppWorkspaceSlugBuildLibraryRoute: AppWorkspaceSlugBuildLibraryRoute,
-  AppWorkspaceSlugBuildMapRoute: AppWorkspaceSlugBuildMapRoute,
+  AppWorkspaceSlugBuildTemplatesRoute: AppWorkspaceSlugBuildTemplatesRoute,
   AppWorkspaceSlugBuildIndexRoute: AppWorkspaceSlugBuildIndexRoute,
   AppWorkspaceSlugBuildProcessIdRoute: AppWorkspaceSlugBuildProcessIdRoute,
   AppWorkspaceSlugBuildProcessNewRoute: AppWorkspaceSlugBuildProcessNewRoute,

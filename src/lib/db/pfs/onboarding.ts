@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck — Ported PFS module.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -31,7 +31,7 @@ export type OnboardingStepId =
 export type OnboardingPhase = "foundation" | "knowledge" | "activation" | "complete";
 
 export type OnboardingContext = {
-  organizationId: string;
+  workspaceId: string;
   profile: Row<"company_profile"> | null;
   products: Row<"product_service">[];
   departments: Row<"department">[];
@@ -52,7 +52,7 @@ export type OnboardingContext = {
 export type ReadinessStage = "initial" | "developing" | "advanced" | "leading";
 
 export type ReadinessAssessmentRow = {
-  organization_id: string;
+  workspace_id: string;
   decision_authority: string | null;
   has_ai_owner: boolean | null;
   literacy_coverage: string | null;
@@ -129,11 +129,11 @@ function token() {
   return Array.from(random, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function updateProfileStep(organizationId: string, step: number) {
+async function updateProfileStep(workspaceId: string, step: number) {
   const { data: existing } = await db
     .from("company_profile")
     .select("id, onboarding_step")
-    .eq("organization_id", organizationId)
+    .eq("workspace_id", workspaceId)
     .is("archived_at", null)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -175,7 +175,7 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
       db
         .from("company_profile")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -183,76 +183,76 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
       db
         .from("product_service")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false }),
       db
         .from("department")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("invitation")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false }),
       db
         .from("tool")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("data_source")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("audience")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("client")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("knowledge_source")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("name"),
       db
         .from("vault")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("vault_type")
         .order("name"),
       db
         .from("readiness_assessment")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .maybeSingle(),
       db
         .from("membership")
         .select("id, user_id, role, department_id")
-        .eq("organization_id", gate.organizationId),
+        .eq("workspace_id", gate.workspaceId),
       db
         .from("member_profile")
         .select("membership_id, display_name, job_title")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null),
       db
         .from("strategic_priority")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -260,7 +260,7 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
       db
         .from("campaign")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .is("archived_at", null)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -279,7 +279,7 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
   );
 
   return {
-    organizationId: gate.organizationId,
+    workspaceId: gate.workspaceId,
     profile: profile.data ?? null,
     products: products.data ?? [],
     departments: departments.data ?? [],
@@ -326,7 +326,7 @@ export async function saveCompanyProfile(input: {
   const gate = await requireActiveOrg();
   const parsed = profileSchema.parse(input);
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     industry: parsed.industry,
     sub_industry: parsed.subIndustry,
     size: parsed.size,
@@ -346,7 +346,7 @@ export async function saveCompanyProfile(input: {
   const { data: existing } = await db
     .from("company_profile")
     .select("id")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null)
     .limit(1)
     .maybeSingle();
@@ -367,7 +367,7 @@ export async function saveRegulatoryPosture(input: {
   const gate = await requireActiveOrg();
   const parsed = regulatorySchema.parse(input);
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     primary_jurisdiction: parsed.primaryJurisdiction,
     data_residency: asList(parsed.dataResidency),
     is_regulated: parsed.isRegulated,
@@ -378,7 +378,7 @@ export async function saveRegulatoryPosture(input: {
   const { data: existing } = await db
     .from("company_profile")
     .select("id")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null)
     .limit(1)
     .maybeSingle();
@@ -393,7 +393,7 @@ export async function saveReadiness(input: z.input<typeof readinessSchema>) {
   const gate = await requireActiveOrg();
   const { parsed, organization, culture } = scoreReadiness(input);
   const { error } = await db.from("readiness_assessment").upsert({
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     decision_authority: parsed.decisionAuthority,
     has_ai_owner: parsed.hasAiOwner,
     literacy_coverage: parsed.literacyCoverage,
@@ -418,7 +418,7 @@ export function useReadinessAssessment() {
       const { data, error } = await db
         .from("readiness_assessment")
         .select("*")
-        .eq("organization_id", gate.organizationId)
+        .eq("workspace_id", gate.workspaceId)
         .maybeSingle();
       if (error) throw error;
       return (data as ReadinessAssessmentRow | null) ?? null;
@@ -437,7 +437,7 @@ export async function saveProduct(input: {
 }) {
   const gate = await requireActiveOrg();
   const { error } = await db.from("product_service").insert({
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     name: input.name,
     category: input.category,
     description: input.description,
@@ -447,7 +447,7 @@ export async function saveProduct(input: {
     delivery_complexity: input.deliveryComplexity,
   });
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 2);
+  await updateProfileStep(gate.workspaceId, 2);
 }
 
 export async function saveDepartment(input: {
@@ -467,7 +467,7 @@ export async function saveDepartment(input: {
   const gate = await requireActiveOrg();
   const parsed = departmentSchema.parse(input);
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     name: parsed.name,
     description: parsed.description,
     headcount: parsed.headcount,
@@ -481,7 +481,7 @@ export async function saveDepartment(input: {
     knowledge_owner_user_id: parsed.knowledgeOwnerUserId || null,
   };
   const query = input.id
-    ? db.from("department").update(payload).eq("id", input.id).eq("organization_id", gate.organizationId)
+    ? db.from("department").update(payload).eq("id", input.id).eq("workspace_id", gate.workspaceId)
     : db.from("department").insert(payload);
   if (!input.id) {
     // Idempotent insert: if a non-archived department with the same (case-insensitive) name
@@ -489,7 +489,7 @@ export async function saveDepartment(input: {
     const { data: existing } = await db
       .from("department")
       .select("id")
-      .eq("organization_id", gate.organizationId)
+      .eq("workspace_id", gate.workspaceId)
       .is("archived_at", null)
       .ilike("name", parsed.name)
       .limit(1)
@@ -499,15 +499,15 @@ export async function saveDepartment(input: {
         .from("department")
         .update(payload)
         .eq("id", existing.id)
-        .eq("organization_id", gate.organizationId);
+        .eq("workspace_id", gate.workspaceId);
       if (updateError) throw updateError;
-      await updateProfileStep(gate.organizationId, 3);
+      await updateProfileStep(gate.workspaceId, 3);
       return;
     }
   }
   const { error } = await query;
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 3);
+  await updateProfileStep(gate.workspaceId, 3);
 }
 
 export async function archiveDepartment(id: string) {
@@ -516,7 +516,7 @@ export async function archiveDepartment(id: string) {
     .from("department")
     .update({ archived_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("organization_id", gate.organizationId);
+    .eq("workspace_id", gate.workspaceId);
   if (error) throw error;
 }
 
@@ -529,7 +529,7 @@ export async function saveInvitation(input: {
   const gate = await requireActiveOrg();
   const inviteToken = token();
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     email: input.email,
     role: input.role,
     department_id: input.departmentId,
@@ -539,7 +539,7 @@ export async function saveInvitation(input: {
     const { data: existing } = await db
       .from("invitation")
       .select("id")
-      .eq("organization_id", gate.organizationId)
+      .eq("workspace_id", gate.workspaceId)
       .ilike("email", input.email)
       .eq("status", "pending")
       .is("archived_at", null)
@@ -550,14 +550,14 @@ export async function saveInvitation(input: {
         .from("invitation")
         .update(payload)
         .eq("id", existing.id)
-        .eq("organization_id", gate.organizationId);
+        .eq("workspace_id", gate.workspaceId);
       if (updateError) throw updateError;
-      await updateProfileStep(gate.organizationId, 4);
+      await updateProfileStep(gate.workspaceId, 4);
       return;
     }
   }
   const query = input.id
-    ? db.from("invitation").update(payload).eq("id", input.id).eq("organization_id", gate.organizationId)
+    ? db.from("invitation").update(payload).eq("id", input.id).eq("workspace_id", gate.workspaceId)
     : db
         .from("invitation")
         .insert({
@@ -570,7 +570,7 @@ export async function saveInvitation(input: {
         .single();
   const { error } = await query;
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 4);
+  await updateProfileStep(gate.workspaceId, 4);
 }
 
 export async function archiveInvitation(id: string) {
@@ -579,7 +579,7 @@ export async function archiveInvitation(id: string) {
     .from("invitation")
     .update({ archived_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .eq("status", "pending");
   if (error) throw error;
 }
@@ -594,7 +594,7 @@ export async function advanceOnboardingPhase(phase: OnboardingPhase) {
   const { error } = await db
     .from("company_profile")
     .update({ onboarding_phase: phase })
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null);
   if (error) throw error;
 }
@@ -611,7 +611,7 @@ export async function saveTool(input: {
 }) {
   const gate = await requireActiveOrg();
   const { error } = await db.from("tool").insert({
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     catalog_id: input.catalogId ?? null,
     name: input.name,
     category: input.category,
@@ -622,7 +622,7 @@ export async function saveTool(input: {
     criticality: input.criticality,
   });
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 5);
+  await updateProfileStep(gate.workspaceId, 5);
 }
 
 export async function saveDataSource(input: {
@@ -637,7 +637,7 @@ export async function saveDataSource(input: {
 }) {
   const gate = await requireActiveOrg();
   const { error } = await db.from("data_source").insert({
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     name: input.name,
     tool_id: input.toolId,
     department_owner_id: input.departmentOwnerId,
@@ -648,7 +648,7 @@ export async function saveDataSource(input: {
     update_frequency: input.updateFrequency,
   });
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 6);
+  await updateProfileStep(gate.workspaceId, 6);
 }
 
 export async function saveStrategicPriority(input: {
@@ -664,7 +664,7 @@ export async function saveStrategicPriority(input: {
 }) {
   const gate = await requireActiveOrg();
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     primary_reason: input.primaryReason,
     priorities: asList(input.priorities),
     top_goals: asList(input.topGoals),
@@ -688,7 +688,7 @@ export async function saveStrategicPriority(input: {
   const { data: existing } = await db
     .from("strategic_priority")
     .select("id")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null)
     .limit(1)
     .maybeSingle();
@@ -697,7 +697,7 @@ export async function saveStrategicPriority(input: {
     : db.from("strategic_priority").insert(payload);
   const { error } = await query;
   if (error) throw error;
-  await updateProfileStep(gate.organizationId, 7);
+  await updateProfileStep(gate.workspaceId, 7);
 }
 
 export async function saveCampaign(input: {
@@ -708,7 +708,7 @@ export async function saveCampaign(input: {
 }) {
   const gate = await requireActiveOrg();
   const payload = {
-    organization_id: gate.organizationId,
+    workspace_id: gate.workspaceId,
     deadline: input.deadline || null,
     workflows_per_employee: input.workflowsPerEmployee,
     require_lead_review: input.requireLeadReview,
@@ -718,7 +718,7 @@ export async function saveCampaign(input: {
   const { data: existing } = await db
     .from("campaign")
     .select("id")
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null)
     .limit(1)
     .maybeSingle();
@@ -729,7 +729,7 @@ export async function saveCampaign(input: {
   await db
     .from("company_profile")
     .update({ onboarding_step: 8, onboarding_phase: "complete", onboarding_completed_at: new Date().toISOString() })
-    .eq("organization_id", gate.organizationId)
+    .eq("workspace_id", gate.workspaceId)
     .is("archived_at", null);
 }
 

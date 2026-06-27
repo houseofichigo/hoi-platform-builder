@@ -7,14 +7,17 @@ export const Route = createFileRoute("/app/$workspaceSlug/build")({
 });
 
 function BuildLayout() {
-  const { workspace } = useWorkspace();
+  const { workspace, isAdmin } = useWorkspace();
   const location = useLocation();
   if (!workspace) return null;
   const tabs: ReadonlyArray<{ to: string; label: string; exact?: boolean }> = [
-    { to: "/app/$workspaceSlug/build", label: "Overview", exact: true },
-    { to: "/app/$workspaceSlug/build/map", label: "Map" },
+    { to: "/app/$workspaceSlug/build", label: "Priority Dashboard", exact: true },
+    { to: "/app/$workspaceSlug/build/process/new", label: "Map Process" },
     { to: "/app/$workspaceSlug/build/library", label: "Process Library" },
-    { to: "/app/$workspaceSlug/build/approvals", label: "Approvals" },
+    { to: "/app/$workspaceSlug/build/templates", label: "Template Library" },
+    ...(isAdmin
+      ? []
+      : [{ to: "/app/$workspaceSlug/build/approvals", label: "Pending Approvals" }]),
   ];
   const base = `/app/${workspace.slug}/build`;
   return (

@@ -224,7 +224,7 @@ export function OnboardingChecklist() {
             </button>
             <button
               type="button"
-              onClick={() => completeTourAndNavigate("/app/$workspaceSlug/build/map")}
+              onClick={() => completeTourAndNavigate("/app/$workspaceSlug/build/process/new")}
               className="btn-ichigo btn-ichigo-outline"
             >
               Capture use case
@@ -269,7 +269,7 @@ export function OnboardingChecklist() {
     to:
       | "/app/$workspaceSlug/assess"
       | "/app/$workspaceSlug/discover"
-      | "/app/$workspaceSlug/build/map"
+      | "/app/$workspaceSlug/build/process/new"
       | "/app/$workspaceSlug/scale",
   ) {
     markTourCompleted.mutate(undefined, {

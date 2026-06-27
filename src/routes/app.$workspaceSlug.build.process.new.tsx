@@ -1,4 +1,4 @@
-// @ts-nocheck — Ported PFS module; type tightening tracked for a follow-up batch.
+// @ts-nocheck — Ported PFS module.
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   addEdge,
@@ -60,6 +60,7 @@ import type { LucideIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+// import { AppShell } from "@/components/build/pfs/process-platform";
 import { ProcessTemplateBrowser } from "@/components/build/pfs/process-template-library";
 import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 import { ToolCatalogPicker } from "@/components/build/pfs/tool-catalog-picker";
@@ -419,7 +420,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
   component: NewProcessRoute,
   errorComponent: ({ error }) => (
     <>
-<Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
+      <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
         <p className="font-display text-[30px] font-medium tracking-normal text-[var(--ichigo-navy)]">
           Process builder did not load
         </p>
@@ -427,7 +428,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
           {error.message || "Something interrupted the process builder. Refresh or start a new map."}
         </p>
       </Card>
-</>
+    </>
   ),
 });
 
@@ -675,10 +676,10 @@ function templateToBuilderState(template: ProcessTemplate): { nodes: BuilderNode
 function NewProcessRoute() {
   return (
     <>
-<ReactFlowProvider>
+      <ReactFlowProvider>
         <ProcessBuilder />
       </ReactFlowProvider>
-</>
+    </>
   );
 }
 

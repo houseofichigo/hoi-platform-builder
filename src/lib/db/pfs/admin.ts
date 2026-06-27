@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-nocheck — Ported PFS module.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
@@ -6,7 +6,7 @@ import { db, requireActiveOrg } from "@/lib/db/pfs/shared";
 export type ProcessDecision = "approve" | "request_changes" | "reject" | "start_review";
 
 export type AdminOverview = {
-  organization_id?: string;
+  workspace_id?: string;
   processes?: {
     total?: number;
     draft?: number;
@@ -32,7 +32,7 @@ export type AdminOverview = {
 
 export async function getAdminOverview(): Promise<AdminOverview> {
   const gate = await requireActiveOrg();
-  const { data, error } = await db.rpc("admin_overview", { p_org_id: gate.organizationId });
+  const { data, error } = await db.rpc("admin_overview", { p_org_id: gate.workspaceId });
   if (error) throw error;
   return (data ?? {}) as AdminOverview;
 }

@@ -1644,6 +1644,8 @@ function FrameStep({
   setGlobalPass,
   departments,
   onNext,
+  currentStep,
+  onNavigateStep,
 }: {
   frame: Record<string, any>;
   setFrame: (frame: any) => void;
@@ -1651,6 +1653,8 @@ function FrameStep({
   setGlobalPass: (value: any) => void;
   departments: Array<{ id: string; name: string }>;
   onNext: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   const selectedCriticality = Array.isArray(globalPass.outputCriticality) ? globalPass.outputCriticality : [];
   const toggleCriticality = (value: string) => {
@@ -1662,6 +1666,9 @@ function FrameStep({
 
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
+      <div className="mb-5 border-b border-[var(--chalk)] pb-4">
+        <BuilderStepNav current={currentStep} onSelect={onNavigateStep} />
+      </div>
       <div className="space-y-6">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Identity</p>

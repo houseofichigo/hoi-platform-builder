@@ -101,7 +101,7 @@ export function buildPhases(): NavPhase[] {
       to: "/app/$workspaceSlug/build",
       items: [
         { label: "Overview", to: "/app/$workspaceSlug/build", icon: Hammer },
-        { label: "Map", to: "/app/$workspaceSlug/build/map", icon: ClipboardList },
+        { label: "Map", to: "/app/$workspaceSlug/build/process/new", icon: ClipboardList },
         { label: "Process Library", to: "/app/$workspaceSlug/build/library", icon: LibraryIcon },
         { label: "Approvals", to: "/app/$workspaceSlug/build/approvals", icon: Inbox },
       ],

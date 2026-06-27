@@ -1439,6 +1439,8 @@ function ProcessBuilder() {
           setGlobalPass={setGlobalPass}
           departments={departments}
           onNext={() => setStep("diagram")}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
 
@@ -1502,6 +1504,8 @@ function ProcessBuilder() {
           onToggleToolTiles={() => setShowToolTiles((current) => !current)}
           onToggleLayoutDirection={() => setLayoutDirection((current) => current === "RIGHT" ? "DOWN" : "RIGHT")}
           onNext={() => setStep("submit")}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
 
@@ -1539,6 +1543,8 @@ function ProcessBuilder() {
           pending={createProcess.isPending}
           error={createProcess.error?.message}
           onSubmit={submit}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
     </div>

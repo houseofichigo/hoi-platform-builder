@@ -43,7 +43,7 @@ function buildTree(departments: OrgDepartment[], people: OrgPerson[], invites: O
   return { roots, unassignedPeople, unassignedInvites };
 }
 
-export function OrgChartCanvas() {
+export function OrgChartCanvas(_props: { reparentEnabled?: boolean; onSelect?: (sel: any) => void } = {}) {
   const { data, isLoading, error } = useOrgChart();
 
   if (isLoading) {

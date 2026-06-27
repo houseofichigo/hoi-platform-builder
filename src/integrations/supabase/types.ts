@@ -3406,6 +3406,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          domain: string | null
           icon_key: string | null
           id: string
           is_active: boolean
@@ -3417,6 +3418,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          domain?: string | null
           icon_key?: string | null
           id?: string
           is_active?: boolean
@@ -3428,6 +3430,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          domain?: string | null
           icon_key?: string | null
           id?: string
           is_active?: boolean

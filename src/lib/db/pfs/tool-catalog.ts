@@ -13,6 +13,7 @@ export type ToolCatalogRow = Row<"tool_catalog"> & {
   logo_mirror_key?: string | null;
   description?: string | null;
   website?: string | null;
+  domain?: string | null;
 };
 export type ToolRow = Row<"tool">;
 
@@ -81,10 +82,26 @@ export function sortToolCatalogCategories(categories: string[]) {
   });
 }
 
-export function toolCatalogLogoUrl(row?: Pick<ToolCatalogRow, "logo_mirror_key"> | null) {
+export function toolCatalogLogoUrl(
+  row?: Pick<ToolCatalogRow, "logo_mirror_key" | "domain" | "website"> | null,
+) {
   const key = row?.logo_mirror_key?.replace(/^tool-logos\//, "");
-  if (!key) return "";
-  return supabase.storage.from("tool-logos").getPublicUrl(key).data.publicUrl;
+  if (key) return supabase.storage.from("tool-logos").getPublicUrl(key).data.publicUrl;
+
+  const token = import.meta.env.VITE_LOVABLE_CONNECTOR_LOGO_DEV_API_KEY as string | undefined;
+  if (!token) return "";
+
+  let domain = row?.domain?.trim() || "";
+  if (!domain && row?.website) {
+    try {
+      const url = row.website.startsWith("http") ? row.website : `https://${row.website}`;
+      domain = new URL(url).hostname.replace(/^www\./, "");
+    } catch {
+      domain = "";
+    }
+  }
+  if (!domain) return "";
+  return `https://img.logo.dev/${encodeURIComponent(domain)}?token=${token}&size=80&format=png&retina=true`;
 }
 
 export function catalogProfileDefaults(row?: Partial<ToolCatalogRow> | null): Omit<DataProfile, "source"> | null {

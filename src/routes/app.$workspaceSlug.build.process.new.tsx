@@ -1777,6 +1777,8 @@ function DiagramStep(props: {
   onToggleToolTiles: () => void;
   onToggleLayoutDirection: () => void;
   onNext: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const canDelete = Boolean(props.selected || props.selectedEdgeId);
@@ -1825,9 +1827,9 @@ function DiagramStep(props: {
     <div className="fixed inset-x-0 bottom-0 top-[56px] z-30 flex bg-[var(--paper)]">
       <div className="relative flex min-w-0 flex-1 flex-col">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--chalk)] bg-white/90 p-4">
-            <div>
-              <p className="font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">Process canvas</p>
-              <p className="font-sans text-[13px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
+            <div className="flex min-w-0 flex-col gap-2">
+              <BuilderStepNav current={props.currentStep} onSelect={props.onNavigateStep} />
+              <p className="font-sans text-[12px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">

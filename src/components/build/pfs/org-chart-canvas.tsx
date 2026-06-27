@@ -113,9 +113,14 @@ function useIsBelowLg() {
   return value;
 }
 
+<<<<<<< HEAD
 type FocusCtx = { focusId: string | null; requestFocus: (id: string) => void; clearFocus: () => void };
 const FocusContext = createContext<FocusCtx>({ focusId: null, requestFocus: () => {}, clearFocus: () => {} });
 const handleStyle = { width: 9, height: 9, background: "var(--chalk)", border: "1.5px solid white" };
+=======
+export function OrgChartCanvas(_props: { reparentEnabled?: boolean; onSelect?: (sel: any) => void } = {}) {
+  const { data, isLoading, error } = useOrgChart();
+>>>>>>> b154ea6cc0920ef5046cf708ed0c86d49bc42811
 
 function FocusButton({ targetId }: { targetId: string }) {
   const { focusId, requestFocus, clearFocus } = useContext(FocusContext);

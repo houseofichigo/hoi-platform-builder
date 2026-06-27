@@ -1439,6 +1439,8 @@ function ProcessBuilder() {
           setGlobalPass={setGlobalPass}
           departments={departments}
           onNext={() => setStep("diagram")}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
 
@@ -1502,6 +1504,8 @@ function ProcessBuilder() {
           onToggleToolTiles={() => setShowToolTiles((current) => !current)}
           onToggleLayoutDirection={() => setLayoutDirection((current) => current === "RIGHT" ? "DOWN" : "RIGHT")}
           onNext={() => setStep("submit")}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
 
@@ -1539,6 +1543,8 @@ function ProcessBuilder() {
           pending={createProcess.isPending}
           error={createProcess.error?.message}
           onSubmit={submit}
+          currentStep={step}
+          onNavigateStep={setStep}
         />
       ) : null}
     </div>
@@ -1591,6 +1597,46 @@ function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect:
   );
 }
 
+function BuilderStepNav({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
+  const navSteps = builderSteps.filter((item) => item.id !== "start");
+  const currentIndex = navSteps.findIndex((item) => item.id === current);
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {navSteps.map((item, index) => {
+        const active = item.id === current;
+        const complete = currentIndex >= 0 && index < currentIndex;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onSelect(item.id)}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 font-sans text-[12px] font-medium transition ${
+              active
+                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
+                : complete
+                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)] hover:bg-[var(--paper)]"
+                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
+            }`}
+          >
+            <span
+              className={`flex h-5 w-5 items-center justify-center rounded-full font-mono text-[11px] ${
+                active
+                  ? "bg-white text-[var(--ichigo-navy)]"
+                  : complete
+                    ? "bg-[var(--ichigo-navy)] text-white"
+                    : "bg-[var(--paper)] text-[var(--slate)]"
+              }`}
+            >
+              {complete ? <Check className="h-3 w-3" /> : index + 1}
+            </span>
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function FrameStep({
   frame,
   setFrame,
@@ -1598,6 +1644,8 @@ function FrameStep({
   setGlobalPass,
   departments,
   onNext,
+  currentStep,
+  onNavigateStep,
 }: {
   frame: Record<string, any>;
   setFrame: (frame: any) => void;
@@ -1605,6 +1653,8 @@ function FrameStep({
   setGlobalPass: (value: any) => void;
   departments: Array<{ id: string; name: string }>;
   onNext: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   const selectedCriticality = Array.isArray(globalPass.outputCriticality) ? globalPass.outputCriticality : [];
   const toggleCriticality = (value: string) => {
@@ -1616,6 +1666,9 @@ function FrameStep({
 
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
+      <div className="mb-5 border-b border-[var(--chalk)] pb-4">
+        <BuilderStepNav current={currentStep} onSelect={onNavigateStep} />
+      </div>
       <div className="space-y-6">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Identity</p>
@@ -1724,6 +1777,8 @@ function DiagramStep(props: {
   onToggleToolTiles: () => void;
   onToggleLayoutDirection: () => void;
   onNext: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
   const canDelete = Boolean(props.selected || props.selectedEdgeId);
@@ -1772,9 +1827,9 @@ function DiagramStep(props: {
     <div className="fixed inset-x-0 bottom-0 top-[56px] z-30 flex bg-[var(--paper)]">
       <div className="relative flex min-w-0 flex-1 flex-col">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--chalk)] bg-white/90 p-4">
-            <div>
-              <p className="font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">Process canvas</p>
-              <p className="font-sans text-[13px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
+            <div className="flex min-w-0 flex-col gap-2">
+              <BuilderStepNav current={props.currentStep} onSelect={props.onNavigateStep} />
+              <p className="font-sans text-[12px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
@@ -3708,9 +3763,14 @@ function SubmitStep(props: {
   pending: boolean;
   error?: string;
   onSubmit: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
+      <div className="mb-5 border-b border-[var(--chalk)] pb-4">
+        <BuilderStepNav current={props.currentStep} onSelect={props.onNavigateStep} />
+      </div>
       <div className="mb-5 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

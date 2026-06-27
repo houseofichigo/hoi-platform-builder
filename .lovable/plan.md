@@ -1,43 +1,42 @@
-# Fix: Company Setup "column invitation.workspace_id does not exist"
+## Problem
 
-## Root cause
+`src/components/build/pfs/company-onboarding.tsx` is a 135-line stub showing only "Departments / Members / Pending invites" with a basic add-department form. The PFS25 reference (`Process_Flow_Studio_25.zip`, 1,393 lines) is the real 6-step wizard the screenshots show: Company basics → Org chart → Tool stack → Mapping priorities → Send invitations → Launch mapping workspace, with the step header, "saved/draft" badges, "Why we ask this" copy, `Load demo company` action, and step-by-step Save/Back/Skip controls.
 
-The Company Setup screen uses the ported PFS onboarding adapter
-(`src/lib/db/pfs/onboarding.ts`), which queries `invitation` and
-`membership` filtered by `workspace_id`. Those two PFS-native tables exist
-in the database but only carry the original `organization_id` column.
+All adapters the real wizard depends on already exist in this repo (just under `@/lib/db/pfs/*` instead of `@/lib/db/*`), and the supporting components (`ToolCatalogPicker`, `OrgChartCanvas`, `useOrgChart`, `computeReadiness`, onboarding mutations, audiences/clients/knowledge-sources/demo-loader) are all in place. So this is purely a component port, not a data-layer change.
 
-The earlier alignment migration added the dual `workspace_id` /
-`organization_id` columns (plus the `sync_workspace_organization_id`
-trigger) to 27 PFS tables — but `invitation` and `membership` were missed.
-Every other PFS table the adapter touches (department, company_profile,
-tool, data_source, vault, etc.) already has both columns, which is why
-only the invitation step blows up with `column invitation.workspace_id
-does not exist`.
+## Scope
 
-Confirmed by `information_schema.columns`: `invitation` and `membership`
-are the only PFS tables in the schema still lacking `workspace_id`.
+In:
+- Replace `src/components/build/pfs/company-onboarding.tsx` with the full PFS25 `company-onboarding.tsx`, adjusting import paths to this project (`@/components/build/pfs/...`, `@/lib/db/pfs/...`).
+- Verify the admin route renders the new wizard correctly at `/app/$workspaceSlug/admin/onboarding` (existing route already imports `CompanyOnboarding` and passes `mode="wizard"`, so likely no change needed — only adjust the surrounding header copy if it duplicates the wizard's own header).
+- Typecheck and fix any small drift (e.g. type names that diverged between PFS25 and the local adapters).
 
-## Fix
+Out (explicitly not touching, per user):
+- Process map, workspace, Build phase, Admin sidebar, Analytics, Review Policy.
+- Database schema or RLS — adapters already mirror PFS25.
+- Any other admin tab.
 
-One migration that, for both `public.invitation` and `public.membership`:
+## Technical Notes
 
-1. Adds nullable `workspace_id uuid` referencing `public.workspaces(id)`.
-2. Back-fills `workspace_id := organization_id` for existing rows.
-3. Attaches the existing `sync_workspace_organization_id` BEFORE
-   INSERT/UPDATE trigger so the two columns stay mirrored (same pattern
-   used by department, company_profile, etc.).
-4. Adds an index on `workspace_id` to match the other PFS tables.
-5. Leaves RLS policies untouched — they already key off `organization_id`,
-   and the sync trigger keeps the two values identical.
+Import rewrites needed when copying the file:
+- `@/components/tool-catalog-picker` → `@/components/build/pfs/tool-catalog-picker`
+- `@/components/org-chart-canvas` → `@/components/build/pfs/org-chart-canvas`
+- `@/lib/db/org-chart` → `@/lib/db/pfs/org-chart`
+- `@/lib/db/onboarding` → `@/lib/db/pfs/onboarding`
+- `@/lib/db/audiences` → `@/lib/db/pfs/audiences`
+- `@/lib/db/clients` → `@/lib/db/pfs/clients`
+- `@/lib/db/demo-loader` → `@/lib/db/pfs/demo-loader`
+- `@/lib/db/knowledge-sources` → `@/lib/db/pfs/knowledge-sources`
+- `@/lib/db/tool-catalog` → `@/lib/db/pfs/tool-catalog`
+- `@/lib/org-chart/readiness` stays as-is (already present locally).
 
-No application code changes are needed; the PFS adapter already queries
-`workspace_id` everywhere.
+The current route page wraps the wizard with its own "Company Setup." heading + lead paragraph. The PFS25 wizard renders its own "Complete company setup" header with the "Save each step as a draft…" copy (see screenshots). To match the screenshots, strip the route-level heading so only the wizard's header shows.
 
-## Verification
+## Validation
 
-- Reload `/app/house-of-ichigo/admin/onboarding`; the invitations step
-  should load instead of throwing.
-- `select workspace_id, organization_id from public.invitation limit 1;`
-  returns matching values.
-- Inserting an invitation through the wizard populates both columns.
+- `bunx tsgo --noEmit` passes for the new file.
+- `/app/house-of-ichigo/admin/onboarding` renders the 6-step pill row, step card with "Why we ask this", and `Load demo company` button matching the screenshots.
+
+## Batches
+
+Single batch — one file replacement plus one small route trim.

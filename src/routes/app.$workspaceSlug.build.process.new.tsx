@@ -3763,9 +3763,14 @@ function SubmitStep(props: {
   pending: boolean;
   error?: string;
   onSubmit: () => void;
+  currentStep: BuilderStep;
+  onNavigateStep: (step: BuilderStep) => void;
 }) {
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
+      <div className="mb-5 border-b border-[var(--chalk)] pb-4">
+        <BuilderStepNav current={props.currentStep} onSelect={props.onNavigateStep} />
+      </div>
       <div className="mb-5 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

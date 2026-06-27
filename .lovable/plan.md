@@ -1,29 +1,60 @@
-## Why logos aren't showing
+## Goal
+Make the Process Editor full-bleed: canvas fills viewport below the top nav, inspector is a sibling column with matching height (not fixed/absolute). Layout-only change — no logic, no elkjs, same tokens.
 
-The picker calls `toolCatalogLogoUrl(row)` which reads `row.logo_mirror_key` from the `tool_catalog` table and builds a Supabase Storage URL from the `tool-logos` bucket. But the live `tool_catalog` schema only has 9 columns — `logo_mirror_key` does not exist, so the key is always undefined, the `<img>` 404s, and every tile falls back to the generic category icon.
+## Files
+- `src/routes/app.$workspaceSlug.build.process.new.tsx`
+- `src/routes/app.$workspaceSlug.build.process.$id.tsx`
 
-No logos were ever uploaded to a `tool-logos` bucket either, so even adding the column wouldn't produce images on its own.
+## Changes (applied identically to both files)
 
-## Fix: source logos from Logo.dev (already available as a connector)
+### 1. Outer wrapper
+Replace the current `<div className="space-y-5"><div className="relative"><Card ...>` editor shell with a fixed full-width flex row that breaks out of the centered content column:
 
-Logo.dev returns a real brand logo for any domain via `https://img.logo.dev/<domain>?token=...`. We already have the publishable key wired as `VITE_LOVABLE_CONNECTOR_LOGO_DEV_API_KEY`. We just need a reliable domain per tool.
+```tsx
+<div className="fixed inset-x-0 bottom-0 top-[56px] z-30 flex bg-[var(--paper)]">
+  <div className="relative flex min-w-0 flex-1 flex-col">
+    {/* toolbar: "Process canvas" header + Templates/Undo/Redo/Delete/Auto-layout/Review & submit */}
+    <div className="relative min-h-0 flex-1">
+      <ReactFlow ... className="h-full w-full" />
+    </div>
+    {/* readiness / steps / automation / data stats bar */}
+  </div>
+  {selected ? (
+    <aside className="flex w-[360px] shrink-0 flex-col overflow-y-auto border-l border-[var(--chalk)] bg-white">
+      <SidePanel ... />
+    </aside>
+  ) : null}
+</div>
+```
 
-### Steps
+Top offset is `56px` — will verify against the actual top-nav height in the layout and adjust if different.
 
-1. **Add a `domain` column to `tool_catalog`** (migration), nullable text. Keep `logo_mirror_key` path intact for future custom uploads.
-2. **Backfill `domain`** for catalog rows using slug → known mapping (e.g. `notion` → `notion.so`, `hubspot` → `hubspot.com`, `chatgpt` → `openai.com`, `google-sheets` → `google.com`). For unmapped rows, default to `<slug>.com`. Logo.dev returns a transparent fallback when the domain is unknown, so worst case the tile shows a clean placeholder rather than nothing.
-3. **Update `src/lib/db/pfs/tool-catalog.ts`**:
-   - Extend `ToolCatalogRow` with `domain?: string | null`.
-   - Replace `toolCatalogLogoUrl` so it prefers the Supabase storage mirror if `logo_mirror_key` is set, otherwise returns `https://img.logo.dev/{domain}?token={VITE_LOVABLE_CONNECTOR_LOGO_DEV_API_KEY}&size=80&format=png` when `domain` exists.
-   - Include `domain` in the select.
-4. **No component changes** — `ToolTile` already renders `<img src={logoUrl}>` and has graceful `onError` fallback to the category icon for any remaining misses.
+### 2. Inspector
+- Remove `fixed bottom-0 right-0 top-0 ... max-w-[390px]` variant (~L1896).
+- Remove `absolute inset-y-0 right-0 ... max-w-[460px]` variant (~L2032).
+- Both collapse into the single `<aside className="w-[360px] shrink-0 ...">` sibling above.
 
-### Acceptance
+### 3. Canvas sizing
+- Replace `h-[calc(100vh-280px)] min-h-[620px]` on the canvas container with `min-h-0 flex-1`.
+- ReactFlow gets `className="h-full w-full"`.
 
-- In Company Setup → Tool stack, opening the picker shows real brand logos for the major tools (Notion, Slack, HubSpot, Salesforce, OpenAI, Google Workspace, etc.).
-- Unknown/custom tools still show the orange category icon.
-- No new secrets required; uses the existing Logo.dev connector key.
+### 4. ReactFlow props (comfort defaults)
+```tsx
+fitView
+fitViewOptions={{ padding: 0.25, minZoom: 0.6, maxZoom: 1.4 }}
+minZoom={0.4}
+maxZoom={1.75}
+defaultEdgeOptions={{ type: "smoothstep" }}
+proOptions={{ hideAttribution: true }}
+```
+Call `fitView()` after node/layout changes so the diagram stays framed. Keep `MiniMap` and `Controls` pinned bottom-left inside the canvas column.
 
-### Out of scope
+## Out of scope
+Node behavior, data flow, validation, elkjs/auto-layout logic, design tokens — untouched.
 
-- Uploading curated SVGs to a `tool-logos` Storage bucket. We can do that later for tools where Logo.dev returns a poor match — the `logo_mirror_key` path stays as the override.
+## Verification
+- Canvas spans full width minus the 360px inspector.
+- Inspector top/bottom align exactly with canvas (no overhang).
+- A fresh 2–3 node process is fully visible without manual zoom.
+- Window resize keeps canvas + inspector at equal height.
+- Build passes; no logic regressions in process create/edit flows.

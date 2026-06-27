@@ -72,16 +72,16 @@ export type WorkspaceAdminOverview = {
     assessComplete: number;
     assessTotal: number;
     useCases: number;
-    scoredUseCases: number;
-    approvedUseCases: number;
+    pendingProcessApprovals: number;
+    approvedProcesses: number;
     activeRoadmap: number;
     openGovernanceFlags: number;
     pendingPilotReviews: number;
   };
   onboarding: {
     companyProfileComplete: boolean;
-    useCaseProfileComplete: boolean;
-    workedExampleSelected: boolean;
+    processContextComplete: boolean;
+    trainingExampleSelected: boolean;
   };
   billing: {
     planId: string;
@@ -145,7 +145,7 @@ export const getWorkspaceAdminOverview = createServerFn({ method: "POST" })
           .from("assess_progress")
           .select("id", { count: "exact", head: true })
           .eq("workspace_id", data.workspaceId)
-          .eq("status", "completed"),
+          .eq("status", "complete"),
       ),
       countRows(
         supabaseAdmin
@@ -229,16 +229,16 @@ export const getWorkspaceAdminOverview = createServerFn({ method: "POST" })
         assessComplete,
         assessTotal: MODULES.length,
         useCases: processes,
-        scoredUseCases: submittedProcesses,
-        approvedUseCases: approvedProcesses,
+        pendingProcessApprovals: submittedProcesses,
+        approvedProcesses,
         activeRoadmap,
         openGovernanceFlags,
         pendingPilotReviews,
       },
       onboarding: {
         companyProfileComplete: !!workspace.workspace_profile,
-        useCaseProfileComplete: !!workspace.use_case_profile,
-        workedExampleSelected: !!workspace.worked_example,
+        processContextComplete: !!workspace.use_case_profile,
+        trainingExampleSelected: !!workspace.worked_example,
       },
       billing: {
         planId: subscription?.plan_id ?? workspace.plan,
@@ -346,7 +346,7 @@ export const getWorkspaceAdminMembers = createServerFn({ method: "POST" })
       if (progressErr) throw new Error(progressErr.message);
       for (const row of progress ?? []) {
         const current = progressByUser.get(row.user_id) ?? { completed: 0, lastActivityAt: null };
-        if (row.status === "completed") current.completed += 1;
+        if (row.status === "complete") current.completed += 1;
         if (!current.lastActivityAt || Date.parse(row.updated_at) > Date.parse(current.lastActivityAt)) {
           current.lastActivityAt = row.updated_at;
         }

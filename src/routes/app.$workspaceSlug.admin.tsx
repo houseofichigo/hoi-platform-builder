@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
-import { BarChart3, CreditCard, ReceiptText, Scale, Settings, Shield, UserCog, Users } from "lucide-react";
+import { CreditCard, Settings, Shield, UserCog, Users } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin")({
@@ -8,12 +8,9 @@ export const Route = createFileRoute("/app/$workspaceSlug/admin")({
 
 const tabs = [
   { to: "/app/$workspaceSlug/admin", label: "Overview", icon: Shield, exact: true },
-  { to: "/app/$workspaceSlug/admin/onboarding", label: "Setup", icon: UserCog, exact: false },
+  { to: "/app/$workspaceSlug/admin/onboarding", label: "Company Setup", icon: UserCog, exact: false },
   { to: "/app/$workspaceSlug/admin/members", label: "Members", icon: Users, exact: false },
-  { to: "/app/$workspaceSlug/admin/analytics", label: "Analytics", icon: BarChart3, exact: false },
-  { to: "/app/$workspaceSlug/admin/review-policy", label: "Review policy", icon: Scale, exact: false },
   { to: "/app/$workspaceSlug/admin/billing", label: "Billing", icon: CreditCard, exact: false },
-  { to: "/app/$workspaceSlug/admin/invoices", label: "Invoices", icon: ReceiptText, exact: false },
   { to: "/app/$workspaceSlug/admin/settings", label: "Settings", icon: Settings, exact: false },
 ] as const;
 
@@ -55,7 +52,7 @@ function WorkspaceAdminLayout() {
           Manage <span className="accent-italic">{workspace.name}.</span>
         </h1>
         <p className="lead mt-2 max-w-[68ch]">
-          Manage team onboarding, usage, seats, billing visibility, and workspace setup. House of Ichigo controls owner and admin promotions.
+          Track platform health, review Build approvals, manage company setup, members, billing, and workspace controls. House of Ichigo controls owner and admin promotions.
         </p>
       </header>
 

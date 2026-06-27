@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
-import { UserPlus } from "lucide-react";
+import { Building2, UserPlus } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
+import { useAssignMemberStructure, useOrgChart } from "@/lib/db/org-chart";
 import { sendWorkspaceInvite } from "@/lib/invitations.functions";
 import {
   getWorkspaceAdminMembers,
@@ -25,6 +26,8 @@ function WorkspaceAdminMembersPage() {
   const resendInvite = useServerFn(sendWorkspaceInvite);
   const revokeInvite = useServerFn(revokeWorkspaceInvitation);
   const removeMember = useServerFn(removeWorkspaceMember);
+  const { data: orgChart } = useOrgChart();
+  const assignStructure = useAssignMemberStructure();
   const { data, isLoading, error } = useQuery({
     enabled: !!workspace,
     queryKey: ["workspace-admin", "members", workspace?.id],
@@ -35,6 +38,7 @@ function WorkspaceAdminMembersPage() {
     if (!workspace) return;
     qc.invalidateQueries({ queryKey: ["workspace-admin", "members", workspace.id] });
     qc.invalidateQueries({ queryKey: ["workspace-admin", "overview", workspace.id] });
+    qc.invalidateQueries({ queryKey: ["org-chart", workspace.id] });
   };
 
   const resendMutation = useMutation({
@@ -58,6 +62,10 @@ function WorkspaceAdminMembersPage() {
     },
     onError: (err) => toast.error((err as Error).message),
   });
+
+  const peopleByUserId = new Map((orgChart?.people ?? []).map((person) => [person.userId, person]));
+  const personOptions = orgChart?.people ?? [];
+  const departmentOptions = orgChart?.departments ?? [];
 
   const revokeMutation = useMutation({
     mutationFn: (inviteId: string) => {
@@ -92,7 +100,7 @@ function WorkspaceAdminMembersPage() {
           <p className="eyebrow-muted">Team access</p>
           <h2 className="mt-2 text-[22px] font-semibold text-navy">Members and invitations.</h2>
           <p className="mt-2 max-w-[64ch] text-[13px] text-graphite">
-            Invite members and viewers. Owner/admin promotions are handled by House of Ichigo so client super-user access stays controlled.
+            Invite members and viewers, remove workspace access, and assign people into the Company Setup org chart. Owner/admin promotions are handled by House of Ichigo.
           </p>
         </div>
         <Link
@@ -179,6 +187,110 @@ function WorkspaceAdminMembersPage() {
                 ))}
               </tbody>
             </table>
+          </section>
+
+          <section className="rounded-md border border-chalk bg-white p-5">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-terracotta" />
+                  <p className="eyebrow-muted">Org chart alignment</p>
+                </div>
+                <p className="mt-2 max-w-[64ch] text-[13px] text-graphite">
+                  Department and manager assignments are shared with Company Setup, Build ownership, and process review context.
+                </p>
+              </div>
+              <Link
+                to="/app/$workspaceSlug/admin/onboarding"
+                params={{ workspaceSlug: workspace.slug }}
+                className="btn-ichigo btn-ichigo-outline text-[13px]"
+              >
+                Open Company Setup
+              </Link>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-md border border-chalk">
+              <table className="w-full text-[13px]">
+                <thead className="bg-mist text-left font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+                  <tr>
+                    <th className="px-4 py-3 font-normal">Person</th>
+                    <th className="px-4 py-3 font-normal">Department</th>
+                    <th className="px-4 py-3 font-normal">Manager</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.members.map((member) => {
+                    const person = peopleByUserId.get(member.user_id);
+                    return (
+                      <tr key={member.user_id} className="border-t border-chalk text-navy">
+                        <td className="px-4 py-3">
+                          <p className="font-medium">{member.full_name || member.email || "Unnamed member"}</p>
+                          <p className="text-[12px] text-slate">{member.job_role || person?.jobTitle || member.role}</p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <select
+                            disabled={!person || assignStructure.isPending}
+                            value={person?.departmentId ?? ""}
+                            onChange={(event) => {
+                              if (!person) return;
+                              assignStructure.mutate(
+                                {
+                                  memberId: person.id,
+                                  departmentId: event.target.value || null,
+                                  managerMemberId: person.managerMemberId,
+                                },
+                                {
+                                  onSuccess: refreshMembers,
+                                  onError: (err) => toast.error((err as Error).message),
+                                },
+                              );
+                            }}
+                            className="w-full rounded-md border border-chalk bg-white px-3 py-2 text-[13px] text-navy disabled:bg-mist disabled:text-slate"
+                          >
+                            <option value="">Unassigned</option>
+                            {departmentOptions.map((department) => (
+                              <option key={department.id} value={department.id}>
+                                {department.name}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-4 py-3">
+                          <select
+                            disabled={!person || assignStructure.isPending}
+                            value={person?.managerMemberId ?? ""}
+                            onChange={(event) => {
+                              if (!person) return;
+                              assignStructure.mutate(
+                                {
+                                  memberId: person.id,
+                                  departmentId: person.departmentId,
+                                  managerMemberId: event.target.value || null,
+                                },
+                                {
+                                  onSuccess: refreshMembers,
+                                  onError: (err) => toast.error((err as Error).message),
+                                },
+                              );
+                            }}
+                            className="w-full rounded-md border border-chalk bg-white px-3 py-2 text-[13px] text-navy disabled:bg-mist disabled:text-slate"
+                          >
+                            <option value="">No manager</option>
+                            {personOptions
+                              .filter((candidate) => candidate.id !== person?.id)
+                              .map((candidate) => (
+                                <option key={candidate.id} value={candidate.id}>
+                                  {candidate.displayName}
+                                </option>
+                              ))}
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className="overflow-hidden rounded-md border border-chalk bg-white">

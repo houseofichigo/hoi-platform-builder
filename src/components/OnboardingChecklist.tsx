@@ -32,7 +32,7 @@ export function OnboardingChecklist() {
         break;
       case "invite":
         navigate({
-          to: "/app/$workspaceSlug/invite",
+          to: "/app/$workspaceSlug/admin/members",
           params: { workspaceSlug: slug },
         });
         break;

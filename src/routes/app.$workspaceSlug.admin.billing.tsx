@@ -36,9 +36,9 @@ function WorkspaceAdminBillingPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="eyebrow-muted">Billing</p>
-            <h2 className="mt-2 text-[24px] font-semibold text-navy">Plan and licences.</h2>
+            <h2 className="mt-2 text-[24px] font-semibold text-navy">Plan, seats, and invoices.</h2>
             <p className="mt-2 max-w-[62ch] text-[14px] text-graphite">
-              Billing is currently managed by House of Ichigo. Stripe self-service can be connected later without changing this admin surface.
+              Review subscription status, licence usage, invoice history, and billing events for this workspace.
             </p>
           </div>
           <a href="mailto:hello@houseofichigo.com" className="btn-ichigo btn-ichigo-outline text-[13px]">
@@ -76,6 +76,35 @@ function WorkspaceAdminBillingPage() {
           <BillingFact label="Current period end" value={data.subscription.currentPeriodEnd ? new Date(data.subscription.currentPeriodEnd).toLocaleDateString() : "Manual"} />
           <BillingFact label="Invoice history" value={data.billingEvents.length ? `${data.billingEvents.length} event(s)` : "No billing events yet"} />
         </dl>
+      </section>
+
+      <section className="overflow-hidden rounded-md border border-chalk bg-white">
+        <div className="border-b border-chalk px-5 py-4">
+          <p className="eyebrow-muted">Invoice and billing history</p>
+          <p className="mt-2 text-[13px] text-graphite">
+            Stripe invoices and manual billing events appear here as they are recorded.
+          </p>
+        </div>
+        {!data.billingEvents.length ? (
+          <p className="p-8 text-center text-[13px] text-slate">No invoice or billing events yet.</p>
+        ) : (
+          <table className="w-full text-[13px]">
+            <thead className="bg-mist text-left font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
+              <tr>
+                <th className="px-4 py-3 font-normal">Event</th>
+                <th className="px-4 py-3 font-normal">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.billingEvents.map((event) => (
+                <tr key={event.id} className="border-t border-chalk text-navy">
+                  <td className="px-4 py-3">{event.eventType}</td>
+                  <td className="px-4 py-3 text-slate">{new Date(event.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
     </div>
   );

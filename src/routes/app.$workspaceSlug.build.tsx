@@ -7,23 +7,21 @@ export const Route = createFileRoute("/app/$workspaceSlug/build")({
 });
 
 function BuildLayout() {
-  const { workspace, isAdmin } = useWorkspace();
+  const { workspace } = useWorkspace();
   const location = useLocation();
   if (!workspace) return null;
   const tabs: ReadonlyArray<{ to: string; label: string; exact?: boolean }> = [
-    { to: "/app/$workspaceSlug/build", label: "Priority Dashboard", exact: true },
+    { to: "/app/$workspaceSlug/build", label: "Overview", exact: true },
     { to: "/app/$workspaceSlug/build/process/new", label: "Map Process" },
     { to: "/app/$workspaceSlug/build/library", label: "Process Library" },
     { to: "/app/$workspaceSlug/build/templates", label: "Template Library" },
-    ...(isAdmin
-      ? []
-      : [{ to: "/app/$workspaceSlug/build/approvals", label: "Pending Approvals" }]),
+    { to: "/app/$workspaceSlug/build/approvals", label: "Approvals" },
   ];
   const base = `/app/${workspace.slug}/build`;
   return (
     <div className="space-y-6">
       <header>
-        <p className="eyebrow">BUILD · USE CASES</p>
+        <p className="eyebrow">BUILD · PROCESSES</p>
         <h1 className="h-display-md mt-2 flex items-center gap-3">
           <Workflow className="h-6 w-6 text-terracotta" />
           Map, review, approve.

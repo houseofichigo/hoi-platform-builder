@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, BarChart3, CreditCard, Users } from "lucide-react";
+import { ArrowRight, BarChart3, CheckCircle2, CreditCard, GitPullRequest, ShieldAlert, UserCog, Users } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getWorkspaceAdminOverview } from "@/lib/workspace-admin.functions";
+import { getBuildOverview } from "@/lib/db/build-analytics";
+import { AdminOverview as PfsAdminOverview } from "@/components/build/pfs/admin-overview";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin/")({
   component: WorkspaceAdminOverviewPage,
@@ -16,6 +18,11 @@ function WorkspaceAdminOverviewPage() {
     enabled: !!workspace,
     queryKey: ["workspace-admin", "overview", workspace?.id],
     queryFn: () => getOverview({ data: { workspaceId: workspace!.id } }),
+  });
+  const { data: buildOverview } = useQuery({
+    enabled: !!workspace,
+    queryKey: ["build-overview", workspace?.id],
+    queryFn: () => getBuildOverview(workspace!.id),
   });
 
   if (!workspace) return null;
@@ -43,40 +50,87 @@ function WorkspaceAdminOverviewPage() {
           warning={data.billing.seatUsage.overLimit}
         />
         <AdminMetric label="Assess progress" value={`${data.counts.assessComplete}/${data.counts.assessTotal}`} detail="completed modules" />
-        <AdminMetric label="Build portfolio" value={data.counts.useCases} detail={`${data.counts.scoredUseCases} scored · ${data.counts.approvedUseCases} approved`} />
+        <AdminMetric
+          label="Build portfolio"
+          value={buildOverview?.total ?? data.counts.useCases}
+          detail={`${buildOverview?.awaiting_decision ?? data.counts.pendingProcessApprovals} awaiting decision · ${buildOverview?.approved ?? data.counts.approvedProcesses} approved`}
+        />
         <AdminMetric label="Scale attention" value={data.counts.openGovernanceFlags} detail={`${data.counts.pendingPilotReviews} pilot review(s) pending`} />
       </section>
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <QuickLink
+          icon={GitPullRequest}
+          title="Approval requests"
+          body="Review submitted and in-review Build processes waiting on an admin decision."
+          detail={`${buildOverview?.awaiting_decision ?? data.counts.pendingProcessApprovals} waiting`}
+          to="/app/$workspaceSlug/build/approvals"
+          slug={workspace.slug}
+        />
+        <QuickLink
+          icon={UserCog}
+          title="Company setup"
+          body="Maintain the company profile, org chart, teams, tools, and priorities."
+          detail={data.onboarding.companyProfileComplete ? "Profile started" : "Needs setup"}
+          to="/app/$workspaceSlug/admin/onboarding"
+          slug={workspace.slug}
+        />
         <QuickLink
           icon={Users}
-          title="Team management"
-          body="Invite members and viewers, monitor pending invites, and see who has access."
+          title="Members"
+          body="Invite members and viewers, monitor pending invites, and align people to the org chart."
+          detail={`${data.counts.members} active`}
           to="/app/$workspaceSlug/admin/members"
           slug={workspace.slug}
         />
         <QuickLink
           icon={BarChart3}
-          title="Workspace analytics"
-          body="Track Assess completion, scored use cases, active roadmap work, and open governance items."
-          to="/app/$workspaceSlug/admin/analytics"
+          title="Governance attention"
+          body="Track open governance flags, active roadmap work, and pilot reviews needing evidence."
+          detail={`${data.counts.openGovernanceFlags} open flags`}
+          to="/app/$workspaceSlug/scale/governance"
+          slug={workspace.slug}
+        />
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <AttentionRow
+          icon={ShieldAlert}
+          label="Open governance flags"
+          value={data.counts.openGovernanceFlags}
+          to="/app/$workspaceSlug/scale/governance"
+          slug={workspace.slug}
+        />
+        <AttentionRow
+          icon={CheckCircle2}
+          label="Pending pilot reviews"
+          value={data.counts.pendingPilotReviews}
+          to="/app/$workspaceSlug/scale/reviews"
           slug={workspace.slug}
         />
         <QuickLink
           icon={CreditCard}
-          title="Billing and seats"
-          body="Review plan, licence usage, subscription status, and manual billing notes."
+          title="Billing and invoices"
+          body="Review plan, seat usage, subscription status, and invoice or billing events."
+          detail={data.billing.status}
           to="/app/$workspaceSlug/admin/billing"
           slug={workspace.slug}
         />
       </section>
 
       <section className="rounded-md border border-chalk bg-white p-5">
-        <p className="eyebrow-muted">Setup status</p>
+        <p className="eyebrow-muted">Company setup status</p>
         <div className="mt-4 grid gap-2 md:grid-cols-3">
           <SetupSignal label="Company profile" complete={data.onboarding.companyProfileComplete} />
-          <SetupSignal label="Use-case profile" complete={data.onboarding.useCaseProfileComplete} />
-          <SetupSignal label="Worked example" complete={data.onboarding.workedExampleSelected} />
+          <SetupSignal label="Process context" complete={data.onboarding.processContextComplete} />
+          <SetupSignal label="Training example" complete={data.onboarding.trainingExampleSelected} />
+        </div>
+      </section>
+
+      <section className="rounded-md border border-chalk bg-white p-5">
+        <p className="eyebrow-muted">Process platform analytics</p>
+        <div className="mt-4">
+          <PfsAdminOverview />
         </div>
       </section>
     </div>
@@ -98,13 +152,20 @@ function QuickLink({
   icon: Icon,
   title,
   body,
+  detail,
   to,
   slug,
 }: {
   icon: typeof Users;
   title: string;
   body: string;
-  to: "/app/$workspaceSlug/admin/members" | "/app/$workspaceSlug/admin/analytics" | "/app/$workspaceSlug/admin/billing";
+  detail?: string | number;
+  to:
+    | "/app/$workspaceSlug/admin/members"
+    | "/app/$workspaceSlug/admin/onboarding"
+    | "/app/$workspaceSlug/admin/billing"
+    | "/app/$workspaceSlug/build/approvals"
+    | "/app/$workspaceSlug/scale/governance";
   slug: string;
 }) {
   return (
@@ -112,6 +173,32 @@ function QuickLink({
       <Icon className="h-5 w-5 text-terracotta" />
       <p className="mt-4 text-[15px] font-semibold text-navy">{title}</p>
       <p className="mt-2 text-[13px] text-graphite">{body}</p>
+      {detail !== undefined && <p className="mt-3 text-[12px] font-medium text-slate">{detail}</p>}
+      <span className="mt-4 inline-flex items-center gap-1 text-[12px] text-terracotta">
+        Open <ArrowRight className="h-3 w-3" />
+      </span>
+    </Link>
+  );
+}
+
+function AttentionRow({
+  icon: Icon,
+  label,
+  value,
+  to,
+  slug,
+}: {
+  icon: typeof ShieldAlert;
+  label: string;
+  value: number;
+  to: "/app/$workspaceSlug/scale/reviews" | "/app/$workspaceSlug/scale/governance";
+  slug: string;
+}) {
+  return (
+    <Link to={to} params={{ workspaceSlug: slug }} className="rounded-md border border-chalk bg-white p-5 hover:border-terracotta">
+      <Icon className="h-5 w-5 text-terracotta" />
+      <p className="mt-4 text-[15px] font-semibold text-navy">{label}</p>
+      <p className="mt-2 text-[30px] font-semibold leading-none text-navy">{value}</p>
       <span className="mt-4 inline-flex items-center gap-1 text-[12px] text-terracotta">
         Open <ArrowRight className="h-3 w-3" />
       </span>

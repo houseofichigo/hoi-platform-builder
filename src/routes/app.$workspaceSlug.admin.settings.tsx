@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ReviewPolicy } from "@/components/build/pfs/process-platform";
 import { useWorkspace } from "@/hooks/useWorkspace";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin/settings")({
@@ -49,6 +50,13 @@ function WorkspaceAdminSettingsPage() {
           </Link>
           .
         </p>
+      </section>
+
+      <section className="rounded-md border border-chalk bg-white p-5">
+        <p className="eyebrow-muted">Build review policy</p>
+        <div className="mt-4">
+          <ReviewPolicy />
+        </div>
       </section>
 
       <section className="rounded-md border border-amber-200 bg-amber-50/40 p-5">

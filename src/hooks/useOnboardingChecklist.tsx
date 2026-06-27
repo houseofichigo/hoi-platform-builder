@@ -114,18 +114,18 @@ export function useOnboardingChecklist() {
       const items: ChecklistItem[] = [
         {
           id: "workspace_profile",
-          title: "Set up your company profile",
+          title: "Finish company setup",
           description:
-            "Five quick questions about your company. Every example in your training is generated from this context — no fictional profile.",
+            "Add your company profile, org chart, tools, priorities, and operating context.",
           complete: workspaceProfileComplete,
-          actionLabel: "Set up company profile",
+          actionLabel: "Open setup",
         },
         {
           id: "invite",
           title: "Invite your team",
-          description: "Workspaces are better with teammates. Invite the people you'll work with.",
+          description: "Invite the people who will assess, map, approve, and scale process work with you.",
           complete: inviteComplete,
-          actionLabel: "Send invites",
+          actionLabel: "Manage members",
         },
 
         {
@@ -138,7 +138,7 @@ export function useOnboardingChecklist() {
         {
           id: "library",
           title: "Browse the library",
-          description: "See what's possible. Prompts, agents, and case studies curated by House of Ichigo.",
+          description: "See prompts, agents, tools, and examples curated by House of Ichigo.",
           complete: libraryComplete,
           actionLabel: "Browse library",
         },

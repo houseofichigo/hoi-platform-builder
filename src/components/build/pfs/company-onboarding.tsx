@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolCatalogPicker } from "@/components/build/pfs/tool-catalog-picker";
 import { OrgChartCanvas } from "@/components/build/pfs/org-chart-canvas";
-import { useOrgChart } from "@/lib/db/pfs/org-chart";
+import { useOrgChart } from "@/lib/db/org-chart";
 import { computeReadiness } from "@/lib/org-chart/readiness";
 import {
   Select,

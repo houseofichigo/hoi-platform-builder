@@ -1,8 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
+  BarChart3,
+  Building2,
   CheckCircle2,
   Clock,
+  GitPullRequest,
   Mail,
   Rocket,
   UserPlus,
@@ -50,6 +53,7 @@ function WorkspaceHome() {
         role={role}
       />
       <OnboardingChecklist />
+      <WorkspaceActions slug={workspace.slug} role={role} isAdmin={isAdmin} />
       <ResumeSection slug={workspace.slug} />
       <TeamStatusSection slug={workspace.slug} />
       {isAdmin && <AttentionSection slug={workspace.slug} />}
@@ -130,12 +134,12 @@ function ResumeSection({ slug }: { slug: string }) {
           </ResumeTile>
 
           <ResumeTile
-            eyebrow="BUILD · USE CASES"
+            eyebrow="BUILD · PROCESSES"
             onClick={() => go("build")}
             loading={isLoading}
             empty={(data?.build.total ?? 0) === 0}
             emptyTitle="No processes yet"
-            emptyCta="Map your first"
+            emptyCta="Map your first process"
           >
             <p className="h-heading-md">{data?.build.total} processes</p>
             <p className="mt-1 text-[13px] text-graphite">
@@ -149,7 +153,7 @@ function ResumeSection({ slug }: { slug: string }) {
             loading={isLoading}
             empty={(data?.scale.active ?? 0) === 0 && (data?.scale.pendingApproval ?? 0) === 0}
             emptyTitle="Roadmap empty"
-            emptyCta="Score a use case to start"
+            emptyCta="Approve a process to start"
           >
             <p className="h-heading-md">{data?.scale.active} active</p>
             <p className="mt-1 text-[13px] text-graphite">
@@ -227,7 +231,7 @@ function TeamStatusSection({ slug }: { slug: string }) {
     },
     {
       eyebrow: "STAGE 03 · BUILD",
-      stat: `${data?.build.scored ?? 0}`,
+      stat: `${data?.build.mapped ?? 0}`,
       label: "PROCESSES MAPPED",
       context: `${data?.build.pending ?? 0} pending approval · ${data?.build.approved ?? 0} approved`,
     },
@@ -263,6 +267,73 @@ function TeamStatusSection({ slug }: { slug: string }) {
             <p className="mt-2 text-[13px] text-graphite">{c.context}</p>
           </button>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function WorkspaceActions({ slug, role, isAdmin }: { slug: string; role: string | null; isAdmin: boolean }) {
+  const actions = isAdmin
+    ? [
+        {
+          icon: Building2,
+          label: "Finish company setup",
+          detail: "Keep profile, org chart, tools, and priorities current.",
+          to: "/app/$workspaceSlug/admin/onboarding" as const,
+        },
+        {
+          icon: GitPullRequest,
+          label: "Review approvals",
+          detail: "Decide submitted Build processes before they move into Scale.",
+          to: "/app/$workspaceSlug/build/approvals" as const,
+        },
+        {
+          icon: BarChart3,
+          label: "View admin overview",
+          detail: "See members, usage, approval requests, billing, and governance attention.",
+          to: "/app/$workspaceSlug/admin" as const,
+        },
+      ]
+    : role === "viewer"
+      ? [
+          {
+            icon: BarChart3,
+            label: "Browse Build library",
+            detail: "Review mapped and approved process work in read-only mode.",
+            to: "/app/$workspaceSlug/build/library" as const,
+          },
+        ]
+      : [
+          {
+            icon: GitPullRequest,
+            label: "Map a process",
+            detail: "Capture the workflow, systems, risks, and automation opportunities.",
+            to: "/app/$workspaceSlug/build/process/new" as const,
+          },
+        ];
+
+  return (
+    <section>
+      <p className="eyebrow">NEXT BEST ACTIONS</p>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {actions.map((action) => {
+          const Icon = action.icon;
+          return (
+            <Link
+              key={action.label}
+              to={action.to}
+              params={{ workspaceSlug: slug }}
+              className="card card-elevate group"
+            >
+              <Icon className="h-5 w-5 text-terracotta" />
+              <p className="mt-4 text-[15px] font-semibold text-navy">{action.label}</p>
+              <p className="mt-2 text-[13px] text-graphite">{action.detail}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-[13px] text-terracotta">
+                Open <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

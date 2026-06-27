@@ -7,14 +7,14 @@ import { getBuildOverview } from "@/lib/db/build-analytics";
 
 export interface ResumeData {
   assess: { moduleNum: number; moduleTitle: string; progress: number; started: boolean };
-  build: { total: number; readyToScore: number; scored: number; submitted: number; pending: number; approved: number };
+  build: { total: number; readyToReview: number; mapped: number; submitted: number; pending: number; approved: number };
   scale: { active: number; pilot: number; live: number; openFlags: number; pendingReviews: number; pendingApproval: number };
 }
 
 export interface TeamStatus {
   assess: { completed: number; total: number; membersStarted: number };
   discover: { items: number };
-  build: { total: number; scored: number; pending: number; approved: number };
+  build: { total: number; mapped: number; pending: number; approved: number };
   scale: { live: number; pilot: number; active: number; openFlags: number; pendingReviews: number };
 }
 
@@ -55,11 +55,11 @@ async function fetchBuildCounts(workspaceId: string) {
   const overview = await getBuildOverview(workspaceId);
   return {
     total: overview.total,
-    scored: overview.approved,
+    mapped: overview.total,
     approved: overview.approved,
     submitted: overview.submitted,
     pending: overview.awaiting_decision,
-    readyToScore: overview.submitted + overview.under_review,
+    readyToReview: overview.submitted + overview.under_review,
   };
 }
 
@@ -160,7 +160,7 @@ export function useTeamStatus() {
       return {
         assess: { completed, total: 12, membersStarted },
         discover: { items: libraryRes.count ?? 0 },
-        build: { total: build.total, scored: build.scored, pending: build.pending, approved: build.approved },
+        build: { total: build.total, mapped: build.mapped, pending: build.pending, approved: build.approved },
         scale,
       };
     },

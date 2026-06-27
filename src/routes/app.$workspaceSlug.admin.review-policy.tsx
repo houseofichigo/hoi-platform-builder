@@ -1,14 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-import { ReviewPolicy } from "@/components/build/pfs/process-platform";
-import { useWorkspace } from "@/hooks/useWorkspace";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/$workspaceSlug/admin/review-policy")({
-  component: WorkspaceAdminReviewPolicyPage,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/app/$workspaceSlug/admin/settings",
+      params: { workspaceSlug: params.workspaceSlug },
+    });
+  },
 });
-
-function WorkspaceAdminReviewPolicyPage() {
-  const { workspace } = useWorkspace();
-  if (!workspace) return null;
-  return <ReviewPolicy />;
-}

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import type { OrgChartPayload } from "@/lib/db/pfs/org-chart";
+import type { OrgChartPayload } from "@/lib/db/org-chart";
 
 /**
  * Readiness signals for the Org Chart onboarding step.
@@ -25,17 +25,17 @@ const COVERAGE_WARN_THRESHOLD = 60;
 
 export function computeReadiness(payload: OrgChartPayload | null | undefined): OrgChartReadiness {
   const departments = (payload?.departments ?? []).filter((d) => !d.archivedAt);
-  const people = (payload?.people ?? []).filter((p) => !p.archivedAt);
+  const people = payload?.people ?? [];
   const invites = payload?.pendingInvites ?? [];
-  const ownerId = payload?.company.ownerMembershipId ?? null;
+  const ownerId = payload?.company?.ownerMembershipId ?? null;
 
   const hasDepartment = departments.length > 0;
   const hasPeopleOrInvites = people.length > 0 || invites.length > 0;
-  const departmentsWithoutLead = departments.filter((d) => !d.leadMembershipId).length;
+  const departmentsWithoutLead = departments.filter((d) => !(d.leadMembershipId ?? d.leadMemberId)).length;
 
   // a "missing manager" is an active person with no managerId who is not the
   // company owner (the org root has no manager by definition).
-  const missingManagers = people.filter((p) => !p.managerId && p.id !== ownerId).length;
+  const missingManagers = people.filter((p) => !(p.managerId ?? p.managerMemberId) && p.id !== ownerId).length;
 
   const pendingInvites = invites.length;
 

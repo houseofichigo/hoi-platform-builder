@@ -12,10 +12,13 @@ export interface OrgDepartment {
   name: string;
   parentId: string | null;
   leadMemberId: string | null;
+  leadMembershipId: string | null;
+  departmentLeadId: string | null;
   headcount: number | null;
   description: string | null;
   holdsSensitiveData: boolean;
   distinctAudience: boolean;
+  audienceId: string | null;
   archivedAt: string | null;
   childrenCount: number;
 }
@@ -26,10 +29,13 @@ export interface OrgPerson {
   role: WorkspaceRole;
   departmentId: string | null;
   managerMemberId: string | null;
+  managerId: string | null;
   displayName: string;
   jobTitle: string;
   avatarUrl: string | null;
+  archivedAt: string | null;
   directReportsCount: number;
+  email: string | null;
 }
 
 export interface OrgPendingInvite {
@@ -38,11 +44,16 @@ export interface OrgPendingInvite {
   role: Exclude<WorkspaceRole, "owner">;
   departmentId: string | null;
   managerMemberId: string | null;
+  managerId: string | null;
   status: string;
+  firstName: string | null;
+  lastName: string | null;
+  position: string | null;
 }
 
 export interface OrgChartPayload {
   workspace: { id: string; name: string; slug: string };
+  company: { id: string; name: string; ownerMembershipId: string | null };
   departments: OrgDepartment[];
   people: OrgPerson[];
   pendingInvites: OrgPendingInvite[];
@@ -54,10 +65,12 @@ export interface DepartmentInput {
   name: string;
   parentId?: string | null;
   leadMemberId?: string | null;
+  leadMembershipId?: string | null;
   headcount?: number | null;
   description?: string | null;
   holdsSensitiveData?: boolean;
   distinctAudience?: boolean;
+  audienceId?: string | null;
 }
 
 export interface InviteInput {
@@ -65,6 +78,10 @@ export interface InviteInput {
   role: Exclude<WorkspaceRole, "owner">;
   departmentId?: string | null;
   managerMemberId?: string | null;
+  managerId?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  position?: string | null;
 }
 
 function token() {
@@ -133,17 +150,27 @@ export async function fetchOrgChart(workspaceId: string): Promise<OrgChartPayloa
     }
   }
 
+  const ownerMember = members.find((member: any) => member.role === "owner") ?? members[0] ?? null;
+
   return {
     workspace: workspaceRes.data,
+    company: {
+      id: workspaceRes.data?.id ?? workspaceId,
+      name: workspaceRes.data?.name ?? "Workspace",
+      ownerMembershipId: ownerMember?.id ?? null,
+    },
     departments: (departmentsRes.data ?? []).map((department: any) => ({
       id: department.id,
       name: department.name,
       parentId: department.parent_id ?? null,
       leadMemberId: department.lead_member_id ?? null,
+      leadMembershipId: department.lead_member_id ?? null,
+      departmentLeadId: department.lead_member_id ?? null,
       headcount: department.headcount ?? null,
       description: department.description ?? null,
       holdsSensitiveData: Boolean(department.holds_sensitive_data),
       distinctAudience: Boolean(department.distinct_audience),
+      audienceId: null,
       archivedAt: department.archived_at ?? null,
       childrenCount: departmentChildren.get(department.id) ?? 0,
     })),
@@ -155,10 +182,13 @@ export async function fetchOrgChart(workspaceId: string): Promise<OrgChartPayloa
         role: member.role,
         departmentId: member.department_id ?? null,
         managerMemberId: member.manager_member_id ?? null,
+        managerId: member.manager_member_id ?? null,
         displayName: profile?.full_name || `Member ${String(member.user_id).slice(0, 8)}`,
         jobTitle: profile?.job_role || roleTitle(member.role),
         avatarUrl: profile?.avatar_url ?? null,
+        archivedAt: null,
         directReportsCount: directReports.get(member.id) ?? 0,
+        email: null,
       };
     }),
     pendingInvites: (invitesRes.data ?? []).map((invite: any) => ({
@@ -167,7 +197,11 @@ export async function fetchOrgChart(workspaceId: string): Promise<OrgChartPayloa
       role: invite.role,
       departmentId: invite.department_id ?? null,
       managerMemberId: invite.manager_member_id ?? null,
+      managerId: invite.manager_member_id ?? null,
       status: invite.status,
+      firstName: null,
+      lastName: null,
+      position: null,
     })),
     structureAvailable: true,
   };
@@ -178,7 +212,7 @@ export async function saveDepartment(workspaceId: string, input: DepartmentInput
     workspace_id: workspaceId,
     name: input.name.trim(),
     parent_id: input.parentId ?? null,
-    lead_member_id: input.leadMemberId ?? null,
+    lead_member_id: input.leadMemberId ?? input.leadMembershipId ?? null,
     headcount: input.headcount ?? 0,
     description: input.description?.trim() || null,
     holds_sensitive_data: Boolean(input.holdsSensitiveData),
@@ -241,9 +275,54 @@ export async function inviteWorkspacePerson(workspaceId: string, invitedBy: stri
     invited_by: invitedBy,
     token: token(),
     department_id: input.departmentId ?? null,
-    manager_member_id: input.managerMemberId ?? null,
+    manager_member_id: input.managerMemberId ?? input.managerId ?? null,
   });
   if (error) throw error;
+}
+
+export async function createDepartment(workspaceId: string, input: DepartmentInput) {
+  return saveDepartment(workspaceId, input);
+}
+
+export async function updateDepartment(workspaceId: string, input: DepartmentInput & { id: string }) {
+  return saveDepartment(workspaceId, input);
+}
+
+export async function assignMembership(workspaceId: string, input: { membershipId: string; departmentId?: string | null; managerId?: string | null }) {
+  return assignMemberStructure(workspaceId, input.membershipId, {
+    departmentId: input.departmentId,
+    managerMemberId: input.managerId,
+  });
+}
+
+export async function updateInvitationAssignment(workspaceId: string, input: { inviteId: string; departmentId: string | null }) {
+  const { error } = await db
+    .from("workspace_invitations")
+    .update({ department_id: input.departmentId })
+    .eq("workspace_id", workspaceId)
+    .eq("id", input.inviteId);
+  if (error) throw error;
+}
+
+export async function updateInvitationManager(workspaceId: string, input: { inviteId: string; managerId: string | null }) {
+  const { error } = await db
+    .from("workspace_invitations")
+    .update({ manager_member_id: input.managerId })
+    .eq("workspace_id", workspaceId)
+    .eq("id", input.inviteId);
+  if (error) throw error;
+}
+
+export async function updateDepartmentLead(workspaceId: string, input: { departmentId: string; leadMembershipId: string | null }) {
+  return setDepartmentLead(workspaceId, input.departmentId, input.leadMembershipId);
+}
+
+export async function updateOrganizationOwner(workspaceId: string, input: { membershipId: string }) {
+  await assignMemberStructure(workspaceId, input.membershipId, {
+    departmentId: null,
+    managerMemberId: null,
+  });
+  void input;
 }
 
 export function useOrgChart() {
@@ -255,11 +334,15 @@ export function useOrgChart() {
   });
 }
 
-function useOrgChartMutation<TInput>(mutationFn: (workspaceId: string, input: TInput) => Promise<unknown>) {
+export function useOrgChartMutation<TInput>(mutationFn: (workspaceId: string, input: TInput) => Promise<unknown>) {
   const { workspace } = useWorkspace();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: TInput) => mutationFn(workspace!.id, input),
+    mutationFn: async (input: TInput) => {
+      if (!workspace) throw new Error("Workspace not ready");
+
+      return mutationFn(workspace.id, input);
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["org-chart", workspace?.id] }),
   });
 }

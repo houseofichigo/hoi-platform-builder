@@ -26,6 +26,7 @@ import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminCatalogRouteImport } from './routes/admin.catalog'
 import { Route as AdminBillingRouteImport } from './routes/admin.billing'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AppWorkspaceSlugIndexRouteImport } from './routes/app.$workspaceSlug.index'
@@ -150,6 +151,11 @@ const AdminLibraryRoute = AdminLibraryRouteImport.update({
 const AdminContentRoute = AdminContentRouteImport.update({
   id: '/admin/content',
   path: '/admin/content',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCatalogRoute = AdminCatalogRouteImport.update({
+  id: '/admin/catalog',
+  path: '/admin/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBillingRoute = AdminBillingRouteImport.update({
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/catalog': typeof AdminCatalogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -454,6 +461,7 @@ export interface FileRoutesByTo {
   '/verify': typeof VerifyRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/catalog': typeof AdminCatalogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -508,6 +516,7 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/billing': typeof AdminBillingRoute
+  '/admin/catalog': typeof AdminCatalogRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -569,6 +578,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/catalog'
     | '/admin/content'
     | '/admin/library'
     | '/admin/settings'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/catalog'
     | '/admin/content'
     | '/admin/library'
     | '/admin/settings'
@@ -680,6 +691,7 @@ export interface FileRouteTypes {
     | '/verify'
     | '/admin/audit'
     | '/admin/billing'
+    | '/admin/catalog'
     | '/admin/content'
     | '/admin/library'
     | '/admin/settings'
@@ -740,6 +752,7 @@ export interface RootRouteChildren {
   VerifyRoute: typeof VerifyRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBillingRoute: typeof AdminBillingRoute
+  AdminCatalogRoute: typeof AdminCatalogRoute
   AdminContentRoute: typeof AdminContentRoute
   AdminLibraryRoute: typeof AdminLibraryRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -869,6 +882,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/content'
       fullPath: '/admin/content'
       preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/catalog': {
+      id: '/admin/catalog'
+      path: '/admin/catalog'
+      fullPath: '/admin/catalog'
+      preLoaderRoute: typeof AdminCatalogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/billing': {
@@ -1326,6 +1346,7 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyRoute: VerifyRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminBillingRoute: AdminBillingRoute,
+  AdminCatalogRoute: AdminCatalogRoute,
   AdminContentRoute: AdminContentRoute,
   AdminLibraryRoute: AdminLibraryRoute,
   AdminSettingsRoute: AdminSettingsRoute,

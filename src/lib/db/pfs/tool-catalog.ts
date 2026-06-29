@@ -14,6 +14,18 @@ export type ToolCatalogRow = Row<"tool_catalog"> & {
   description?: string | null;
   website?: string | null;
   domain?: string | null;
+  logo_url?: string | null;
+  homepage_url?: string | null;
+  subcategory?: string | null;
+  region_relevance?: string[] | null;
+  countries_relevant?: string[] | null;
+  departments?: string[] | null;
+  common_sme_use_cases?: string[] | null;
+  process_categories?: string[] | null;
+  likely_triggers?: string[] | null;
+  likely_actions?: string[] | null;
+  business_criticality_default?: string | null;
+  needs_review?: boolean | null;
 };
 export type ToolRow = Row<"tool">;
 
@@ -21,6 +33,8 @@ export type ToolCatalogFilters = {
   search?: string;
   category?: string;
   triggerOnly?: boolean;
+  region?: string;
+  department?: string;
 };
 
 export const businessToolCategories = [
@@ -56,6 +70,8 @@ export async function getToolCatalog(filters: ToolCatalogFilters = {}) {
 
   if (filters.category) query = query.eq("category", filters.category);
   if (filters.triggerOnly) query = query.eq("trigger_capable", true);
+  if (filters.region) query = query.contains("region_relevance", [filters.region]);
+  if (filters.department) query = query.contains("departments", [filters.department]);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -83,8 +99,9 @@ export function sortToolCatalogCategories(categories: string[]) {
 }
 
 export function toolCatalogLogoUrl(
-  row?: Pick<ToolCatalogRow, "logo_mirror_key" | "domain" | "website"> | null,
+  row?: Pick<ToolCatalogRow, "logo_mirror_key" | "domain" | "website" | "logo_url" | "homepage_url"> | null,
 ) {
+  if (row?.logo_url) return row.logo_url;
   const key = row?.logo_mirror_key?.replace(/^tool-logos\//, "");
   if (key) return supabase.storage.from("tool-logos").getPublicUrl(key).data.publicUrl;
 
@@ -92,9 +109,10 @@ export function toolCatalogLogoUrl(
   if (!token) return "";
 
   let domain = row?.domain?.trim() || "";
-  if (!domain && row?.website) {
+  const homepage = row?.homepage_url || row?.website;
+  if (!domain && homepage) {
     try {
-      const url = row.website.startsWith("http") ? row.website : `https://${row.website}`;
+      const url = homepage.startsWith("http") ? homepage : `https://${homepage}`;
       domain = new URL(url).hostname.replace(/^www\./, "");
     } catch {
       domain = "";
@@ -126,7 +144,14 @@ export function catalogProfileDefaults(row?: Partial<ToolCatalogRow> | null): Om
 
 export function useToolCatalog(filters: ToolCatalogFilters = {}) {
   return useQuery({
-    queryKey: ["tool-catalog", filters.category ?? "all", filters.triggerOnly ?? false, filters.search ?? ""],
+    queryKey: [
+      "tool-catalog",
+      filters.category ?? "all",
+      filters.triggerOnly ?? false,
+      filters.search ?? "",
+      filters.region ?? "any",
+      filters.department ?? "any",
+    ],
     queryFn: () => getToolCatalog(filters),
     staleTime: 1000 * 60 * 30,
   });

@@ -2923,6 +2923,291 @@ export type Database = {
           },
         ]
       }
+      stg_category_mapping: {
+        Row: {
+          brief_category: string | null
+          source_category: string | null
+          status: string | null
+          tool_count: string | null
+        }
+        Insert: {
+          brief_category?: string | null
+          source_category?: string | null
+          status?: string | null
+          tool_count?: string | null
+        }
+        Update: {
+          brief_category?: string | null
+          source_category?: string | null
+          status?: string | null
+          tool_count?: string | null
+        }
+        Relationships: []
+      }
+      stg_deleted_duplicate_actions: {
+        Row: {
+          action_family: string | null
+          business_action: string | null
+          business_object: string | null
+          business_use_case: string | null
+          capability_type: string | null
+          confidence_score: string | null
+          is_trigger: string | null
+          kept_confidence_score: string | null
+          kept_under_tool_slug: string | null
+          notes: string | null
+          operation_group: string | null
+          removed_reason: string | null
+          source_platform: string | null
+          source_url: string | null
+          tool_name: string | null
+          tool_slug: string | null
+        }
+        Insert: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: string | null
+          is_trigger?: string | null
+          kept_confidence_score?: string | null
+          kept_under_tool_slug?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          removed_reason?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+        }
+        Update: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: string | null
+          is_trigger?: string | null
+          kept_confidence_score?: string | null
+          kept_under_tool_slug?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          removed_reason?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+        }
+        Relationships: []
+      }
+      stg_manual_review_queue: {
+        Row: {
+          entity: string | null
+          name_or_action: string | null
+          reason: string | null
+          suggested_phase: string | null
+        }
+        Insert: {
+          entity?: string | null
+          name_or_action?: string | null
+          reason?: string | null
+          suggested_phase?: string | null
+        }
+        Update: {
+          entity?: string | null
+          name_or_action?: string | null
+          reason?: string | null
+          suggested_phase?: string | null
+        }
+        Relationships: []
+      }
+      stg_name_normalization: {
+        Row: {
+          id: string | null
+          new_name: string | null
+          new_slug: string | null
+          original_name: string | null
+          original_slug: string | null
+          rule_applied: string | null
+        }
+        Insert: {
+          id?: string | null
+          new_name?: string | null
+          new_slug?: string | null
+          original_name?: string | null
+          original_slug?: string | null
+          rule_applied?: string | null
+        }
+        Update: {
+          id?: string | null
+          new_name?: string | null
+          new_slug?: string | null
+          original_name?: string | null
+          original_slug?: string | null
+          rule_applied?: string | null
+        }
+        Relationships: []
+      }
+      stg_proposed_merges: {
+        Row: {
+          canonical_name: string | null
+          cluster_id: string | null
+          decision: string | null
+          member_categories: string | null
+          member_names: string | null
+          member_slugs: string | null
+          reason: string | null
+          similarity: string | null
+        }
+        Insert: {
+          canonical_name?: string | null
+          cluster_id?: string | null
+          decision?: string | null
+          member_categories?: string | null
+          member_names?: string | null
+          member_slugs?: string | null
+          reason?: string | null
+          similarity?: string | null
+        }
+        Update: {
+          canonical_name?: string | null
+          cluster_id?: string | null
+          decision?: string | null
+          member_categories?: string | null
+          member_names?: string | null
+          member_slugs?: string | null
+          reason?: string | null
+          similarity?: string | null
+        }
+        Relationships: []
+      }
+      stg_tool_action_catalog_cleaned: {
+        Row: {
+          action_family: string | null
+          business_action: string | null
+          business_object: string | null
+          business_use_case: string | null
+          capability_type: string | null
+          confidence_score: string | null
+          is_trigger: string | null
+          notes: string | null
+          operation_group: string | null
+          source_platform: string | null
+          source_url: string | null
+          tool_name: string | null
+          tool_slug: string | null
+        }
+        Insert: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: string | null
+          is_trigger?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+        }
+        Update: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: string | null
+          is_trigger?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug?: string | null
+        }
+        Relationships: []
+      }
+      stg_tool_catalog_cleaned: {
+        Row: {
+          business_criticality_default: string | null
+          category: string | null
+          clean_slug: string | null
+          common_sme_use_cases: string | null
+          confidence_score: string | null
+          countries_relevant: string | null
+          default_accessibility: string | null
+          default_api_available: string | null
+          default_data_sensitivity: string | null
+          default_data_structure: string | null
+          departments: string | null
+          description: string | null
+          homepage_url: string | null
+          likely_actions: string | null
+          likely_triggers: string | null
+          logo_url: string | null
+          name: string | null
+          notes: string | null
+          process_categories: string | null
+          region_relevance: string | null
+          source_urls: string | null
+          subcategory: string | null
+          trigger_capable: string | null
+        }
+        Insert: {
+          business_criticality_default?: string | null
+          category?: string | null
+          clean_slug?: string | null
+          common_sme_use_cases?: string | null
+          confidence_score?: string | null
+          countries_relevant?: string | null
+          default_accessibility?: string | null
+          default_api_available?: string | null
+          default_data_sensitivity?: string | null
+          default_data_structure?: string | null
+          departments?: string | null
+          description?: string | null
+          homepage_url?: string | null
+          likely_actions?: string | null
+          likely_triggers?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notes?: string | null
+          process_categories?: string | null
+          region_relevance?: string | null
+          source_urls?: string | null
+          subcategory?: string | null
+          trigger_capable?: string | null
+        }
+        Update: {
+          business_criticality_default?: string | null
+          category?: string | null
+          clean_slug?: string | null
+          common_sme_use_cases?: string | null
+          confidence_score?: string | null
+          countries_relevant?: string | null
+          default_accessibility?: string | null
+          default_api_available?: string | null
+          default_data_sensitivity?: string | null
+          default_data_structure?: string | null
+          departments?: string | null
+          description?: string | null
+          homepage_url?: string | null
+          likely_actions?: string | null
+          likely_triggers?: string | null
+          logo_url?: string | null
+          name?: string | null
+          notes?: string | null
+          process_categories?: string | null
+          region_relevance?: string | null
+          source_urls?: string | null
+          subcategory?: string | null
+          trigger_capable?: string | null
+        }
+        Relationships: []
+      }
       strategic_priority: {
         Row: {
           archived_at: string | null

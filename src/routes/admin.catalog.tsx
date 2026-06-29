@@ -126,7 +126,8 @@ function ToolsTab() {
     queryFn: () => list({ data: { search: search || undefined, limit, offset: page * limit } }),
   });
   const approveMutation = useMutation({
-    mutationFn: (input: Parameters<typeof approve>[0]["data"]) => approve({ data: input }),
+    mutationFn: (input: { id: string; category?: string; subcategory?: string; description?: string; clearReview?: boolean }) =>
+      approve({ data: input }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "catalog"] }),
   });
 

@@ -1591,52 +1591,6 @@ function ProcessBuilder() {
   );
 }
 
-function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
-  const currentIndex = builderSteps.findIndex((item) => item.id === current);
-
-  return (
-    <div className="relative grid gap-3 md:grid-cols-3">
-      <div className="absolute left-[12%] right-[12%] top-6 hidden h-px bg-[var(--chalk)] md:block" />
-      {builderSteps.map((item, index) => {
-        const active = item.id === current;
-        const complete = index < currentIndex;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            className={`relative z-10 flex min-h-20 items-center gap-3 rounded-[var(--r-md)] border p-3 text-left transition ${
-              active
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white shadow-sm"
-                : complete
-                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)]"
-                  : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
-            }`}
-          >
-            <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-[13px] ${
-                active
-                  ? "border-white bg-white text-[var(--ichigo-navy)]"
-                  : complete
-                    ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
-                    : "border-[var(--chalk)] bg-white text-[var(--slate)]"
-              }`}
-            >
-              {complete ? <Check className="h-4 w-4" /> : index + 1}
-            </span>
-            <span>
-              <span className="block font-sans text-[14px] font-semibold">{item.label}</span>
-              <span className={`mt-1 block font-sans text-[12px] ${active ? "text-white/75" : "text-[var(--slate)]"}`}>
-                {item.caption}
-              </span>
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function BuilderStageStepper({
   current,
   onSelect,

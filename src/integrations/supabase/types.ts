@@ -3194,10 +3194,12 @@ export type Database = {
           integration_source: string
           is_active: boolean
           needs_manual_review: boolean
+          needs_review: boolean
           operation_group: string | null
           output_data_created: string | null
           process_mapping_category: string | null
           raw_source_label: string | null
+          review_reason: string | null
           tool_category: string | null
           tool_description: string | null
           tool_id: string | null
@@ -3224,10 +3226,12 @@ export type Database = {
           integration_source?: string
           is_active?: boolean
           needs_manual_review?: boolean
+          needs_review?: boolean
           operation_group?: string | null
           output_data_created?: string | null
           process_mapping_category?: string | null
           raw_source_label?: string | null
+          review_reason?: string | null
           tool_category?: string | null
           tool_description?: string | null
           tool_id?: string | null
@@ -3254,10 +3258,12 @@ export type Database = {
           integration_source?: string
           is_active?: boolean
           needs_manual_review?: boolean
+          needs_review?: boolean
           operation_group?: string | null
           output_data_created?: string | null
           process_mapping_category?: string | null
           raw_source_label?: string | null
+          review_reason?: string | null
           tool_category?: string | null
           tool_description?: string | null
           tool_id?: string | null
@@ -3402,42 +3408,317 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_action_deleted_log: {
+        Row: {
+          action_family: string | null
+          business_action: string | null
+          business_object: string | null
+          business_use_case: string | null
+          capability_type: string | null
+          confidence_score: number | null
+          id: string
+          kept_under_tool_slug: string | null
+          notes: string | null
+          operation_group: string | null
+          original_id: string | null
+          removed_at: string
+          removed_reason: string | null
+          source_platform: string | null
+          source_url: string | null
+          tool_name: string | null
+          tool_slug: string
+        }
+        Insert: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: number | null
+          id?: string
+          kept_under_tool_slug?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          original_id?: string | null
+          removed_at?: string
+          removed_reason?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug: string
+        }
+        Update: {
+          action_family?: string | null
+          business_action?: string | null
+          business_object?: string | null
+          business_use_case?: string | null
+          capability_type?: string | null
+          confidence_score?: number | null
+          id?: string
+          kept_under_tool_slug?: string | null
+          notes?: string | null
+          operation_group?: string | null
+          original_id?: string | null
+          removed_at?: string
+          removed_reason?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          tool_name?: string | null
+          tool_slug?: string
+        }
+        Relationships: []
+      }
       tool_catalog: {
         Row: {
+          business_criticality_default: string | null
           category: string
+          common_sme_use_cases: string[] | null
+          confidence_score: number | null
+          countries_relevant: string[] | null
           created_at: string
+          default_accessibility: string | null
+          default_api_available: boolean | null
+          default_data_sensitivity: string | null
+          default_data_structure: string | null
+          departments: string[] | null
+          description: string | null
           domain: string | null
+          homepage_url: string | null
           icon_key: string | null
           id: string
           is_active: boolean
+          likely_actions: string[] | null
+          likely_triggers: string[] | null
+          logo_url: string | null
           name: string
+          needs_review: boolean
+          notes: string | null
+          process_categories: string[] | null
+          region_relevance: string[] | null
+          review_reason: string | null
           slug: string
           source: string
+          source_urls: string[] | null
+          subcategory: string | null
           trigger_capable: boolean
+          updated_at: string
         }
         Insert: {
+          business_criticality_default?: string | null
           category: string
+          common_sme_use_cases?: string[] | null
+          confidence_score?: number | null
+          countries_relevant?: string[] | null
           created_at?: string
+          default_accessibility?: string | null
+          default_api_available?: boolean | null
+          default_data_sensitivity?: string | null
+          default_data_structure?: string | null
+          departments?: string[] | null
+          description?: string | null
           domain?: string | null
+          homepage_url?: string | null
           icon_key?: string | null
           id?: string
           is_active?: boolean
+          likely_actions?: string[] | null
+          likely_triggers?: string[] | null
+          logo_url?: string | null
           name: string
+          needs_review?: boolean
+          notes?: string | null
+          process_categories?: string[] | null
+          region_relevance?: string[] | null
+          review_reason?: string | null
           slug: string
           source?: string
+          source_urls?: string[] | null
+          subcategory?: string | null
           trigger_capable?: boolean
+          updated_at?: string
         }
         Update: {
+          business_criticality_default?: string | null
           category?: string
+          common_sme_use_cases?: string[] | null
+          confidence_score?: number | null
+          countries_relevant?: string[] | null
           created_at?: string
+          default_accessibility?: string | null
+          default_api_available?: boolean | null
+          default_data_sensitivity?: string | null
+          default_data_structure?: string | null
+          departments?: string[] | null
+          description?: string | null
           domain?: string | null
+          homepage_url?: string | null
           icon_key?: string | null
           id?: string
           is_active?: boolean
+          likely_actions?: string[] | null
+          likely_triggers?: string[] | null
+          logo_url?: string | null
           name?: string
+          needs_review?: boolean
+          notes?: string | null
+          process_categories?: string[] | null
+          region_relevance?: string[] | null
+          review_reason?: string | null
           slug?: string
           source?: string
+          source_urls?: string[] | null
+          subcategory?: string | null
           trigger_capable?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tool_catalog_merge_log: {
+        Row: {
+          canonical_slug: string
+          canonical_tool_id: string | null
+          cluster_id: string
+          decision: string
+          id: string
+          member_categories: string | null
+          member_names: string | null
+          merged_at: string
+          merged_slug: string
+          merged_tool_id: string | null
+          reason: string | null
+          similarity: string | null
+        }
+        Insert: {
+          canonical_slug: string
+          canonical_tool_id?: string | null
+          cluster_id: string
+          decision: string
+          id?: string
+          member_categories?: string | null
+          member_names?: string | null
+          merged_at?: string
+          merged_slug: string
+          merged_tool_id?: string | null
+          reason?: string | null
+          similarity?: string | null
+        }
+        Update: {
+          canonical_slug?: string
+          canonical_tool_id?: string | null
+          cluster_id?: string
+          decision?: string
+          id?: string
+          member_categories?: string | null
+          member_names?: string | null
+          merged_at?: string
+          merged_slug?: string
+          merged_tool_id?: string | null
+          reason?: string | null
+          similarity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_catalog_merge_log_canonical_tool_id_fkey"
+            columns: ["canonical_tool_id"]
+            isOneToOne: false
+            referencedRelation: "tool_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tool_catalog_merge_log_merged_tool_id_fkey"
+            columns: ["merged_tool_id"]
+            isOneToOne: false
+            referencedRelation: "tool_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_catalog_rename_log: {
+        Row: {
+          applied_at: string
+          id: string
+          new_name: string
+          new_slug: string
+          original_name: string
+          original_slug: string
+          rule_applied: string | null
+          tool_catalog_id: string | null
+        }
+        Insert: {
+          applied_at?: string
+          id?: string
+          new_name: string
+          new_slug: string
+          original_name: string
+          original_slug: string
+          rule_applied?: string | null
+          tool_catalog_id?: string | null
+        }
+        Update: {
+          applied_at?: string
+          id?: string
+          new_name?: string
+          new_slug?: string
+          original_name?: string
+          original_slug?: string
+          rule_applied?: string | null
+          tool_catalog_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_catalog_rename_log_tool_catalog_id_fkey"
+            columns: ["tool_catalog_id"]
+            isOneToOne: false
+            referencedRelation: "tool_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_review_queue: {
+        Row: {
+          created_at: string
+          entity: string
+          entity_ref: string
+          id: string
+          name_or_action: string
+          payload: Json | null
+          reason: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          suggested_phase: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity: string
+          entity_ref: string
+          id?: string
+          name_or_action: string
+          payload?: Json | null
+          reason: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          suggested_phase?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity?: string
+          entity_ref?: string
+          id?: string
+          name_or_action?: string
+          payload?: Json | null
+          reason?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          suggested_phase?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

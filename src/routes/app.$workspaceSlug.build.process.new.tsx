@@ -685,6 +685,7 @@ function NewProcessRoute() {
 
 function ProcessBuilder() {
   const navigate = useNavigate();
+  const { workspaceSlug } = Route.useParams();
   const templateSearch = Route.useSearch();
   // When the user arrives here via "Start with this template" from the
   // Template Library, treat it as an explicit "new diagram" intent: ignore any
@@ -1386,23 +1387,62 @@ function ProcessBuilder() {
                 Diagram-first <span className="italic text-[var(--ichigo-orange)]">capture</span>
               </h1>
             </div>
-            {hasDraftContent ? (
-              <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
-                <Save className="h-4 w-4 text-[var(--ichigo-orange)]" />
-                <span className="font-sans text-[12px] text-[var(--slate)]">
-                  {draftStatus === "restored" ? "Draft restored" : draftStatus === "saved" ? "Draft autosaved" : "Draft active"}
-                </span>
-                <button
+            {step !== "start" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {hasDraftContent ? (
+                  <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
+                    <Save className="h-4 w-4 text-[var(--ichigo-orange)]" />
+                    <span className="font-sans text-[12px] text-[var(--slate)]">
+                      {draftStatus === "restored"
+                        ? "Draft restored"
+                        : draftStatus === "saved"
+                          ? "Draft autosaved"
+                          : "Draft active"}
+                    </span>
+                  </div>
+                ) : null}
+                <Button
                   type="button"
-                  onClick={discardDraft}
-                  className="font-sans text-[12px] font-semibold text-[var(--ichigo-orange)]"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (
+                      !hasDraftContent ||
+                      (typeof window !== "undefined" &&
+                        window.confirm("Discard this process draft and start over?"))
+                    ) {
+                      discardDraft();
+                    }
+                  }}
+                  className="gap-2 border-[var(--chalk)] text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
                 >
-                  Discard
-                </button>
+                  <RotateCw className="h-4 w-4" />
+                  Start over
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (
+                      !hasDraftContent ||
+                      (typeof window !== "undefined" &&
+                        window.confirm("Leave the process builder? Your draft will be saved."))
+                    ) {
+                      navigate({
+                        to: "/app/$workspaceSlug/build",
+                        params: { workspaceSlug },
+                      });
+                    }
+                  }}
+                  className="gap-2 border-[var(--chalk)] text-[var(--ichigo-orange)] hover:text-[var(--ichigo-orange)]"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Cancel
+                </Button>
               </div>
             ) : null}
           </div>
-          {step !== "start" ? <BuilderStepper current={step} onSelect={setStep} /> : null}
         </div>
       </Card>
 
@@ -1547,52 +1587,6 @@ function ProcessBuilder() {
           onNavigateStep={setStep}
         />
       ) : null}
-    </div>
-  );
-}
-
-function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
-  const currentIndex = builderSteps.findIndex((item) => item.id === current);
-
-  return (
-    <div className="relative grid gap-3 md:grid-cols-3">
-      <div className="absolute left-[12%] right-[12%] top-6 hidden h-px bg-[var(--chalk)] md:block" />
-      {builderSteps.map((item, index) => {
-        const active = item.id === current;
-        const complete = index < currentIndex;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            className={`relative z-10 flex min-h-20 items-center gap-3 rounded-[var(--r-md)] border p-3 text-left transition ${
-              active
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white shadow-sm"
-                : complete
-                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)]"
-                  : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
-            }`}
-          >
-            <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-[13px] ${
-                active
-                  ? "border-white bg-white text-[var(--ichigo-navy)]"
-                  : complete
-                    ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
-                    : "border-[var(--chalk)] bg-white text-[var(--slate)]"
-              }`}
-            >
-              {complete ? <Check className="h-4 w-4" /> : index + 1}
-            </span>
-            <span>
-              <span className="block font-sans text-[14px] font-semibold">{item.label}</span>
-              <span className={`mt-1 block font-sans text-[12px] ${active ? "text-white/75" : "text-[var(--slate)]"}`}>
-                {item.caption}
-              </span>
-            </span>
-          </button>
-        );
-      })}
     </div>
   );
 }

@@ -1843,9 +1843,11 @@ function DiagramStep(props: {
   return (
     <div className="fixed inset-x-0 bottom-0 top-[56px] z-30 flex bg-[var(--paper)]">
       <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="border-b border-[var(--chalk)] bg-white/90 px-4 py-3">
+          <BuilderStageStepper current={props.currentStep} onSelect={props.onNavigateStep} />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--chalk)] bg-white/90 p-4">
             <div className="flex min-w-0 flex-col gap-2">
-              <BuilderStepNav current={props.currentStep} onSelect={props.onNavigateStep} />
               <p className="font-sans text-[12px] text-[var(--slate)]">Start with a trigger, then use the + controls to add steps, branches, joins, and tools.</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

@@ -1684,7 +1684,7 @@ function FrameStep({
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
       <div className="mb-5 border-b border-[var(--chalk)] pb-4">
-        <BuilderStepNav current={currentStep} onSelect={onNavigateStep} />
+        <BuilderStageStepper current={currentStep} onSelect={onNavigateStep} />
       </div>
       <div className="space-y-6">
         <div>

@@ -1387,18 +1387,6 @@ function ProcessBuilder() {
                 Diagram-first <span className="italic text-[var(--terracotta)]">capture</span>
               </h1>
             </div>
-<<<<<<< HEAD
-            {hasDraftContent ? (
-              <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
-                <Save className="h-4 w-4 text-[var(--terracotta)]" />
-                <span className="font-sans text-[12px] text-[var(--slate)]">
-                  {draftStatus === "restored" ? "Draft restored" : draftStatus === "saved" ? "Draft autosaved" : "Draft active"}
-                </span>
-                <button
-                  type="button"
-                  onClick={discardDraft}
-                  className="font-sans text-[12px] font-semibold text-[var(--terracotta)]"
-=======
             {step !== "start" ? (
               <div className="flex flex-wrap items-center gap-2">
                 {hasDraftContent ? (
@@ -1427,7 +1415,6 @@ function ProcessBuilder() {
                     }
                   }}
                   className="gap-2 border-[var(--chalk)] text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
->>>>>>> db2773587f2b8b39a4dd872d1bf9bdf2e8b9b6dc
                 >
                   <RotateCw className="h-4 w-4" />
                   Start over
@@ -1604,55 +1591,6 @@ function ProcessBuilder() {
   );
 }
 
-<<<<<<< HEAD
-function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
-  const currentIndex = builderSteps.findIndex((item) => item.id === current);
-
-  return (
-    <div className="relative grid gap-3 md:grid-cols-3">
-      <div className="absolute left-[12%] right-[12%] top-6 hidden h-px bg-[var(--chalk)] md:block" />
-      {builderSteps.map((item, index) => {
-        const active = item.id === current;
-        const complete = index < currentIndex;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(item.id)}
-            className={`relative z-10 flex min-h-20 items-center gap-3 rounded-[var(--r-md)] border p-3 text-left transition ${
-              active
-                ? "border-[var(--navy)] bg-[var(--navy)] text-white shadow-sm"
-                : complete
-                  ? "border-[var(--navy)] bg-white text-[var(--navy)]"
-                  : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
-            }`}
-          >
-            <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-[13px] ${
-                active
-                  ? "border-white bg-white text-[var(--navy)]"
-                  : complete
-                    ? "border-[var(--navy)] bg-[var(--navy)] text-white"
-                    : "border-[var(--chalk)] bg-white text-[var(--slate)]"
-              }`}
-            >
-              {complete ? <Check className="h-4 w-4" /> : index + 1}
-            </span>
-            <span>
-              <span className="block font-sans text-[14px] font-semibold">{item.label}</span>
-              <span className={`mt-1 block font-sans text-[12px] ${active ? "text-white/75" : "text-[var(--slate)]"}`}>
-                {item.caption}
-              </span>
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-=======
->>>>>>> db2773587f2b8b39a4dd872d1bf9bdf2e8b9b6dc
 function BuilderStageStepper({
   current,
   onSelect,

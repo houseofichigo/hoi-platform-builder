@@ -98,7 +98,7 @@ function DepartmentForm({ departmentId, payload, onClose }: { departmentId: stri
   const department = payload.departments.find((d) => d.id === departmentId);
   const updateMut = useOrgChartMutation(updateDepartment);
   const archiveMut = useOrgChartMutation<string>((wsId, id) => archiveDepartment(wsId, id));
-  const leadMut = useOrgChartMutation(setDepartmentLead);
+  const leadMut = useOrgChartMutation(updateDepartmentLead);
 
   const [name, setName] = useState(department?.name ?? "");
   const [parentId, setParentId] = useState<string>(department?.parentId ?? "");
@@ -136,7 +136,7 @@ function DepartmentForm({ departmentId, payload, onClose }: { departmentId: stri
       });
       const previousLead = department.leadMembershipId ?? department.leadMemberId ?? "";
       if ((leadId || "") !== previousLead) {
-        await leadMut.mutateAsync({ departmentId, leadMemberId: leadId || null });
+        await leadMut.mutateAsync({ departmentId, leadMembershipId: leadId || null });
       }
       toast.success("Department updated");
       onClose();
@@ -203,7 +203,7 @@ function DepartmentForm({ departmentId, payload, onClose }: { departmentId: stri
 function PersonForm({ personId, payload, onClose }: { personId: string; payload: OrgChartPayload; onClose: () => void }) {
   const person = payload.people.find((p) => p.id === personId);
   const assignMut = useOrgChartMutation(assignMembership);
-  const leadMut = useOrgChartMutation(setDepartmentLead);
+  const leadMut = useOrgChartMutation(updateDepartmentLead);
 
   const [departmentId, setDepartmentId] = useState<string>(person?.departmentId ?? "");
   const [managerId, setManagerId] = useState<string>(person?.managerId ?? "");
@@ -237,9 +237,9 @@ function PersonForm({ personId, payload, onClose }: { personId: string; payload:
         managerId: managerId || null,
       });
       if (departmentId && makeLead && !isCurrentLead) {
-        await leadMut.mutateAsync({ departmentId, leadMemberId: person.id });
+        await leadMut.mutateAsync({ departmentId, leadMembershipId: person.id });
       } else if (isCurrentLead && (!makeLead || departmentId !== person.departmentId)) {
-        if (person.departmentId) await leadMut.mutateAsync({ departmentId: person.departmentId, leadMemberId: null });
+        if (person.departmentId) await leadMut.mutateAsync({ departmentId: person.departmentId, leadMembershipId: null });
       }
       toast.success("Member updated");
       onClose();

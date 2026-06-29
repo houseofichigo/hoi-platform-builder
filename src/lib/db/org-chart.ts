@@ -325,6 +325,15 @@ export async function updateOrganizationOwner(workspaceId: string, input: { memb
   void input;
 }
 
+export async function cancelInvitation(workspaceId: string, inviteId: string) {
+  const { error } = await db
+    .from("workspace_invitations")
+    .delete()
+    .eq("workspace_id", workspaceId)
+    .eq("id", inviteId);
+  if (error) throw error;
+}
+
 export function useOrgChart() {
   const { workspace } = useWorkspace();
   return useQuery({

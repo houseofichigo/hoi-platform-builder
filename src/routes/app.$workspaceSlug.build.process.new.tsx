@@ -685,6 +685,7 @@ function NewProcessRoute() {
 
 function ProcessBuilder() {
   const navigate = useNavigate();
+  const { workspaceSlug } = Route.useParams();
   const templateSearch = Route.useSearch();
   // When the user arrives here via "Start with this template" from the
   // Template Library, treat it as an explicit "new diagram" intent: ignore any
@@ -1386,6 +1387,7 @@ function ProcessBuilder() {
                 Diagram-first <span className="italic text-[var(--terracotta)]">capture</span>
               </h1>
             </div>
+<<<<<<< HEAD
             {hasDraftContent ? (
               <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
                 <Save className="h-4 w-4 text-[var(--terracotta)]" />
@@ -1396,13 +1398,64 @@ function ProcessBuilder() {
                   type="button"
                   onClick={discardDraft}
                   className="font-sans text-[12px] font-semibold text-[var(--terracotta)]"
+=======
+            {step !== "start" ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {hasDraftContent ? (
+                  <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
+                    <Save className="h-4 w-4 text-[var(--ichigo-orange)]" />
+                    <span className="font-sans text-[12px] text-[var(--slate)]">
+                      {draftStatus === "restored"
+                        ? "Draft restored"
+                        : draftStatus === "saved"
+                          ? "Draft autosaved"
+                          : "Draft active"}
+                    </span>
+                  </div>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (
+                      !hasDraftContent ||
+                      (typeof window !== "undefined" &&
+                        window.confirm("Discard this process draft and start over?"))
+                    ) {
+                      discardDraft();
+                    }
+                  }}
+                  className="gap-2 border-[var(--chalk)] text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
+>>>>>>> db2773587f2b8b39a4dd872d1bf9bdf2e8b9b6dc
                 >
-                  Discard
-                </button>
+                  <RotateCw className="h-4 w-4" />
+                  Start over
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (
+                      !hasDraftContent ||
+                      (typeof window !== "undefined" &&
+                        window.confirm("Leave the process builder? Your draft will be saved."))
+                    ) {
+                      navigate({
+                        to: "/app/$workspaceSlug/build",
+                        params: { workspaceSlug },
+                      });
+                    }
+                  }}
+                  className="gap-2 border-[var(--chalk)] text-[var(--ichigo-orange)] hover:text-[var(--ichigo-orange)]"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Cancel
+                </Button>
               </div>
             ) : null}
           </div>
-          {step !== "start" ? <BuilderStepper current={step} onSelect={setStep} /> : null}
         </div>
       </Card>
 
@@ -1551,6 +1604,7 @@ function ProcessBuilder() {
   );
 }
 
+<<<<<<< HEAD
 function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
   const currentIndex = builderSteps.findIndex((item) => item.id === current);
 
@@ -1597,6 +1651,8 @@ function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect:
   );
 }
 
+=======
+>>>>>>> db2773587f2b8b39a4dd872d1bf9bdf2e8b9b6dc
 function BuilderStageStepper({
   current,
   onSelect,

@@ -101,6 +101,7 @@ export function ToolCatalogPicker({
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>("All");
   const catalogQuery = useToolCatalog({ triggerOnly });
   const catalogRows = catalogQuery.data ?? [];
   const fallbackSearchOnly = catalogSearchOnly ?? !multiSelect;
@@ -141,6 +142,13 @@ export function ToolCatalogPicker({
   const searchNeedle = search.trim().toLowerCase();
   const filteredFallbackRows: PickerRow[] = filteredCatalog
     .filter((tool) => selectedCategory === "All" || tool.category === selectedCategory)
+    .filter((tool) =>
+      selectedRegion === "All"
+        ? true
+        : (tool.region_relevance ?? []).some(
+            (r) => r?.toLowerCase() === selectedRegion.toLowerCase() || r?.toLowerCase() === "global",
+          ),
+    )
     .filter((tool) => {
       if (!searchNeedle) return !hiddenDefaultToolCategories.includes(tool.category as any) || showMoreCategories || selectedCategory !== "All";
       return `${tool.name} ${tool.category}`.toLowerCase().includes(searchNeedle);
@@ -158,6 +166,13 @@ export function ToolCatalogPicker({
   const categories = sortToolCatalogCategories([...new Set(catalogRows.map((row) => row.category))]);
   const primaryCategories = categories.filter((category) => !hiddenDefaultToolCategories.includes(category as any));
   const moreCategories = categories.filter((category) => hiddenDefaultToolCategories.includes(category as any));
+  const regions = useMemo(() => {
+    const set = new Set<string>();
+    for (const row of catalogRows) (row.region_relevance ?? []).forEach((r) => r && set.add(r));
+    return ["EU", "US", "UK", "APAC", "Global", ...Array.from(set)]
+      .filter((v, i, arr) => arr.indexOf(v) === i)
+      .filter((r) => r !== "All");
+  }, [catalogRows]);
   const selectedRows = catalogRows.filter((row) => selectedCatalogIds.has(row.id));
 
   const choose = async (row: PickerRow) => {
@@ -213,6 +228,14 @@ export function ToolCatalogPicker({
                       </CategoryChip>
                     ))
                   : null}
+              </div>
+              <div className="mt-2 flex items-center gap-2 overflow-x-auto pb-1">
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--slate)]">Region</span>
+                {["All", ...regions].map((region) => (
+                  <CategoryChip key={region} active={selectedRegion === region} onClick={() => setSelectedRegion(region)}>
+                    {region}
+                  </CategoryChip>
+                ))}
               </div>
               {multiSelect && selectedRows.length ? (
                 <div className="mt-3 flex flex-wrap gap-2 rounded-[var(--r-md)] bg-[var(--paper)] p-2">
@@ -336,6 +359,9 @@ function ToolTile({
 }) {
   const logoUrl = toolCatalogLogoUrl(row.catalog);
   const [logoFailed, setLogoFailed] = useState(false);
+  const description = row.catalog?.description ?? null;
+  const regions = row.catalog?.region_relevance ?? [];
+  const departments = row.catalog?.departments ?? [];
   return (
     <CommandItem
       value={`${row.name} ${row.category} ${row.source}`}
@@ -358,6 +384,9 @@ function ToolTile({
             {selected ? <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--terracotta)]" /> : <Sparkles className="ml-auto h-4 w-4 shrink-0 text-transparent" />}
           </div>
           <p className="mt-1 truncate font-sans text-[11px] text-[var(--slate)]">{row.category}</p>
+          {description ? (
+            <p className="mt-1 line-clamp-2 font-sans text-[11px] leading-snug text-[var(--graphite)]">{description}</p>
+          ) : null}
           <div className="mt-2 flex flex-wrap gap-1.5">
             {row.triggerCapable ? (
               <Badge className="rounded-full bg-[var(--mist)] px-2 py-0.5 text-[10px] text-[var(--navy)]">Trigger</Badge>
@@ -365,6 +394,12 @@ function ToolTile({
             {row.source === "catalog" ? (
               <Badge className="rounded-full bg-[var(--paper)] px-2 py-0.5 text-[10px] text-[var(--slate)]">Catalog</Badge>
             ) : null}
+            {regions.slice(0, 2).map((r) => (
+              <Badge key={`region-${r}`} className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] text-emerald-700">{r}</Badge>
+            ))}
+            {departments.slice(0, 2).map((d) => (
+              <Badge key={`dept-${d}`} className="rounded-full bg-sky-50 px-2 py-0.5 text-[10px] text-sky-700">{d}</Badge>
+            ))}
           </div>
         </div>
       </div>

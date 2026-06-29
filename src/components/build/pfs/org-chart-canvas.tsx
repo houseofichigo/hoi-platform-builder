@@ -810,7 +810,7 @@ export function OrgChartCanvas({ onSelect, reparentEnabled = true }: { onSelect?
         )}
 
         <Canvas
-          onSelect={onSelect}
+          onSelect={handleSelect}
           reparentEnabled={reparentEnabled}
           collapsed={collapsed}
           focusId={focusId}
@@ -819,6 +819,7 @@ export function OrgChartCanvas({ onSelect, reparentEnabled = true }: { onSelect?
           centerOnId={centerOnId}
           onCentered={() => setCenterOnId(null)}
         />
+        <OrgNodeEditor selection={selection} payload={data ?? undefined} onClose={() => setSelection(null)} />
       </div>
     </ReactFlowProvider>
   );

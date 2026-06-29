@@ -56,6 +56,7 @@ const STATUS_TONE: Record<string, string> = {
 const SOURCE_LABEL: Record<string, string> = {
   eu_ai_act: "EU AI Act",
   gdpr: "GDPR",
+  cnil: "CNIL",
   internal_policy: "Internal policy",
 };
 
@@ -72,6 +73,8 @@ const RULE_EXPLANATION: Record<string, string> = {
     "High-risk AI needs conformity assessment evidence before launch, including test cases, thresholds, and failure handling.",
   DPIA_REQUIRED:
     "Personal data and automated processing require GDPR privacy review, lawful basis, notice, minimisation, retention, and data-subject handling.",
+  CNIL_PRIVACY_REVIEW:
+    "CNIL-facing privacy review is required for sensitive or personal-data AI processing, including notice, lawful basis, retention, and DPO evidence.",
   DATA_MINIMISATION:
     "Review the data scope and remove fields that are not necessary for the business purpose.",
   RIGHT_TO_EXPLANATION:
@@ -84,7 +87,7 @@ const RULE_EXPLANATION: Record<string, string> = {
 
 const STATUSES = ["open", "in_progress", "resolved", "accepted_risk", "not_applicable"] as const;
 const SEVERITIES = ["hard_stop", "requires_action", "advisory"] as const;
-const SOURCES = ["eu_ai_act", "gdpr", "internal_policy"] as const;
+const SOURCES = ["eu_ai_act", "gdpr", "cnil", "internal_policy"] as const;
 
 const ALLOWED_FLAG_TRANSITIONS: Record<string, string[]> = {
   open: ["in_progress", "resolved", "accepted_risk", "not_applicable"],

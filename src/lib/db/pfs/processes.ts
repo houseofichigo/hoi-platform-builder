@@ -1,10 +1,12 @@
 // @ts-nocheck — Ported PFS module.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 
 import type { Priority, ProcessRecord, ProcessStatus, RiskTier } from "@/lib/process-data";
 import { asRecord, db, numberFrom, requireActiveOrg, stringFrom, type Row } from "@/lib/db/pfs/shared";
 import { classifyRiskTier, classifyRiskTierFromCapture } from "@/lib/risk-tier";
 import { rankProcessOpportunity, scoreProcess, type ProcessScoreResult } from "@/lib/scoring/process-score";
+import { generateGovernanceFlagsForUseCase } from "@/lib/scale/scale.functions";
 
 type ProcessRow = Row<"process"> & {
   department?: { name?: string | null } | null;
@@ -342,6 +344,22 @@ export function useProcess(id: string) {
   });
 }
 
+export async function fetchProcessExport(processId: string) {
+  const gate = await requireActiveOrg();
+  const { data, error } = await db
+    .from("process_export")
+    .select("export_json, payload, version, created_at")
+    .eq("workspace_id", gate.workspaceId)
+    .eq("process_id", processId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return (asRecord(data?.export_json).schemaVersion ? data?.export_json : data?.export_json ?? data?.payload ?? null) as
+    | Record<string, unknown>
+    | null;
+}
+
 type StepValidationUpdate = {
   id: string;
   dataProfile: Record<string, unknown>;
@@ -504,7 +522,22 @@ export function useValidateProcessData(processId: string) {
   });
 }
 
-export async function approveProcess(processId: string) {
+async function fetchLinkedUseCase(workspaceId: string, processId: string) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data, error } = await db
+      .from("use_cases")
+      .select("id")
+      .eq("workspace_id", workspaceId)
+      .eq("process_id", processId)
+      .maybeSingle();
+    if (error) throw error;
+    if (data?.id) return data.id as string;
+    await new Promise((resolve) => setTimeout(resolve, 120));
+  }
+  return null;
+}
+
+export async function approveProcess(processId: string, note = "Approved for prioritization.") {
   const gate = await requireActiveOrg();
   const now = new Date().toISOString();
 
@@ -519,7 +552,7 @@ export async function approveProcess(processId: string) {
   const { data: decided, error: decisionError } = await db.rpc("decide_process", {
     p_process_id: processId,
     p_decision: "approve",
-    p_note: "Approved for prioritization.",
+    p_note: note || "Approved for prioritization.",
   });
   if (decisionError) throw decisionError;
 
@@ -540,23 +573,50 @@ export async function approveProcess(processId: string) {
 
   await createOrUpdateOpportunityAndRoadmap(process as ProcessRow);
   await recomputeOrgScores(gate.workspaceId);
+  const useCaseId = await fetchLinkedUseCase(gate.workspaceId, processId);
+  if (!useCaseId) {
+    throw new Error("Process approved, but the Scale bridge did not create a linked use case.");
+  }
+  return { processId, workspaceId: gate.workspaceId, useCaseId };
 }
 
-export function useApproveProcess(processId: string) {
+export function useApproveProcessAction() {
   const queryClient = useQueryClient();
+  const generateFlags = useServerFn(generateGovernanceFlagsForUseCase);
   return useMutation({
-    mutationFn: () => approveProcess(processId),
-    onSuccess: async () => {
+    mutationFn: async (input: { processId: string; note?: string }) => {
+      const result = await approveProcess(input.processId, input.note);
+      await generateFlags({ data: { useCaseId: result.useCaseId } });
+      return result;
+    },
+    onSuccess: async (result) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["process", processId] }),
+        queryClient.invalidateQueries({ queryKey: ["process", result.processId] }),
         queryClient.invalidateQueries({ queryKey: ["processes"] }),
         queryClient.invalidateQueries({ queryKey: ["processes", "review-queue"] }),
+        queryClient.invalidateQueries({ queryKey: ["processes", result.workspaceId] }),
+        queryClient.invalidateQueries({ queryKey: ["build-overview"] }),
+        queryClient.invalidateQueries({ queryKey: ["build-overview", result.workspaceId] }),
         queryClient.invalidateQueries({ queryKey: ["admin-overview"] }),
         queryClient.invalidateQueries({ queryKey: ["department-scores"] }),
         queryClient.invalidateQueries({ queryKey: ["company-score"] }),
         queryClient.invalidateQueries({ queryKey: ["opportunities"] }),
         queryClient.invalidateQueries({ queryKey: ["roadmap"] }),
+        queryClient.invalidateQueries({ queryKey: ["scale"] }),
+        queryClient.invalidateQueries({ queryKey: ["workspace-admin", "overview"] }),
+        queryClient.invalidateQueries({ queryKey: ["resume"] }),
+        queryClient.invalidateQueries({ queryKey: ["team-status"] }),
+        queryClient.invalidateQueries({ queryKey: ["attention"] }),
       ]);
     },
   });
+}
+
+export function useApproveProcess(processId: string) {
+  const approve = useApproveProcessAction();
+  return {
+    ...approve,
+    mutate: () => approve.mutate({ processId }),
+    mutateAsync: () => approve.mutateAsync({ processId }),
+  };
 }

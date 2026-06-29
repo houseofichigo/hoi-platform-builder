@@ -294,8 +294,8 @@ function ChipMultiSelect({
               onClick={() => onChange(toggleValue(values, option))}
               className={`rounded-full border px-3 py-2 font-sans text-[12px] font-medium transition ${
                 selected
-                  ? "border-[var(--ichigo-orange)] bg-[var(--ichigo-orange)] text-white"
-                  : "border-[var(--chalk)] bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)] hover:border-[var(--ichigo-orange)]"
+                  ? "border-[var(--terracotta)] bg-[var(--terracotta)] text-white"
+                  : "border-[var(--chalk)] bg-[var(--mist)] text-[var(--navy)] hover:border-[var(--terracotta)]"
               }`}
             >
               {nice(option)}
@@ -310,7 +310,7 @@ function ChipMultiSelect({
               key={value}
               type="button"
               onClick={() => onChange(values.filter((item) => item !== value))}
-              className="rounded-full border border-[var(--ichigo-orange)] bg-white px-3 py-2 font-sans text-[12px] font-medium text-[var(--ichigo-orange)]"
+              className="rounded-full border border-[var(--terracotta)] bg-white px-3 py-2 font-sans text-[12px] font-medium text-[var(--terracotta)]"
             >
               {value} ×
             </button>
@@ -363,7 +363,7 @@ function RatingSelect({
             title={labels[score - 1]}
             onClick={() => onChange(score)}
             className={`h-10 rounded-[var(--r-sm)] font-mono text-[12px] font-semibold ${
-              value === score ? "bg-[var(--ichigo-navy)] text-white" : "text-[var(--slate)] hover:bg-white"
+              value === score ? "bg-[var(--navy)] text-white" : "text-[var(--slate)] hover:bg-white"
             }`}
           >
             {score}
@@ -387,7 +387,7 @@ function BooleanSwitch({
   return (
     <div className="flex min-h-11 items-center justify-between gap-4 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white px-3 py-2">
       <Label className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">{label}</Label>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} className="data-[state=checked]:bg-[var(--ichigo-orange)]" />
+      <Switch checked={checked} onCheckedChange={onCheckedChange} className="data-[state=checked]:bg-[var(--terracotta)]" />
     </div>
   );
 }
@@ -397,7 +397,7 @@ function SaveButton({ pending, label = "Save and continue" }: { pending: boolean
     <Button
       type="submit"
       disabled={pending}
-      className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+      className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
     >
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
       {label}
@@ -408,9 +408,9 @@ function SaveButton({ pending, label = "Save and continue" }: { pending: boolean
 function StatPill({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: number }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-3 py-1.5">
-      <Icon className="h-4 w-4 text-[var(--ichigo-orange)]" />
+      <Icon className="h-4 w-4 text-[var(--terracotta)]" />
       <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--slate)]">{label}</span>
-      <span className="font-sans text-[13px] font-semibold text-[var(--ichigo-navy)]">{value}</span>
+      <span className="font-sans text-[13px] font-semibold text-[var(--navy)]">{value}</span>
     </div>
   );
 }
@@ -447,7 +447,7 @@ function OrgChartStep({ onSaved }: { onSaved: () => void }) {
   return (
     <div className="space-y-4">
       <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
-        <p className="font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">
+        <p className="font-sans text-[15px] font-semibold text-[var(--navy)]">
           Live company hierarchy
         </p>
         <p className="mt-1 font-sans text-[14px] text-[var(--slate)]">
@@ -463,14 +463,14 @@ function OrgChartStep({ onSaved }: { onSaved: () => void }) {
             key={c.label}
             className={`rounded-[var(--r-md)] border bg-white p-3 ${
               c.tone === "warn"
-                ? "border-[var(--ichigo-orange)]/50 bg-[var(--ichigo-orange)]/5"
+                ? "border-[var(--terracotta)]/50 bg-[var(--terracotta)]/5"
                 : "border-[var(--chalk)]"
             }`}
           >
             <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--slate)]">
               {c.label}
             </div>
-            <div className="mt-1 font-display text-[22px] font-medium text-[var(--ichigo-navy)]">
+            <div className="mt-1 font-display text-[22px] font-medium text-[var(--navy)]">
               {c.value}
             </div>
           </div>
@@ -495,7 +495,7 @@ function OrgChartStep({ onSaved }: { onSaved: () => void }) {
             readiness.warnings.map((w) => (
               <span
                 key={w}
-                className="inline-flex items-center gap-1 rounded-full border border-[var(--ichigo-orange)]/40 bg-[var(--ichigo-orange)]/10 px-2.5 py-1 font-mono text-[11px] text-[var(--ichigo-navy)]"
+                className="inline-flex items-center gap-1 rounded-full border border-[var(--terracotta)]/40 bg-[var(--terracotta)]/10 px-2.5 py-1 font-mono text-[11px] text-[var(--navy)]"
               >
                 {w}
               </span>
@@ -510,7 +510,7 @@ function OrgChartStep({ onSaved }: { onSaved: () => void }) {
           type="button"
           onClick={onSaved}
           disabled={blocked}
-          className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90 disabled:opacity-50"
+          className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90 disabled:opacity-50"
         >
           <Check className="mr-2 h-4 w-4" />
           Continue
@@ -576,7 +576,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
   if (contextQuery.isLoading) {
     return (
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-        <Loader2 className="mx-auto h-5 w-5 animate-spin text-[var(--ichigo-orange)]" />
+        <Loader2 className="mx-auto h-5 w-5 animate-spin text-[var(--terracotta)]" />
         <p className="mt-3 font-sans text-[15px] text-[var(--slate)]">Loading company setup.</p>
       </Card>
     );
@@ -585,7 +585,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
   if (contextQuery.isError || !context || !activeStep) {
     return (
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-        <p className="font-display text-[30px] text-[var(--ichigo-navy)]">Company setup did not load</p>
+        <p className="font-display text-[30px] text-[var(--navy)]">Company setup did not load</p>
         <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">
           {contextQuery.error?.message ?? "No onboarding context found."}
         </p>
@@ -597,7 +597,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
     <div className="space-y-5">
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
             {mode === "wizard" ? "Company onboarding" : "Company parameters"}
           </p>
           <Button
@@ -611,7 +611,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
               await demoMutation.mutateAsync(undefined);
               await contextQuery.refetch();
             }}
-            className="h-9 rounded-[var(--r-md)] border-[var(--ichigo-navy)] text-[var(--ichigo-navy)]"
+            className="h-9 rounded-[var(--r-md)] border-[var(--navy)] text-[var(--navy)]"
           >
             {demoMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Load demo company
@@ -634,18 +634,18 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
                   aria-current={isActive ? "step" : undefined}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-sans text-[12px] font-medium transition ${
                     isActive
-                      ? "border-[var(--ichigo-orange)] bg-[var(--ichigo-orange)] text-white shadow-sm"
+                      ? "border-[var(--terracotta)] bg-[var(--terracotta)] text-white shadow-sm"
                       : done
-                        ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)] hover:bg-[var(--ichigo-mist)]"
-                        : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:border-[var(--ichigo-orange)] hover:text-[var(--ichigo-navy)]"
+                        ? "border-[var(--navy)] bg-white text-[var(--navy)] hover:bg-[var(--mist)]"
+                        : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:border-[var(--terracotta)] hover:text-[var(--navy)]"
                   }`}
                 >
                   <span
                     className={`flex h-5 w-5 items-center justify-center rounded-full font-mono text-[10px] ${
                       isActive
-                        ? "bg-white text-[var(--ichigo-orange)]"
+                        ? "bg-white text-[var(--terracotta)]"
                         : done
-                          ? "bg-[var(--ichigo-navy)] text-white"
+                          ? "bg-[var(--navy)] text-white"
                           : "bg-[var(--chalk)] text-[var(--slate)]"
                     }`}
                   >
@@ -665,17 +665,17 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
         <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
               Step {activeIndex + 1} of {steps.length}
             </p>
-            <h2 className="mt-1 font-display text-[36px] font-medium tracking-normal text-[var(--ichigo-navy)]">
+            <h2 className="mt-1 font-display text-[36px] font-medium tracking-normal text-[var(--navy)]">
               {activeStep.label}
             </h2>
             <p className="mt-2 max-w-2xl font-sans text-[14px] text-[var(--slate)]">
               Why we ask this: {activeStep.why}
             </p>
           </div>
-          <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">
+          <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">
             {completed[activeStep.id] ? "saved" : "draft"}
           </Badge>
         </div>
@@ -698,7 +698,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
             size="sm"
             onClick={goBack}
             disabled={activeIndex === 0}
-            className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--ichigo-navy)]"
+            className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--navy)]"
           >
             Back
           </Button>
@@ -713,7 +713,7 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
               if (activeIndex < steps.length - 1) setActiveIndex(activeIndex + 1);
             }}
             disabled={activeIndex === steps.length - 1}
-            className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--ichigo-navy)]"
+            className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--navy)]"
           >
             Skip
           </Button>
@@ -833,7 +833,7 @@ function ReadinessForm({ context, onSaved }: { context: NonNullable<ReturnType<t
       }}
     >
       <div className="md:col-span-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
-        <p className="font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">
+        <p className="font-sans text-[15px] font-semibold text-[var(--navy)]">
           A two-minute readiness baseline — your dashboard's Organization and Culture dimensions go live.
         </p>
         <p className="mt-1 font-sans text-[14px] text-[var(--slate)]">
@@ -1071,7 +1071,7 @@ function ToolForm({ context, onSaved }: { context: NonNullable<ReturnType<typeof
           <Field label="Custom tool name" value={form.name} onChange={(name) => setForm({ ...form, name })} />
         )}
         {sensitiveSelection.length ? (
-          <p className="rounded-[var(--r-md)] border border-[var(--warning)]/40 bg-[var(--warning)]/10 p-3 font-sans text-[13px] text-[var(--ichigo-navy)]">
+          <p className="rounded-[var(--r-md)] border border-[var(--warning)]/40 bg-[var(--warning)]/10 p-3 font-sans text-[13px] text-[var(--navy)]">
             Sensitive-data hint: {sensitiveSelection.map((tool) => tool.name).slice(0, 4).join(", ")} may handle personal or sensitive data. If a department relies on these tools, consider marking that department as holding sensitive data.
           </p>
         ) : null}
@@ -1211,7 +1211,7 @@ function PriorityForm({ context, onSaved }: { context: NonNullable<ReturnType<ty
       <ChipMultiSelect label="Top goals" values={form.topGoals} onChange={(topGoals) => setForm({ ...form, topGoals })} options={goals} />
       <ChipMultiSelect label="Priority departments" values={form.priorityDepartments} onChange={(priorityDepartments) => setForm({ ...form, priorityDepartments })} options={context.departments.map((department) => department.name)} allowCustom={false} />
       <div className="md:col-span-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Review policy</p>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Review policy</p>
         <p className="mt-1 font-sans text-[14px] text-[var(--slate)]">
           Risk is calculated automatically for each mapped process. Customer-facing, financial, legal or compliance, sensitive-data, high-automation, or hard-to-reverse processes may need extra review.
         </p>
@@ -1287,7 +1287,7 @@ function SendInvitationsForm({ context, onSaved }: { context: NonNullable<Return
       </form>
 
       <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
-        <p className="font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">
+        <p className="font-sans text-[15px] font-semibold text-[var(--navy)]">
           {pending.length} pending invitation{pending.length === 1 ? "" : "s"} ready to send.
         </p>
         <p className="mt-1 font-sans text-[14px] text-[var(--slate)]">
@@ -1302,7 +1302,7 @@ function SendInvitationsForm({ context, onSaved }: { context: NonNullable<Return
           await sendMutation.mutateAsync(undefined);
           onSaved();
         }}
-        className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+        className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
       >
         {sendMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
         Send pending invitations
@@ -1351,7 +1351,7 @@ function ExistingRows({ rows, empty }: { rows: string[]; empty: string }) {
       {rows.length ? (
         <div className="flex flex-wrap gap-2">
           {rows.map((row) => (
-            <Badge key={row} className="rounded-full bg-white px-3 py-1 text-[var(--ichigo-navy)]">
+            <Badge key={row} className="rounded-full bg-white px-3 py-1 text-[var(--navy)]">
               {row}
             </Badge>
           ))}

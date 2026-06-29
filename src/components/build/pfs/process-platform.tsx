@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, Clock3, GitPullRequest, Library, Plus, ShieldCheck, Workflow } from "lucide-react";
+import { CheckCircle2, Clock3, GitPullRequest, Library, Plus, ShieldCheck, TrendingUp, Workflow } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { useBuildOverview, useDecideProcess } from "@/lib/db/build-analytics";
 import { useProcesses, type ProcessListItem } from "@/lib/db/process";
+import { useApproveProcessAction } from "@/lib/db/pfs/processes";
 import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 
 function statusLabel(status: string) {
@@ -20,6 +21,15 @@ function processRisk(process: ProcessListItem) {
   return (process as any).riskTier ?? risk?.tier ?? "standard";
 }
 
+function scoreNumber(process: ProcessListItem, keys: string[], fallback = 0) {
+  const scores = process.scores ?? {};
+  for (const key of keys) {
+    const value = scores[key];
+    if (typeof value === "number" && Number.isFinite(value)) return Math.round(value);
+  }
+  return fallback;
+}
+
 export function DashboardScreen() {
   const { workspace } = useWorkspace();
   const overview = useBuildOverview();
@@ -27,6 +37,10 @@ export function DashboardScreen() {
   if (!workspace) return null;
 
   const recent = (processes.data ?? []).slice(0, 5);
+  const topScored = [...(processes.data ?? [])]
+    .filter((process) => Object.keys(process.scores ?? {}).length > 0)
+    .sort((a, b) => scoreNumber(b, ["priorityScore", "priority_score", "impact"]) - scoreNumber(a, ["priorityScore", "priority_score", "impact"]))
+    .slice(0, 5);
   return (
     <div className="space-y-5">
       <section className="grid gap-3 md:grid-cols-4">
@@ -54,6 +68,39 @@ export function DashboardScreen() {
             <ProcessRow key={process.id} process={process} workspaceSlug={workspace.slug} />
           ))}
           {!recent.length ? <p className="py-6 text-center text-[13px] text-slate">No mapped processes yet.</p> : null}
+        </div>
+      </Card>
+
+      <Card className="border-chalk bg-white p-5">
+        <div className="flex items-start gap-3">
+          <TrendingUp className="mt-1 h-5 w-5 text-terracotta" />
+          <div>
+            <p className="eyebrow-muted">Scored process value</p>
+            <h2 className="mt-2 text-[22px] font-semibold text-navy">Top processes by priority and readiness</h2>
+          </div>
+        </div>
+        <div className="mt-5 divide-y divide-chalk">
+          {topScored.map((process) => (
+            <Link
+              key={process.id}
+              to="/app/$workspaceSlug/build/process/$id"
+              params={{ workspaceSlug: workspace.slug, id: process.id }}
+              className="grid gap-3 py-3 text-[13px] hover:bg-mist/50 md:grid-cols-[1fr_auto_auto_auto]"
+            >
+              <div>
+                <p className="font-medium text-navy">{process.name}</p>
+                <p className="mt-1 text-slate">{process.departmentName ?? "Unassigned"}</p>
+              </div>
+              <ScorePill label="Priority" value={scoreNumber(process, ["priorityScore", "priority_score", "impact"])} />
+              <ScorePill label="Readiness" value={scoreNumber(process, ["readiness", "readinessScore", "readiness_score"])} />
+              <div className="flex items-center justify-start md:justify-end">
+                <RiskTierBadge tier={processRisk(process)} />
+              </div>
+            </Link>
+          ))}
+          {!topScored.length ? (
+            <p className="py-6 text-center text-[13px] text-slate">No scored processes yet. Map and submit a process to populate this view.</p>
+          ) : null}
         </div>
       </Card>
     </div>
@@ -87,6 +134,7 @@ export function PendingTasks() {
   const { workspace, isAdmin } = useWorkspace();
   const processes = useProcesses();
   const decide = useDecideProcess();
+  const approve = useApproveProcessAction();
   const [notes, setNotes] = useState<Record<string, string>>({});
   if (!workspace) return null;
 
@@ -112,11 +160,11 @@ export function PendingTasks() {
               />
               <div className="flex flex-wrap gap-2">
                 <Button
-                  disabled={decide.isPending}
-                  onClick={() => decide.mutate({ processId: process.id, decision: "approve", note: notes[process.id] })}
+                  disabled={approve.isPending}
+                  onClick={() => approve.mutate({ processId: process.id, note: notes[process.id] })}
                   className="bg-terracotta text-white hover:bg-terracotta/90"
                 >
-                  Approve
+                  {approve.isPending ? "Approving..." : "Approve"}
                 </Button>
                 <Button
                   disabled={decide.isPending}
@@ -133,6 +181,7 @@ export function PendingTasks() {
         </Card>
       ))}
       {!queue.length ? <Card className="border-chalk bg-white p-8 text-center text-[13px] text-slate">No processes are awaiting approval.</Card> : null}
+      {approve.error ? <p className="rounded-md bg-danger/10 p-3 text-[13px] text-danger">{approve.error.message}</p> : null}
     </div>
   );
 }
@@ -151,6 +200,15 @@ export function ReviewPolicy() {
         </div>
       </div>
     </Card>
+  );
+}
+
+function ScorePill({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="inline-flex min-w-24 items-center justify-between rounded-md border border-chalk bg-paper px-3 py-2 text-slate">
+      <span>{label}</span>
+      <strong className="ml-3 text-navy">{value}</strong>
+    </span>
   );
 }
 

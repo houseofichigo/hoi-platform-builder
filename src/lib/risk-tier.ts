@@ -189,8 +189,8 @@ export function classifyRiskTierFromCapture(captureValue: unknown): RiskTierResu
 
 export function riskTierClass(tier: RiskTier | null | undefined) {
   if (tier === "critical") return "bg-[var(--danger)] text-white";
-  if (tier === "elevated") return "bg-[var(--ichigo-navy)] text-white";
-  if (tier === "standard") return "bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]";
-  if (tier === "low") return "bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]";
+  if (tier === "elevated") return "bg-[var(--navy)] text-white";
+  if (tier === "standard") return "bg-[var(--mist)] text-[var(--navy)]";
+  if (tier === "low") return "bg-[var(--mist)] text-[var(--navy)]";
   return "bg-[var(--chalk)] text-[var(--slate)]";
 }

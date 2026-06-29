@@ -169,6 +169,10 @@ export async function createSubmittedProcess(input: CreateProcessInput) {
     version: 1,
     export_json: exportJson,
     created_by: gate.userId,
+    export_type: "full",
+    format: "json",
+    payload: exportJson,
+    generated_by: gate.userId,
   });
   if (exportError && exportError.code !== "42501") throw exportError;
 

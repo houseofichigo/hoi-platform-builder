@@ -121,6 +121,31 @@ describe("deriveGovernanceFlags · GDPR", () => {
   });
 });
 
+describe("deriveGovernanceFlags · CNIL", () => {
+  it("CNIL_PRIVACY_REVIEW fires for sensitive customer-facing process data", () => {
+    const f = deriveGovernanceFlags({
+      capture: {
+        dataClassification: "sensitive",
+        outputCriticality: "customer_facing",
+      },
+    });
+    expect(codesOf(f)).toContain("CNIL_PRIVACY_REVIEW");
+    expect(f.find((flag) => flag.rule_code === "CNIL_PRIVACY_REVIEW")?.rule_source).toBe("cnil");
+  });
+
+  it("CNIL_PRIVACY_REVIEW reads bridged process capture nested in use_cases.capture_v2", () => {
+    const f = deriveGovernanceFlags({
+      capture: {
+        capture: {
+          derivedData: { dataClassification: "personal" },
+          globalPass: { decisionLogic: "model_based" },
+        },
+      },
+    });
+    expect(codesOf(f)).toContain("CNIL_PRIVACY_REVIEW");
+  });
+});
+
 describe("deriveGovernanceFlags · Internal policy", () => {
   it("SECURITY_REVIEW_REQUIRED fires from foreign vendor", () => {
     const f = deriveGovernanceFlags({

@@ -63,7 +63,7 @@ function ClipboardGlyph({ className }: { className?: string }) {
   return <Wrench className={className} />;
 }
 
-function CategoryIcon({ category, className = "h-4 w-4 text-[var(--ichigo-orange)]" }: { category: string; className?: string }) {
+function CategoryIcon({ category, className = "h-4 w-4 text-[var(--terracotta)]" }: { category: string; className?: string }) {
   const Icon = categoryIcons[category as keyof typeof categoryIcons] ?? Wrench;
   return <Icon className={className} />;
 }
@@ -185,7 +185,7 @@ export function ToolCatalogPicker({
           <Button
             type="button"
             variant="outline"
-            className="h-11 w-full justify-between rounded-[var(--r-md)] border-[var(--chalk)] bg-white px-3 text-left font-sans text-[14px] font-normal text-[var(--ichigo-navy)]"
+            className="h-11 w-full justify-between rounded-[var(--r-md)] border-[var(--chalk)] bg-white px-3 text-left font-sans text-[14px] font-normal text-[var(--navy)]"
           >
             <span className={selectedLabel ? "" : "text-[var(--slate)]"}>{selectedLabel || placeholder}</span>
             <Search className="h-4 w-4 text-[var(--slate)]" />
@@ -222,7 +222,7 @@ export function ToolCatalogPicker({
                       key={tool.id}
                       type="button"
                       onClick={() => onToggleCatalog?.(tool)}
-                      className="rounded-full bg-white px-2 py-1 font-sans text-[11px] text-[var(--ichigo-navy)]"
+                      className="rounded-full bg-white px-2 py-1 font-sans text-[11px] text-[var(--navy)]"
                     >
                       {tool.name}
                     </button>
@@ -293,8 +293,8 @@ export function ToolCatalogPicker({
               ))}
               {onCustomTool ? (
                 <CommandGroup heading="Custom">
-                  <CommandItem value={`custom ${search}`} onSelect={() => onCustomTool(search)} className="m-1 rounded-[var(--r-md)] border border-dashed border-[var(--ichigo-orange)] p-3">
-                    <Wrench className="h-4 w-4 text-[var(--ichigo-orange)]" />
+                  <CommandItem value={`custom ${search}`} onSelect={() => onCustomTool(search)} className="m-1 rounded-[var(--r-md)] border border-dashed border-[var(--terracotta)] p-3">
+                    <Wrench className="h-4 w-4 text-[var(--terracotta)]" />
                     <span>Add a custom tool{search.trim() ? `: ${search.trim()}` : ""}</span>
                   </CommandItem>
                 </CommandGroup>
@@ -316,8 +316,8 @@ function CategoryChip({ active, onClick, children }: { active: boolean; onClick:
       onClick={onClick}
       className={`shrink-0 rounded-full border px-3 py-1.5 font-sans text-[12px] font-medium ${
         active
-          ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
-          : "border-[var(--chalk)] bg-white text-[var(--ichigo-navy)]"
+          ? "border-[var(--navy)] bg-[var(--navy)] text-white"
+          : "border-[var(--chalk)] bg-white text-[var(--navy)]"
       }`}
     >
       {children}
@@ -341,7 +341,7 @@ function ToolTile({
       value={`${row.name} ${row.category} ${row.source}`}
       onSelect={onSelect}
       className={`min-h-24 items-start rounded-[var(--r-md)] border bg-white p-3 ${
-        selected ? "border-[var(--ichigo-orange)] ring-2 ring-[var(--ichigo-orange)]/25" : "border-[var(--chalk)]"
+        selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25" : "border-[var(--chalk)]"
       }`}
     >
       <div className="flex w-full gap-3">
@@ -349,18 +349,18 @@ function ToolTile({
           {logoUrl && !logoFailed ? (
             <img src={logoUrl} alt="" className="h-7 w-7 object-contain" onError={() => setLogoFailed(true)} />
           ) : (
-            <CategoryIcon category={row.category} className="h-5 w-5 text-[var(--ichigo-orange)]" />
+            <CategoryIcon category={row.category} className="h-5 w-5 text-[var(--terracotta)]" />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
-            <span className="line-clamp-2 font-sans text-[13px] font-semibold leading-4 text-[var(--ichigo-navy)]">{row.name}</span>
-            {selected ? <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--ichigo-orange)]" /> : <Sparkles className="ml-auto h-4 w-4 shrink-0 text-transparent" />}
+            <span className="line-clamp-2 font-sans text-[13px] font-semibold leading-4 text-[var(--navy)]">{row.name}</span>
+            {selected ? <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--terracotta)]" /> : <Sparkles className="ml-auto h-4 w-4 shrink-0 text-transparent" />}
           </div>
           <p className="mt-1 truncate font-sans text-[11px] text-[var(--slate)]">{row.category}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {row.triggerCapable ? (
-              <Badge className="rounded-full bg-[var(--ichigo-mist)] px-2 py-0.5 text-[10px] text-[var(--ichigo-navy)]">Trigger</Badge>
+              <Badge className="rounded-full bg-[var(--mist)] px-2 py-0.5 text-[10px] text-[var(--navy)]">Trigger</Badge>
             ) : null}
             {row.source === "catalog" ? (
               <Badge className="rounded-full bg-[var(--paper)] px-2 py-0.5 text-[10px] text-[var(--slate)]">Catalog</Badge>

@@ -115,14 +115,14 @@ function counts(steps: TemplateStep[]) {
 
 function kindBadge(kind: StepKind) {
   const map: Record<StepKind, { label: string; cls: string }> = {
-    trigger: { label: "TRIGGER", cls: "border-[var(--ichigo-navy)] text-[var(--ichigo-navy)]" },
+    trigger: { label: "TRIGGER", cls: "border-[var(--navy)] text-[var(--navy)]" },
     task: { label: "STEP", cls: "border-[var(--chalk)] text-[var(--slate)]" },
-    decision: { label: "DECISION", cls: "border-[var(--ichigo-orange)] text-[var(--ichigo-orange)]" },
-    approval: { label: "APPROVAL", cls: "border-[var(--ichigo-orange)] text-[var(--ichigo-orange)]" },
+    decision: { label: "DECISION", cls: "border-[var(--terracotta)] text-[var(--terracotta)]" },
+    approval: { label: "APPROVAL", cls: "border-[var(--terracotta)] text-[var(--terracotta)]" },
     handoff: { label: "HANDOFF", cls: "border-[var(--chalk)] text-[var(--slate)]" },
     output: { label: "OUTPUT", cls: "border-[var(--chalk)] text-[var(--slate)]" },
     merge: { label: "MERGE", cls: "border-[var(--chalk)] text-[var(--slate)]" },
-    end: { label: "END", cls: "border-[var(--ichigo-navy)] text-[var(--ichigo-navy)]" },
+    end: { label: "END", cls: "border-[var(--navy)] text-[var(--navy)]" },
   };
   const b = map[kind];
   return (
@@ -141,9 +141,9 @@ function FlowStrip({ steps, max = 7 }: { steps: TemplateStep[]; max?: number }) 
       {shown.map((s, i) => {
         const accent =
           s.kind === "decision" || s.kind === "approval"
-            ? "border-[var(--ichigo-orange)] text-[var(--ichigo-orange)]"
+            ? "border-[var(--terracotta)] text-[var(--terracotta)]"
             : s.kind === "trigger" || s.kind === "end"
-              ? "border-[var(--ichigo-navy)] text-[var(--ichigo-navy)]"
+              ? "border-[var(--navy)] text-[var(--navy)]"
               : "border-[var(--chalk)] text-[var(--slate)]";
         return (
           <div key={`${s.id}-${i}`} className="flex items-center gap-1.5">
@@ -246,11 +246,11 @@ export function ProcessTemplateBrowser({
         <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
                 Process templates
               </p>
-              <h2 className="mt-1 flex items-center gap-2 font-display text-[30px] font-medium text-[var(--ichigo-navy)]">
-                <ClipboardCheck className="h-7 w-7 text-[var(--ichigo-orange)]" />
+              <h2 className="mt-1 flex items-center gap-2 font-display text-[30px] font-medium text-[var(--navy)]">
+                <ClipboardCheck className="h-7 w-7 text-[var(--terracotta)]" />
                 Template Library
               </h2>
               <p className="mt-2 max-w-3xl font-sans text-[13px] leading-6 text-[var(--graphite)]">
@@ -287,8 +287,8 @@ export function ProcessTemplateBrowser({
                   onClick={() => setCategory(c)}
                   className={`rounded-full border px-3 py-1 font-sans text-[12px] transition-colors ${
                     active
-                      ? "border-transparent bg-[var(--ichigo-orange)] text-white"
-                      : "border-[var(--chalk)] bg-white text-[var(--graphite)] hover:border-[var(--ichigo-orange)] hover:text-[var(--ichigo-orange)]"
+                      ? "border-transparent bg-[var(--terracotta)] text-white"
+                      : "border-[var(--chalk)] bg-white text-[var(--graphite)] hover:border-[var(--terracotta)] hover:text-[var(--terracotta)]"
                   }`}
                 >
                   {c}
@@ -301,7 +301,7 @@ export function ProcessTemplateBrowser({
 
       {filtered.length === 0 ? (
         <Card className="border-[var(--chalk)] bg-white p-6">
-          <p className="text-[14px] font-medium text-[var(--ichigo-navy)]">No templates match this search.</p>
+          <p className="text-[14px] font-medium text-[var(--navy)]">No templates match this search.</p>
           <p className="mt-1 text-[13px] text-[var(--graphite)]">Try a different category or clear the search.</p>
         </Card>
       ) : (
@@ -354,13 +354,13 @@ function TemplateCard({
           onOpen();
         }
       }}
-      className="cursor-pointer rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-5 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ichigo-orange)]"
+      className="cursor-pointer rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-5 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--terracotta)]"
     >
       <FlowStrip steps={steps} max={7} />
 
       <div className="mt-4 flex items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="inline-flex items-center rounded-md border border-[var(--ichigo-navy)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ichigo-navy)]">
+          <span className="inline-flex items-center rounded-md border border-[var(--navy)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--navy)]">
             {template.category}
           </span>
           <span className="inline-flex items-center rounded-md border border-[var(--chalk)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--slate)]">
@@ -374,7 +374,7 @@ function TemplateCard({
         </div>
         <Button
           type="button"
-          className="bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+          className="bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
           onClick={(e) => {
             e.stopPropagation();
             onApply();
@@ -385,7 +385,7 @@ function TemplateCard({
       </div>
 
       <div className="mt-3">
-        <p className="font-display text-[22px] font-medium leading-tight text-[var(--ichigo-navy)]">
+        <p className="font-display text-[22px] font-medium leading-tight text-[var(--navy)]">
           {template.name}
         </p>
         {template.departmentHint || template.processFamily ? (
@@ -421,7 +421,7 @@ function TemplateCard({
                 {i + 1}
               </span>
               <div className="min-w-0">
-                <p className="font-sans text-[13px] font-medium text-[var(--ichigo-navy)]">{s.label}</p>
+                <p className="font-sans text-[13px] font-medium text-[var(--navy)]">{s.label}</p>
                 {s.description ? (
                   <p className="line-clamp-1 font-sans text-[12px] text-[var(--graphite)]">{s.description}</p>
                 ) : null}
@@ -452,12 +452,12 @@ function TemplateCard({
 
       {template.kpis.length ? (
         <p className="mt-2 font-sans text-[12px] text-[var(--graphite)]">
-          <span className="font-semibold text-[var(--ichigo-navy)]">KPIs:</span> {template.kpis.join(", ")}
+          <span className="font-semibold text-[var(--navy)]">KPIs:</span> {template.kpis.join(", ")}
         </p>
       ) : null}
       {template.aiAgentOpportunities.length ? (
         <p className="mt-1 font-sans text-[12px] text-[var(--graphite)]">
-          <span className="font-semibold text-[var(--ichigo-navy)]">AI:</span> {template.aiAgentOpportunities.join(", ")}
+          <span className="font-semibold text-[var(--navy)]">AI:</span> {template.aiAgentOpportunities.join(", ")}
         </p>
       ) : null}
     </Card>
@@ -467,7 +467,7 @@ function TemplateCard({
 function CountTile({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-md border border-[var(--chalk)] bg-white px-3 py-2">
-      <p className="font-display text-[20px] font-medium leading-none text-[var(--ichigo-navy)]">{value}</p>
+      <p className="font-display text-[20px] font-medium leading-none text-[var(--navy)]">{value}</p>
       <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--slate)]">{label}</p>
     </div>
   );
@@ -494,7 +494,7 @@ function TemplateDetailDialog({
           <>
             <DialogHeader>
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center rounded-md border border-[var(--ichigo-navy)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ichigo-navy)]">
+                <span className="inline-flex items-center rounded-md border border-[var(--navy)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--navy)]">
                   {template.category}
                 </span>
                 <span className="inline-flex items-center rounded-md border border-[var(--chalk)] px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--slate)]">
@@ -515,11 +515,11 @@ function TemplateDetailDialog({
                 </span>
               </div>
               {template.departmentHint || template.processFamily ? (
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
                   {template.departmentHint || template.processFamily}
                 </p>
               ) : null}
-              <DialogTitle className="font-display text-[28px] font-medium text-[var(--ichigo-navy)]">
+              <DialogTitle className="font-display text-[28px] font-medium text-[var(--navy)]">
                 {template.name}
               </DialogTitle>
               {template.description ? (
@@ -545,7 +545,7 @@ function TemplateDetailDialog({
                     <span className="pt-0.5 text-right font-mono text-[11px] text-[var(--slate)]">{i + 1}</span>
                     <div className="pt-0.5">{kindBadge(s.kind)}</div>
                     <div className="min-w-0">
-                      <p className="font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{s.label}</p>
+                      <p className="font-sans text-[14px] font-semibold text-[var(--navy)]">{s.label}</p>
                       {s.description ? (
                         <p className="mt-0.5 font-sans text-[12px] leading-5 text-[var(--graphite)]">{s.description}</p>
                       ) : null}
@@ -590,7 +590,7 @@ function TemplateDetailDialog({
               </Button>
               <Button
                 type="button"
-                className="bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+                className="bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
                 onClick={() => onApply(template)}
               >
                 {actionLabel}

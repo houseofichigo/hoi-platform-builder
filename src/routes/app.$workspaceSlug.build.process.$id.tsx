@@ -1,14 +1,15 @@
 // @ts-nocheck — Ported PFS module.
 import { createFileRoute } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check, Download } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 // AppShell removed (outer build layout provides chrome)
 import { RiskTierBadge } from "@/components/build/pfs/risk-tier-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useApproveProcess, useProcess, useValidateProcessData } from "@/lib/db/pfs/processes";
+import { fetchProcessExport, useApproveProcess, useProcess, useValidateProcessData } from "@/lib/db/pfs/processes";
 import { asRecord } from "@/lib/db/pfs/shared";
 import { riskTierMeta } from "@/lib/risk-tier";
 
@@ -23,16 +24,35 @@ function ProcessDetailRoute() {
   const validateData = useValidateProcessData(id);
   const approve = useApproveProcess(id);
 
+  const downloadJson = async () => {
+    if (!data) return;
+    try {
+      const exportJson = (await fetchProcessExport(id)) ?? buildFallbackExport(data);
+      const blob = new Blob([JSON.stringify(exportJson, null, 2)], {
+        type: "application/json;charset=utf-8",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slugify(data.record.name)}-${id.slice(0, 8)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Process JSON downloaded");
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
   return (
     <>
       {processQuery.isLoading ? (
         <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-          <p className="font-display text-[30px] text-[var(--ichigo-navy)]">Loading process</p>
+          <p className="font-display text-[30px] text-[var(--navy)]">Loading process</p>
           <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">Fetching the live process record.</p>
         </Card>
       ) : processQuery.isError || !data ? (
         <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-          <p className="font-display text-[30px] text-[var(--ichigo-navy)]">Process did not load</p>
+          <p className="font-display text-[30px] text-[var(--navy)]">Process did not load</p>
           <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">{processQuery.error?.message ?? "Process unavailable."}</p>
         </Card>
       ) : (
@@ -44,10 +64,10 @@ function ProcessDetailRoute() {
                 return (
                   <>
               <div>
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
                   Process detail
                 </p>
-                <h3 className="mt-2 font-display text-[38px] font-medium tracking-normal text-[var(--ichigo-navy)]">
+                <h3 className="mt-2 font-display text-[38px] font-medium tracking-normal text-[var(--navy)]">
                   {data.record.name}
                 </h3>
                 <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">
@@ -60,14 +80,22 @@ function ProcessDetailRoute() {
               </div>
               <div className="flex flex-wrap gap-2">
                 <RiskTierBadge process={data.record} />
-                <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">
+                <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">
                   {data.record.status}
                 </Badge>
+                <Button
+                  variant="outline"
+                  onClick={downloadJson}
+                  className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--navy)] hover:bg-[var(--paper)]"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download process JSON
+                </Button>
                 {!["Approved"].includes(data.record.status) ? (
                   <Button
                     disabled={approve.isPending}
                     onClick={() => approve.mutate()}
-                    className="rounded-[var(--r-md)] bg-[var(--ichigo-navy)] text-white hover:bg-[var(--ichigo-navy)]/90"
+                    className="rounded-[var(--r-md)] bg-[var(--navy)] text-white hover:bg-[var(--navy)]/90"
                   >
                     <Check className="mr-2 h-4 w-4" />
                     {approve.isPending ? "Approving..." : "Approve & prioritize"}
@@ -92,7 +120,7 @@ function ProcessDetailRoute() {
             <div className="mt-5 space-y-3">
               {data.steps.map((step) => (
                 <div key={step.id} className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
-                  <p className="font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">{step.label}</p>
+                  <p className="font-sans text-[15px] font-semibold text-[var(--navy)]">{step.label}</p>
                   <p className="font-sans text-[13px] text-[var(--slate)]">
                     {step.kind ?? "step"} · L{step.automation_level ?? 0}
                   </p>
@@ -118,6 +146,40 @@ function ProcessDetailRoute() {
       )}
     </>
   );
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60) || "process";
+}
+
+function buildFallbackExport(data: {
+  row: Record<string, any>;
+  record: Record<string, any>;
+  steps: Array<Record<string, any>>;
+}) {
+  return {
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    source: "fallback_from_process_detail",
+    process: {
+      id: data.row.id,
+      name: data.record.name,
+      department: data.record.department,
+      status: data.record.status,
+      createdAt: data.row.created_at,
+      submittedAt: data.row.submitted_at,
+      approvedAt: data.row.approved_at,
+    },
+    capture: data.row.capture ?? {},
+    scores: data.row.scores ?? {},
+    governanceFlags: data.row.governance_flags ?? {},
+    riskTier: data.row.risk_tier ?? data.record.riskTier ?? null,
+    steps: data.steps,
+  };
 }
 
 type ValidationStep = {
@@ -188,10 +250,10 @@ function DataValidationPanel({
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
             Data validation
           </p>
-          <h3 className="mt-1 font-sans text-[22px] font-semibold text-[var(--ichigo-navy)]">
+          <h3 className="mt-1 font-sans text-[22px] font-semibold text-[var(--navy)]">
             Confirm sensitivity and ownership
           </h3>
           <p className="mt-2 font-sans text-[14px] text-[var(--slate)]">
@@ -200,7 +262,7 @@ function DataValidationPanel({
         </div>
         <Badge
           className={`rounded-full px-3 py-1 ${
-            dataValidated ? "bg-[var(--success)] text-white" : "bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]"
+            dataValidated ? "bg-[var(--success)] text-white" : "bg-[var(--mist)] text-[var(--navy)]"
           }`}
         >
           data_validated = {String(dataValidated)}
@@ -212,12 +274,12 @@ function DataValidationPanel({
           <div key={step.id} className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">{step.label}</p>
+                <p className="font-sans text-[15px] font-semibold text-[var(--navy)]">{step.label}</p>
                 <p className="font-sans text-[13px] text-[var(--slate)]">
                   {step.isDataCritical ? "Data-critical" : "Not data-critical"} · {String(step.dataProfile.source)}
                 </p>
               </div>
-              <Badge className="rounded-full bg-white px-3 py-1 text-[var(--ichigo-navy)]">
+              <Badge className="rounded-full bg-white px-3 py-1 text-[var(--navy)]">
                 {step.dataQuality.replaceAll("_", " ")}
               </Badge>
             </div>
@@ -243,7 +305,7 @@ function DataValidationPanel({
       <Button
         disabled={pending}
         onClick={() => onConfirm(draftSteps)}
-        className="mt-5 rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+        className="mt-5 rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
       >
         <Check className="mr-2 h-4 w-4" />
         {pending ? "Saving..." : "Confirm data validation"}
@@ -267,7 +329,7 @@ function CycleButton({
     <button
       type="button"
       onClick={() => onChange(options[(options.indexOf(value) + 1) % options.length])}
-      className="rounded-full border border-[var(--chalk)] bg-white px-3 py-2 text-left font-sans text-[12px] text-[var(--ichigo-navy)]"
+      className="rounded-full border border-[var(--chalk)] bg-white px-3 py-2 text-left font-sans text-[12px] text-[var(--navy)]"
     >
       <span className="text-[var(--slate)]">{label}: </span>
       {value.replaceAll("_", " ")}

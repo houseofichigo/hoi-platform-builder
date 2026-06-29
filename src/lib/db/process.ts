@@ -39,6 +39,9 @@ export interface ProcessListItem {
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  capture: Record<string, unknown>;
+  scores: Record<string, unknown>;
+  riskTier: string | null;
   stepCount: number;
   steps: ProcessStep[];
 }
@@ -104,6 +107,9 @@ function mapProcess(row: any): ProcessListItem {
     archivedAt: row.archived_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    capture: row.capture ?? {},
+    scores: row.scores ?? {},
+    riskTier: row.risk_tier ?? null,
     stepCount: steps.length,
     steps,
   };

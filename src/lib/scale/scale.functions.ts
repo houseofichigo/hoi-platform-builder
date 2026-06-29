@@ -97,6 +97,8 @@ function reviewerRoleForSource(source: DerivedGovernanceFlag["rule_source"]): st
   switch (source) {
     case "gdpr":
       return "DPO";
+    case "cnil":
+      return "DPO / CNIL liaison";
     case "eu_ai_act":
       return "AI governance owner";
     case "internal_policy":
@@ -106,6 +108,9 @@ function reviewerRoleForSource(source: DerivedGovernanceFlag["rule_source"]): st
 }
 
 function evidenceForRule(ruleCode: DerivedGovernanceFlag["rule_code"]): string[] {
+  if (ruleCode === "CNIL_PRIVACY_REVIEW") {
+    return ["lawful basis", "privacy notice", "retention rule", "CNIL/DPO review note"];
+  }
   if (ruleCode === "DPIA_REQUIRED" || ruleCode === "DATA_MINIMISATION" || ruleCode === "RIGHT_TO_EXPLANATION") {
     return ["processing purpose", "data minimisation note", "DPIA decision", "data subject impact note"];
   }
@@ -133,7 +138,7 @@ export async function deriveAndPersistGovernanceFlagsForUseCase(args: {
 }) {
   const { data: uc, error: ucErr } = await supabaseAdmin
     .from("use_cases")
-    .select("id, workspace_id, function, name, workspaces(slug)")
+    .select("id, workspace_id, function, name, capture_v2, derived_scores, workspaces(slug)")
     .eq("id", args.useCaseId)
     .single();
   if (ucErr || !uc) throw new Error(ucErr?.message ?? "Use case not found");
@@ -153,6 +158,9 @@ export async function deriveAndPersistGovernanceFlagsForUseCase(args: {
   ]);
 
   const mergedCapture: Record<string, unknown> = {};
+  Object.assign(mergedCapture, (uc.capture_v2 ?? {}) as Record<string, unknown>);
+  Object.assign(mergedCapture, ((uc.capture_v2 as Record<string, unknown> | null)?.capture ?? {}) as Record<string, unknown>);
+  Object.assign(mergedCapture, ((uc.derived_scores as Record<string, unknown> | null)?.scores ?? {}) as Record<string, unknown>);
   for (const c of captures ?? []) {
     Object.assign(mergedCapture, (c.responses ?? {}) as Record<string, unknown>);
   }
@@ -440,7 +448,7 @@ export const moveRoadmapEntry = createServerFn({ method: "POST" })
     try {
       const { data: uc } = await supabaseAdmin
         .from("use_cases")
-        .select("function")
+        .select("function, capture_v2, derived_scores")
         .eq("id", entry.use_case_id)
         .maybeSingle();
       const { data: captures } = await supabaseAdmin
@@ -448,6 +456,9 @@ export const moveRoadmapEntry = createServerFn({ method: "POST" })
         .select("responses")
         .eq("use_case_id", entry.use_case_id);
       const mergedCapture: Record<string, unknown> = {};
+      Object.assign(mergedCapture, (uc?.capture_v2 ?? {}) as Record<string, unknown>);
+      Object.assign(mergedCapture, ((uc?.capture_v2 as Record<string, unknown> | null)?.capture ?? {}) as Record<string, unknown>);
+      Object.assign(mergedCapture, ((uc?.derived_scores as Record<string, unknown> | null)?.scores ?? {}) as Record<string, unknown>);
       for (const c of captures ?? []) {
         Object.assign(mergedCapture, (c.responses ?? {}) as Record<string, unknown>);
       }
@@ -791,7 +802,7 @@ export const recomputeGovernanceFlags = createServerFn({ method: "POST" })
 
     const { data: useCases, error: ucErr } = await supabaseAdmin
       .from("use_cases")
-      .select("id, name, function")
+      .select("id, name, function, capture_v2, derived_scores")
       .eq("workspace_id", data.workspaceId)
       .in("status", ["scored", "submitted", "approved"]);
     if (ucErr) throw new Error(ucErr.message);
@@ -826,6 +837,9 @@ export const recomputeGovernanceFlags = createServerFn({ method: "POST" })
       ]);
 
       const mergedCapture: Record<string, unknown> = {};
+      Object.assign(mergedCapture, (uc.capture_v2 ?? {}) as Record<string, unknown>);
+      Object.assign(mergedCapture, ((uc.capture_v2 as Record<string, unknown> | null)?.capture ?? {}) as Record<string, unknown>);
+      Object.assign(mergedCapture, ((uc.derived_scores as Record<string, unknown> | null)?.scores ?? {}) as Record<string, unknown>);
       for (const c of captures ?? []) {
         Object.assign(mergedCapture, (c.responses ?? {}) as Record<string, unknown>);
       }

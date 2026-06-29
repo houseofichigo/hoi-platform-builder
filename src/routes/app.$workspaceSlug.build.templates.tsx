@@ -46,7 +46,7 @@ function TemplateLibraryScreen() {
 function TemplateState({ title, detail }: { title: string; detail: string }) {
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-      <p className="font-display text-[30px] font-medium tracking-normal text-[var(--ichigo-navy)]">{title}</p>
+      <p className="font-display text-[30px] font-medium tracking-normal text-[var(--navy)]">{title}</p>
       <p className="mx-auto mt-2 max-w-xl font-sans text-[15px] text-[var(--slate)]">{detail}</p>
     </Card>
   );

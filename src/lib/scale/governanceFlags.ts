@@ -5,7 +5,7 @@
 
 import type { RoadmapStage } from "./types";
 
-export type GovernanceRuleSource = "eu_ai_act" | "gdpr" | "internal_policy";
+export type GovernanceRuleSource = "eu_ai_act" | "gdpr" | "cnil" | "internal_policy";
 export type GovernanceSeverity = "hard_stop" | "requires_action" | "advisory";
 
 export type GovernanceRuleCode =
@@ -15,6 +15,7 @@ export type GovernanceRuleCode =
   | "TRANSPARENCY_ART13"
   | "CONFORMITY_ASSESSMENT"
   | "DPIA_REQUIRED"
+  | "CNIL_PRIVACY_REVIEW"
   | "DATA_MINIMISATION"
   | "RIGHT_TO_EXPLANATION"
   | "SECURITY_REVIEW_REQUIRED"
@@ -51,7 +52,86 @@ function n(v: unknown): number | null {
 }
 function isYes(v: unknown): boolean {
   const x = s(v).toLowerCase();
-  return x === "yes" || x === "true";
+  return x === "yes" || x === "true" || x === "1";
+}
+
+function isNo(v: unknown): boolean {
+  const x = s(v).toLowerCase();
+  return x === "no" || x === "false" || x === "none" || x === "0";
+}
+
+function rec(v: unknown): Record<string, unknown> {
+  return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+}
+
+function firstString(...values: unknown[]): string {
+  for (const value of values) {
+    const text = s(value);
+    if (text) return text;
+  }
+  return "";
+}
+
+function normalizeCapture(capture: Record<string, unknown>): Record<string, unknown> {
+  const nestedCapture = rec(capture.capture);
+  const derivedData = { ...rec(capture.derivedData), ...rec(nestedCapture.derivedData) };
+  const globalPass = { ...rec(capture.globalPass), ...rec(nestedCapture.globalPass) };
+  const frame = { ...rec(capture.frame), ...rec(nestedCapture.frame) };
+  const derivedScores = rec(capture.derived_scores);
+  const scores = { ...rec(derivedScores.scores), ...rec(capture.scores) };
+  const outputCriticality = firstString(capture.outputCriticality, capture.output_criticality, frame.outputCriticality);
+  const classification = firstString(
+    capture.classification,
+    capture.data_classification,
+    capture.dataClassification,
+    derivedData.dataClassification,
+    derivedData.data_classification,
+  );
+  const decisionLogic = firstString(
+    capture.decision_logic_type,
+    capture.decision_logic,
+    capture.decision_logic_choice,
+    globalPass.decisionLogic,
+    frame.decisionLogic,
+  );
+  const impact = firstString(
+    capture.impact,
+    capture.business_impact,
+    capture.impact_if_failure,
+    capture.impact_if_failure_choice,
+    capture.impactIfFailure,
+    capture.error_reversibility,
+    capture.errorReversibility,
+    scores.impactTier,
+  );
+  const customerFacing =
+    isYes(capture.customer_facing_choice) ||
+    isYes(capture.customerFacing) ||
+    firstString(capture.target_domain, frame.targetDomain) === "customer_facing" ||
+    outputCriticality === "customer_facing";
+
+  return {
+    ...capture,
+    ...nestedCapture,
+    derivedData,
+    globalPass,
+    frame,
+    data_classification: classification,
+    classification,
+    decision_logic_type: decisionLogic,
+    impact_if_failure_choice: impact,
+    target_domain: customerFacing ? "customer_facing" : firstString(capture.target_domain, frame.targetDomain),
+    customer_facing_choice: customerFacing ? "yes" : capture.customer_facing_choice,
+    scope_chips: arr(capture.scope_chips).length ? arr(capture.scope_chips) : arr(derivedData.scopeChips),
+    integrations_chips: arr(capture.integrations_chips).length ? arr(capture.integrations_chips) : arr(derivedData.integrations),
+    personal_data_choice:
+      capture.personal_data_choice ??
+      capture.personal_data ??
+      (["personal", "sensitive", "special_category", "restricted", "highly_restricted"].includes(classification) ? "yes" : undefined),
+    automated_decisions_affect_individuals_choice:
+      capture.automated_decisions_affect_individuals_choice ??
+      capture.automatedDecisionsAffectIndividuals,
+  };
 }
 
 function isCustomerFacing(cap: Record<string, unknown>): boolean {
@@ -76,7 +156,7 @@ function automatedDecisionsAffectIndividuals(
 export function deriveGovernanceFlags(input: DeriveInput): DerivedGovernanceFlag[] {
   const flags: DerivedGovernanceFlag[] = [];
   const codes = new Set(input.reasonCodes ?? []);
-  const cap = input.capture ?? {};
+  const cap = normalizeCapture(input.capture ?? {});
   const fn = (input.useCaseFunction ?? "").toLowerCase();
   const stage = input.stage;
   const fromStage = input.fromStage ?? null;
@@ -86,6 +166,9 @@ export function deriveGovernanceFlags(input: DeriveInput): DerivedGovernanceFlag
     cap.personal_data === true ||
     (personal !== "" && personal !== "none" && personal !== "no");
   const classification = s(cap.classification) || s(cap.data_classification);
+  const sensitiveClassification = ["personal", "sensitive", "special_category", "restricted", "highly_restricted"].includes(
+    classification,
+  );
 
   const decisionLogic =
     s(cap.decision_logic_type) ||
@@ -195,6 +278,21 @@ export function deriveGovernanceFlags(input: DeriveInput): DerivedGovernanceFlag
     });
   }
 
+  if ((hasPersonal || sensitiveClassification) && (automatedDecisions || affectsIndividuals || customerFacing || broadProcessing)) {
+    flags.push({
+      rule_code: "CNIL_PRIVACY_REVIEW",
+      rule_source: "cnil",
+      severity: "requires_action",
+      metadata: {
+        personal_data: hasPersonal,
+        classification: classification || null,
+        automated_decisions: automatedDecisions || affectsIndividuals,
+        customer_facing: customerFacing,
+        broad_processing: broadProcessing,
+      },
+    });
+  }
+
   if (broadProcessing || classification === "restricted" || classification === "confidential") {
     flags.push({
       rule_code: "DATA_MINIMISATION",
@@ -225,7 +323,7 @@ export function deriveGovernanceFlags(input: DeriveInput): DerivedGovernanceFlag
   const foreignVendor = s(cap.foreign_vendor) || s(cap.foreign_vendor_choice);
   const hasForeign =
     cap.foreign_vendor_access === true ||
-    (foreignVendor !== "" && foreignVendor !== "none" && foreignVendor !== "no") ||
+    (foreignVendor !== "" && !isNo(foreignVendor)) ||
     codes.has("FOREIGN_DATA_ACCESS");
   const integrations = arr(cap.integrations_chips).length || (n(cap.integration_count) ?? 0);
 

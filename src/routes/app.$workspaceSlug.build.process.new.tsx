@@ -421,7 +421,7 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/process/new")({
   errorComponent: ({ error }) => (
     <>
       <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-        <p className="font-display text-[30px] font-medium tracking-normal text-[var(--ichigo-navy)]">
+        <p className="font-display text-[30px] font-medium tracking-normal text-[var(--navy)]">
           Process builder did not load
         </p>
         <p className="mx-auto mt-2 max-w-xl font-sans text-[15px] text-[var(--slate)]">
@@ -1379,23 +1379,23 @@ function ProcessBuilder() {
         <div className="space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">
                 Process builder
               </p>
               <h1 className="mt-1 font-display text-[38px] font-medium tracking-normal">
-                Diagram-first <span className="italic text-[var(--ichigo-orange)]">capture</span>
+                Diagram-first <span className="italic text-[var(--terracotta)]">capture</span>
               </h1>
             </div>
             {hasDraftContent ? (
               <div className="flex items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] px-3 py-2">
-                <Save className="h-4 w-4 text-[var(--ichigo-orange)]" />
+                <Save className="h-4 w-4 text-[var(--terracotta)]" />
                 <span className="font-sans text-[12px] text-[var(--slate)]">
                   {draftStatus === "restored" ? "Draft restored" : draftStatus === "saved" ? "Draft autosaved" : "Draft active"}
                 </span>
                 <button
                   type="button"
                   onClick={discardDraft}
-                  className="font-sans text-[12px] font-semibold text-[var(--ichigo-orange)]"
+                  className="font-sans text-[12px] font-semibold text-[var(--terracotta)]"
                 >
                   Discard
                 </button>
@@ -1567,18 +1567,18 @@ function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect:
             onClick={() => onSelect(item.id)}
             className={`relative z-10 flex min-h-20 items-center gap-3 rounded-[var(--r-md)] border p-3 text-left transition ${
               active
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white shadow-sm"
+                ? "border-[var(--navy)] bg-[var(--navy)] text-white shadow-sm"
                 : complete
-                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)]"
+                  ? "border-[var(--navy)] bg-white text-[var(--navy)]"
                   : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
             }`}
           >
             <span
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border font-mono text-[13px] ${
                 active
-                  ? "border-white bg-white text-[var(--ichigo-navy)]"
+                  ? "border-white bg-white text-[var(--navy)]"
                   : complete
-                    ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
+                    ? "border-[var(--navy)] bg-[var(--navy)] text-white"
                     : "border-[var(--chalk)] bg-white text-[var(--slate)]"
               }`}
             >
@@ -1620,18 +1620,18 @@ function BuilderStageStepper({
             onClick={() => onSelect(item.id)}
             className={`flex items-center gap-3 rounded-[var(--r-md)] border px-4 py-3 text-left transition ${
               active
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white shadow-sm"
+                ? "border-[var(--navy)] bg-[var(--navy)] text-white shadow-sm"
                 : complete
-                  ? "border-[var(--chalk)] bg-white text-[var(--ichigo-navy)] hover:border-[var(--ichigo-navy)]"
-                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:border-[var(--ichigo-navy)] hover:text-[var(--ichigo-navy)]"
+                  ? "border-[var(--chalk)] bg-white text-[var(--navy)] hover:border-[var(--navy)]"
+                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:border-[var(--navy)] hover:text-[var(--navy)]"
             }`}
           >
             <span
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[13px] font-semibold ${
                 active
-                  ? "bg-white text-[var(--ichigo-navy)]"
+                  ? "bg-white text-[var(--navy)]"
                   : complete
-                    ? "bg-[var(--ichigo-navy)] text-white"
+                    ? "bg-[var(--navy)] text-white"
                     : "border border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
               }`}
             >
@@ -1688,7 +1688,7 @@ function FrameStep({
       </div>
       <div className="space-y-6">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Identity</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Identity</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <TextInput label="Process name" value={frame.name} onChange={(name) => setFrame({ ...frame, name })} />
             <TextInput label="Process family" value={frame.family} onChange={(family) => setFrame({ ...frame, family })} />
@@ -1714,7 +1714,7 @@ function FrameStep({
         </div>
 
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Characterization</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Characterization</p>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">Output criticality</Label>
@@ -1728,8 +1728,8 @@ function FrameStep({
                       onClick={() => toggleCriticality(value)}
                       className={`rounded-full border px-3 py-2 font-sans text-[12px] font-medium ${
                         active
-                          ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
-                          : "border-[var(--chalk)] bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]"
+                          ? "border-[var(--navy)] bg-[var(--navy)] text-white"
+                          : "border-[var(--chalk)] bg-[var(--mist)] text-[var(--navy)]"
                       }`}
                     >
                       {label}
@@ -1746,7 +1746,7 @@ function FrameStep({
           </div>
         </div>
       </div>
-      <Button onClick={onNext} className="mt-5 rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90">
+      <Button onClick={onNext} className="mt-5 rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90">
         Continue to diagram
       </Button>
     </Card>
@@ -1866,9 +1866,9 @@ function DiagramStep(props: {
                           props.onAddTemplate(template);
                           setTemplateMenuOpen(false);
                         }}
-                        className="flex w-full items-center gap-2 rounded-[var(--r-sm)] px-3 py-2 text-left font-sans text-[13px] font-medium text-[var(--ichigo-navy)] hover:bg-[var(--paper)]"
+                        className="flex w-full items-center gap-2 rounded-[var(--r-sm)] px-3 py-2 text-left font-sans text-[13px] font-medium text-[var(--navy)] hover:bg-[var(--paper)]"
                       >
-                        <Square className="h-3.5 w-3.5 text-[var(--ichigo-orange)]" />
+                        <Square className="h-3.5 w-3.5 text-[var(--terracotta)]" />
                         {template.label}
                       </button>
                     ))}
@@ -1891,7 +1891,7 @@ function DiagramStep(props: {
                 <GitBranch className="mr-2 h-4 w-4" />
                 Auto-layout
               </Button>
-              <Button type="button" onClick={props.onNext} className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90">
+              <Button type="button" onClick={props.onNext} className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90">
                 Review & submit
               </Button>
             </div>
@@ -1937,14 +1937,14 @@ function DiagramStep(props: {
                 onToggleLayoutDirection={props.onToggleLayoutDirection}
               />
               <Controls className="!bottom-4 !left-4 !border !border-[var(--chalk)] !bg-white !shadow-sm" />
-              <MiniMap className="!border !border-[var(--chalk)] !bg-white/90" maskColor="rgba(250,250,247,0.72)" nodeColor="var(--ichigo-navy)" />
+              <MiniMap className="!border !border-[var(--chalk)] !bg-white/90" maskColor="rgba(250,250,247,0.72)" nodeColor="var(--navy)" />
             </ReactFlow>
             {props.nodes.length === 0 ? (
               <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
                 <button
                   type="button"
                   onClick={props.onOpenTriggerPicker}
-                  className="pointer-events-auto flex h-40 w-48 flex-col items-center justify-center rounded-[var(--r-md)] border-2 border-dashed border-[var(--chalk)] bg-white/90 font-sans text-[var(--ichigo-navy)] shadow-xl backdrop-blur transition hover:border-[var(--ichigo-orange)] hover:text-[var(--ichigo-orange)]"
+                  className="pointer-events-auto flex h-40 w-48 flex-col items-center justify-center rounded-[var(--r-md)] border-2 border-dashed border-[var(--chalk)] bg-white/90 font-sans text-[var(--navy)] shadow-xl backdrop-blur transition hover:border-[var(--terracotta)] hover:text-[var(--terracotta)]"
                 >
                   <Plus className="h-8 w-8" />
                   <span className="mt-3 text-[15px] font-semibold">Add a trigger</span>
@@ -2051,8 +2051,8 @@ function StartChoiceOverlay({ onManual, onAiDraft, onTemplate }: { onManual: () 
   return (
     <div className="pointer-events-auto w-full max-w-4xl rounded-[var(--r-md)] border border-[var(--chalk)] bg-white/95 p-5 shadow-2xl backdrop-blur">
       <div className="text-center">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Start mapping</p>
-        <h3 className="mt-2 font-display text-[30px] font-medium text-[var(--ichigo-navy)]">How would you like to build this process?</h3>
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Start mapping</p>
+        <h3 className="mt-2 font-display text-[30px] font-medium text-[var(--navy)]">How would you like to build this process?</h3>
         <p className="mx-auto mt-2 max-w-xl font-sans text-[14px] leading-6 text-[var(--slate)]">
           Start manually with a trigger, let AI draft a first map, or copy a reusable process template and adapt it to your company.
         </p>
@@ -2061,12 +2061,12 @@ function StartChoiceOverlay({ onManual, onAiDraft, onTemplate }: { onManual: () 
         <button
           type="button"
           onClick={onManual}
-          className="group rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+          className="group rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] text-[var(--ichigo-orange)] group-hover:border-[var(--ichigo-orange)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] text-[var(--terracotta)] group-hover:border-[var(--terracotta)]">
             <Plus className="h-5 w-5" />
           </span>
-          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--ichigo-navy)]">Build manually</span>
+          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--navy)]">Build manually</span>
           <span className="mt-1 block font-sans text-[13px] leading-5 text-[var(--slate)]">
             Choose a trigger, then add each step, branch, tool, and approval yourself.
           </span>
@@ -2074,12 +2074,12 @@ function StartChoiceOverlay({ onManual, onAiDraft, onTemplate }: { onManual: () 
         <button
           type="button"
           onClick={onTemplate}
-          className="group rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+          className="group rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] text-[var(--ichigo-orange)] group-hover:border-[var(--ichigo-orange)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] text-[var(--terracotta)] group-hover:border-[var(--terracotta)]">
             <ClipboardCheck className="h-5 w-5" />
           </span>
-          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--ichigo-navy)]">Start from template</span>
+          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--navy)]">Start from template</span>
           <span className="mt-1 block font-sans text-[13px] leading-5 text-[var(--slate)]">
             Copy a starter blueprint into this canvas. You will adapt owners, tools, outputs, volume, reliability, and criticality.
           </span>
@@ -2087,12 +2087,12 @@ function StartChoiceOverlay({ onManual, onAiDraft, onTemplate }: { onManual: () 
         <button
           type="button"
           onClick={onAiDraft}
-          className="group rounded-[var(--r-md)] border border-[var(--ichigo-orange)] bg-[var(--paper)] p-5 text-left shadow-sm transition hover:bg-white"
+          className="group rounded-[var(--r-md)] border border-[var(--terracotta)] bg-[var(--paper)] p-5 text-left shadow-sm transition hover:bg-white"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] bg-[var(--ichigo-orange)] text-white">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-sm)] bg-[var(--terracotta)] text-white">
             <Bot className="h-5 w-5" />
           </span>
-          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--ichigo-navy)]">Draft with AI</span>
+          <span className="mt-4 block font-sans text-[16px] font-semibold text-[var(--navy)]">Draft with AI</span>
           <span className="mt-1 block font-sans text-[13px] leading-5 text-[var(--slate)]">
             Explain the workflow in plain language. AI proposes a map, then you confirm the missing business details.
           </span>
@@ -2118,9 +2118,9 @@ function ProcessTemplateStartPanel({
       <div className="border-b border-[var(--chalk)] bg-[var(--paper)] p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Template library</p>
-            <h3 className="mt-1 flex items-center gap-2 font-display text-[26px] font-medium text-[var(--ichigo-navy)]">
-              <ClipboardCheck className="h-6 w-6 text-[var(--ichigo-orange)]" />
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Template library</p>
+            <h3 className="mt-1 flex items-center gap-2 font-display text-[26px] font-medium text-[var(--navy)]">
+              <ClipboardCheck className="h-6 w-6 text-[var(--terracotta)]" />
               Start from template
             </h3>
             <p className="mt-1 font-sans text-[13px] leading-5 text-[var(--slate)]">
@@ -2188,9 +2188,9 @@ function AIDraftStartPanel({
       <div className="border-b border-[var(--chalk)] bg-[var(--paper)] p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">AI process builder</p>
-            <h3 className="mt-1 flex items-center gap-2 font-display text-[26px] font-medium text-[var(--ichigo-navy)]">
-              <Bot className="h-6 w-6 text-[var(--ichigo-orange)]" />
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">AI process builder</p>
+            <h3 className="mt-1 flex items-center gap-2 font-display text-[26px] font-medium text-[var(--navy)]">
+              <Bot className="h-6 w-6 text-[var(--terracotta)]" />
               Draft with AI
             </h3>
             <p className="mt-1 font-sans text-[13px] leading-5 text-[var(--slate)]">
@@ -2231,7 +2231,7 @@ function AIDraftStartPanel({
           />
         </div>
         <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-3">
-          <p className="font-sans text-[13px] font-semibold text-[var(--ichigo-navy)]">User must confirm later</p>
+          <p className="font-sans text-[13px] font-semibold text-[var(--navy)]">User must confirm later</p>
           <p className="mt-1 font-sans text-[12px] leading-5 text-[var(--slate)]">
             Owner, expected output, frequency/volume, data reliability, criticality, failure impact, and reversibility stay user-owned.
           </p>
@@ -2240,7 +2240,7 @@ function AIDraftStartPanel({
           type="button"
           disabled={assistant.isPending || !description.trim()}
           onClick={requestDraft}
-          className="w-full rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+          className="w-full rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
         >
           {assistant.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
           Generate draft map
@@ -2253,7 +2253,7 @@ function AIDraftStartPanel({
         {patch ? (
           <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
             <div className="flex items-center justify-between gap-3">
-              <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">
+              <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">
                 {patch.confidence} confidence
               </Badge>
               <span className="font-sans text-[12px] text-[var(--slate)]">{patch.operations.length} edits</span>
@@ -2263,7 +2263,7 @@ function AIDraftStartPanel({
               {patch.operations.length ? patch.operations.map((operation, index) => (
                 <div key={`${operation.op}-${index}`} className="rounded-[var(--r-sm)] border border-[var(--chalk)] bg-white p-3">
                   <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--slate)]">{operation.op.replaceAll("_", " ")}</p>
-                  <p className="mt-1 font-sans text-[12px] leading-5 text-[var(--ichigo-navy)]">{operationSummary(operation)}</p>
+                  <p className="mt-1 font-sans text-[12px] leading-5 text-[var(--navy)]">{operationSummary(operation)}</p>
                 </div>
               )) : (
                 <p className="rounded-[var(--r-sm)] bg-white p-3 font-sans text-[13px] text-[var(--slate)]">No graph edits proposed.</p>
@@ -2273,13 +2273,13 @@ function AIDraftStartPanel({
               <div className="mt-3 space-y-2">
                 {patch.questions.map((question) => (
                   <p key={`${question.field}-${question.question}`} className="rounded-[var(--r-sm)] bg-white p-3 font-sans text-[12px] leading-5 text-[var(--graphite)]">
-                    <span className="font-semibold text-[var(--ichigo-navy)]">{question.field}: </span>
+                    <span className="font-semibold text-[var(--navy)]">{question.field}: </span>
                     {question.question}
                   </p>
                 ))}
               </div>
             ) : null}
-            <Button type="button" onClick={applyDraft} className="mt-4 w-full rounded-[var(--r-md)] bg-[var(--ichigo-navy)] text-white hover:bg-[var(--ichigo-navy)]/90">
+            <Button type="button" onClick={applyDraft} className="mt-4 w-full rounded-[var(--r-md)] bg-[var(--navy)] text-white hover:bg-[var(--navy)]/90">
               Apply to canvas
             </Button>
           </div>
@@ -2287,7 +2287,7 @@ function AIDraftStartPanel({
         {reports?.rejected.length ? (
           <div className="space-y-2">
             {reports.rejected.map((report, index) => (
-              <p key={`${report.op}-${index}`} className="rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-3 font-sans text-[12px] text-[var(--ichigo-navy)]">
+              <p key={`${report.op}-${index}`} className="rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-3 font-sans text-[12px] text-[var(--navy)]">
                 Could not apply {report.op.replaceAll("_", " ")}: {report.reason}
               </p>
             ))}
@@ -2352,7 +2352,7 @@ function TriggerPicker({
       <div className="border-b border-[var(--chalk)] bg-[var(--paper)] p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Start process</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Start process</p>
             <h3 className="mt-1 font-display text-[26px] font-medium tracking-normal">
               {screen === "tool" && pendingTool ? pendingTool.name : screen === "apps" ? "App event" : "What starts this process?"}
             </h3>
@@ -2360,7 +2360,7 @@ function TriggerPicker({
               {screen === "tool" && pendingTool ? `Choose the ${pendingTool.name} event.` : screen === "apps" ? "Choose the app that emits the starting event." : "A trigger is the event or moment that begins the map."}
             </p>
             {hasTrigger ? (
-              <p className="mt-2 rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-2 font-sans text-[13px] text-[var(--ichigo-navy)]">
+              <p className="mt-2 rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-2 font-sans text-[13px] text-[var(--navy)]">
                 This map already has a trigger. Multiple triggers are allowed, but keep each one intentional.
               </p>
             ) : null}
@@ -2377,33 +2377,33 @@ function TriggerPicker({
           <button
             type="button"
             onClick={() => onCreate({ triggerType: "manual" })}
-            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
           >
-            <CircleDot className="mt-0.5 h-5 w-5 text-[var(--ichigo-orange)]" />
+            <CircleDot className="mt-0.5 h-5 w-5 text-[var(--terracotta)]" />
             <span>
-              <span className="block font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">Manual</span>
+              <span className="block font-sans text-[15px] font-semibold text-[var(--navy)]">Manual</span>
               <span className="mt-1 block font-sans text-[13px] text-[var(--slate)]">Someone starts the process by hand.</span>
             </span>
           </button>
           <button
             type="button"
             onClick={() => onCreate({ triggerType: "schedule" })}
-            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
           >
             <ClockIcon />
             <span>
-              <span className="block font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">Schedule</span>
+              <span className="block font-sans text-[15px] font-semibold text-[var(--navy)]">Schedule</span>
               <span className="mt-1 block font-sans text-[13px] text-[var(--slate)]">Runs on a recurring interval. Default: every 1 day.</span>
             </span>
           </button>
           <button
             type="button"
             onClick={() => setScreen("apps")}
-            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
           >
-            <Zap className="mt-0.5 h-5 w-5 text-[var(--ichigo-orange)]" />
+            <Zap className="mt-0.5 h-5 w-5 text-[var(--terracotta)]" />
             <span className="min-w-0 flex-1">
-              <span className="block font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">App event</span>
+              <span className="block font-sans text-[15px] font-semibold text-[var(--navy)]">App event</span>
               <span className="mt-1 block font-sans text-[13px] text-[var(--slate)]">Start when something happens in a company tool.</span>
             </span>
             <span className="font-sans text-[18px] text-[var(--slate)]">→</span>
@@ -2411,11 +2411,11 @@ function TriggerPicker({
           <button
             type="button"
             onClick={() => onCreate({ triggerType: "event", eventName: "webhook_called", toolName: "Webhook" })}
-            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+            className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4 text-left hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
           >
-            <GitBranch className="mt-0.5 h-5 w-5 text-[var(--ichigo-orange)]" />
+            <GitBranch className="mt-0.5 h-5 w-5 text-[var(--terracotta)]" />
             <span>
-              <span className="block font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">Webhook or form submission</span>
+              <span className="block font-sans text-[15px] font-semibold text-[var(--navy)]">Webhook or form submission</span>
               <span className="mt-1 block font-sans text-[13px] text-[var(--slate)]">Start from an HTTP webhook, form, or intake event.</span>
             </span>
           </button>
@@ -2467,7 +2467,7 @@ function TriggerPicker({
 }
 
 function ClockIcon() {
-  return <Circle className="h-5 w-5 text-[var(--ichigo-orange)]" />;
+  return <Circle className="h-5 w-5 text-[var(--terracotta)]" />;
 }
 
 function NodeToolPicker({
@@ -2553,13 +2553,13 @@ function NodeToolPicker({
       <div className="border-b border-[var(--chalk)] bg-[var(--paper)] p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Add to diagram</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Add to diagram</p>
             <h3 className="mt-1 flex min-w-0 items-center gap-3 font-display text-[26px] font-medium tracking-normal">
               {selectedCategory ? (
                 <button
                   type="button"
                   onClick={goBack}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--chalk)] bg-white text-[var(--ichigo-navy)] transition hover:border-[var(--ichigo-orange)] hover:text-[var(--ichigo-orange)]"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--chalk)] bg-white text-[var(--navy)] transition hover:border-[var(--terracotta)] hover:text-[var(--terracotta)]"
                   aria-label="Go back"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -2568,7 +2568,7 @@ function NodeToolPicker({
               {pendingLogo ? (
                 <img src={pendingLogo} alt="" className="h-7 w-7 rounded-[var(--r-sm)] object-contain" />
               ) : DrawerIcon ? (
-                <DrawerIcon className="h-6 w-6 shrink-0 text-[var(--ichigo-orange)]" />
+                <DrawerIcon className="h-6 w-6 shrink-0 text-[var(--terracotta)]" />
               ) : null}
               <span className="truncate">{drawerTitle}</span>
             </h3>
@@ -2591,11 +2591,11 @@ function NodeToolPicker({
                 <button
                   type="button"
                   onClick={() => category.id === "trigger" ? onAddTrigger() : setSelectedCategory(category.id)}
-                  className="flex w-full items-start gap-4 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+                  className="flex w-full items-start gap-4 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
                 >
-                  <Icon className="mt-0.5 h-5 w-5 text-[var(--ichigo-orange)]" />
+                  <Icon className="mt-0.5 h-5 w-5 text-[var(--terracotta)]" />
                   <span className="min-w-0 flex-1">
-                    <span className="block font-sans text-[15px] font-semibold text-[var(--ichigo-navy)]">{category.label}</span>
+                    <span className="block font-sans text-[15px] font-semibold text-[var(--navy)]">{category.label}</span>
                     <span className="mt-0.5 block font-sans text-[12px] leading-5 text-[var(--slate)]">{category.description}</span>
                   </span>
                   <span className="mt-1 font-sans text-[18px] leading-none text-[var(--slate)]">→</span>
@@ -2652,11 +2652,11 @@ function NodeToolPicker({
                         key={`${action.category}-${action.label}`}
                         type="button"
                         onClick={() => onChooseKind(target, action.kind, action.data)}
-                        className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-3 text-left transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+                        className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-3 text-left transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
                       >
-                        <Icon className="mt-0.5 h-5 w-5 text-[var(--ichigo-orange)]" />
+                        <Icon className="mt-0.5 h-5 w-5 text-[var(--terracotta)]" />
                         <span className="min-w-0">
-                          <span className="block font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{action.label}</span>
+                          <span className="block font-sans text-[14px] font-semibold text-[var(--navy)]">{action.label}</span>
                           <span className="mt-0.5 block font-sans text-[12px] leading-5 text-[var(--slate)]">{action.description}</span>
                         </span>
                       </button>
@@ -2675,7 +2675,7 @@ function NodeToolPicker({
 
 function SearchField({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
-    <div className="flex h-12 items-center gap-3 rounded-[var(--r-md)] border border-[var(--ichigo-orange)] bg-white px-3">
+    <div className="flex h-12 items-center gap-3 rounded-[var(--r-md)] border border-[var(--terracotta)] bg-white px-3">
       <Search className="h-4 w-4 text-[var(--slate)]" />
       <Input
         value={value}
@@ -2726,13 +2726,13 @@ function ToolListSection({
               key={item.kind === "org" ? `org-${item.tool.id}` : `catalog-${item.catalog.id}`}
               type="button"
               onClick={() => item.kind === "org" ? onChooseOrg?.(item.tool) : onChooseCatalog?.(item.catalog)}
-              className="flex w-full items-center gap-3 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+              className="flex w-full items-center gap-3 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)]">
-                {logo ? <img src={logo} alt="" className="h-6 w-6 object-contain" /> : <Zap className="h-4 w-4 text-[var(--ichigo-orange)]" />}
+                {logo ? <img src={logo} alt="" className="h-6 w-6 object-contain" /> : <Zap className="h-4 w-4 text-[var(--terracotta)]" />}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{name}</span>
+                <span className="block truncate font-sans text-[14px] font-semibold text-[var(--navy)]">{name}</span>
                 <span className="block truncate font-sans text-[12px] text-[var(--slate)]">{category || catalog?.description || "Company tool"}</span>
               </span>
               <span className="font-sans text-[18px] text-[var(--slate)]">→</span>
@@ -2799,7 +2799,7 @@ function ToolActionChooser({
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-[var(--chalk)] pb-3">
             <div className="flex items-center gap-2">
-              <h4 className="font-sans text-[18px] font-semibold text-[var(--ichigo-navy)]">
+              <h4 className="font-sans text-[18px] font-semibold text-[var(--navy)]">
                 {actionLabel} ({visibleActions.length})
               </h4>
               <span className="flex h-5 w-5 items-center justify-center rounded-full border border-[var(--chalk)] font-sans text-[11px] text-[var(--slate)]">?</span>
@@ -2815,13 +2815,13 @@ function ToolActionChooser({
                     key={action.id}
                     type="button"
                     onClick={() => onChoose(action)}
-                    className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--ichigo-orange)] hover:bg-[var(--paper)]"
+                    className="flex w-full items-start gap-3 rounded-[var(--r-md)] border border-transparent bg-white p-3 text-left transition hover:border-[var(--terracotta)] hover:bg-[var(--paper)]"
                   >
                     <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-sm)] bg-[var(--paper)]">
-                      {logo ? <img src={logo} alt="" className="h-5 w-5 object-contain" /> : <Zap className="h-4 w-4 text-[var(--ichigo-orange)]" />}
+                      {logo ? <img src={logo} alt="" className="h-5 w-5 object-contain" /> : <Zap className="h-4 w-4 text-[var(--terracotta)]" />}
                     </span>
                     <span className="min-w-0">
-                      <span className="block font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{action.business_action}</span>
+                      <span className="block font-sans text-[14px] font-semibold text-[var(--navy)]">{action.business_action}</span>
                       <span className="mt-0.5 block font-sans text-[12px] leading-5 text-[var(--slate)]">
                         {action.business_use_case || `Use ${tool.name} to work with ${action.business_object}.`}
                       </span>
@@ -2841,7 +2841,7 @@ function ToolActionChooser({
             No {capabilityType === "trigger" ? "trigger events" : "action rows"} found for this tool yet. The current import has partial coverage, so you can still continue with a generic tool step.
           </p>
           {capabilityType === "action" ? (
-            <Button type="button" onClick={onUseGeneric} className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90">
+            <Button type="button" onClick={onUseGeneric} className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90">
               Create blank step with this tool
             </Button>
           ) : null}
@@ -2914,11 +2914,11 @@ function ToolActionSelect({
               onClick={() => onSelect(action)}
               className={`w-full rounded-[var(--r-md)] border p-2 text-left transition ${
                 selectedActionId === action.id
-                  ? "border-[var(--ichigo-orange)] bg-white"
-                  : "border-transparent bg-white/60 hover:border-[var(--ichigo-orange)] hover:bg-white"
+                  ? "border-[var(--terracotta)] bg-white"
+                  : "border-transparent bg-white/60 hover:border-[var(--terracotta)] hover:bg-white"
               }`}
             >
-              <span className="block font-sans text-[12px] font-semibold text-[var(--ichigo-navy)]">{action.business_action}</span>
+              <span className="block font-sans text-[12px] font-semibold text-[var(--navy)]">{action.business_action}</span>
               <span className="block truncate font-sans text-[11px] text-[var(--slate)]">{action.business_object}</span>
             </button>
           ))
@@ -2974,8 +2974,8 @@ function CanvasToolbar({
         onClick={onToggleToolTiles}
         className={`h-9 rounded-full border px-3 font-mono text-[11px] font-semibold transition ${
           showToolTiles
-            ? "border-[var(--ichigo-orange)] bg-[var(--ichigo-orange)] text-white"
-            : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--ichigo-navy)]"
+            ? "border-[var(--terracotta)] bg-[var(--terracotta)] text-white"
+            : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--navy)]"
         }`}
         title="Toggle tool tiles"
       >
@@ -2984,7 +2984,7 @@ function CanvasToolbar({
       <button
         type="button"
         onClick={onToggleLayoutDirection}
-        className="h-9 rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-3 font-mono text-[11px] font-semibold text-[var(--ichigo-navy)] transition hover:border-[var(--ichigo-orange)]"
+        className="h-9 rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-3 font-mono text-[11px] font-semibold text-[var(--navy)] transition hover:border-[var(--terracotta)]"
         title="Toggle layout direction"
       >
         {layoutDirection === "RIGHT" ? "LR" : "TB"}
@@ -3001,7 +3001,7 @@ function PlaceholderButton({ label, onClick }: { label: string; onClick: () => v
         event.stopPropagation();
         onClick();
       }}
-      className="flex h-9 items-center gap-2 rounded-full border border-[var(--ichigo-orange)] bg-white px-3 font-sans text-[12px] font-semibold text-[var(--ichigo-orange)] shadow-sm transition hover:bg-[var(--ichigo-orange)] hover:text-white"
+      className="flex h-9 items-center gap-2 rounded-full border border-[var(--terracotta)] bg-white px-3 font-sans text-[12px] font-semibold text-[var(--terracotta)] shadow-sm transition hover:bg-[var(--terracotta)] hover:text-white"
     >
       <Plus className="h-3.5 w-3.5" />
       {label}
@@ -3020,7 +3020,7 @@ function IconButton({ label, icon: Icon, onClick, disabled, danger }: { label: s
         event.stopPropagation();
         onClick();
       }}
-      className={`flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chalk)] bg-white transition hover:border-[var(--ichigo-orange)] disabled:cursor-not-allowed disabled:opacity-40 ${danger ? "text-[var(--danger)]" : "text-[var(--ichigo-navy)]"}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-full border border-[var(--chalk)] bg-white transition hover:border-[var(--terracotta)] disabled:cursor-not-allowed disabled:opacity-40 ${danger ? "text-[var(--danger)]" : "text-[var(--navy)]"}`}
     >
       <Icon className="h-4 w-4" />
     </button>
@@ -3190,7 +3190,7 @@ function SidePanel({
         <div key={field.key}>
           <div className="mb-2 flex items-center justify-between">
             <Label className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">{fieldLabel}</Label>
-            <span className="font-mono text-[12px] text-[var(--ichigo-orange)]">L{node.data.automationLevel}</span>
+            <span className="font-mono text-[12px] text-[var(--terracotta)]">L{node.data.automationLevel}</span>
           </div>
           <div className="grid grid-cols-5 gap-1">
             {[0, 1, 2, 3, 4].map((level) => (
@@ -3198,7 +3198,7 @@ function SidePanel({
                 key={level}
                 type="button"
                 onClick={() => update({ automationLevel: level })}
-                className={`h-9 rounded-[var(--r-sm)] font-mono text-[12px] ${node.data.automationLevel === level ? "bg-[var(--ichigo-orange)] text-white" : "bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]"}`}
+                className={`h-9 rounded-[var(--r-sm)] font-mono text-[12px] ${node.data.automationLevel === level ? "bg-[var(--terracotta)] text-white" : "bg-[var(--mist)] text-[var(--navy)]"}`}
               >
                 L{level}
               </button>
@@ -3251,22 +3251,22 @@ function SidePanel({
     <Card className="flex h-full flex-col rounded-none border-0 bg-white">
       <div className="border-b border-[var(--chalk)] bg-[var(--paper)] p-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-sm)] bg-[var(--paper)] text-[var(--ichigo-orange)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-sm)] bg-[var(--paper)] text-[var(--terracotta)]">
             {(() => {
               const Icon = kindIcon[node.data.kind];
               return <Icon className="h-5 w-5" />;
             })()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Edit selected step</p>
-            <p className="truncate font-display text-[24px] leading-8 text-[var(--ichigo-navy)]">{node.data.label}</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Edit selected step</p>
+            <p className="truncate font-display text-[24px] leading-8 text-[var(--navy)]">{node.data.label}</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <Badge className="rounded-full bg-[var(--ichigo-mist)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--ichigo-navy)]">
+              <Badge className="rounded-full bg-[var(--mist)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--navy)]">
                 {nodeKindLabel(node.data.kind)}
               </Badge>
               {statusChips.map((chip) => (
                 <Badge key={chip} className={`rounded-full px-2.5 py-1 font-sans text-[11px] ${
-                  chip.startsWith("Missing") ? "bg-[var(--warning)]/15 text-[var(--ichigo-navy)]" : "bg-white text-[var(--slate)]"
+                  chip.startsWith("Missing") ? "bg-[var(--warning)]/15 text-[var(--navy)]" : "bg-white text-[var(--slate)]"
                 }`}>
                   {chip}
                 </Badge>
@@ -3279,7 +3279,7 @@ function SidePanel({
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         {isDecision || isApproval ? (
           <div className="rounded-[var(--r-md)] border border-[var(--warning)]/25 bg-[var(--warning)]/10 p-3">
-            <p className="font-sans text-[13px] text-[var(--ichigo-navy)]">
+            <p className="font-sans text-[13px] text-[var(--navy)]">
               {isDecision
                 ? "If steps should have at least two clear branches, such as True and False."
                 : "Approval steps should include what is approved and where rejected work goes."}
@@ -3309,7 +3309,7 @@ function SidePanel({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--slate)]">Tool role</p>
-                      <p className="mt-1 font-sans text-[13px] font-semibold text-[var(--ichigo-navy)]">
+                      <p className="mt-1 font-sans text-[13px] font-semibold text-[var(--navy)]">
                         {node.data.toolName} · {rolePhrase(node.data.toolRole ?? inferToolRole({ name: node.data.toolName })) || "supports this step"}
                       </p>
                     </div>
@@ -3317,7 +3317,7 @@ function SidePanel({
                       <button
                         type="button"
                         onClick={() => setEditToolRole((open) => !open)}
-                        className="font-sans text-[12px] font-semibold text-[var(--ichigo-orange)]"
+                        className="font-sans text-[12px] font-semibold text-[var(--terracotta)]"
                       >
                         {editToolRole ? "Done" : "Edit role"}
                       </button>
@@ -3352,7 +3352,7 @@ function SidePanel({
                 {node.data.hitl ? (
                   <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-3">
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--slate)]">Human-in-the-loop</p>
-                    <p className="mt-1 font-sans text-[13px] text-[var(--ichigo-navy)]">{node.data.hitl.replaceAll("_", " ")}</p>
+                    <p className="mt-1 font-sans text-[13px] text-[var(--navy)]">{node.data.hitl.replaceAll("_", " ")}</p>
                   </div>
                 ) : null}
               </div>
@@ -3395,7 +3395,7 @@ function DataProfileSummary({ node, expanded, onEdit }: { node: ProcessBuilderNo
           <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--slate)]">Structural data profile</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {chips.map((chip) => (
-              <Badge key={chip} className="rounded-full bg-white px-2.5 py-1 font-sans text-[11px] text-[var(--ichigo-navy)]">
+              <Badge key={chip} className="rounded-full bg-white px-2.5 py-1 font-sans text-[11px] text-[var(--navy)]">
                 {chip}
               </Badge>
             ))}
@@ -3404,7 +3404,7 @@ function DataProfileSummary({ node, expanded, onEdit }: { node: ProcessBuilderNo
         <button
           type="button"
           onClick={onEdit}
-          className="shrink-0 font-sans text-[12px] font-semibold text-[var(--ichigo-orange)]"
+          className="shrink-0 font-sans text-[12px] font-semibold text-[var(--terracotta)]"
         >
           {expanded ? "Hide" : "Edit data assumptions"}
         </button>
@@ -3427,7 +3427,7 @@ function BriefPreview({ node }: { node: ProcessBuilderNode }) {
   return (
     <section className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--slate)]">AI brief preview</p>
-      <p className="mt-2 font-sans text-[13px] leading-6 text-[var(--ichigo-navy)]">
+      <p className="mt-2 font-sans text-[13px] leading-6 text-[var(--navy)]">
         {owners}{tool} to {action.toLowerCase()}{output}. Automation: L{node.data.automationLevel}.{data}{assistantOpportunity}
       </p>
     </section>
@@ -3553,7 +3553,7 @@ function DataChips({ node, onChange }: { node: ProcessBuilderNode; onChange: (no
     <div>
       <div className="mb-2 flex items-center justify-between">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">Structural data profile</p>
-        <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">{profile.source}</Badge>
+        <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">{profile.source}</Badge>
       </div>
       <div className="flex flex-wrap gap-2">
         {chips.map(([key, label, options]) => (
@@ -3565,7 +3565,7 @@ function DataChips({ node, onChange }: { node: ProcessBuilderNode; onChange: (no
               const next = options[(options.indexOf(current) + 1) % options.length];
               onChange(hydrateNode({ ...node, data: { ...node.data, dataProfile: { ...profile, [key]: next, source: "overridden" } } }) as ProcessBuilderNode);
             }}
-            className="rounded-full border border-[var(--chalk)] bg-[var(--ichigo-mist)] px-3 py-2 text-left font-sans text-[12px] font-medium text-[var(--ichigo-navy)]"
+            className="rounded-full border border-[var(--chalk)] bg-[var(--mist)] px-3 py-2 text-left font-sans text-[12px] font-medium text-[var(--navy)]"
           >
             <span className="text-[var(--slate)]">{label}: </span>
             {String(profile[key]).replaceAll("_", " ")}
@@ -3591,7 +3591,7 @@ function QualityControl({ node, onChange }: { node: ProcessBuilderNode; onChange
             key={value}
             type="button"
             onClick={() => onChange(hydrateNode({ ...node, data: { ...node.data, dataQuality: value } }) as ProcessBuilderNode)}
-            className={`min-h-10 rounded-[var(--r-sm)] px-2 font-sans text-[12px] font-medium ${node.data.dataQuality === value ? "bg-[var(--ichigo-orange)] text-white" : "bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]"}`}
+            className={`min-h-10 rounded-[var(--r-sm)] px-2 font-sans text-[12px] font-medium ${node.data.dataQuality === value ? "bg-[var(--terracotta)] text-white" : "bg-[var(--mist)] text-[var(--navy)]"}`}
           >
             {label}
           </button>
@@ -3652,7 +3652,7 @@ function CopilotDrawer({
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--ichigo-orange)]">Diagram copilot</p>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--terracotta)]">Diagram copilot</p>
           <p className="mt-1 font-sans text-[14px] text-[var(--slate)]">Ask for a structured suggestion, preview it, then apply it to the canvas.</p>
         </div>
         <Button type="button" variant="outline" onClick={() => setOpen(false)} className="rounded-[var(--r-md)] border-[var(--chalk)]">
@@ -3670,8 +3670,8 @@ function CopilotDrawer({
             }}
             className={`flex items-center gap-2 rounded-full border px-3 py-2 font-sans text-[12px] font-medium ${
               mode === actionMode && message === actionMessage
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
-                : "border-[var(--chalk)] bg-[var(--ichigo-mist)] text-[var(--ichigo-navy)]"
+                ? "border-[var(--navy)] bg-[var(--navy)] text-white"
+                : "border-[var(--chalk)] bg-[var(--mist)] text-[var(--navy)]"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -3690,7 +3690,7 @@ function CopilotDrawer({
           type="button"
           disabled={assistant.isPending || !message.trim()}
           onClick={request}
-          className="rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90"
+          className="rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90"
         >
           {assistant.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
           Ask AI
@@ -3705,12 +3705,12 @@ function CopilotDrawer({
         <div className="mt-4 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">
+              <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">
                 {patch.confidence} confidence
               </Badge>
               <p className="mt-2 font-sans text-[14px] text-[var(--graphite)]">{patch.summary}</p>
             </div>
-            <Button type="button" onClick={apply} className="rounded-[var(--r-md)] bg-[var(--ichigo-navy)] text-white hover:bg-[var(--ichigo-navy)]/90">
+            <Button type="button" onClick={apply} className="rounded-[var(--r-md)] bg-[var(--navy)] text-white hover:bg-[var(--navy)]/90">
               Apply patch
             </Button>
           </div>
@@ -3718,7 +3718,7 @@ function CopilotDrawer({
             {patch.operations.length ? patch.operations.map((operation, index) => (
               <div key={`${operation.op}-${index}`} className="rounded-[var(--r-sm)] border border-[var(--chalk)] bg-white p-3">
                 <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--slate)]">{operation.op.replaceAll("_", " ")}</p>
-                <p className="mt-1 font-sans text-[13px] text-[var(--ichigo-navy)]">{operationSummary(operation)}</p>
+                <p className="mt-1 font-sans text-[13px] text-[var(--navy)]">{operationSummary(operation)}</p>
               </div>
             )) : (
               <p className="rounded-[var(--r-sm)] border border-[var(--chalk)] bg-white p-3 font-sans text-[13px] text-[var(--slate)]">
@@ -3730,7 +3730,7 @@ function CopilotDrawer({
             <div className="mt-3 space-y-2">
               {patch.questions.map((question) => (
                 <p key={`${question.field}-${question.question}`} className="rounded-[var(--r-sm)] bg-white p-3 font-sans text-[13px] text-[var(--graphite)]">
-                  <span className="font-semibold text-[var(--ichigo-navy)]">{question.field}: </span>
+                  <span className="font-semibold text-[var(--navy)]">{question.field}: </span>
                   {question.question}
                 </p>
               ))}
@@ -3741,12 +3741,12 @@ function CopilotDrawer({
       {reports ? (
         <div className="mt-4 grid gap-2 md:grid-cols-2">
           {reports.applied.map((report, index) => (
-            <p key={`applied-${index}`} className="rounded-[var(--r-sm)] bg-[var(--success)]/10 p-3 font-sans text-[13px] text-[var(--ichigo-navy)]">
+            <p key={`applied-${index}`} className="rounded-[var(--r-sm)] bg-[var(--success)]/10 p-3 font-sans text-[13px] text-[var(--navy)]">
               Applied {report.op.replaceAll("_", " ")}{report.detail ? `: ${report.detail}` : ""}
             </p>
           ))}
           {reports.rejected.map((report, index) => (
-            <p key={`rejected-${index}`} className="rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-3 font-sans text-[13px] text-[var(--ichigo-navy)]">
+            <p key={`rejected-${index}`} className="rounded-[var(--r-sm)] bg-[var(--warning)]/10 p-3 font-sans text-[13px] text-[var(--navy)]">
               Could not apply {report.op.replaceAll("_", " ")}: {report.reason}
             </p>
           ))}
@@ -3815,11 +3815,11 @@ function SubmitStep(props: {
       <div className="mt-5 grid gap-3 md:grid-cols-2">
         <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">Trigger, from trigger node</p>
-          <p className="mt-2 font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{props.derivedEndpoints.trigger}</p>
+          <p className="mt-2 font-sans text-[14px] font-semibold text-[var(--navy)]">{props.derivedEndpoints.trigger}</p>
         </div>
         <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-4">
           <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--slate)]">Output, from end/output node</p>
-          <p className="mt-2 font-sans text-[14px] font-semibold text-[var(--ichigo-navy)]">{props.derivedEndpoints.output}</p>
+          <p className="mt-2 font-sans text-[14px] font-semibold text-[var(--navy)]">{props.derivedEndpoints.output}</p>
         </div>
       </div>
       <div className="mt-5 rounded-[var(--r-md)] border border-[var(--chalk)] bg-[var(--paper)] p-4">
@@ -3839,7 +3839,7 @@ function SubmitStep(props: {
               {props.readiness.passed}/{props.readiness.total} checks passed · {props.readiness.confidence} confidence
             </p>
           </div>
-          <Badge className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 text-[var(--ichigo-navy)]">
+          <Badge className="rounded-full bg-[var(--mist)] px-3 py-1 text-[var(--navy)]">
             {props.readiness.confidence}
           </Badge>
         </div>
@@ -3848,7 +3848,7 @@ function SubmitStep(props: {
             <div key={item.id} className="rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] p-3">
               <div className="flex items-center gap-2">
                 {item.passed ? <Check className="h-4 w-4 text-[var(--success)]" /> : <FileQuestion className="h-4 w-4 text-[var(--warning)]" />}
-                <p className="font-sans text-[13px] font-semibold text-[var(--ichigo-navy)]">{item.label}</p>
+                <p className="font-sans text-[13px] font-semibold text-[var(--navy)]">{item.label}</p>
               </div>
               {!item.passed ? <p className="mt-1 font-sans text-[12px] text-[var(--slate)]">{item.detail}</p> : null}
             </div>
@@ -3865,13 +3865,13 @@ function SubmitStep(props: {
               <span>{key}</span>
               <span>{value as number}/100</span>
             </div>
-            <Progress value={value as number} className="h-2 bg-[var(--ichigo-mist)] [&>div]:bg-[var(--ichigo-azure)]" />
+            <Progress value={value as number} className="h-2 bg-[var(--mist)] [&>div]:bg-[var(--terracotta)]" />
           </div>
         ))}
       </div>
       {props.error ? <p className="mt-4 rounded-[var(--r-md)] bg-[var(--danger)]/10 p-3 text-[var(--danger)]">{props.error}</p> : null}
-      {props.blockReason ? <p className="mt-4 rounded-[var(--r-md)] bg-[var(--warning)]/10 p-3 text-[var(--ichigo-navy)]">{props.blockReason}</p> : null}
-      <Button disabled={props.disabled} onClick={props.onSubmit} className="mt-6 rounded-[var(--r-md)] bg-[var(--ichigo-orange)] text-white hover:bg-[var(--ichigo-orange)]/90">
+      {props.blockReason ? <p className="mt-4 rounded-[var(--r-md)] bg-[var(--warning)]/10 p-3 text-[var(--navy)]">{props.blockReason}</p> : null}
+      <Button disabled={props.disabled} onClick={props.onSubmit} className="mt-6 rounded-[var(--r-md)] bg-[var(--terracotta)] text-white hover:bg-[var(--terracotta)]/90">
         {props.pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
         Submit process for review
       </Button>
@@ -3942,9 +3942,9 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
   const handleStyle = {
     width: 14,
     height: 14,
-    background: "var(--ichigo-orange)",
+    background: "var(--terracotta)",
     border: "2px solid white",
-    boxShadow: "0 0 0 3px color-mix(in srgb, var(--ichigo-orange) 22%, transparent)",
+    boxShadow: "0 0 0 3px color-mix(in srgb, var(--terracotta) 22%, transparent)",
     zIndex: 20,
   };
   const fallbackSubtitle = data.kind === "merge"
@@ -3956,7 +3956,7 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
     data.dataProfile.sensitivity === "sensitive"
       ? "border-[var(--danger)] bg-[var(--danger)]/10 text-[var(--danger)]"
       : data.dataProfile.sensitivity === "personal"
-        ? "border-[var(--warning)] bg-[var(--warning)]/10 text-[var(--ichigo-navy)]"
+        ? "border-[var(--warning)] bg-[var(--warning)]/10 text-[var(--navy)]"
         : "border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]";
   const hasIssues = issues.length > 0;
   const openAppendPicker = () => {
@@ -3980,7 +3980,7 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
         hasIssues
           ? "border-[var(--danger)] ring-2 ring-[var(--danger)]/20"
           : selected
-            ? "border-[var(--ichigo-orange)] ring-2 ring-[var(--ichigo-orange)]/25"
+            ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25"
             : "border-[var(--chalk)]"
       }`}
     >
@@ -3990,13 +3990,13 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
           {data.toolName && data.ui?.toolLogoUrl && !toolLogoFailed ? (
             <img src={data.ui.toolLogoUrl} alt="" className="h-6 w-6 object-contain" onError={() => setToolLogoFailed(true)} />
           ) : (
-            <Icon className="h-4 w-4 text-[var(--ichigo-orange)]" />
+            <Icon className="h-4 w-4 text-[var(--terracotta)]" />
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate font-display text-[15px] leading-5 text-[var(--ichigo-navy)]">{data.label}</p>
-            <span className="shrink-0 rounded-full bg-[var(--ichigo-mist)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--ichigo-navy)]">
+            <p className="truncate font-display text-[15px] leading-5 text-[var(--navy)]">{data.label}</p>
+            <span className="shrink-0 rounded-full bg-[var(--mist)] px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[var(--navy)]">
               {nodeKindLabel(data.kind)}
             </span>
           </div>
@@ -4020,22 +4020,22 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
       ) : null}
       <div className="mt-3 flex flex-wrap gap-1.5">
         {data.assistantOpportunity ? (
-          <span className="rounded-full border border-[var(--ichigo-orange)]/25 bg-[var(--ichigo-orange)]/10 px-2 py-1 font-sans text-[10px] font-semibold text-[var(--ichigo-navy)]">
+          <span className="rounded-full border border-[var(--terracotta)]/25 bg-[var(--terracotta)]/10 px-2 py-1 font-sans text-[10px] font-semibold text-[var(--navy)]">
             Assistant opportunity
           </span>
         ) : null}
         {data.toolName ? (
-          <span className="max-w-full truncate rounded-full border border-[var(--ichigo-orange)]/30 bg-[var(--ichigo-orange)]/10 px-2 py-1 font-sans text-[10px] font-semibold text-[var(--ichigo-navy)]">
+          <span className="max-w-full truncate rounded-full border border-[var(--terracotta)]/30 bg-[var(--terracotta)]/10 px-2 py-1 font-sans text-[10px] font-semibold text-[var(--navy)]">
             {data.toolName}{data.toolActionName ? ` · ${data.toolActionName}` : data.toolRole ? ` · ${rolePhrase(data.toolRole)}` : ""}
           </span>
         ) : null}
         {data.kind !== "trigger" && data.kind !== "merge" ? (
-          <span className="rounded-full border border-[var(--chalk)] bg-white px-2 py-1 font-mono text-[10px] text-[var(--ichigo-navy)]">
+          <span className="rounded-full border border-[var(--chalk)] bg-white px-2 py-1 font-mono text-[10px] text-[var(--navy)]">
             L{data.automationLevel}
           </span>
         ) : null}
         {data.kind === "merge" ? (
-          <span className="rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-2 py-1 font-sans text-[10px] text-[var(--ichigo-navy)]">
+          <span className="rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-2 py-1 font-sans text-[10px] text-[var(--navy)]">
             Join paths
           </span>
         ) : null}
@@ -4045,7 +4045,7 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
           </span>
         ) : null}
         {triggerChip ? (
-          <span className="max-w-full truncate rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-2 py-1 font-sans text-[10px] text-[var(--ichigo-navy)]">
+          <span className="max-w-full truncate rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-2 py-1 font-sans text-[10px] text-[var(--navy)]">
             {triggerChip}
           </span>
         ) : null}
@@ -4065,7 +4065,7 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
               event.stopPropagation();
               openBranchPicker((data.ui?.branchLabels?.length ?? 0) === 0 ? "True" : "False");
             }}
-            className="flex items-center gap-1 rounded-full border border-dashed border-[var(--ichigo-orange)] px-2 py-1 font-sans text-[10px] font-semibold text-[var(--ichigo-orange)]"
+            className="flex items-center gap-1 rounded-full border border-dashed border-[var(--terracotta)] px-2 py-1 font-sans text-[10px] font-semibold text-[var(--terracotta)]"
           >
             <Plus className="h-3 w-3" />
             Add branch
@@ -4078,17 +4078,17 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
           <button
             type="button"
             title="Edit tool used by this step"
-            className="flex min-w-36 max-w-48 items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white px-2 py-2 text-left shadow-sm transition hover:border-[var(--ichigo-orange)]"
+            className="flex min-w-36 max-w-48 items-center gap-2 rounded-[var(--r-md)] border border-[var(--chalk)] bg-white px-2 py-2 text-left shadow-sm transition hover:border-[var(--terracotta)]"
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-sm)] bg-[var(--paper)]">
               {data.ui.toolLogoUrl && !toolLogoFailed ? (
                 <img src={data.ui.toolLogoUrl} alt="" className="h-5 w-5 object-contain" onError={() => setToolLogoFailed(true)} />
               ) : (
-                <Icon className="h-3.5 w-3.5 text-[var(--ichigo-orange)]" />
+                <Icon className="h-3.5 w-3.5 text-[var(--terracotta)]" />
               )}
             </span>
             <span className="min-w-0">
-              <span className="block truncate font-sans text-[11px] font-semibold text-[var(--ichigo-navy)]">{data.toolName}</span>
+              <span className="block truncate font-sans text-[11px] font-semibold text-[var(--navy)]">{data.toolName}</span>
               <span className="block truncate font-sans text-[10px] text-[var(--slate)]">{data.toolActionName ?? (rolePhrase(data.toolRole) || data.ui.toolCategory || "Tool")}</span>
             </span>
           </button>
@@ -4101,7 +4101,7 @@ function ProcessNode({ id, data, selected }: NodeProps<ProcessBuilderNode>) {
           event.stopPropagation();
           openAppendPicker();
         }}
-        className={`absolute z-10 flex h-10 min-w-10 items-center justify-center rounded-full border border-[var(--ichigo-orange)] bg-white px-2 text-[var(--ichigo-orange)] shadow-sm transition hover:bg-[var(--ichigo-orange)] hover:text-white ${
+        className={`absolute z-10 flex h-10 min-w-10 items-center justify-center rounded-full border border-[var(--terracotta)] bg-white px-2 text-[var(--terracotta)] shadow-sm transition hover:bg-[var(--terracotta)] hover:text-white ${
           isVertical ? "-bottom-6 left-[calc(50%+28px)] -translate-x-1/2" : "-right-7 top-[calc(50%+32px)] -translate-y-1/2"
         } ${
           isTerminal || selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -4119,12 +4119,12 @@ function StickyNode({ data }: NodeProps<StickyBuilderNode>) {
   return (
     <div className="w-52 rounded-[var(--r-md)] border border-[var(--warning)]/40 bg-[var(--paper)] p-3 shadow-sm">
       <div className="mb-2 flex items-center gap-2">
-        <StickyNote className="h-4 w-4 text-[var(--ichigo-orange)]" />
+        <StickyNote className="h-4 w-4 text-[var(--terracotta)]" />
         <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--slate)]">
           {data.category.replaceAll("_", " ")}
         </p>
       </div>
-      <p className="font-sans text-[13px] text-[var(--ichigo-navy)]">{data.text}</p>
+      <p className="font-sans text-[13px] text-[var(--navy)]">{data.text}</p>
     </div>
   );
 }
@@ -4505,7 +4505,7 @@ function OwnerMultiSelect({
               key={owner}
               type="button"
               onClick={() => removeOwner(owner)}
-              className="rounded-full bg-[var(--ichigo-mist)] px-3 py-1 font-sans text-[12px] text-[var(--ichigo-navy)]"
+              className="rounded-full bg-[var(--mist)] px-3 py-1 font-sans text-[12px] text-[var(--navy)]"
               title="Remove owner"
             >
               {owner} ×
@@ -4535,7 +4535,7 @@ function OwnerMultiSelect({
               key={member.id}
               type="button"
               onClick={() => addOwner(member.name)}
-              className="rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-3 py-1 text-left font-sans text-[11px] text-[var(--ichigo-navy)]"
+              className="rounded-full border border-[var(--chalk)] bg-[var(--paper)] px-3 py-1 text-left font-sans text-[11px] text-[var(--navy)]"
             >
               {member.name}
               {member.role ? <span className="ml-1 text-[var(--slate)]">· {member.role}</span> : null}
@@ -4583,7 +4583,7 @@ function SelectField({ label, value, onChange, options }: { label: string; value
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="rounded-[var(--r-md)] border border-[var(--chalk)] bg-white p-3">
-      <p className="font-display text-[28px] leading-none text-[var(--ichigo-orange)]">{value}</p>
+      <p className="font-display text-[28px] leading-none text-[var(--terracotta)]">{value}</p>
       <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--slate)]">{label}</p>
     </div>
   );
@@ -4592,7 +4592,7 @@ function Metric({ label, value }: { label: string; value: string | number }) {
 function StateCard({ title, detail }: { title: string; detail: string }) {
   return (
     <Card className="rounded-[var(--r-md)] border-[var(--chalk)] bg-white p-8 text-center">
-      <p className="font-display text-[30px] text-[var(--ichigo-navy)]">{title}</p>
+      <p className="font-display text-[30px] text-[var(--navy)]">{title}</p>
       <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">{detail}</p>
     </Card>
   );

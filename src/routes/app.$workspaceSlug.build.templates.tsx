@@ -1,7 +1,7 @@
 // @ts-nocheck — Ported PFS module.
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
-import { ProcessTemplateBrowser, TemplateLibraryIntro } from "@/components/build/pfs/process-template-library";
+import { ProcessTemplateBrowser } from "@/components/build/pfs/process-template-library";
 import { Card } from "@/components/ui/card";
 import { useProcessTemplates } from "@/lib/db/pfs/process-templates";
 
@@ -15,15 +15,29 @@ export const Route = createFileRoute("/app/$workspaceSlug/build/templates")({
 
 function TemplateLibraryScreen() {
   const templatesQuery = useProcessTemplates();
+  const navigate = useNavigate();
+  const { workspaceSlug } = Route.useParams();
+
+  const goToBuilder = (templateSlug?: string) => {
+    void navigate({
+      to: "/app/$workspaceSlug/build/process/new",
+      params: { workspaceSlug },
+      search: templateSlug ? { templateSlug } : {},
+    });
+  };
+
   return (
     <div className="space-y-5">
-      <TemplateLibraryIntro />
       {templatesQuery.isLoading ? (
         <TemplateState title="Loading template library" detail="Fetching reusable process blueprints." />
       ) : templatesQuery.isError ? (
         <TemplateState title="Template library did not load" detail={templatesQuery.error.message} />
       ) : (
-        <ProcessTemplateBrowser templates={templatesQuery.data ?? []} />
+        <ProcessTemplateBrowser
+          templates={templatesQuery.data ?? []}
+          onApply={(t) => goToBuilder(t.slug)}
+          onBuildManually={() => goToBuilder()}
+        />
       )}
     </div>
   );

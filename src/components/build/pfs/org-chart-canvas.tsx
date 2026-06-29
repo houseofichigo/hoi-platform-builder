@@ -472,10 +472,10 @@ function Canvas({
 
   const onNodeClick = useCallback((_: unknown, node: OrgNode) => {
     if (!onSelect) return;
-    if (node.type === "companyNode") onSelect({ kind: "company", id: node.data.companyId });
-    else if (node.type === "departmentNode") onSelect({ kind: "department", id: node.data.deptId });
-    else if (node.type === "personNode") onSelect({ kind: "person", id: node.data.personId });
-    else onSelect({ kind: "invite", id: node.data.inviteId });
+    if (node.type === "companyNode") onSelect({ kind: "company", id: (node.data as CompanyData).companyId });
+    else if (node.type === "departmentNode") onSelect({ kind: "department", id: (node.data as DeptData).deptId });
+    else if (node.type === "personNode") onSelect({ kind: "person", id: (node.data as PersonData).personId });
+    else onSelect({ kind: "invite", id: (node.data as InviteData).inviteId });
   }, [onSelect]);
 
   const onNodeDragStop = useCallback(async (_: unknown, node: OrgNode) => {

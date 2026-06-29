@@ -685,6 +685,7 @@ function NewProcessRoute() {
 
 function ProcessBuilder() {
   const navigate = useNavigate();
+  const { workspaceSlug } = Route.useParams();
   const templateSearch = Route.useSearch();
   // When the user arrives here via "Start with this template" from the
   // Template Library, treat it as an explicit "new diagram" intent: ignore any

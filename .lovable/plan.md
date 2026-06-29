@@ -1,56 +1,32 @@
 ## Goal
 
-Turn the Template Library cards into clickable previews that match the uploaded screenshots, and let users import a template into a new process draft.
+Show the three Frame / Diagram / Submit stages as the prominent stepper from the screenshot at the top of the process builder, without reducing the working canvas area.
 
-## Scope
+## Changes (all in `src/routes/app.$workspaceSlug.build.process.new.tsx`)
 
-Frontend only. The backend (`process_template` table, `useProcessTemplates`, and the existing `/build/process/new?templateSlug=…` import path) already exists and works.
+### 1. New `BuilderStageStepper` component
 
-## Changes
+Render three large cards matching the screenshot:
 
-### 1. `src/components/build/pfs/process-template-library.tsx` (rewrite)
+- Card per stage with: round number badge (filled navy with check when complete; filled navy when active; outlined chalk when upcoming), bold label (`Frame` / `Diagram` / `Submit`), small caption (`Define & characterize` / `Map the flow` / `Review & submit`).
+- Active card: solid navy background, white text, white number bubble.
+- Complete card: white background, navy text, navy bubble with check icon.
+- Upcoming card: white background, slate text, chalk-outlined bubble.
+- All three are buttons that call `onSelect(step)`; equal width via `grid-cols-3` with `gap-3`.
 
-Match Screenshot 3 (browse view):
+### 2. Diagram view (fixed full-bleed shell around line 1827)
 
-- Header card: eyebrow `PROCESS TEMPLATES`, clipboard icon + serif title "Template Library", subtitle, top-right `Build manually` button (calls a new optional `onBuildManually` prop).
-- Search bar (filters by name, description, category, department hint, tags, recommended tools).
-- Category filter chips derived from `templates[].category` plus `All` (active = terracotta pill, inactive = chalk outline).
-- Grid of `TemplateCard`s (2-up on `md`, full-width row in screenshot). Each card shows:
-  - Flow strip preview: first ~6 step labels rendered as small chalk-bordered chips; decision/approval steps highlighted in terracotta (derived from `templateJson.nodes` kinds).
-  - Category pill, `Global template` / `Company` scope pill, `internal`/`external` pill.
-  - `Start with this template` primary button (top-right of card body).
-  - Title, department/family eyebrow, `description`.
-  - Adapt-this-map helper line.
-  - Three count tiles: `STEPS`, `BRANCHES`, `APPROVALS` (steps = task-like nodes, branches = decision nodes, approvals = approval nodes).
-  - Numbered step list (first 5–8 step labels with short description from `templateJson.nodes[i].data?.description`).
-  - Footer chips: recommended tools + `complexity` + `confidence X/5`. If present, `KPIs:` and `AI:` lines.
-- Whole card is clickable (button/keyboard accessible) to open the detail modal; the inner `Start with this template` button stops propagation and triggers import directly.
+- Add a compact wrapper above the existing toolbar that hosts `BuilderStageStepper`. Keep it inside the fixed container so the canvas still fills the remaining space via the existing `flex-1` column.
+- Remove the inline `BuilderStepNav` pill row + helper sentence from the toolbar (replaced by the stepper); keep right-side action buttons (Templates, Undo, Redo, Delete, Auto-layout, Review & submit) as-is.
+- Canvas keeps its current `flex-1 min-h-0` sizing; net vertical use is roughly the same as today (stepper replaces the pill row + helper line), so the canvas does not shrink.
 
-### 2. New `TemplateDetailDialog` (same file)
+### 3. Frame and Submit steps (the two non-canvas screens)
 
-Match Screenshots 1 & 2:
+- Replace the existing small `BuilderStepNav` rendered at the top of `FrameStep` (line 1670) and the Submit step card (line ~3772) with `BuilderStageStepper` for visual consistency with the diagram screen.
+- Keep `onNavigateStep` wiring as-is.
 
-- Shadcn `Dialog` (`max-w-3xl`, scrollable body).
-- Top chips row: category, `Global template`/company, `internal`, `complexity`, `confidence X/5`.
-- Title (`name`) + category eyebrow + `description` paragraph.
-- Flow strip: all step labels as compact chips with arrows between; decisions/approvals outlined in terracotta, end/trigger in navy.
-- `PROCESS STEPS` section: `N steps · M connections` summary then a numbered list. Each row shows step number, kind badge (`TRIGGER`/`STEP`/`DECISION`/`APPROVAL`/`OUTPUT`/`END` styled like screenshot), label, description, and an `Input · Output` line built from `node.data.inputType` / `node.data.output` / tool name.
-- `OBJECTIVE` paragraph (`objective` + adapt-helper line).
-- Two-column meta grid: `DEPARTMENT`, `TAGS`, `RECOMMENDED TOOLS`, `KPIs`, `RISKS`, `AUTOMATION OPPORTUNITIES`, `AI AGENT OPPORTUNITIES`, `VARIATIONS`. Render each as chalk-outlined chips; hide sections that are empty.
-- Footer: `Close` (outline) + `Start with this template` (terracotta) — triggers the same import handler.
+### 4. Cleanup
 
-### 3. `src/routes/app.$workspaceSlug.build.templates.tsx`
+- Leave `BuilderStepNav` exported/unused only if still referenced elsewhere; otherwise remove its definition. Quick check shows it is only used in these three call sites, so it can be deleted after the swap.
 
-- Drop the separate `TemplateLibraryIntro` block (the new component owns its own header).
-- Pass `onApply={(t) => navigate({ to: "/app/$workspaceSlug/build/process/new", params: { workspaceSlug }, search: { templateSlug: t.slug } })}` and `onBuildManually={() => navigate({ to: "/app/$workspaceSlug/build/process/new", params: { workspaceSlug } })}`.
-- Action label stays `Start with this template`.
-
-### 4. No DB / migration / server changes
-
-The import flow already exists via `?templateSlug=` consumed by `/build/process/new` (`getProcessTemplateBySlug` + `templateToBuilderState`). Existing CSV data populates everything the new UI reads.
-
-## Notes
-
-- Step labels/descriptions are read from `template.templateJson.nodes[i].data?.label` / `…?.description` with a graceful fallback to `node.label`.
-- Counts use the same `nodeKinds` mapping already used by `templateToBuilderState` so previews match what the builder will create.
-- Out of scope: editing templates, saving company templates, drag-and-drop reordering — this PR is preview + import only.
+No backend or schema changes. No new dependencies.

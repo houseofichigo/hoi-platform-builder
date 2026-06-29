@@ -648,6 +648,12 @@ export function OrgChartCanvas({ onSelect, reparentEnabled = true }: { onSelect?
   const [searchQ, setSearchQ] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [centerOnId, setCenterOnId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<EditorSelection>(null);
+
+  const handleSelect = useCallback((value: Selected) => {
+    setSelection(value);
+    onSelect?.(value);
+  }, [onSelect]);
 
   const counters = useMemo(() => {
     const departments = data?.departments.filter((department) => !department.archivedAt) ?? [];

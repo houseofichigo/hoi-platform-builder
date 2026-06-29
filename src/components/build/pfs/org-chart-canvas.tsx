@@ -54,6 +54,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { OrgNodeEditor, type EditorSelection } from "@/components/build/pfs/org-node-editor";
 
 type Selected =
   | { kind: "department"; id: string }

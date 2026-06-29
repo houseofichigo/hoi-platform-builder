@@ -1597,11 +1597,19 @@ function BuilderStepper({ current, onSelect }: { current: BuilderStep; onSelect:
   );
 }
 
-function BuilderStepNav({ current, onSelect }: { current: BuilderStep; onSelect: (step: BuilderStep) => void }) {
+function BuilderStageStepper({
+  current,
+  onSelect,
+  className,
+}: {
+  current: BuilderStep;
+  onSelect: (step: BuilderStep) => void;
+  className?: string;
+}) {
   const navSteps = builderSteps.filter((item) => item.id !== "start");
   const currentIndex = navSteps.findIndex((item) => item.id === current);
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className={`grid grid-cols-1 gap-3 sm:grid-cols-3 ${className ?? ""}`}>
       {navSteps.map((item, index) => {
         const active = item.id === current;
         const complete = currentIndex >= 0 && index < currentIndex;
@@ -1610,26 +1618,35 @@ function BuilderStepNav({ current, onSelect }: { current: BuilderStep; onSelect:
             key={item.id}
             type="button"
             onClick={() => onSelect(item.id)}
-            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 font-sans text-[12px] font-medium transition ${
+            className={`flex items-center gap-3 rounded-[var(--r-md)] border px-4 py-3 text-left transition ${
               active
-                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white"
+                ? "border-[var(--ichigo-navy)] bg-[var(--ichigo-navy)] text-white shadow-sm"
                 : complete
-                  ? "border-[var(--ichigo-navy)] bg-white text-[var(--ichigo-navy)] hover:bg-[var(--paper)]"
-                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:text-[var(--ichigo-navy)]"
+                  ? "border-[var(--chalk)] bg-white text-[var(--ichigo-navy)] hover:border-[var(--ichigo-navy)]"
+                  : "border-[var(--chalk)] bg-white text-[var(--slate)] hover:border-[var(--ichigo-navy)] hover:text-[var(--ichigo-navy)]"
             }`}
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full font-mono text-[11px] ${
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-mono text-[13px] font-semibold ${
                 active
                   ? "bg-white text-[var(--ichigo-navy)]"
                   : complete
                     ? "bg-[var(--ichigo-navy)] text-white"
-                    : "bg-[var(--paper)] text-[var(--slate)]"
+                    : "border border-[var(--chalk)] bg-[var(--paper)] text-[var(--slate)]"
               }`}
             >
-              {complete ? <Check className="h-3 w-3" /> : index + 1}
+              {complete ? <Check className="h-4 w-4" /> : index + 1}
             </span>
-            {item.label}
+            <span className="flex min-w-0 flex-col">
+              <span className="font-sans text-[14px] font-semibold leading-tight">{item.label}</span>
+              <span
+                className={`font-sans text-[12px] leading-tight ${
+                  active ? "text-white/75" : "text-[var(--slate)]"
+                }`}
+              >
+                {item.caption}
+              </span>
+            </span>
           </button>
         );
       })}

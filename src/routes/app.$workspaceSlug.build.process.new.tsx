@@ -2117,7 +2117,7 @@ function ProcessTemplateStartPanel({
             {error}
           </p>
         ) : null}
-        <ProcessTemplateBrowser templates={templates} onApply={onApply} actionLabel="Start" />
+        <ProcessTemplateBrowser templates={templates} onApply={onApply} actionLabel="Start" showHeader={false} />
       </div>
     </div>
   );

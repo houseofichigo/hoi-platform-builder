@@ -18,7 +18,7 @@ import {
   archiveDepartment,
   assignMembership,
   cancelInvitation,
-  setDepartmentLead,
+  updateDepartmentLead,
   updateDepartment,
   updateInvitationAssignment,
   updateInvitationManager,

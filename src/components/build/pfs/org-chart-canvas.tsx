@@ -140,7 +140,7 @@ function FocusButton({ targetId }: { targetId: string }) {
 
 function CompanyNode({ data, selected }: NodeProps<CompanyNodeT>) {
   return (
-    <div className={`w-[280px] rounded-[var(--r-md)] border-2 bg-white p-3 shadow-md transition ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/30" : "border-[var(--navy)]"}`}>
+    <div className={`w-[280px] cursor-pointer rounded-[var(--r-md)] border-2 bg-white p-3 shadow-md transition hover:shadow-lg ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/30" : "border-[var(--navy)]"}`}>
       <div className="flex items-center gap-2 text-[var(--navy)]">
         <Building2 className="h-4 w-4" />
         <span className="truncate text-sm font-semibold">{data.name || "Company"}</span>
@@ -161,7 +161,7 @@ function DepartmentNode({ data, selected }: NodeProps<DeptNodeT>) {
   const reconcile = data.declared && data.declared > 0 ? `${data.named}/${data.declared} named` : `${data.named} named`;
   const over = data.declared != null && data.declared > 0 && data.named > data.declared;
   return (
-    <div className={`w-[236px] rounded-[var(--r-md)] border bg-[var(--navy)] p-3 text-white shadow-sm transition ${selected ? "ring-2 ring-[var(--terracotta)]/60" : ""}`}>
+    <div className={`w-[236px] cursor-pointer rounded-[var(--r-md)] border bg-[var(--navy)] p-3 text-white shadow-sm transition hover:shadow-md ${selected ? "ring-2 ring-[var(--terracotta)]/60" : ""}`}>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <div className="flex items-center gap-2">
         <Building2 className="h-4 w-4 opacity-80" />
@@ -180,7 +180,7 @@ function DepartmentNode({ data, selected }: NodeProps<DeptNodeT>) {
 
 function PersonNode({ data, selected }: NodeProps<PersonNodeT>) {
   return (
-    <div className={`w-[236px] rounded-[var(--r-md)] border border-l-[3px] bg-white p-3 shadow-sm transition ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25" : "border-[var(--chalk)]"}`} style={{ borderLeftColor: "var(--terracotta)" }}>
+    <div className={`w-[236px] cursor-pointer rounded-[var(--r-md)] border border-l-[3px] bg-white p-3 shadow-sm transition hover:shadow-md ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25" : "border-[var(--chalk)]"}`} style={{ borderLeftColor: "var(--terracotta)" }}>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <div className="flex items-center gap-2.5">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-sm)] border border-[var(--chalk)] bg-[var(--paper)] font-mono text-[11px] font-semibold text-[var(--terracotta)]">{initials(data.name)}</div>
@@ -201,7 +201,7 @@ function PersonNode({ data, selected }: NodeProps<PersonNodeT>) {
 
 function InviteNode({ data, selected }: NodeProps<InviteNodeT>) {
   return (
-    <div className={`w-[212px] rounded-[var(--r-md)] border border-dashed bg-[var(--paper)] p-3 shadow-sm transition ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25" : "border-[var(--chalk)]"}`}>
+    <div className={`w-[212px] cursor-pointer rounded-[var(--r-md)] border border-dashed bg-[var(--paper)] p-3 shadow-sm transition hover:shadow-md ${selected ? "border-[var(--terracotta)] ring-2 ring-[var(--terracotta)]/25" : "border-[var(--chalk)]"}`}>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <div className="flex items-center gap-2 text-[var(--slate)]">
         <Mail className="h-3.5 w-3.5" />

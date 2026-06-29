@@ -2117,7 +2117,10 @@ export type Database = {
       }
       process_export: {
         Row: {
+          archived_at: string | null
           created_at: string
+          created_by: string | null
+          export_json: Json | null
           export_type: string
           format: string
           generated_by: string | null
@@ -2126,10 +2129,14 @@ export type Database = {
           payload: Json
           process_id: string
           storage_path: string | null
+          version: number
           workspace_id: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
+          created_by?: string | null
+          export_json?: Json | null
           export_type: string
           format?: string
           generated_by?: string | null
@@ -2138,10 +2145,14 @@ export type Database = {
           payload?: Json
           process_id: string
           storage_path?: string | null
+          version?: number
           workspace_id: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
+          created_by?: string | null
+          export_json?: Json | null
           export_type?: string
           format?: string
           generated_by?: string | null
@@ -2150,6 +2161,7 @@ export type Database = {
           payload?: Json
           process_id?: string
           storage_path?: string | null
+          version?: number
           workspace_id?: string
         }
         Relationships: [

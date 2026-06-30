@@ -14,7 +14,7 @@ export const BLUEPRINT_LOADING_LINES = [
   "· C1 Data Map",
   "· C2 Trust + Safety",
   "· C3 Verification",
-  "· Gate 1 decision",
+  "· readiness decision",
 ] as const;
 
 interface BuildGeneratedBlueprintArgs {
@@ -112,10 +112,10 @@ export function generatedBlueprintToMarkdown(
     "Pass criteria:",
     ...c3.passCriteria.map((item) => `- ${item}`),
     "",
-    "Gate evidence:",
+    "Readiness review evidence:",
     ...c3.gateEvidence.map((item) => `- ${item}`),
     "",
-    "## Example Gate 1 Decision",
+    "## Example readiness Decision",
     "",
     `Example readiness status: ${status}. ${generated.statusExplanation}`,
     "",

@@ -321,7 +321,7 @@ export function M06Work() {
     qc.invalidateQueries({ queryKey: ["assess-progress-all", workspace.id, user.id] });
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
-    toast.success("M06 complete. Gate 2 is ready.");
+    toast.success("M06 complete. pilot-readiness is ready.");
   };
 
   if (!workspace) return null;
@@ -674,7 +674,7 @@ export function M06Work() {
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
-      stepLabel="STEP 5 of 5 · GATE 2 DOSSIER"
+      stepLabel="STEP 5 of 5 · PILOT-READINESS DOSSIER"
       title={s.title}
       why={<p>{s.why}</p>}
       example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -732,7 +732,7 @@ export function M06Work() {
           </div>
 
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
-            <p className="eyebrow-muted">GATE 2 CRITERIA</p>
+            <p className="eyebrow-muted">PILOT-READINESS CRITERIA</p>
             <ul className="list-disc pl-5 text-[12px] text-slate">
               {M06_COURSE_CONTENT.gate2Criteria.map((c) => (
                 <li key={c.id}>
@@ -766,7 +766,7 @@ export function M06Work() {
               }}
               className="mt-1 h-4 w-4 accent-terracotta"
             />
-            This is the version I will bring to Gate 2.
+            This is the version I will bring to the pilot-readiness review.
           </label>
 
           <div className="card bg-mist/40 space-y-1">
@@ -777,8 +777,8 @@ export function M06Work() {
       }
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
       canContinue={canComplete}
-      disabledReason="Acknowledge dossier review and Gate 2 readiness."
-      nextLabel="Complete M06 → Gate 2"
+      disabledReason="Acknowledge dossier review and pilot-readiness review."
+      nextLabel="Complete M06 → Readiness review 2"
       onBack={() => goToStep(4)}
       onContinue={completeM06}
     />

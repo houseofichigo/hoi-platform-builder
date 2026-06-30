@@ -89,11 +89,11 @@ export function BlueprintDocument({ blueprint, generated }: BlueprintDocumentPro
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <ListCard title="PASS / PARTIAL / FAIL" items={c3.passCriteria} />
-          <ListCard title="GATE 1 EVIDENCE" items={c3.gateEvidence} />
+          <ListCard title="READINESS EVIDENCE" items={c3.gateEvidence} />
         </div>
       </BlueprintSection>
 
-      <BlueprintSection title="Example Gate 1 Decision">
+      <BlueprintSection title="Example readiness Decision">
         <div className="space-y-3">
           <p className="rounded-md bg-terracotta/5 p-4 font-medium text-navy">
             Example readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}

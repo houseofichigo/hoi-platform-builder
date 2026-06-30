@@ -39,7 +39,7 @@ const DEFAULT_REFLECTION: ReflectionAnswers = {
 
 const DEFAULT_READINESS_STATUS: "PASS" | "PARTIAL" | "BLOCKED" = "PARTIAL";
 const DEFAULT_READINESS_EXPLANATION =
-  "Reference library is ready to use, but file, connector, search, agent, and scheduled rungs still require source ownership, access rules, and confirmation gates.";
+  "Reference library is ready to use, but file, connector, search, agent, and scheduled rungs still require source ownership, access rules, and confirmation checks.";
 
 export function M03Work() {
   const { workspace } = useWorkspace();

@@ -384,7 +384,7 @@ export function M09Work() {
     qc.invalidateQueries({ queryKey: ["assess-progress-all", workspace.id, user.id] });
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
-    toast.success("M09 complete. Gate 3 dossier is ready.");
+    toast.success("M09 complete. investment dossier is ready.");
   };
 
   if (!workspace) return null;
@@ -708,7 +708,7 @@ export function M09Work() {
     );
   }
 
-  // ===== STEP 5 — Gate 3 dossier =====
+  // ===== STEP 5 — investment dossier =====
   const s = M09_COURSE_CONTENT.step5;
   const top = candidates.find((c) => c.id === readiness.topCandidateId)
     ?? candidates.find((c) => ranking[c.id]?.rank === 1);
@@ -752,7 +752,7 @@ export function M09Work() {
   return (
     <Step
       chapterLabel={CHAPTER_LABEL}
-      stepLabel="STEP 5 of 5 · GATE 3 DOSSIER"
+      stepLabel="STEP 5 of 5 · INVESTMENT DOSSIER"
       title={s.title}
       why={<p>{s.why}</p>}
       example={<p className="text-[14px] text-navy">{s.example}</p>}
@@ -816,7 +816,7 @@ export function M09Work() {
           )}
 
           <div className="rounded-md border border-chalk bg-white px-4 py-3 space-y-1">
-            <p className="eyebrow-muted">GATE 3 CRITERIA</p>
+            <p className="eyebrow-muted">INVESTMENT CRITERIA</p>
             <ul className="list-disc pl-5 text-[12px] text-slate">
               {M09_COURSE_CONTENT.gate3Criteria.map((c) => (
                 <li key={c.id}>
@@ -865,7 +865,7 @@ export function M09Work() {
               }}
               className="mt-1 h-4 w-4 accent-terracotta"
             />
-            I have reviewed the dossier above end-to-end and it is the version I will bring to Gate 3.
+            I have reviewed the dossier above end-to-end and it is the version I will bring to the portfolio investment review.
           </label>
 
           <div className="card bg-mist/40 space-y-1">
@@ -877,7 +877,7 @@ export function M09Work() {
       produces={<p className="text-[14px] text-navy">{s.produces}</p>}
       canContinue={canComplete}
       disabledReason="Acknowledge dossier review and confirm a top candidate."
-      nextLabel="Complete M09 → Gate 3"
+      nextLabel="Complete M09 → Readiness review 3"
       onBack={() => goToStep(4)}
       onContinue={completeM09}
     />

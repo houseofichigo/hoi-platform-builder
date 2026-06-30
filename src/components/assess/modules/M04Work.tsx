@@ -659,7 +659,7 @@ Replace any example documents with my own approved knowledge base before buildin
     qc.invalidateQueries({ queryKey: ["assess-progress-all", workspace.id, user.id] });
     qc.invalidateQueries({ queryKey: ["resume", workspace.id] });
     qc.invalidateQueries({ queryKey: ["team-status", workspace.id] });
-    toast.success("M04 complete. Gate 1 is ready.");
+    toast.success("M04 complete. readiness is ready.");
   };
 
   if (!workspace || !hydrated) return null;
@@ -995,7 +995,7 @@ Replace any example documents with my own approved knowledge base before buildin
       produces={<p className="text-[14px] text-navy">m04.test_results and m04.readiness</p>}
       canContinue={ready}
       disabledReason="Confirm your own assistant was tested and bounded."
-      nextLabel="Complete M04 → Gate 1"
+      nextLabel="Complete M04 → Readiness review 1"
       onBack={() => goToStep(4)}
       onContinue={completeM04}
     />

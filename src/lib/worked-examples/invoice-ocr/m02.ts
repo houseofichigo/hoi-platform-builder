@@ -85,13 +85,13 @@ export const M02_OCR_CONTENT = {
   step4: {
     title: "Knowledge base blueprint — entries, retrieval tests, and readiness",
     why:
-      "The source map tells us what exists. The knowledge base tells the AI what to use. M02 is complete when sources are mapped, knowledge entries are structured with metadata, retrieval tests are written, and Gate 1 gaps are named.",
+      "The source map tells us what exists. The knowledge base tells the AI what to use. M02 is complete when sources are mapped, knowledge entries are structured with metadata, retrieval tests are written, and readiness gaps are named.",
     example:
       "A strong entry is not just 'AP policy'. It is an entry such as 'Approval threshold above EUR 5,000' with source, owner, rule, tags, sensitivity, status, and refresh rule. Then you test whether the AI can retrieve it.",
     whatToNotice: [
       "A knowledge base is structured, searchable, source-backed, versioned, permission-aware, and governed",
       "Retrieval tests prove whether the AI can find the right knowledge at the right time",
-      "Gate 1 is passed by evidence, not intention: missing owners, metadata, access, or tests become reason codes",
+      "readiness is passed by evidence, not intention: missing owners, metadata, access, or tests become reason codes",
     ],
     produces: "Three-layer knowledge base blueprint → completes M02",
   },
@@ -171,7 +171,7 @@ export const M02_OCR_CONTENT = {
           "Merge of accounting + procurement (no single owner)",
         ],
         why:
-          "One owner, one record, one update path. The procurement system holds richer onboarding data but it's not the AP system of record. The merged approach silently fails Gate 3 — no one is accountable when records drift.",
+          "One owner, one record, one update path. The procurement system holds richer onboarding data but it's not the AP system of record. The merged approach silently fails investment — no one is accountable when records drift.",
         governance: {
           ownership: "AP Team Lead",
           lineage: "Onboarded in procurement → synced to accounting nightly → manual edits logged",
@@ -228,7 +228,7 @@ export const M02_OCR_CONTENT = {
           "No archive — only current month available",
         ],
         why:
-          "12 months covers the seasonal cycle and gives enough vendor variety for evaluation. Multi-year is over-collection (GDPR minimisation). Per-supplier portals fragment access. No archive = no Gate 2 — you can't evaluate accuracy without a labelled past.",
+          "12 months covers the seasonal cycle and gives enough vendor variety for evaluation. Multi-year is over-collection (GDPR minimisation). Per-supplier portals fragment access. No archive = no pilot-readiness — you can't evaluate accuracy without a labelled past.",
         governance: {
           ownership: "AP Team Lead",
           lineage: "Posted invoices archived nightly with full metadata",

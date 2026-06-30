@@ -131,20 +131,20 @@ export const M06_OCR_CONTENT = {
       "Every metric has a measurement method, not just a number",
     ],
     produces: "Pilot plan — population, window, rollback owner, and five metric targets",
-    nextLabel: "Step 5 — Gate 2 readiness dossier",
+    nextLabel: "Step 5 — pilot-readiness review dossier",
   },
 
   step5: {
-    title: "Gate 2 readiness dossier",
-    why: "Gate 2 is the second explicit decision: is the agent ready to expand from the controlled pilot? The dossier synthesizes design, integrations, HITL, and pilot plan so the gate is a real check, not a celebration.",
+    title: "pilot-readiness review dossier",
+    why: "pilot-readiness is the second explicit decision: is the agent ready to expand from the controlled pilot? The dossier synthesizes design, integrations, HITL, and pilot plan so the readiness review is a real check, not a celebration.",
     example:
-      "The dossier names goal clarity, tool permissions, HITL coverage, pilot scope, rollback, auditability, metric targets, and residual risk. Each one gets a yes/partial/no answer at the gate.",
+      "The dossier names goal clarity, tool permissions, HITL coverage, pilot scope, rollback, auditability, metric targets, and residual risk. Each one gets a yes/partial/no answer at the readiness review.",
     whatToNotice: [
       "Residual risk is named, not assumed to be zero",
-      "Auditability is a gate criterion, not an afterthought",
+      "Auditability is a readiness review criterion, not an afterthought",
       "Metric targets without a measurement are unverifiable",
     ],
-    produces: "Gate 2 readiness dossier — ready for the gate route",
+    produces: "pilot-readiness review dossier — ready for the readiness review route",
   },
 
   capabilities: [

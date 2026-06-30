@@ -112,7 +112,7 @@ export const M03_OCR_CONTENT = {
     why:
       "A prompt that works once is not a library entry. A library entry is documented: type, owner, version, when to use, when not to use, inputs, outputs, quality checks, safety risks, failures observed. Run the 10-item quality bar on each prompt before filing.",
     example:
-      "The quality bar is not a polish step — it is a refusal-to-ship gate. If a prompt fails 'safety risks are named' or 'inputs and variables are defined', it goes back to Step 3, not to the library.",
+      "The quality bar is not a polish step — it is a refusal-to-ship readiness review. If a prompt fails 'safety risks are named' or 'inputs and variables are defined', it goes back to Step 3, not to the library.",
     whatToNotice: [
       "Architecture, outputs, discipline — three habits that turn prompts into infrastructure",
       "Every checkbox must be intentional — 'yes' means you can defend the answer",

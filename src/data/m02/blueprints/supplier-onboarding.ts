@@ -7,13 +7,13 @@ export const supplierOnboardingBlueprint: M02BlueprintData = {
     "Identify missing supplier information, apply onboarding rules, and route risk cases to the right owner.",
   components: {
     c1: {
-      title: "Procurement policy becomes a security-gate KB entry",
+      title: "Procurement policy becomes a security-readiness review KB entry",
       rawSource: {
         name: "Procurement policy library",
         format: "Confluence policy page",
         startingState: "Security questionnaire requirements sit inside a broader procurement policy with multiple owners and exceptions.",
         whyAiCannotUseItYet:
-          "The AI may miss the gate, infer from old submissions, or route a supplier before the required security evidence exists.",
+          "The AI may miss the readiness review, infer from old submissions, or route a supplier before the required security evidence exists.",
       },
       dataMapRow: {
         sourceLocation: "Procurement policy library / Section 5.2",
@@ -34,12 +34,12 @@ export const supplierOnboardingBlueprint: M02BlueprintData = {
           version: "v1.4",
           lastUpdated: "2026-02-10",
           sensitivity: "Internal",
-          allowedAiUse: "Gate supplier onboarding and route to Risk & Compliance; never approve",
+          allowedAiUse: "Readiness review supplier onboarding and route to Risk & Compliance; never approve",
           tags: ["supplier", "security", "questionnaire", "risk-review"],
         },
       },
       whatToNotice:
-        "C1 turns a policy page into a precise gate: who owns it, when it applies, what evidence is required, and how the AI may use it.",
+        "C1 turns a policy page into a precise readiness review: who owns it, when it applies, what evidence is required, and how the AI may use it.",
     },
     c2: {
       title: "Risk, spend, and geography rules decide what the AI may do",
@@ -101,7 +101,7 @@ export const supplierOnboardingBlueprint: M02BlueprintData = {
       "Only support supplier completeness checks, policy routing, risk evidence checks, and escalation guidance before approval.",
     retrievalOrder: [
       "Check C2 rules for security, spend, risk, and geography boundaries",
-      "Retrieve the C1 supplier requirement entry that supports the gate",
+      "Retrieve the C1 supplier requirement entry that supports the readiness review",
       "Use C3 tests to verify missing-evidence and escalation behavior",
     ],
     sourcePrecedence: [
@@ -109,7 +109,7 @@ export const supplierOnboardingBlueprint: M02BlueprintData = {
       "Risk band rules override standard spend routing",
       "Restricted geography escalation overrides all automated routing",
     ],
-    citation: "Cite the KB entry ID and source for every supplier gate or routing rule.",
+    citation: "Cite the KB entry ID and source for every supplier readiness review or routing rule.",
     sensitivity: "Supplier banking, risk, security, and restricted geography data are internal or restricted.",
     boundaryBehaviour:
       "If required fields, questionnaire, risk band, geography, or approval owner is missing, block automation and route to the named owner.",

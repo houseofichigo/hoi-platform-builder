@@ -79,7 +79,7 @@ export const M04_COURSE_CONTENT = {
   step5: {
     title: "Final assistant check",
     why:
-      "The final check confirms the assistant has instructions, knowledge if needed, guardrails, and tests before moving to Gate 1.",
+      "The final check confirms the assistant has instructions, knowledge if needed, guardrails, and tests before moving to the readiness review.",
     example:
       "Your assistant should answer from its system prompt and knowledge, refuse unsupported claims, and avoid agent-like actions.",
     whatToNotice: [

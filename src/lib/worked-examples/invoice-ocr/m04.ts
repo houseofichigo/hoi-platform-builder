@@ -70,7 +70,7 @@ export const M04_OCR_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "An assistant is a system, not a chat box. M04 turns your prompt library into a grounded assistant: instructions, knowledge, retrieval rules, tests, and a Gate 1 decision.",
+    "An assistant is a system, not a chat box. M04 turns your prompt library into a grounded assistant: instructions, knowledge, retrieval rules, tests, and a readiness decision.",
 
   step1: {
     title: "Assistant architecture — what must be separated",
@@ -127,12 +127,12 @@ export const M04_OCR_CONTENT = {
       "Uncertainty and provenance prove the assistant cites, not invents",
     ],
     produces: "Five recorded test results with pass criteria",
-    nextLabel: "Step 5 — Gate 1 readiness dossier",
+    nextLabel: "Step 5 — readiness checklist dossier",
   },
 
   step5: {
-    title: "Gate 1 readiness dossier",
-    why: "Gate 1 is the first explicit decision: continue, continue with constraints, improve, or stop. The dossier synthesizes architecture, knowledge base, governance, and test results into a decision-ready summary so the gate is a real check, not a formality.",
+    title: "readiness checklist dossier",
+    why: "readiness is the first explicit decision: continue, continue with constraints, improve, or stop. The dossier synthesizes architecture, knowledge base, governance, and test results into a decision-ready summary so the readiness review is a real check, not a formality.",
     example:
       "The dossier names value, data, quality, risk, and operability — five readiness questions the reviewer can answer in order.",
     whatToNotice: [
@@ -140,7 +140,7 @@ export const M04_OCR_CONTENT = {
       "Improvements without a date are improvements that never happen",
       "Operability sits beside quality, not after it",
     ],
-    produces: "Gate 1 readiness dossier — ready for the gate route",
+    produces: "readiness checklist dossier — ready for the readiness review route",
   },
 
   architectureBlocks: [
@@ -281,7 +281,7 @@ export const M04_OCR_CONTENT = {
       title: "Change",
       question: "Who can publish a new version, and how is it tested before it reaches the assistant?",
       whyItMatters:
-        "Knowledge changes are the most common silent regression. Without a gate, a quiet edit can break the five-test evaluation without anyone noticing.",
+        "Knowledge changes are the most common silent regression. Without a readiness review, a quiet edit can break the five-test evaluation without anyone noticing.",
       goodDefault:
         "Named owner per artifact. New version triggers a re-run of the five-test evaluation before publication.",
       weakDefault:

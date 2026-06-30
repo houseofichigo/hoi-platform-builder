@@ -93,7 +93,7 @@ export const customerSupportBlueprint: M02BlueprintData = {
         "Unsafe auto-action is blocked",
       ],
       whatToNotice:
-        "C3 proves the KB works before Build. The test checks retrieval, source, behavior, and safety gate in one realistic customer question.",
+        "C3 proves the KB works before Build. The test checks retrieval, source, behavior, and safety readiness review in one realistic customer question.",
     },
   },
   retrievalInstructions: {

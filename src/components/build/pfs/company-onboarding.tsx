@@ -589,6 +589,16 @@ export function CompanyOnboarding({ mode }: { mode: Mode }) {
         <p className="mt-2 font-sans text-[15px] text-[var(--slate)]">
           {contextQuery.error?.message ?? "No onboarding context found."}
         </p>
+        <div className="mt-5 flex justify-center gap-2">
+          <Button
+            type="button"
+            onClick={() => contextQuery.refetch()}
+            disabled={contextQuery.isFetching}
+          >
+            {contextQuery.isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Retry
+          </Button>
+        </div>
       </Card>
     );
   }

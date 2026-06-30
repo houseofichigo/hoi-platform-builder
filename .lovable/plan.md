@@ -1,30 +1,39 @@
-## What I verified
+## What's actually happening
 
-- Dev server is healthy (Vite ready, no errors in logs).
-- SSR for `/` returns HTTP 200 with the real hero HTML (7.2 KB). So the server isn't throwing.
-- The branded "This page didn't load" screen is the `ErrorComponent` in `src/routes/__root.tsx` — it only renders when something throws **in the client React tree** after hydration.
-- The console shows a React 19 **hydration mismatch** on `<html>` caused by the **Scribe browser extension** injecting `data-scribe-recorder-ready="true"`. In React 19 this discards the tree and re-renders from scratch — if anything throws during that re-render, the root `errorComponent` takes over. That matches your symptom exactly.
+`/app/house-of-ichigo/admin/onboarding` renders `<CompanyOnboarding mode="wizard" />`, which calls `useOnboardingContext()` (`src/lib/db/pfs/onboarding.ts:310`). That hook fires ~15 parallel Supabase reads and **throws on the first one that errors** (`onboarding.ts:275-278`). The throw escapes the component, there is no error boundary on the route, and TanStack falls back to the global `ErrorComponent` in `src/routes/__root.tsx` — the "This page didn't load" screen.
 
-The current `ErrorComponent` hides the real message, so I can't see what's throwing on the second render. The plan is to surface the underlying error and stop the extension from triggering hydration discards.
+When I inspected the live preview the wizard rendered fine (Step 1 of 6), which matches the symptom: a single flaky / RLS-denied query is enough to wipe the entire page, even though the wizard itself works. The fix has two layers:
 
-## Plan
+1. **Never let the wizard nuke the page**: render an inline error card when `useOnboardingContext` errors, with the underlying message + retry.
+2. **Stop one optional query from killing the whole context load**: in `getOnboardingContext`, only throw for the queries the wizard genuinely needs (profile + departments + members). Treat secondary lists (tools, audiences, clients, knowledge sources, vaults, priorities, campaign) as `[]` / `null` with a console warning when they error individually.
+3. **Per-route error boundary** so any other throw (e.g. inside `OrgChartCanvas` or a mutation render) shows the real message inline instead of the generic screen.
 
-### 1. Stop the Scribe extension from breaking hydration
-In `src/routes/__root.tsx`, add `suppressHydrationWarning` to the `<html>` and `<body>` tags in `RootShell`. This is the standard React fix for browser extensions that mutate the document shell before hydration. It does not hide real mismatches inside your app.
+## Changes
 
-### 2. Surface the real error (temporary diagnostic)
-In `src/routes/__root.tsx` `ErrorComponent`, render `error.message` and `error.stack` in a collapsed `<details>` block (dev only via `import.meta.env.DEV`). Also log `error.digest` if present. This way the next refresh tells us exactly which component/loader is throwing instead of the generic fallback.
+### `src/lib/db/pfs/onboarding.ts`
+- Refactor the parallel-read block in `getOnboardingContext`:
+  - Required reads (`profile`, `departments`, `members`, `memberProfiles`): if `error` is set, throw it (preserve current behaviour).
+  - Optional reads (`products`, `invitations`, `tools`, `dataSources`, `audiences`, `clients`, `knowledgeSources`, `vaults`, `readiness`, `priorities`, `campaign`): on error, `console.warn` and fall back to `[] / null` so the wizard still loads.
+- Keep the existing return shape unchanged.
 
-### 3. Re-test, then act on the real error
-Once the underlying message is visible, fix the actual throw at its source (likely a Link/asset/loader issue triggered only on client re-render). I'll patch the offending file in a follow-up — I'm not changing any feature code blind.
+### `src/components/build/pfs/company-onboarding.tsx`
+- Destructure `isError` and `error` from `useOnboardingContext()`.
+- When `isError`, render an inline error card (Card + Button) showing `error.message` and a "Retry" button that calls `refetch()`. Do not let the error propagate.
+- Keep the existing loading skeleton path.
 
-### Files touched
-- `src/routes/__root.tsx` — add `suppressHydrationWarning`, expand `ErrorComponent` with dev-only details.
+### `src/routes/app.$workspaceSlug.admin.onboarding.tsx`
+- Add a local `errorComponent` to the route definition that:
+  - Logs the raw error.
+  - Renders an inline card with the error message, a "Try again" button (`router.invalidate(); reset();`), and a "Back to admin" link.
+  - In dev (`import.meta.env.DEV`), shows `error.stack` in a `<details>` block — same pattern we already use in `__root.tsx`.
 
-No business-logic or backend changes. No other files touched until step 3.
+### Verification
+- `curl` the route on dev and confirm 200 + wizard HTML (already verified).
+- In the live preview, force one of the optional queries to fail (e.g. via a bad column) and confirm the wizard still renders and the inline warning appears in the console — not the global error screen.
+- Click through Step 1 → Step 2 of the wizard to confirm no regression.
 
-### Out of scope
-- Disabling the Scribe extension (that's on your browser, not the app).
-- Changing routes, auth, or data fetching.
+## Out of scope
 
-After this is merged, refresh `/` and paste the new error text — that's what will let me ship the real fix in one shot.
+- No schema or RLS changes.
+- No edits to the global `ErrorComponent`, `__root.tsx`, `src/server.ts`, or auto-generated Supabase files.
+- No changes to other admin routes.

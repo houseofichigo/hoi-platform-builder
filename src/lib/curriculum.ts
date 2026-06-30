@@ -1,8 +1,6 @@
 export type CurriculumPhase = 'scope' | 'build' | 'govern' | 'scale';
 export type ModuleId = 'm01' | 'm02' | 'm03' | 'm04' | 'm05' | 'm06' | 'm07' | 'm08' | 'm09' | 'm10' | 'm11' | 'm12';
-export type GateNumber = 1 | 2 | 3;
-export type GateRole = 'pre' | 'g1' | 'g2' | 'g3' | 'post1' | 'post2' | 'post3';
-export type AssessCourseId = 'ai-transformation-foundations';
+export type AssessCourseId = 'ai-foundations' | 'ai-at-scale';
 
 export type CoursePrimaryMedia =
   | {
@@ -30,8 +28,6 @@ export interface ModuleMeta {
   prereq: ModuleId | null;
   duration: string;
   estimatedMinutes: number;
-  gateRole: GateRole;
-  gateNumber: GateNumber | null;
   deliverable: string;
   description: string;
   objectives: string[];
@@ -66,7 +62,6 @@ export interface AssessCourseMeta {
   moduleMedia: Record<ModuleId, CoursePrimaryMedia>;
   methodology: string;
   artifacts: string[];
-  gates: string[];
   formats: { label: string; duration: string; coverage: string }[];
   certification: {
     tier1: string;

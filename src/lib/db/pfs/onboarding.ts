@@ -272,10 +272,33 @@ export async function getOnboardingContext(): Promise<OnboardingContext> {
         .maybeSingle(),
     ]);
 
-  const firstError = [profile, products, departments, invitations, tools, dataSources, audiences, clients, knowledgeSources, vaults, readiness, members, memberProfiles, priorities, campaign].find(
+  // Required reads — throw if any of these fail, the wizard cannot render without them.
+  const requiredError = [profile, departments, members, memberProfiles].find(
     (result) => result.error,
   )?.error;
-  if (firstError) throw firstError;
+  if (requiredError) throw requiredError;
+
+  // Optional reads — warn but fall back to empty so a single flaky/RLS-denied query
+  // does not collapse the entire onboarding page.
+  const optional: Array<readonly [string, { error: unknown }]> = [
+    ["products", products],
+    ["invitations", invitations],
+    ["tools", tools],
+    ["dataSources", dataSources],
+    ["audiences", audiences],
+    ["clients", clients],
+    ["knowledgeSources", knowledgeSources],
+    ["vaults", vaults],
+    ["readiness", readiness],
+    ["priorities", priorities],
+    ["campaign", campaign],
+  ];
+  for (const [name, result] of optional) {
+    if (result.error) {
+      // eslint-disable-next-line no-console
+      console.warn(`[onboarding] optional read "${name}" failed:`, result.error);
+    }
+  }
 
   const profileByUser = new Map(
     ((memberProfiles.data ?? []) as Array<{ user_id: string; full_name: string | null; job_role: string | null }>).map(

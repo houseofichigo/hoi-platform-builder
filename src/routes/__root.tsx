@@ -64,6 +64,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Go home
           </a>
         </div>
+        {import.meta.env.DEV && (
+          <details className="mt-6 rounded-md border border-input bg-muted/30 p-3 text-left text-xs">
+            <summary className="cursor-pointer font-medium text-foreground">
+              Error details (dev only)
+            </summary>
+            <p className="mt-2 break-words font-mono text-destructive">
+              {error?.message ?? String(error)}
+            </p>
+            {error?.stack && (
+              <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] text-muted-foreground">
+                {error.stack}
+              </pre>
+            )}
+          </details>
+        )}
       </div>
     </div>
   );
@@ -106,11 +121,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
+    <html lang="en" suppressHydrationWarning>
+      <head suppressHydrationWarning>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>

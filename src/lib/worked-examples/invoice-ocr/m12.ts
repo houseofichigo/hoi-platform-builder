@@ -75,7 +75,7 @@ export const M12_OCR_CONTENT = {
     title: "Executive scorecard",
     why: "The sponsor needs one page to track program health across investment, risk, governance, and impact. The scorecard is the standing artifact between the roadmap and the next review.",
     example:
-      "Live systems: 1. Pilots running: 2. Gate status: G2 passed for triage, G3 pending for risk screening. Forecast spend vs. M08 model: -5%. HITL load: stable. EU AI Act governance docs current: yes.",
+      "Live systems: 1. Pilots running: 2. Readiness review status: G2 passed for triage, G3 pending for risk screening. Forecast spend vs. M08 model: -5%. HITL load: stable. EU AI Act governance docs current: yes.",
     whatToNotice: [
       "Every metric has a target — not a wish",
       "Metrics span investment, risk, governance, and outcome",
@@ -158,13 +158,13 @@ export const M12_OCR_CONTENT = {
       id: "pilots_running",
       label: "Pilots currently running",
       whyItMatters: "Pilots are the pipeline of next-quarter production systems.",
-      suggestedTarget: "2 active pilots, each with a named Gate decision date.",
+      suggestedTarget: "2 active pilots, each with a named Readiness review decision date.",
     },
     {
       id: "gate_status",
-      label: "Portfolio gate status",
-      whyItMatters: "Gate status shows whether the portfolio is moving or stuck at a checkpoint.",
-      suggestedTarget: "No candidate stuck > 1 quarter at the same gate.",
+      label: "Portfolio readiness review status",
+      whyItMatters: "Readiness review status shows whether the portfolio is moving or stuck at a checkpoint.",
+      suggestedTarget: "No candidate stuck > 1 quarter at the same readiness review.",
     },
     {
       id: "spend_vs_model",
@@ -260,7 +260,7 @@ export function getM12StrategyScaffold(
   const roadmapNarrative =
     `12-month roadmap for ${company} (${country}):\n` +
     `· Now (0-3m): scale invoice OCR (${volume}, ${accounting}) to a second AP team; close monitoring on the live system.\n` +
-    `· Next (3-9m): launch the highest-scoring M09 candidate as a pilot; bring a second candidate to Gate 2.\n` +
+    `· Next (3-9m): launch the highest-scoring M09 candidate as a pilot; bring a second candidate to the pilot-readiness review.\n` +
     `· Later (9-12m): prepare deferred candidates — close governance and data gaps so they can enter Now next year.\n` +
     `Sequencing rationale: capacity, data readiness, and governance posture — not enthusiasm.`;
 
@@ -274,7 +274,7 @@ export function getM12StrategyScaffold(
   const executiveScorecard =
     `Executive scorecard for ${company} AI program:\n` +
     `· Live systems: target ≥ 1 by Q1, ≥ 2 by Q3.\n` +
-    `· Pilots running: 2 with named Gate dates.\n` +
+    `· Pilots running: 2 with named Readiness review dates.\n` +
     `· Spend vs. M08 model: within ±15% per quarter.\n` +
     `· HITL load: stable or declining quarter-over-quarter.\n` +
     `· Open incidents: 0 critical; all warnings owned.\n` +
@@ -295,7 +295,7 @@ export function getM12StrategyScaffold(
     `Bet. The portfolio scored in M09 names invoice OCR as the production system to scale and ` +
     `up to three additional candidates to pilot. The roadmap sequences these across Now (0-3m), Next (3-9m), and Later (9-12m).\n\n` +
     `Roadmap. Now: scale invoice OCR (${volume}, ${accounting}) to a second AP team; close monitoring. ` +
-    `Next: launch the highest-scoring M09 candidate as a pilot and bring a second to Gate 2. ` +
+    `Next: launch the highest-scoring M09 candidate as a pilot and bring a second to the pilot-readiness review. ` +
     `Later: prepare deferred candidates by closing governance and data gaps.\n\n` +
     `Gaps being closed. A second trained AP lead; a monitoring dashboard live; a deployment ` +
     `partner under contract; an EU AI Act technical documentation owner named; a quarterly portfolio ` +

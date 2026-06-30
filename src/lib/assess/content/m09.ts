@@ -12,7 +12,7 @@ export const M09_COURSE_CONTENT = {
   placeholder: false,
 
   storyHeader:
-    "Portfolio Scoring & Use Case Prioritisation. Gate 3 is where enthusiasm becomes capital allocation: which use cases deserve the next investment cycle?",
+    "Portfolio Scoring & Use Case Prioritisation. investment is where enthusiasm becomes capital allocation: which use cases deserve the next investment cycle?",
 
   step1: {
     title: "Capture the portfolio",
@@ -37,7 +37,7 @@ export const M09_COURSE_CONTENT = {
       "Score each pillar 1-5: business impact, feasibility, process maturity, risk, AI suitability, agent suitability, delivery readiness, priority.",
     whatToNotice: [
       "High impact with low feasibility is a constraint, not a win",
-      "Reason codes name blockers in vocabulary the gate accepts",
+      "Reason codes name blockers in vocabulary the readiness review accepts",
       "A score with no reason code is a guess; a reason code with no score is an opinion",
     ],
     produces: "Scores across eight pillars plus reason codes per candidate",
@@ -71,13 +71,13 @@ export const M09_COURSE_CONTENT = {
       "A tied rank is not a rank",
     ],
     produces: "Ranked portfolio with constraints",
-    nextLabel: "Step 5 - Gate 3 dossier",
+    nextLabel: "Step 5 - investment dossier",
   },
 
   step5: {
-    title: "Gate 3 investment dossier",
+    title: "investment investment dossier",
     why:
-      "Gate 3 asks which use cases earn the next investment cycle. The dossier synthesizes value, data readiness, governance, automation posture, ownership, risk, and rollback.",
+      "investment asks which use cases earn the next investment cycle. The dossier synthesizes value, data readiness, governance, automation posture, ownership, risk, and rollback.",
     example:
       "The dossier names the top candidate, its score profile, reason codes, automation posture, constraints, and recommendation.",
     whatToNotice: [
@@ -85,7 +85,7 @@ export const M09_COURSE_CONTENT = {
       "Risk acceptance must be named",
       "A dossier that cannot fit on two pages is not yet a dossier",
     ],
-    produces: "Gate 3 dossier ready for the gate route",
+    produces: "investment dossier ready for the readiness review route",
   },
 
   pillars: [
@@ -280,7 +280,7 @@ export const M09_COURSE_CONTENT = {
     {
       id: "fund" as const,
       label: "Fund",
-      summary: "All Gate 3 criteria pass. Allocate the next investment cycle.",
+      summary: "All portfolio readiness criteria pass. Allocate the next investment cycle.",
     },
     {
       id: "fund_with_constraints" as const,
@@ -311,7 +311,7 @@ export const M09_COURSE_CONTENT = {
   ] as const,
 
   methodNote:
-    "Gate 3 is not 'we like this'. It is 'we will invest in this, under these conditions, and revisit on this date'.",
+    "investment is not 'we like this'. It is 'we will invest in this, under these conditions, and revisit on this date'.",
 } as const;
 
 export function getM09PortfolioScaffold(

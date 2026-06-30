@@ -47,7 +47,7 @@ export const M12_COURSE_CONTENT = {
     why:
       "The sponsor needs one page to track program health across investment, risk, governance, and impact.",
     example:
-      "Live systems, pilots running, gate status, spend vs. cost model, HITL load, open incidents, governance docs current, realised impact.",
+      "Live systems, pilots running, readiness review status, spend vs. cost model, HITL load, open incidents, governance docs current, realised impact.",
     whatToNotice: [
       "Every metric has a target",
       "Metrics span investment, risk, governance, and outcome",
@@ -131,13 +131,13 @@ export const M12_COURSE_CONTENT = {
       id: "pilots_running",
       label: "Pilots currently running",
       whyItMatters: "Pilots are the pipeline of next-quarter production systems.",
-      suggestedTarget: "2 active pilots, each with a named gate decision date.",
+      suggestedTarget: "2 active pilots, each with a named readiness review decision date.",
     },
     {
       id: "gate_status",
-      label: "Portfolio gate status",
-      whyItMatters: "Gate status shows whether the portfolio is moving or stuck.",
-      suggestedTarget: "No candidate stuck more than 1 quarter at the same gate.",
+      label: "Portfolio readiness review status",
+      whyItMatters: "Readiness review status shows whether the portfolio is moving or stuck.",
+      suggestedTarget: "No candidate stuck more than 1 quarter at the same readiness review.",
     },
     {
       id: "spend_vs_model",
@@ -229,7 +229,7 @@ export function getM12StrategyScaffold(
     roadmapNarrative:
       `12-month roadmap for ${company} (${country}):\n` +
       `- Now (0-3m): scale the top M09 candidate into a controlled production or wider pilot stage; close monitoring on the live workflow.\n` +
-      `- Next (3-9m): launch the second and third portfolio candidates as constrained pilots; bring one candidate to Gate 2.\n` +
+      `- Next (3-9m): launch the second and third portfolio candidates as constrained pilots; bring one candidate to the pilot-readiness review.\n` +
       `- Later (9-12m): prepare deferred candidates by closing governance, data, and partnership gaps.\n` +
       `Sequencing rationale: capacity, data readiness, governance posture, and sponsor priority.`,
     capabilityGaps:
@@ -241,7 +241,7 @@ export function getM12StrategyScaffold(
     executiveScorecard:
       `Executive scorecard for ${company} AI program:\n` +
       `- Live systems: target >= 1 by Q1, >= 2 by Q3.\n` +
-      `- Pilots running: 2 with named gate dates.\n` +
+      `- Pilots running: 2 with named readiness review dates.\n` +
       `- Spend vs. M08 model: within +/-15% per quarter.\n` +
       `- HITL load: stable or declining quarter-over-quarter.\n` +
       `- Open incidents: 0 critical; all warnings owned.\n` +
@@ -259,7 +259,7 @@ export function getM12StrategyScaffold(
     executiveSummary:
       `Executive summary - ${company} AI program, 12 months.\n\n` +
       `Bet. The M09 portfolio identifies one top candidate to scale and a short list of constrained pilots. The roadmap sequences these across Now (0-3m), Next (3-9m), and Later (9-12m).\n\n` +
-      `Roadmap. Now: scale the top M09 candidate and close monitoring on the live workflow. Next: launch two constrained pilots and bring one candidate to Gate 2. Later: prepare deferred candidates by closing governance, data, and partnership gaps.\n\n` +
+      `Roadmap. Now: scale the top M09 candidate and close monitoring on the live workflow. Next: launch two constrained pilots and bring one candidate to the pilot-readiness review. Later: prepare deferred candidates by closing governance, data, and partnership gaps.\n\n` +
       `Gaps being closed. A named system owner and backup; a monitoring dashboard; implementation/security/legal partners; vendor terms; current system cards and operating playbooks; quarterly portfolio re-scoring.\n\n` +
       `Stop conditions. Quality stop condition breached; governance documentation not closed by the agreed quarter; partner not under contract by checkpoint; cost overrun > 30% vs. M08; critical incident with AI-system root cause.\n\n` +
       `Review cadence. Monthly sponsor scorecard, quarterly M09 re-score, annual roadmap re-issue. The roadmap changes when the portfolio changes.`,

@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Minus } from "lucide-react";
-import { ARTIFACTS, GATES, artifactStatus } from "@/lib/assess/completion";
+import { ARTIFACTS, artifactStatus } from "@/lib/assess/completion";
 import { MODULES, type ModuleId } from "@/lib/curriculum";
 import { ArtifactReadinessPanel } from "./ArtifactReadinessPanel";
-import { GateDecisionSummary } from "./GateDecisionSummary";
 import { CertificationReadiness } from "./CertificationReadiness";
 import type { AssessProgressRow } from "@/hooks/useAssess";
 
@@ -12,14 +11,6 @@ interface Props {
   workspaceName: string;
   progress: Record<string, AssessProgressRow>;
   presentOutputs: Set<string>;
-  decisions: Array<{
-    gate_number: number;
-    module_id: string;
-    decision: string;
-    justification: string;
-    constraints: string[];
-    rationales: string[];
-  }>;
 }
 
 export function ProgramCompletionDashboard({
@@ -27,7 +18,6 @@ export function ProgramCompletionDashboard({
   workspaceName,
   progress,
   presentOutputs,
-  decisions,
 }: Props) {
   const moduleStatusMap: Record<string, "not_started" | "in_progress" | "complete"> = {};
   for (const m of MODULES) {
@@ -37,9 +27,8 @@ export function ProgramCompletionDashboard({
   const artifactsComplete = ARTIFACTS.filter(
     (a) => artifactStatus(a, progress, presentOutputs) === "complete",
   ).length;
-  const gatesRecorded = GATES.filter((g) => decisions.some((d) => d.gate_number === g.num)).length;
 
-  const capstoneReady = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
+  const capstoneReady = modulesComplete >= 12 && artifactsComplete >= 4;
   const tier =
     capstoneReady
       ? "Ready for Tier 02 capstone"
@@ -50,9 +39,6 @@ export function ProgramCompletionDashboard({
   const checklist = [
     { label: "All modules complete", met: modulesComplete >= 12 },
     { label: "All four artifacts complete", met: artifactsComplete >= 4 },
-    { label: "Gate 1 recorded", met: decisions.some((d) => d.gate_number === 1) },
-    { label: "Gate 2 recorded", met: decisions.some((d) => d.gate_number === 2) },
-    { label: "Gate 3 recorded", met: decisions.some((d) => d.gate_number === 3) },
     { label: "Handoff Pack reviewed", met: artifactStatus(ARTIFACTS[3], progress, presentOutputs) === "complete" },
     { label: "Executive sponsor summary ready", met: presentOutputs.has("m12.executive_summary") },
     { label: "Next pilot cycle selected", met: presentOutputs.has("m12.executive_summary") },
@@ -75,15 +61,14 @@ export function ProgramCompletionDashboard({
           Program <span className="accent-italic">completion.</span>
         </h1>
         <p className="lead mt-3 max-w-[60ch]">
-          Review your modules, artifacts, gates, and certification readiness. Tier 02 certification
+          Review your modules, artifacts, and certification readiness. Tier 02 certification
           is completed through the separate capstone track.
         </p>
       </header>
 
-      <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 md:grid-cols-3">
         <StatTile label="Modules complete" value={`${modulesComplete} / 12`} />
         <StatTile label="Artifacts complete" value={`${artifactsComplete} / 4`} />
-        <StatTile label="Gates recorded" value={`${gatesRecorded} / 3`} />
         <StatTile label="Certification" value={tier} />
       </section>
 
@@ -106,12 +91,9 @@ export function ProgramCompletionDashboard({
         </div>
       </section>
 
-      <GateDecisionSummary decisions={decisions} workspaceSlug={workspaceSlug} />
-
       <CertificationReadiness
         modulesComplete={modulesComplete}
         artifactsComplete={artifactsComplete}
-        gatesRecorded={gatesRecorded}
       />
 
       <section className="space-y-5">

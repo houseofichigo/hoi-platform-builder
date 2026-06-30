@@ -43,7 +43,7 @@ const ROADMAP_QUICK_ADDS: Record<RoadmapHorizonId, readonly string[]> = {
   ],
   next: [
     "Pilot two constrained candidates",
-    "Bring one candidate to Gate 2",
+    "Bring one candidate to the pilot-readiness review",
     "Resolve the highest governance blocker",
   ],
   later: [

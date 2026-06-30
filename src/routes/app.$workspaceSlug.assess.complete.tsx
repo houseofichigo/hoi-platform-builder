@@ -19,16 +19,6 @@ interface OutputRow {
   updated_at: string;
 }
 
-interface GateDecisionRow {
-  gate_number: number;
-  module_id: string;
-  decision: string;
-  justification: string;
-  constraints: string[];
-  rationales: string[];
-  updated_at: string;
-}
-
 function AssessCompletePage() {
   const { user } = useAuth();
   const { workspace } = useWorkspace();
@@ -46,22 +36,6 @@ function AssessCompletePage() {
         .eq("user_id", user!.id);
       if (error) throw error;
       return (data ?? []) as OutputRow[];
-    },
-  });
-
-  const decisionsQuery = useQuery({
-    enabled: !!user && !!workspace,
-    queryKey: ["assess-gate-decisions-all", workspace?.id, user?.id],
-    queryFn: async (): Promise<GateDecisionRow[]> => {
-      const { data, error } = await supabase
-        .from("assess_gate_decisions")
-        .select(
-          "gate_number, module_id, decision, justification, constraints, rationales, updated_at",
-        )
-        .eq("workspace_id", workspace!.id)
-        .eq("user_id", user!.id);
-      if (error) throw error;
-      return (data ?? []) as unknown as GateDecisionRow[];
     },
   });
 
@@ -129,7 +103,6 @@ function AssessCompletePage() {
         workspaceName={workspace.name}
         progress={progress ?? {}}
         presentOutputs={presentOutputs}
-        decisions={decisionsQuery.data ?? []}
       />
     </div>
   );

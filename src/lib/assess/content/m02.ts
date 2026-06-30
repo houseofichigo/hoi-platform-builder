@@ -593,7 +593,7 @@ export const M02_COURSE_CONTENT = {
     whatToNotice: [
       "The blueprint is an example output, not a personalized worksheet",
       "A strong blueprint explains what the AI can retrieve, what it must cite, and when it must stop",
-      "Gate 1 is shown as an evidence-based readiness example",
+      "readiness is shown as an evidence-based readiness example",
     ],
     examplesInTheWild: [
       {
@@ -695,7 +695,7 @@ export const M02_COURSE_CONTENT = {
     "C3 retrieval test written",
     "C3 expected entry, source, and behavior documented",
     "C3 PASS / PARTIAL / FAIL criteria recorded",
-    "Gate 1 status selected",
+    "readiness status selected",
     "Gaps and blockers listed",
   ] as const,
 

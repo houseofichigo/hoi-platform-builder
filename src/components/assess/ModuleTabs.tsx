@@ -1,5 +1,4 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
 import type { ModuleId } from "@/lib/curriculum";
 
 type Status = "not_started" | "in_progress" | "complete";
@@ -12,7 +11,6 @@ interface Progress {
 interface Props {
   workspaceSlug: string;
   moduleId: ModuleId;
-  hasGate: boolean;
   progress?: Progress;
   isLoading?: boolean;
 }
@@ -35,17 +33,15 @@ function TabSkeleton() {
   );
 }
 
-export function ModuleTabs({ workspaceSlug, moduleId, hasGate, progress, isLoading }: Props) {
+export function ModuleTabs({ workspaceSlug, moduleId, progress, isLoading }: Props) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const seg = pathname.replace(/\/+$/, "").split("/").pop() ?? "";
   const isStudy = seg === "study";
   const isWork = seg === "work";
-  const isGate = seg === "gate";
-  const isOverview = !isStudy && !isWork && !isGate;
+  const isOverview = !isStudy && !isWork;
 
   const studied = progress?.studied ?? false;
   const status: Status = progress?.status ?? "not_started";
-  const gateUnlocked = status === "complete";
 
   const tabClass = (active: boolean) =>
     [
@@ -62,7 +58,6 @@ export function ModuleTabs({ workspaceSlug, moduleId, hasGate, progress, isLoadi
           <TabSkeleton />
           <TabSkeleton />
           <TabSkeleton />
-          {hasGate && <TabSkeleton />}
         </div>
       </nav>
     );
@@ -94,20 +89,6 @@ export function ModuleTabs({ workspaceSlug, moduleId, hasGate, progress, isLoadi
           Assignment
           <Dot state={status === "complete" ? "full" : status === "in_progress" ? "half" : "empty"} />
         </Link>
-        {hasGate && (
-          <Link
-            to="/app/$workspaceSlug/assess/$moduleId/gate"
-            params={{ workspaceSlug, moduleId }}
-            className={tabClass(isGate)}
-          >
-            Gate
-            {gateUnlocked ? (
-              <Dot state="empty" />
-            ) : (
-              <Lock className="h-3.5 w-3.5 text-slate/70" aria-label="Complete assignment to unlock" />
-            )}
-          </Link>
-        )}
       </div>
     </nav>
   );

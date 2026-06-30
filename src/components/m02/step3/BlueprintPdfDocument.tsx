@@ -95,12 +95,12 @@ export function BlueprintPdfDocument({
           </View>
           <Text style={styles.h3}>Pass criteria</Text>
           {c3.passCriteria.map((item) => <Text key={item}>- {item}</Text>)}
-          <Text style={styles.h3}>Gate evidence</Text>
+          <Text style={styles.h3}>Readiness review evidence</Text>
           {c3.gateEvidence.map((item) => <Text key={item}>- {item}</Text>)}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.h2}>Example Gate 1 Decision</Text>
+          <Text style={styles.h2}>Example readiness Decision</Text>
           <Text>
             Example readiness status: {generated.status.toUpperCase()}. {generated.statusExplanation}
           </Text>

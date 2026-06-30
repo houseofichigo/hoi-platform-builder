@@ -43,7 +43,7 @@ const PANEL_DEFINITIONS = [
   {
     title: "C3 - Verification",
     whatItIs:
-      "C3 proves the KB works with a retrieval test: user question, expected entry, expected source, expected behavior, and Gate evidence.",
+      "C3 proves the KB works with a retrieval test: user question, expected entry, expected source, expected behavior, and Readiness review evidence.",
     whyItMatters:
       "Without proof, the team is only hoping the assistant retrieves and behaves correctly.",
     revealLabel: "C3",
@@ -239,7 +239,7 @@ function C3Panel({ component }: { component: M02BlueprintC3 }) {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <ListCard title="PASS / PARTIAL / FAIL" items={component.passCriteria} />
-        <ListCard title="GATE 1 EVIDENCE" items={component.gateEvidence} />
+        <ListCard title="READINESS EVIDENCE" items={component.gateEvidence} />
       </div>
     </div>
   );

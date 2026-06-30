@@ -1,8 +1,6 @@
 export type CurriculumPhase = 'scope' | 'build' | 'govern' | 'scale';
 export type ModuleId = 'm01' | 'm02' | 'm03' | 'm04' | 'm05' | 'm06' | 'm07' | 'm08' | 'm09' | 'm10' | 'm11' | 'm12';
-export type GateNumber = 1 | 2 | 3;
-export type GateRole = 'pre' | 'g1' | 'g2' | 'g3' | 'post1' | 'post2' | 'post3';
-export type AssessCourseId = 'ai-transformation-foundations';
+export type AssessCourseId = 'ai-foundations' | 'ai-at-scale';
 
 export type CoursePrimaryMedia =
   | {
@@ -30,8 +28,6 @@ export interface ModuleMeta {
   prereq: ModuleId | null;
   duration: string;
   estimatedMinutes: number;
-  gateRole: GateRole;
-  gateNumber: GateNumber | null;
   deliverable: string;
   description: string;
   objectives: string[];
@@ -66,7 +62,6 @@ export interface AssessCourseMeta {
   moduleMedia: Record<ModuleId, CoursePrimaryMedia>;
   methodology: string;
   artifacts: string[];
-  gates: string[];
   formats: { label: string; duration: string; coverage: string }[];
   certification: {
     tier1: string;
@@ -82,7 +77,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'From tools to systems: what language models do, how they work, where they fail.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 2, prereq: null, duration: '1h 45m', estimatedMinutes: 105,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Comparison notes + hallucination log + readiness self-assessment.',
     description: 'Understand what language models do, how they work, and how to know when your organisation is ready to use them.',
     objectives: [
@@ -112,16 +106,15 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Map, structure, and govern the knowledge before you build the AI.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 4, prereq: 'm01', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Completed three-layer knowledge base blueprint.',
-    description: 'Explain why data quality sets the ceiling for AI quality, then turn sources into a governed, searchable, source-backed knowledge base with metadata, owners, access rules, refresh rules, retrieval tests, known gaps, and Gate 1 readiness status.',
+    description: 'Explain why data quality sets the ceiling for AI quality, then turn sources into a governed, searchable, source-backed knowledge base with metadata, owners, access rules, refresh rules, retrieval tests, known gaps, and readiness checklist status.',
     objectives: [
       'Explain why AI quality depends on data quality',
       'Distinguish data, information, knowledge, and knowledge base',
       'Turn a raw source into a C1 Data Map entry',
       'Define C2 Trust + Safety rules for source precedence, access, and escalation',
       'Use C3 Verification to test whether the AI retrieves and behaves correctly',
-      'Assess Gate 1 data and knowledge readiness status',
+      'Assess readiness data and knowledge readiness status',
     ],
     keySections: [
       'Why data precedes AI',
@@ -130,16 +123,16 @@ export const MODULES: ModuleMeta[] = [
       'Three KB components',
       'Building the knowledge base',
       'Trust, safety, and verification',
-      'Gate 1 readiness',
+      'readiness checklist',
       'Assignment: knowledge base blueprint',
     ],
     concepts: [
       { term: 'Knowledge base', definition: 'A governed, searchable, source-backed retrieval layer that tells the AI which trusted knowledge to use.' },
       { term: 'C1 Data Map', definition: 'The component that turns a raw source into an owned, metadata-rich, retrievable KB entry.' },
       { term: 'C2 Trust + Safety', definition: 'The component that defines source precedence, access rules, allowed AI behavior, and escalation boundaries.' },
-      { term: 'C3 Verification', definition: 'The component that proves retrieval with an expected entry, source, behavior, and Gate 1 evidence.' },
+      { term: 'C3 Verification', definition: 'The component that proves retrieval with an expected entry, source, behavior, and readiness evidence.' },
     ],
-    assignment: 'Build a three-component knowledge base blueprint. Walk one raw source through C1 Data Map, C2 Trust + Safety, C3 Verification, and assign a Gate 1 readiness status.',
+    assignment: 'Build a three-component knowledge base blueprint. Walk one raw source through C1 Data Map, C2 Trust + Safety, C3 Verification, and assign a readiness checklist status.',
     outcome: 'A source-backed three-component knowledge base blueprint with named gaps before Build.',
   },
   {
@@ -147,7 +140,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'From one-off prompts to reusable, governed, automation-ready workflow assets.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 4, prereq: 'm02', duration: '1h 45m', estimatedMinutes: 105,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Three documented Prompt Contracts + library entries + test suites + automation layer decisions.',
     description: 'Move from one-off prompts into reusable, governed workflow assets. Apply the Prompt Contract, document tests, and choose the right automation layer per task.',
     objectives: [
@@ -174,40 +166,38 @@ export const MODULES: ModuleMeta[] = [
   },
   {
     id: 'm04', num: 4, title: 'AI Assistants & RAG',
-    subtitle: 'Configure assistants grounded in your data. Apply Gate 1 as an informal readiness check.',
+    subtitle: 'Configure assistants grounded in your data. Apply a readiness checklist.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 5, prereq: 'm03', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'g1', gateNumber: 1,
-    deliverable: 'Assistant blueprint + source checklist + five test outputs + RAG governance notes + Gate 1 decision with reason codes.',
-    description: 'Build assistants as governed configurations: purpose, sources, constraints, outputs, and tests. Apply Gate 1 with evidence and reason codes.',
+    deliverable: 'Assistant blueprint + source checklist + five test outputs + RAG governance notes + readiness decision with reason codes.',
+    description: 'Build assistants as governed configurations: purpose, sources, constraints, outputs, and tests. Record the readiness review. with evidence and reason codes.',
     objectives: [
       'Define an assistant as a governed configuration and apply the six-part anatomy',
       'Build RAG with diagnostic discipline and identify the six failure modes',
       'Run the five-query test set: standard, missing, boundary, conflict, unsafe',
-      'Apply Gate 1 with reason codes: proceed, redesign with named fixes, or stop',
+      'Record the readiness decision with reason codes: proceed, redesign with named fixes, or stop',
     ],
     keySections: [
       'Assistant anatomy: design before tool choice',
       'RAG depth: embeddings, retrieval, six failure modes, RAG vs fine-tuning',
       'Four RAG governance dimensions: indexing, access, retention, change',
-      'Gate 1 evidence pack: five-query test set + reason codes + decision',
+      'Readiness evidence pack: five-query test set + reason codes + decision',
     ],
     concepts: [
       { term: 'Assistant architecture', definition: 'A useful assistant is not just a prompt. It has instructions, knowledge sources, retrieval behaviour, tool boundaries, and evaluation tests.' },
       { term: 'RAG', definition: 'Retrieval-Augmented Generation: the assistant retrieves relevant knowledge at query time, then generates an answer grounded in that retrieved context.' },
       { term: 'Knowledge base', definition: 'The assistant-readable body of evidence: schema knowledge, contextual rules, examples, policies, test cases, and known limitations.' },
-      { term: 'Gate 1', definition: 'Informal readiness check after the assistant build: is this safe and useful enough to build the prototype layer on? Continue, continue with constraints, improve, or stop.' },
+      { term: 'Readiness review 1', definition: 'Informal readiness check after the assistant build: is this safe and useful enough to build the prototype layer on? Continue, continue with constraints, improve, or stop.' },
     ],
-    assignment: 'Build a grounded assistant on a small reference dataset. Run the five-query test set, document RAG governance, and apply Gate 1 with a named PASS / PARTIAL / FAIL decision and reason codes if not PASS.',
-    outcome: 'Assistant blueprint, source checklist, five test outputs, RAG governance notes, and Gate 1 decision.',
-    assignmentAlignment: 'Current app assignment now uses the generic internal-policy assistant framing with source lookup, contextual rules, example-answer testing, injection refusal, and Gate 1 evidence.',
+    assignment: 'Build a grounded assistant on a small reference dataset. Run the five-query test set, document RAG governance, and record the readiness review with a named PASS / PARTIAL / FAIL decision and reason codes if not PASS.',
+    outcome: 'Assistant blueprint, source checklist, five test outputs, RAG governance notes, and readiness decision.',
+    assignmentAlignment: 'Current app assignment now uses the generic internal-policy assistant framing with source lookup, contextual rules, example-answer testing, injection refusal, and readiness evidence.',
   },
   {
     id: 'm05', num: 5, title: 'Prototyping with No-Code',
     subtitle: 'Build the surface where users experience your assistant.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 4, prereq: 'm04', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'post1', gateNumber: null,
     deliverable: 'Lovable prototype + 3-item requirement list.',
     description: 'Use Lovable to practice rapid prototyping, then build a sandbox interface for an AI assistant use case and hand off three requirements to M06.',
     objectives: [
@@ -236,19 +226,18 @@ export const MODULES: ModuleMeta[] = [
   },
   {
     id: 'm06', num: 6, title: 'AI Agents & Pilot',
-    subtitle: 'Build the working agent. Apply Gate 2 as an informal pilot-readiness check.',
+    subtitle: 'Build the working agent. Run a pilot-readiness review.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 5, prereq: 'm05', duration: '3h 00m', estimatedMinutes: 180,
-    gateRole: 'g2', gateNumber: 2,
-    deliverable: 'Working AI agent + pilot metrics report + Gate 2 decision.',
-    description: 'Build a multi-step agent, connect tools through controlled integrations, evaluate against a baseline, and apply Gate 2 as an informal readiness check.',
+    deliverable: 'Working AI agent + pilot metrics report + pilot-readiness decision.',
+    description: 'Build a multi-step agent, connect tools through controlled integrations, evaluate against a baseline, and record the pilot-readiness review as an informal readiness check.',
     objectives: [
       'Distinguish assistant behaviour from agent action',
       'Configure a multi-step workflow in n8n',
       'Integrate external tools via Model Context Protocol-style tool definitions',
       'Design Human-in-the-Loop triggers and escalation rules',
       'Measure pilot outcomes: precision, recall, confidence calibration',
-      'Apply Gate 2 informally: governance rules, HITL, security, monitoring',
+      'Run the pilot-readiness review: governance rules, HITL, security, monitoring',
     ],
     keySections: [
       'Agent architecture: logic, tools, memory',
@@ -256,7 +245,7 @@ export const MODULES: ModuleMeta[] = [
       'MCP integration and tool definitions',
       'HITL design patterns and escalation paths',
       'Evaluation: precision, recall, confidence thresholds',
-      'Gate 2 walkthrough: is it safe to deploy?',
+      'Pilot-readiness review: is it safe to deploy?',
     ],
     concepts: [
       { term: 'AI agent', definition: 'An AI system that can pursue a goal through steps, tool calls, memory, and state. It can take action, so its boundary must be explicit.' },
@@ -264,16 +253,15 @@ export const MODULES: ModuleMeta[] = [
       { term: 'HITL', definition: 'Human-in-the-loop checkpoints where the agent must pause, explain, and request approval before continuing.' },
       { term: 'Pilot boundary', definition: 'The agreed limit for who, what data, what systems, what time window, and what rollback path are included in the pilot.' },
     ],
-    assignment: 'Build a live agent for a low-risk task. Connect one tool via MCP, run 10 representative inputs, measure accuracy against a baseline, and apply Gate 2.',
-    outcome: 'Working AI agent, pilot metrics report, and Gate 2 decision.',
-    assignmentAlignment: 'Current app assignment now uses the generic lead-routing / workflow-agent pilot pattern with bounded tools, HITL checkpoints, pilot metrics, and Gate 2 evidence.',
+    assignment: 'Build a live agent for a low-risk task. Connect one tool via MCP, run 10 representative inputs, measure accuracy against a baseline, and record the pilot-readiness review.',
+    outcome: 'Working AI agent, pilot metrics report, and pilot-readiness decision.',
+    assignmentAlignment: 'Current app assignment now uses the generic lead-routing / workflow-agent pilot pattern with bounded tools, HITL checkpoints, pilot metrics, and pilot-readiness evidence.',
   },
   {
     id: 'm07', num: 7, title: 'Tools & Platforms',
     subtitle: 'Choose the AI stack that meets your governance requirements — before it becomes a liability.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 4, prereq: 'm06', duration: '2h 00m', estimatedMinutes: 120,
-    gateRole: 'post2', gateNumber: null,
     deliverable: 'Comparison matrix + Tool Selection ADR + stack decision.',
     description: 'Choose the AI stack that meets governance requirements before it becomes a liability. Compare capability, cost, governance, and production fit.',
     objectives: [
@@ -303,7 +291,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Architecture decisions, security, and cost modelling for the path to production.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 4, prereq: 'm07', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post2', gateNumber: null,
     deliverable: '1-2 page Integration Plan.',
     description: 'Make architecture decisions, identify security risks, and model cost for the path to production.',
     objectives: [
@@ -331,42 +318,40 @@ export const MODULES: ModuleMeta[] = [
   },
   {
     id: 'm09', num: 9, title: 'AI Portfolio Scoring & Use Case Prioritisation',
-    subtitle: 'Apply the formal scoring engine. Gate 3 turns the result into an investment decision.',
+    subtitle: 'Apply the formal scoring engine. The result drives an investment decision.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 5, prereq: 'm08', duration: '2h 00m', estimatedMinutes: 120,
-    gateRole: 'g3', gateNumber: 3,
-    deliverable: 'Scored portfolio (4 use cases) + step-automation maps + Gate 3 decisions.',
-    description: 'Apply the formal scoring engine. Gate 3 turns the result into an investment decision across the portfolio.',
+    deliverable: 'Scored portfolio (4 use cases) + step-automation maps + portfolio investment decisions.',
+    description: 'Apply the formal scoring engine. The result drives an investment decision. across the portfolio.',
     objectives: [
       'Apply Capture → Prioritise → Map methodology at portfolio scale',
       'Score four use cases against the eight-pillar engine',
       'Use reason codes to make constraints and blockers explicit',
       'Create step-level automation maps for each candidate',
-      'Apply Gate 3 as a formal investment decision across the portfolio',
+      'Make the portfolio investment decision based on the scored evidence',
     ],
     keySections: [
-      'From informal gates to formal scoring',
+      'From a readiness checklist to formal scoring',
       'Four-block Capture: Identify · Data & Tools · Workflow · Safety & Limits',
       'Eight-pillar engine scoring and reason codes',
       'stepAutomationMap and gateStatus interpretation',
-      'Gate 3 walkthrough: which use cases earn the next investment?',
+      'Portfolio investment review: which use cases earn the next investment?',
     ],
     concepts: [
       { term: 'Eight-pillar engine', definition: 'Business Impact, Feasibility, Process Maturity, Risk, AI Suitability, Agent Suitability, Delivery Readiness, and Priority.' },
       { term: 'Reason codes', definition: 'Traceable labels that explain why a use case is blocked, constrained, or preferred.' },
       { term: 'Automation map', definition: 'A step-by-step process view showing what is manual, assisted, automated, or forbidden.' },
-      { term: 'Gate 3', definition: 'Formal portfolio investment decision: fund, fund with constraints, defer, or stop.' },
+      { term: 'Readiness review 3', definition: 'Formal portfolio investment decision: fund, fund with constraints, defer, or stop.' },
     ],
-    assignment: 'Score four candidate use cases formally through the engine. Apply Gate 3 to all four and decide which earns the next investment cycle.',
-    outcome: 'Scored four-use-case portfolio, step-automation maps, and Gate 3 decisions.',
-    assignmentAlignment: 'Current app now scores four generic portfolio candidates: customer email classification, quote generation, HR ticket triage, and RFP response drafting, then produces a Gate 3 dossier.',
+    assignment: 'Score four candidate use cases formally through the engine. Record the portfolio investment review. to all four and decide which earns the next investment cycle.',
+    outcome: 'Scored four-use-case portfolio, step-automation maps, and portfolio investment decisions.',
+    assignmentAlignment: 'Current app now scores four generic portfolio candidates: customer email classification, quote generation, HR ticket triage, and RFP response drafting, then produces a investment dossier.',
   },
   {
     id: 'm10', num: 10, title: 'Documentation & Adoption',
     subtitle: 'Make the system survivable across teams with playbooks and handoffs.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 3, prereq: 'm09', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post3', gateNumber: null,
     deliverable: 'Documentation Pack: outline · playbook · handoff plan.',
     description: 'Make the system survivable across teams with playbooks and handoffs.',
     objectives: [
@@ -397,7 +382,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Detect drift, calibrate alerts, feed re-scoring decisions back into the portfolio.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 4, prereq: 'm10', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'post3', gateNumber: null,
     deliverable: '1-page Monitoring Plan + drift trigger spec + portfolio re-scoring criteria.',
     description: 'Define monitoring metrics across performance, accuracy, drift, and fairness. Calibrate alert thresholds and escalation paths, document drift response, and specify when production signals trigger portfolio re-scoring.',
     objectives: [
@@ -428,7 +412,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Turn one scored portfolio into a 12-month investment roadmap that an executive sponsor can sign.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 4, prereq: 'm11', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post3', gateNumber: null,
     deliverable: 'AI Strategy Roadmap: 12-month plan + capability gap analysis + executive summary.',
     description: 'Synthesize the scored portfolio from M09 into a sequenced 12-month AI roadmap. Translate technical capability into business outcomes, identify gaps across people/tools/partnerships, design an executive scorecard, and plan the next pilot cycle.',
     objectives: [
@@ -471,25 +454,78 @@ export const ARTIFACTS = [
   { id: 'handoff_pack', phase: 4, phaseName: 'Scale', title: 'The Handoff Pack', modules: ['m10', 'm11', 'm12'] as ModuleId[] },
 ];
 
-export const DEFAULT_ASSESS_COURSE_ID = 'ai-transformation-foundations' as const;
+const SHARED_CAPSTONE_CASES: CapstoneCaseMeta[] = [
+  {
+    id: 'invoice-ocr',
+    function: 'Finance',
+    title: 'Invoice OCR for Accounts Payable',
+    workflow: 'Capture supplier invoices, extract structured fields, map to accounting plan, route for HITL approval.',
+    agent: 'Multi-step n8n agent with duplicate detection, vendor matching, audit logging.',
+    why: 'Highest-volume governance use case. Tests every layer.',
+  },
+  {
+    id: 'quote-generation',
+    function: 'Sales',
+    title: 'Quote Generation',
+    workflow: 'Pull customer context from CRM, match products from catalog, generate compliant proposals.',
+    agent: 'RAG-grounded drafting agent with pricing rules and legal-clause library.',
+    why: 'High commercial leverage. Direct revenue impact.',
+  },
+  {
+    id: 'hr-ticket-triage',
+    function: 'HR',
+    title: 'HR Ticket Triage & Routing',
+    workflow: 'Classify incoming HR requests, route by topic and urgency, draft initial responses for review.',
+    agent: 'Classification agent with policy RAG and escalation rules.',
+    why: 'Tests privacy governance under realistic constraints.',
+  },
+  {
+    id: 'customer-email-classification',
+    function: 'Customer Ops',
+    title: 'Customer Email Classification',
+    workflow: 'Categorize support inbox, prioritize by urgency and intent, draft contextual replies.',
+    agent: 'Multi-intent classifier with response drafter and escalation predictor.',
+    why: 'High data volume. Strong precision/recall feedback loop.',
+  },
+  {
+    id: 'rfp-response-drafting',
+    function: 'Sales',
+    title: 'RFP Response Drafting',
+    workflow: 'Extract requirements, match capability library, draft compliance responses, flag gaps.',
+    agent: 'Requirements-extraction agent plus RAG drafter plus compliance checker.',
+    why: 'High-value, low-frequency. Strong audit-trail demands.',
+  },
+  {
+    id: 'supplier-contract-review',
+    function: 'Finance · Legal',
+    title: 'Supplier Contract Review',
+    workflow: 'Extract terms, flag risk clauses, summarize for legal review, track redline cycles.',
+    agent: 'Term-extraction agent with clause-library RAG and risk scorer.',
+    why: 'Stress-tests precision under regulatory pressure.',
+  },
+];
+
+export const COURSE_FOUNDATIONS_ID = 'ai-foundations' as const;
+export const COURSE_AT_SCALE_ID = 'ai-at-scale' as const;
+export const DEFAULT_ASSESS_COURSE_ID: AssessCourseId = COURSE_FOUNDATIONS_ID;
 
 export const COURSES: AssessCourseMeta[] = [
   {
-    id: DEFAULT_ASSESS_COURSE_ID,
-    slug: DEFAULT_ASSESS_COURSE_ID,
-    title: 'AI Transformation Foundations',
-    subtitle: 'The first House of Ichigo Assess course.',
+    id: COURSE_FOUNDATIONS_ID,
+    slug: COURSE_FOUNDATIONS_ID,
+    title: 'AI Foundations: From LLMs to Agents',
+    subtitle: 'Part 1 of the House of Ichigo Assess program.',
     description:
-      'A twelve-module course across four phases, anchored by three governance gates and four cumulative artifacts. Teams leave with documented method fluency and the capability to apply that method to a real system on a case of their choosing.',
-    audience: 'Executives, operations leaders, transformation teams, and business teams in finance, HR, marketing operations, customer service, procurement, and support functions.',
-    level: 'Foundation',
-    duration: '22h 55m',
-    framing: '12 modules · 4 phases · 3 gates · 4 artifacts · 4 formats',
-    modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06', 'm07', 'm08', 'm09', 'm10', 'm11', 'm12'],
+      'A six-module introductory course that takes teams from language-model fundamentals to a working AI assistant and a piloted AI agent. Two phases, two cumulative artifacts, one method.',
+    audience: 'Executives, operations leaders, transformation teams, and business teams new to AI builds.',
+    level: 'Foundation · Part 1',
+    duration: '13h 30m',
+    framing: '6 modules · 2 phases · 2 artifacts',
+    modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06'],
     primaryMedia: {
       type: 'slides',
       url: '',
-      title: 'AI Transformation Foundations course slides',
+      title: 'AI Foundations course slides',
       format: 'pdf',
     },
     moduleMedia: {
@@ -499,25 +535,12 @@ export const COURSES: AssessCourseMeta[] = [
       m04: { type: 'slides', url: '', title: 'M04 · AI Assistants & RAG slides', format: 'pdf' },
       m05: { type: 'slides', url: '', title: 'M05 · Prototyping with No-Code slides', format: 'pdf' },
       m06: { type: 'slides', url: '', title: 'M06 · AI Agents & Pilot slides', format: 'pdf' },
-      m07: { type: 'slides', url: '', title: 'M07 · Tools & Platforms slides', format: 'pdf' },
-      m08: { type: 'slides', url: '', title: 'M08 · Integration & Deployment Planning slides', format: 'pdf' },
-      m09: { type: 'slides', url: '', title: 'M09 · AI Portfolio Scoring & Use Case Prioritisation slides', format: 'pdf' },
-      m10: { type: 'slides', url: '', title: 'M10 · Documentation & Adoption slides', format: 'pdf' },
-      m11: { type: 'slides', url: '', title: 'M11 · Monitoring & Quality slides', format: 'pdf' },
-      m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
-    },
+    } as Record<ModuleId, CoursePrimaryMedia>,
     methodology:
-      'A universal AI systems method taught through transferable module assignments. Applied use-case tracks stay separate; certification proves transfer by applying the full method to a participant-chosen capstone case.',
+      'A universal AI systems method taught through transferable module assignments. Part 1 lands the build foundations; Part 2 covers governance, portfolio, and scale.',
     artifacts: [
       'The Foundation — readiness self-assessment, knowledge base blueprint, prompt library.',
       'The System — assistant, prototype, agent with pilot metrics.',
-      'The Operating Plan — tool ADR, integration plan, scored portfolio.',
-      'The Handoff Pack — system card, playbook, monitoring plan, strategic roadmap.',
-    ],
-    gates: [
-      'Gate 1 — informal readiness check: is it safe to build?',
-      'Gate 2 — informal readiness check: is it safe to deploy?',
-      'Gate 3 — formal investment decision: which use cases earn the next investment cycle?',
     ],
     formats: [
       { label: 'Executive Sprint', duration: '1 day', coverage: 'Selected modules for orientation and conviction.' },
@@ -528,58 +551,54 @@ export const COURSES: AssessCourseMeta[] = [
     certification: {
       tier1: 'AI Builder Foundations',
       tier2: 'Certified AI Systems Builder',
-      assessment: 'Artifact-based assessment. No exams. Tier 02 requires the separate mentored capstone track after Tier 01.',
+      assessment: 'Artifact-based assessment. No exams. Completing Part 1 earns Tier 01.',
     },
-    capstoneCases: [
-      {
-        id: 'invoice-ocr',
-        function: 'Finance',
-        title: 'Invoice OCR for Accounts Payable',
-        workflow: 'Capture supplier invoices, extract structured fields, map to accounting plan, route for HITL approval.',
-        agent: 'Multi-step n8n agent with duplicate detection, vendor matching, audit logging.',
-        why: 'Highest-volume governance use case. Tests every layer.',
-      },
-      {
-        id: 'quote-generation',
-        function: 'Sales',
-        title: 'Quote Generation',
-        workflow: 'Pull customer context from CRM, match products from catalog, generate compliant proposals.',
-        agent: 'RAG-grounded drafting agent with pricing rules and legal-clause library.',
-        why: 'High commercial leverage. Direct revenue impact.',
-      },
-      {
-        id: 'hr-ticket-triage',
-        function: 'HR',
-        title: 'HR Ticket Triage & Routing',
-        workflow: 'Classify incoming HR requests, route by topic and urgency, draft initial responses for review.',
-        agent: 'Classification agent with policy RAG and escalation rules.',
-        why: 'Tests privacy governance under realistic constraints.',
-      },
-      {
-        id: 'customer-email-classification',
-        function: 'Customer Ops',
-        title: 'Customer Email Classification',
-        workflow: 'Categorize support inbox, prioritize by urgency and intent, draft contextual replies.',
-        agent: 'Multi-intent classifier with response drafter and escalation predictor.',
-        why: 'High data volume. Strong precision/recall feedback loop.',
-      },
-      {
-        id: 'rfp-response-drafting',
-        function: 'Sales',
-        title: 'RFP Response Drafting',
-        workflow: 'Extract requirements, match capability library, draft compliance responses, flag gaps.',
-        agent: 'Requirements-extraction agent plus RAG drafter plus compliance checker.',
-        why: 'High-value, low-frequency. Strong audit-trail demands.',
-      },
-      {
-        id: 'supplier-contract-review',
-        function: 'Finance · Legal',
-        title: 'Supplier Contract Review',
-        workflow: 'Extract terms, flag risk clauses, summarize for legal review, track redline cycles.',
-        agent: 'Term-extraction agent with clause-library RAG and risk scorer.',
-        why: 'Stress-tests precision under regulatory pressure.',
-      },
+    capstoneCases: SHARED_CAPSTONE_CASES,
+  },
+  {
+    id: COURSE_AT_SCALE_ID,
+    slug: COURSE_AT_SCALE_ID,
+    title: 'AI at Scale: Governance, Portfolio & Roadmap',
+    subtitle: 'Part 2 of the House of Ichigo Assess program.',
+    description:
+      'A six-module advanced course that turns a working pilot into a governed, scored portfolio with a sponsor-ready 12-month roadmap. Pick up where Part 1 left off.',
+    audience: 'Teams that have completed AI Foundations or are already operating a live AI pilot.',
+    level: 'Advanced · Part 2',
+    duration: '9h 30m',
+    framing: '6 modules · 2 phases · 2 artifacts',
+    modules: ['m07', 'm08', 'm09', 'm10', 'm11', 'm12'],
+    primaryMedia: {
+      type: 'slides',
+      url: '',
+      title: 'AI at Scale course slides',
+      format: 'pdf',
+    },
+    moduleMedia: {
+      m07: { type: 'slides', url: '', title: 'M07 · Tools & Platforms slides', format: 'pdf' },
+      m08: { type: 'slides', url: '', title: 'M08 · Integration & Deployment Planning slides', format: 'pdf' },
+      m09: { type: 'slides', url: '', title: 'M09 · AI Portfolio Scoring & Use Case Prioritisation slides', format: 'pdf' },
+      m10: { type: 'slides', url: '', title: 'M10 · Documentation & Adoption slides', format: 'pdf' },
+      m11: { type: 'slides', url: '', title: 'M11 · Monitoring & Quality slides', format: 'pdf' },
+      m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
+    } as Record<ModuleId, CoursePrimaryMedia>,
+    methodology:
+      'Builds on the AI Foundations method with governance, scoring, monitoring, and roadmap practice. Earn Tier 02 by completing both courses plus the mentored capstone.',
+    artifacts: [
+      'The Operating Plan — tool ADR, integration plan, scored portfolio.',
+      'The Handoff Pack — system card, playbook, monitoring plan, strategic roadmap.',
     ],
+    formats: [
+      { label: 'Executive Sprint', duration: '1 day', coverage: 'Selected modules for orientation and conviction.' },
+      { label: 'Team Workshop', duration: '2 days', coverage: 'Hands-on governance plus portfolio overview.' },
+      { label: 'Intensive Bootcamp', duration: '5 days', coverage: 'Complete program with all assignments.' },
+      { label: 'Cohort Program', duration: '4–12 weeks', coverage: 'Full program with capstone extension.' },
+    ],
+    certification: {
+      tier1: 'AI Builder Foundations',
+      tier2: 'Certified AI Systems Builder',
+      assessment: 'Artifact-based assessment. Tier 02 requires the mentored capstone track after Parts 1 and 2.',
+    },
+    capstoneCases: SHARED_CAPSTONE_CASES,
   },
 ];
 
@@ -590,6 +609,26 @@ export function getModule(id: ModuleId): ModuleMeta | undefined {
 export function getNextModule(id: ModuleId): ModuleMeta | undefined {
   const index = MODULES.findIndex((m) => m.id === id);
   return index >= 0 ? MODULES[index + 1] : undefined;
+}
+
+export function getCourseProgressIsComplete(
+  courseId: string,
+  progress: Record<string, { status: 'not_started' | 'in_progress' | 'complete' } | undefined>,
+): boolean {
+  const course = getCourse(courseId);
+  if (!course) return false;
+  return course.modules.every((id) => progress[id]?.status === 'complete');
+}
+
+export function isCourseUnlocked(
+  courseId: string,
+  progress: Record<string, { status: 'not_started' | 'in_progress' | 'complete' } | undefined>,
+): boolean {
+  if (courseId === COURSE_FOUNDATIONS_ID) return true;
+  if (courseId === COURSE_AT_SCALE_ID) {
+    return getCourseProgressIsComplete(COURSE_FOUNDATIONS_ID, progress);
+  }
+  return true;
 }
 
 export function getPhase(num: 1 | 2 | 3 | 4) {

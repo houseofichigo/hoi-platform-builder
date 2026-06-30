@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { CheckCircle2, Clock, Circle, Lock, PlayCircle } from "lucide-react";
+import { CheckCircle2, Clock, Circle, PlayCircle } from "lucide-react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, isValidModuleId, type ModuleId } from "@/lib/curriculum";
 import { useAssessProgress } from "@/hooks/useAssess";
@@ -54,11 +54,6 @@ function ModuleLayout() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-terracotta/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-terracotta">
               <StatusIcon className="h-3.5 w-3.5" /> {statusLabel}
             </span>
-            {m.gateNumber && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-white">
-                <Lock className="h-3.5 w-3.5" /> Gate {m.gateNumber}
-              </span>
-            )}
           </div>
         </div>
       </header>
@@ -66,7 +61,6 @@ function ModuleLayout() {
       <ModuleTabs
         workspaceSlug={slug}
         moduleId={m.id}
-        hasGate={Boolean(m.gateNumber)}
         progress={progress ?? undefined}
         isLoading={isLoading}
       />

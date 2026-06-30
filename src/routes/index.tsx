@@ -10,7 +10,7 @@ const pillars = [
     eyebrow: "ASSESS",
     title: "Learn the",
     accent: "methodology.",
-    body: "Twelve modules, four phases, two parts.",
+    body: "Two courses · twelve modules · four phases.",
   },
   {
     eyebrow: "DISCOVER",

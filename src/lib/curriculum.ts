@@ -77,7 +77,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'From tools to systems: what language models do, how they work, where they fail.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 2, prereq: null, duration: '1h 45m', estimatedMinutes: 105,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Comparison notes + hallucination log + readiness self-assessment.',
     description: 'Understand what language models do, how they work, and how to know when your organisation is ready to use them.',
     objectives: [
@@ -107,7 +106,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Map, structure, and govern the knowledge before you build the AI.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 4, prereq: 'm01', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Completed three-layer knowledge base blueprint.',
     description: 'Explain why data quality sets the ceiling for AI quality, then turn sources into a governed, searchable, source-backed knowledge base with metadata, owners, access rules, refresh rules, retrieval tests, known gaps, and Gate 1 readiness status.',
     objectives: [
@@ -142,7 +140,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'From one-off prompts to reusable, governed, automation-ready workflow assets.',
     phase: 'scope', phaseNum: 1, phaseName: 'Scope',
     steps: 4, prereq: 'm02', duration: '1h 45m', estimatedMinutes: 105,
-    gateRole: 'pre', gateNumber: null,
     deliverable: 'Three documented Prompt Contracts + library entries + test suites + automation layer decisions.',
     description: 'Move from one-off prompts into reusable, governed workflow assets. Apply the Prompt Contract, document tests, and choose the right automation layer per task.',
     objectives: [
@@ -172,7 +169,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Configure assistants grounded in your data. Apply Gate 1 as an informal readiness check.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 5, prereq: 'm03', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'g1', gateNumber: 1,
     deliverable: 'Assistant blueprint + source checklist + five test outputs + RAG governance notes + Gate 1 decision with reason codes.',
     description: 'Build assistants as governed configurations: purpose, sources, constraints, outputs, and tests. Apply Gate 1 with evidence and reason codes.',
     objectives: [
@@ -202,7 +198,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Build the surface where users experience your assistant.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 4, prereq: 'm04', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'post1', gateNumber: null,
     deliverable: 'Lovable prototype + 3-item requirement list.',
     description: 'Use Lovable to practice rapid prototyping, then build a sandbox interface for an AI assistant use case and hand off three requirements to M06.',
     objectives: [
@@ -234,7 +229,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Build the working agent. Apply Gate 2 as an informal pilot-readiness check.',
     phase: 'build', phaseNum: 2, phaseName: 'Build',
     steps: 5, prereq: 'm05', duration: '3h 00m', estimatedMinutes: 180,
-    gateRole: 'g2', gateNumber: 2,
     deliverable: 'Working AI agent + pilot metrics report + Gate 2 decision.',
     description: 'Build a multi-step agent, connect tools through controlled integrations, evaluate against a baseline, and apply Gate 2 as an informal readiness check.',
     objectives: [
@@ -268,7 +262,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Choose the AI stack that meets your governance requirements — before it becomes a liability.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 4, prereq: 'm06', duration: '2h 00m', estimatedMinutes: 120,
-    gateRole: 'post2', gateNumber: null,
     deliverable: 'Comparison matrix + Tool Selection ADR + stack decision.',
     description: 'Choose the AI stack that meets governance requirements before it becomes a liability. Compare capability, cost, governance, and production fit.',
     objectives: [
@@ -298,7 +291,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Architecture decisions, security, and cost modelling for the path to production.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 4, prereq: 'm07', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post2', gateNumber: null,
     deliverable: '1-2 page Integration Plan.',
     description: 'Make architecture decisions, identify security risks, and model cost for the path to production.',
     objectives: [
@@ -329,7 +321,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Apply the formal scoring engine. Gate 3 turns the result into an investment decision.',
     phase: 'govern', phaseNum: 3, phaseName: 'Govern',
     steps: 5, prereq: 'm08', duration: '2h 00m', estimatedMinutes: 120,
-    gateRole: 'g3', gateNumber: 3,
     deliverable: 'Scored portfolio (4 use cases) + step-automation maps + Gate 3 decisions.',
     description: 'Apply the formal scoring engine. Gate 3 turns the result into an investment decision across the portfolio.',
     objectives: [
@@ -361,7 +352,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Make the system survivable across teams with playbooks and handoffs.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 3, prereq: 'm09', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post3', gateNumber: null,
     deliverable: 'Documentation Pack: outline · playbook · handoff plan.',
     description: 'Make the system survivable across teams with playbooks and handoffs.',
     objectives: [
@@ -392,7 +382,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Detect drift, calibrate alerts, feed re-scoring decisions back into the portfolio.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 4, prereq: 'm10', duration: '2h 30m', estimatedMinutes: 150,
-    gateRole: 'post3', gateNumber: null,
     deliverable: '1-page Monitoring Plan + drift trigger spec + portfolio re-scoring criteria.',
     description: 'Define monitoring metrics across performance, accuracy, drift, and fairness. Calibrate alert thresholds and escalation paths, document drift response, and specify when production signals trigger portfolio re-scoring.',
     objectives: [
@@ -423,7 +412,6 @@ export const MODULES: ModuleMeta[] = [
     subtitle: 'Turn one scored portfolio into a 12-month investment roadmap that an executive sponsor can sign.',
     phase: 'scale', phaseNum: 4, phaseName: 'Scale',
     steps: 4, prereq: 'm11', duration: '1h 30m', estimatedMinutes: 90,
-    gateRole: 'post3', gateNumber: null,
     deliverable: 'AI Strategy Roadmap: 12-month plan + capability gap analysis + executive summary.',
     description: 'Synthesize the scored portfolio from M09 into a sequenced 12-month AI roadmap. Translate technical capability into business outcomes, identify gaps across people/tools/partnerships, design an executive scorecard, and plan the next pilot cycle.',
     objectives: [

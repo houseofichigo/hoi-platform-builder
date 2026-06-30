@@ -1,27 +1,30 @@
-## Issues observed
+## What I verified
 
-1. **Duplicate Frame/Diagram/Submit stepper.** The header card (`src/routes/app.$workspaceSlug.build.process.new.tsx:1405`) renders `BuilderStepper`, AND each step screen (`FrameStep` line 1687, `DiagramStep` line 1847, `SubmitStep` line 3791) also renders `BuilderStageStepper`. Result: two near-identical 3-card steppers stack on every step (visible in both screenshots).
+- Dev server is healthy (Vite ready, no errors in logs).
+- SSR for `/` returns HTTP 200 with the real hero HTML (7.2 KB). So the server isn't throwing.
+- The branded "This page didn't load" screen is the `ErrorComponent` in `src/routes/__root.tsx` — it only renders when something throws **in the client React tree** after hydration.
+- The console shows a React 19 **hydration mismatch** on `<html>` caused by the **Scribe browser extension** injecting `data-scribe-recorder-ready="true"`. In React 19 this discards the tree and re-renders from scratch — if anything throws during that re-render, the root `errorComponent` takes over. That matches your symptom exactly.
 
-2. **No persistent way out.** The only escape is the "Discard" link in the autosave chip, which appears only when `hasDraftContent` is true. Once a draft exists the user can reset, but with an empty/fresh process they cannot get back to the Start picker (template / manual / AI). They also have no clear "Cancel" to leave the builder entirely.
+The current `ErrorComponent` hides the real message, so I can't see what's throwing on the second render. The plan is to surface the underlying error and stop the extension from triggering hydration discards.
 
-## Fix
+## Plan
 
-### 1. Remove the duplicate stepper
-Keep the larger `BuilderStageStepper` (the one matching the design the user approved previously, used inside each step + the fixed diagram canvas header). Remove the header-card `BuilderStepper`.
+### 1. Stop the Scribe extension from breaking hydration
+In `src/routes/__root.tsx`, add `suppressHydrationWarning` to the `<html>` and `<body>` tags in `RootShell`. This is the standard React fix for browser extensions that mutate the document shell before hydration. It does not hide real mismatches inside your app.
 
-- Delete line 1405: `{step !== "start" ? <BuilderStepper current={step} onSelect={setStep} /> : null}`
-- Remove the now-unused `BuilderStepper` component (lines 1554-1598) to keep the file clean.
+### 2. Surface the real error (temporary diagnostic)
+In `src/routes/__root.tsx` `ErrorComponent`, render `error.message` and `error.stack` in a collapsed `<details>` block (dev only via `import.meta.env.DEV`). Also log `error.digest` if present. This way the next refresh tells us exactly which component/loader is throwing instead of the generic fallback.
 
-### 2. Add a clear, always-visible exit
-In the header card (next to the title / autosave chip), render a button group that is always available once `step !== "start"`:
+### 3. Re-test, then act on the real error
+Once the underlying message is visible, fix the actual throw at its source (likely a Link/asset/loader issue triggered only on client re-render). I'll patch the offending file in a follow-up — I'm not changing any feature code blind.
 
-- **"Start over"** — calls `discardDraft()` (resets nodes/edges/frame and returns to the Start picker at `/build/process/new`). Uses a subtle outline style.
-- **"Cancel"** — `navigate({ to: "/app/$workspaceSlug/build", params: { workspaceSlug } })` to leave the builder back to the Build phase.
+### Files touched
+- `src/routes/__root.tsx` — add `suppressHydrationWarning`, expand `ErrorComponent` with dev-only details.
 
-Both wrapped in a confirm dialog (native `confirm()` is fine) when there is draft content, to avoid losing work accidentally. The existing "Discard" link inside the autosave chip is removed (replaced by "Start over").
+No business-logic or backend changes. No other files touched until step 3.
 
-No changes to data flow, validation, draft autosave, or the BuilderStageStepper.
+### Out of scope
+- Disabling the Scribe extension (that's on your browser, not the app).
+- Changing routes, auth, or data fetching.
 
-## Files touched
-
-- `src/routes/app.$workspaceSlug.build.process.new.tsx` only.
+After this is merged, refresh `/` and paste the new error text — that's what will let me ship the real fix in one shot.

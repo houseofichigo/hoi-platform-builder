@@ -206,15 +206,6 @@ function CourseLibrary({
 }) {
   return (
     <section className="space-y-4">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow-muted">COURSE LIBRARY</p>
-          <h2 className="font-display text-[30px] leading-tight text-navy">Two courses, one method</h2>
-        </div>
-        <span className="rounded-full bg-mist px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-slate">
-          {COURSES.length} courses
-        </span>
-      </div>
       <div className="grid gap-5 lg:grid-cols-2">
         {COURSES.map((course, index) => (
           <CourseCard

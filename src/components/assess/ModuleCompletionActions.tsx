@@ -22,15 +22,7 @@ export function ModuleCompletionActions({ module, workspaceSlug, onRetake }: Mod
       </p>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        {module.gateNumber ? (
-          <Link
-            to="/app/$workspaceSlug/assess/$moduleId/gate"
-            params={{ workspaceSlug, moduleId: module.id }}
-            className="btn-ichigo btn-ichigo-primary"
-          >
-            Continue to Gate {module.gateNumber} →
-          </Link>
-        ) : nextModule ? (
+        {nextModule ? (
           <Link
             to="/app/$workspaceSlug/assess/$moduleId"
             params={{ workspaceSlug, moduleId: nextModule.id }}

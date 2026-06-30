@@ -23,7 +23,6 @@ export const ARTIFACTS: ArtifactDef[] = [
       "m02.gaps",
       "m02.step3_state",
       "m02.kb_blueprint",
-      "m02.gate1_readiness",
       "m02.knowledge_check",
       "m03.platform",
       "m03.use_case",
@@ -101,12 +100,6 @@ export const ARTIFACTS: ArtifactDef[] = [
       "m12.executive_summary",
     ],
   },
-];
-
-export const GATES = [
-  { num: 1 as const, moduleId: "m04" as ModuleId, formal: false, question: "Is it safe to build?" },
-  { num: 2 as const, moduleId: "m06" as ModuleId, formal: false, question: "Is it safe to deploy?" },
-  { num: 3 as const, moduleId: "m09" as ModuleId, formal: true, question: "Which use cases earn the next investment cycle?" },
 ];
 
 /**

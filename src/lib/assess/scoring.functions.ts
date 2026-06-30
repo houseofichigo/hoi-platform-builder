@@ -4,17 +4,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
 import { MODULES, type ModuleId } from "@/lib/curriculum";
-import { ARTIFACTS, GATES, isOutputPresent } from "@/lib/assess/completion";
+import { ARTIFACTS, isOutputPresent } from "@/lib/assess/completion";
 import { fnv1aHash } from "@/lib/evidence/hash";
 
 const ASSESSMENT_SCORING_VERSION = "1.0-hoi-executive";
-
-type GateDecision = {
-  gate_number: number;
-  decision: string;
-  constraints?: string[] | null;
-  rationales?: string[] | null;
-};
 
 type ProgressRow = {
   module_id: string;
@@ -73,7 +66,6 @@ function maturityLabel(score: number): string {
 export function computeAssessmentScore(input: {
   progress: ProgressRow[];
   outputs: OutputRow[];
-  decisions: GateDecision[];
 }) {
   const progressByModule = new Map(input.progress.map((row) => [row.module_id, row]));
   const presentOutputs = new Set(input.outputs.filter(outputHasValue).map((row) => row.output_key));
@@ -88,25 +80,14 @@ export function computeAssessmentScore(input: {
     const outputScore =
       ownedKeys.length === 0
         ? 0
-        : (ownedKeys.filter((key) => isOutputPresent(key, presentOutputs)).length / ownedKeys.length) * 55;
+        : (ownedKeys.filter((key) => isOutputPresent(key, presentOutputs)).length / ownedKeys.length) * 65;
     const progressScore =
       progress?.status === "complete" ? 35 : progress?.status === "in_progress" ? 18 : progress?.studied ? 10 : 0;
-    const gate = GATES.find((g) => g.moduleId === module.id);
-    const decision = gate ? input.decisions.find((d) => d.gate_number === gate.num) : null;
-    const gateScore = !gate
-      ? 10
-      : decision?.decision === "continue"
-        ? 10
-        : decision?.decision === "constraints"
-          ? 6
-          : decision?.decision === "improve"
-            ? 3
-            : 0;
     return {
       module_id: module.id,
       title: module.title,
       phase: module.phase,
-      score: clamp(outputScore + progressScore + gateScore),
+      score: clamp(outputScore + progressScore),
       status: progress?.status ?? "not_started",
       missing_outputs: ownedKeys.filter((key) => !isOutputPresent(key, presentOutputs)),
     };
@@ -132,20 +113,15 @@ export function computeAssessmentScore(input: {
     .map(([key, value]) => ({ key, ...(value as { label: string; score: number; maturity: string }) }))
     .sort((a, b) => a.score - b.score)[0];
 
-  const gateRisks = input.decisions
-    .filter((decision) => decision.decision === "improve" || decision.decision === "stop")
-    .map((decision) => `GATE_${decision.gate_number}_${decision.decision.toUpperCase()}`);
   const reasonCodes = [
-    ...gateRisks,
     ...moduleScores
       .filter((row) => row.score < 55)
       .slice(0, 5)
       .map((row) => `LOW_${row.module_id.toUpperCase()}_READINESS`),
   ];
   const evidenceConfidence = clamp(
-    45 +
-      (touchedOutputs / Math.max(1, input.outputs.length || 1)) * 35 +
-      (input.decisions.length / Math.max(1, GATES.length)) * 20,
+    55 +
+      (touchedOutputs / Math.max(1, input.outputs.length || 1)) * 45,
   );
 
   return {
@@ -195,7 +171,7 @@ export const scoreAssessment = createServerFn({ method: "POST" })
     if (memErr) throw new Error(memErr.message);
     if (!membership) throw new Error("Not a workspace member");
 
-    const [progressRes, outputsRes, decisionsRes] = await Promise.all([
+    const [progressRes, outputsRes] = await Promise.all([
       supabaseAdmin
         .from("assess_progress")
         .select("module_id, status, studied, completed_at")
@@ -206,25 +182,18 @@ export const scoreAssessment = createServerFn({ method: "POST" })
         .select("output_key, value, seeded, touched")
         .eq("workspace_id", data.workspaceId)
         .eq("user_id", userId),
-      supabaseAdmin
-        .from("assess_gate_decisions")
-        .select("gate_number, decision, constraints, rationales")
-        .eq("workspace_id", data.workspaceId)
-        .eq("user_id", userId),
     ]);
 
-    const error = progressRes.error ?? outputsRes.error ?? decisionsRes.error;
+    const error = progressRes.error ?? outputsRes.error;
     if (error) throw new Error(error.message);
 
     const rawInputs = {
       progress: progressRes.data ?? [],
       outputs: outputsRes.data ?? [],
-      decisions: decisionsRes.data ?? [],
     };
     const computed = computeAssessmentScore(rawInputs as {
       progress: ProgressRow[];
       outputs: OutputRow[];
-      decisions: GateDecision[];
     });
     const inputHash = fnv1aHash(rawInputs);
 

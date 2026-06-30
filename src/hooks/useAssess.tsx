@@ -269,66 +269,6 @@ export function useAssessOutput<T = unknown>(outputKey: string) {
   };
 }
 
-/* ============== Gate decisions ============== */
-
-export interface GateDecisionRow {
-  gate_number: 1 | 2 | 3;
-  module_id: string;
-  decision: "continue" | "constraints" | "improve" | "stop";
-  justification: string;
-  criteria_responses: Record<string, "yes" | "partial" | "no">;
-  constraints: string[];
-  rationales: string[];
-}
-
-export function useAssessGateDecision(gateNumber: 1 | 2 | 3) {
-  const { user } = useAuth();
-  const { workspace } = useWorkspace();
-  const qc = useQueryClient();
-
-  const query = useQuery({
-    enabled: !!user && !!workspace,
-    queryKey: ["assess-gate-decision", workspace?.id, user?.id, gateNumber],
-    queryFn: async (): Promise<GateDecisionRow | null> => {
-      const { data, error } = await supabase
-        .from("assess_gate_decisions")
-        .select("gate_number, module_id, decision, justification, criteria_responses, constraints, rationales")
-        .eq("workspace_id", workspace!.id)
-        .eq("user_id", user!.id)
-        .eq("gate_number", gateNumber)
-        .maybeSingle();
-      if (error) throw error;
-      return (data as unknown as GateDecisionRow | null) ?? null;
-    },
-  });
-
-  const submit = useMutation({
-    mutationFn: async (payload: Omit<GateDecisionRow, "gate_number">) => {
-      if (!user || !workspace) throw new Error("Not ready");
-      const { error } = await supabase.from("assess_gate_decisions").upsert(
-        {
-          workspace_id: workspace.id,
-          user_id: user.id,
-          gate_number: gateNumber,
-          module_id: payload.module_id,
-          decision: payload.decision,
-          justification: payload.justification,
-          criteria_responses: payload.criteria_responses,
-          constraints: payload.constraints,
-          rationales: payload.rationales,
-        },
-        { onConflict: "workspace_id,user_id,gate_number" },
-      );
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["assess-gate-decision", workspace?.id, user?.id, gateNumber] });
-    },
-  });
-
-  return { ...query, submit };
-}
-
 /* ============== Helpers ============== */
 
 export function moduleStatusFor(

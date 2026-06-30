@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, CheckCircle2, Clock, FileText, Flag, Layers, Play } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, Clock, FileText, Layers, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { getModule, getModuleCourse, getModuleMedia, isValidModuleId, type ModuleId } from "@/lib/curriculum";
@@ -159,16 +159,6 @@ function ModuleOverview() {
                 slug={slug}
                 moduleId={m.id}
               />
-              {m.gateNumber && (
-                <LessonCard
-                  label={`Gate ${m.gateNumber}`}
-                  title={m.gateNumber === 3 ? "Investment decision" : "Readiness decision"}
-                  body={m.gateNumber === 3 ? "Use the completed module evidence for the formal portfolio decision." : "Use the assignment evidence to decide whether to continue, constrain, improve, or stop."}
-                  to="/app/$workspaceSlug/assess/$moduleId/gate"
-                  slug={slug}
-                  moduleId={m.id}
-                />
-              )}
             </div>
             {m.assignmentAlignment && (
               <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-4">
@@ -224,7 +214,6 @@ function ModuleOverview() {
             <div className="mt-3 space-y-2 text-[13px] text-graphite">
               <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-slate" /> {m.duration} · ~{m.estimatedMinutes} min</p>
               <p className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate" /> {m.deliverable}</p>
-              {m.gateNumber && <p className="flex items-center gap-2"><Flag className="h-4 w-4 text-slate" /> Gate {m.gateNumber}</p>}
             </div>
           </div>
           {moduleMedia && <CourseMediaBlock media={moduleMedia} compact label="MODULE SLIDES" />}
@@ -299,8 +288,7 @@ function LessonCard({
   body: string;
   to:
     | "/app/$workspaceSlug/assess/$moduleId/study"
-    | "/app/$workspaceSlug/assess/$moduleId/work"
-    | "/app/$workspaceSlug/assess/$moduleId/gate";
+    | "/app/$workspaceSlug/assess/$moduleId/work";
   slug: string;
   moduleId: ModuleId;
 }) {

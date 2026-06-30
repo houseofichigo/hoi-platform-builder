@@ -3,16 +3,14 @@ import { Check, Minus } from "lucide-react";
 interface CertificationReadinessProps {
   modulesComplete: number;
   artifactsComplete: number;
-  gatesRecorded: number;
 }
 
 export function CertificationReadiness({
   modulesComplete,
   artifactsComplete,
-  gatesRecorded,
 }: CertificationReadinessProps) {
   const tier1Ready = modulesComplete >= 3 && artifactsComplete >= 1;
-  const tier2PrereqsReady = modulesComplete >= 12 && artifactsComplete >= 4 && gatesRecorded >= 3;
+  const tier2PrereqsReady = modulesComplete >= 12 && artifactsComplete >= 4;
 
   return (
     <section className="space-y-5">
@@ -39,7 +37,6 @@ export function CertificationReadiness({
           gaps={[
             { label: "M01–M12 complete", met: modulesComplete >= 12 },
             { label: "All four artifacts complete", met: artifactsComplete >= 4 },
-            { label: "All three gates recorded", met: gatesRecorded >= 3 },
             { label: "Capstone track completed", met: false },
           ]}
         />

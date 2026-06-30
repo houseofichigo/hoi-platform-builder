@@ -454,25 +454,78 @@ export const ARTIFACTS = [
   { id: 'handoff_pack', phase: 4, phaseName: 'Scale', title: 'The Handoff Pack', modules: ['m10', 'm11', 'm12'] as ModuleId[] },
 ];
 
-export const DEFAULT_ASSESS_COURSE_ID = 'ai-transformation-foundations' as const;
+const SHARED_CAPSTONE_CASES: CapstoneCaseMeta[] = [
+  {
+    id: 'invoice-ocr',
+    function: 'Finance',
+    title: 'Invoice OCR for Accounts Payable',
+    workflow: 'Capture supplier invoices, extract structured fields, map to accounting plan, route for HITL approval.',
+    agent: 'Multi-step n8n agent with duplicate detection, vendor matching, audit logging.',
+    why: 'Highest-volume governance use case. Tests every layer.',
+  },
+  {
+    id: 'quote-generation',
+    function: 'Sales',
+    title: 'Quote Generation',
+    workflow: 'Pull customer context from CRM, match products from catalog, generate compliant proposals.',
+    agent: 'RAG-grounded drafting agent with pricing rules and legal-clause library.',
+    why: 'High commercial leverage. Direct revenue impact.',
+  },
+  {
+    id: 'hr-ticket-triage',
+    function: 'HR',
+    title: 'HR Ticket Triage & Routing',
+    workflow: 'Classify incoming HR requests, route by topic and urgency, draft initial responses for review.',
+    agent: 'Classification agent with policy RAG and escalation rules.',
+    why: 'Tests privacy governance under realistic constraints.',
+  },
+  {
+    id: 'customer-email-classification',
+    function: 'Customer Ops',
+    title: 'Customer Email Classification',
+    workflow: 'Categorize support inbox, prioritize by urgency and intent, draft contextual replies.',
+    agent: 'Multi-intent classifier with response drafter and escalation predictor.',
+    why: 'High data volume. Strong precision/recall feedback loop.',
+  },
+  {
+    id: 'rfp-response-drafting',
+    function: 'Sales',
+    title: 'RFP Response Drafting',
+    workflow: 'Extract requirements, match capability library, draft compliance responses, flag gaps.',
+    agent: 'Requirements-extraction agent plus RAG drafter plus compliance checker.',
+    why: 'High-value, low-frequency. Strong audit-trail demands.',
+  },
+  {
+    id: 'supplier-contract-review',
+    function: 'Finance · Legal',
+    title: 'Supplier Contract Review',
+    workflow: 'Extract terms, flag risk clauses, summarize for legal review, track redline cycles.',
+    agent: 'Term-extraction agent with clause-library RAG and risk scorer.',
+    why: 'Stress-tests precision under regulatory pressure.',
+  },
+];
+
+export const COURSE_FOUNDATIONS_ID = 'ai-foundations' as const;
+export const COURSE_AT_SCALE_ID = 'ai-at-scale' as const;
+export const DEFAULT_ASSESS_COURSE_ID: AssessCourseId = COURSE_FOUNDATIONS_ID;
 
 export const COURSES: AssessCourseMeta[] = [
   {
-    id: DEFAULT_ASSESS_COURSE_ID,
-    slug: DEFAULT_ASSESS_COURSE_ID,
-    title: 'AI Transformation Foundations',
-    subtitle: 'The first House of Ichigo Assess course.',
+    id: COURSE_FOUNDATIONS_ID,
+    slug: COURSE_FOUNDATIONS_ID,
+    title: 'AI Foundations: From LLMs to Agents',
+    subtitle: 'Part 1 of the House of Ichigo Assess program.',
     description:
-      'A twelve-module course across four phases, anchored by three governance gates and four cumulative artifacts. Teams leave with documented method fluency and the capability to apply that method to a real system on a case of their choosing.',
-    audience: 'Executives, operations leaders, transformation teams, and business teams in finance, HR, marketing operations, customer service, procurement, and support functions.',
-    level: 'Foundation',
-    duration: '22h 55m',
-    framing: '12 modules · 4 phases · 3 gates · 4 artifacts · 4 formats',
-    modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06', 'm07', 'm08', 'm09', 'm10', 'm11', 'm12'],
+      'A six-module introductory course that takes teams from language-model fundamentals to a working AI assistant and a piloted AI agent. Two phases, two cumulative artifacts, one method.',
+    audience: 'Executives, operations leaders, transformation teams, and business teams new to AI builds.',
+    level: 'Foundation · Part 1',
+    duration: '13h 30m',
+    framing: '6 modules · 2 phases · 2 artifacts',
+    modules: ['m01', 'm02', 'm03', 'm04', 'm05', 'm06'],
     primaryMedia: {
       type: 'slides',
       url: '',
-      title: 'AI Transformation Foundations course slides',
+      title: 'AI Foundations course slides',
       format: 'pdf',
     },
     moduleMedia: {
@@ -482,25 +535,12 @@ export const COURSES: AssessCourseMeta[] = [
       m04: { type: 'slides', url: '', title: 'M04 · AI Assistants & RAG slides', format: 'pdf' },
       m05: { type: 'slides', url: '', title: 'M05 · Prototyping with No-Code slides', format: 'pdf' },
       m06: { type: 'slides', url: '', title: 'M06 · AI Agents & Pilot slides', format: 'pdf' },
-      m07: { type: 'slides', url: '', title: 'M07 · Tools & Platforms slides', format: 'pdf' },
-      m08: { type: 'slides', url: '', title: 'M08 · Integration & Deployment Planning slides', format: 'pdf' },
-      m09: { type: 'slides', url: '', title: 'M09 · AI Portfolio Scoring & Use Case Prioritisation slides', format: 'pdf' },
-      m10: { type: 'slides', url: '', title: 'M10 · Documentation & Adoption slides', format: 'pdf' },
-      m11: { type: 'slides', url: '', title: 'M11 · Monitoring & Quality slides', format: 'pdf' },
-      m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
-    },
+    } as Record<ModuleId, CoursePrimaryMedia>,
     methodology:
-      'A universal AI systems method taught through transferable module assignments. Applied use-case tracks stay separate; certification proves transfer by applying the full method to a participant-chosen capstone case.',
+      'A universal AI systems method taught through transferable module assignments. Part 1 lands the build foundations; Part 2 covers governance, portfolio, and scale.',
     artifacts: [
       'The Foundation — readiness self-assessment, knowledge base blueprint, prompt library.',
       'The System — assistant, prototype, agent with pilot metrics.',
-      'The Operating Plan — tool ADR, integration plan, scored portfolio.',
-      'The Handoff Pack — system card, playbook, monitoring plan, strategic roadmap.',
-    ],
-    gates: [
-      'Gate 1 — informal readiness check: is it safe to build?',
-      'Gate 2 — informal readiness check: is it safe to deploy?',
-      'Gate 3 — formal investment decision: which use cases earn the next investment cycle?',
     ],
     formats: [
       { label: 'Executive Sprint', duration: '1 day', coverage: 'Selected modules for orientation and conviction.' },
@@ -511,58 +551,54 @@ export const COURSES: AssessCourseMeta[] = [
     certification: {
       tier1: 'AI Builder Foundations',
       tier2: 'Certified AI Systems Builder',
-      assessment: 'Artifact-based assessment. No exams. Tier 02 requires the separate mentored capstone track after Tier 01.',
+      assessment: 'Artifact-based assessment. No exams. Completing Part 1 earns Tier 01.',
     },
-    capstoneCases: [
-      {
-        id: 'invoice-ocr',
-        function: 'Finance',
-        title: 'Invoice OCR for Accounts Payable',
-        workflow: 'Capture supplier invoices, extract structured fields, map to accounting plan, route for HITL approval.',
-        agent: 'Multi-step n8n agent with duplicate detection, vendor matching, audit logging.',
-        why: 'Highest-volume governance use case. Tests every layer.',
-      },
-      {
-        id: 'quote-generation',
-        function: 'Sales',
-        title: 'Quote Generation',
-        workflow: 'Pull customer context from CRM, match products from catalog, generate compliant proposals.',
-        agent: 'RAG-grounded drafting agent with pricing rules and legal-clause library.',
-        why: 'High commercial leverage. Direct revenue impact.',
-      },
-      {
-        id: 'hr-ticket-triage',
-        function: 'HR',
-        title: 'HR Ticket Triage & Routing',
-        workflow: 'Classify incoming HR requests, route by topic and urgency, draft initial responses for review.',
-        agent: 'Classification agent with policy RAG and escalation rules.',
-        why: 'Tests privacy governance under realistic constraints.',
-      },
-      {
-        id: 'customer-email-classification',
-        function: 'Customer Ops',
-        title: 'Customer Email Classification',
-        workflow: 'Categorize support inbox, prioritize by urgency and intent, draft contextual replies.',
-        agent: 'Multi-intent classifier with response drafter and escalation predictor.',
-        why: 'High data volume. Strong precision/recall feedback loop.',
-      },
-      {
-        id: 'rfp-response-drafting',
-        function: 'Sales',
-        title: 'RFP Response Drafting',
-        workflow: 'Extract requirements, match capability library, draft compliance responses, flag gaps.',
-        agent: 'Requirements-extraction agent plus RAG drafter plus compliance checker.',
-        why: 'High-value, low-frequency. Strong audit-trail demands.',
-      },
-      {
-        id: 'supplier-contract-review',
-        function: 'Finance · Legal',
-        title: 'Supplier Contract Review',
-        workflow: 'Extract terms, flag risk clauses, summarize for legal review, track redline cycles.',
-        agent: 'Term-extraction agent with clause-library RAG and risk scorer.',
-        why: 'Stress-tests precision under regulatory pressure.',
-      },
+    capstoneCases: SHARED_CAPSTONE_CASES,
+  },
+  {
+    id: COURSE_AT_SCALE_ID,
+    slug: COURSE_AT_SCALE_ID,
+    title: 'AI at Scale: Governance, Portfolio & Roadmap',
+    subtitle: 'Part 2 of the House of Ichigo Assess program.',
+    description:
+      'A six-module advanced course that turns a working pilot into a governed, scored portfolio with a sponsor-ready 12-month roadmap. Pick up where Part 1 left off.',
+    audience: 'Teams that have completed AI Foundations or are already operating a live AI pilot.',
+    level: 'Advanced · Part 2',
+    duration: '9h 30m',
+    framing: '6 modules · 2 phases · 2 artifacts',
+    modules: ['m07', 'm08', 'm09', 'm10', 'm11', 'm12'],
+    primaryMedia: {
+      type: 'slides',
+      url: '',
+      title: 'AI at Scale course slides',
+      format: 'pdf',
+    },
+    moduleMedia: {
+      m07: { type: 'slides', url: '', title: 'M07 · Tools & Platforms slides', format: 'pdf' },
+      m08: { type: 'slides', url: '', title: 'M08 · Integration & Deployment Planning slides', format: 'pdf' },
+      m09: { type: 'slides', url: '', title: 'M09 · AI Portfolio Scoring & Use Case Prioritisation slides', format: 'pdf' },
+      m10: { type: 'slides', url: '', title: 'M10 · Documentation & Adoption slides', format: 'pdf' },
+      m11: { type: 'slides', url: '', title: 'M11 · Monitoring & Quality slides', format: 'pdf' },
+      m12: { type: 'slides', url: '', title: 'M12 · AI Strategy & Roadmap slides', format: 'pdf' },
+    } as Record<ModuleId, CoursePrimaryMedia>,
+    methodology:
+      'Builds on the AI Foundations method with governance, scoring, monitoring, and roadmap practice. Earn Tier 02 by completing both courses plus the mentored capstone.',
+    artifacts: [
+      'The Operating Plan — tool ADR, integration plan, scored portfolio.',
+      'The Handoff Pack — system card, playbook, monitoring plan, strategic roadmap.',
     ],
+    formats: [
+      { label: 'Executive Sprint', duration: '1 day', coverage: 'Selected modules for orientation and conviction.' },
+      { label: 'Team Workshop', duration: '2 days', coverage: 'Hands-on governance plus portfolio overview.' },
+      { label: 'Intensive Bootcamp', duration: '5 days', coverage: 'Complete program with all assignments.' },
+      { label: 'Cohort Program', duration: '4–12 weeks', coverage: 'Full program with capstone extension.' },
+    ],
+    certification: {
+      tier1: 'AI Builder Foundations',
+      tier2: 'Certified AI Systems Builder',
+      assessment: 'Artifact-based assessment. Tier 02 requires the mentored capstone track after Parts 1 and 2.',
+    },
+    capstoneCases: SHARED_CAPSTONE_CASES,
   },
 ];
 
@@ -573,6 +609,26 @@ export function getModule(id: ModuleId): ModuleMeta | undefined {
 export function getNextModule(id: ModuleId): ModuleMeta | undefined {
   const index = MODULES.findIndex((m) => m.id === id);
   return index >= 0 ? MODULES[index + 1] : undefined;
+}
+
+export function getCourseProgressIsComplete(
+  courseId: string,
+  progress: Record<string, { status: 'not_started' | 'in_progress' | 'complete' } | undefined>,
+): boolean {
+  const course = getCourse(courseId);
+  if (!course) return false;
+  return course.modules.every((id) => progress[id]?.status === 'complete');
+}
+
+export function isCourseUnlocked(
+  courseId: string,
+  progress: Record<string, { status: 'not_started' | 'in_progress' | 'complete' } | undefined>,
+): boolean {
+  if (courseId === COURSE_FOUNDATIONS_ID) return true;
+  if (courseId === COURSE_AT_SCALE_ID) {
+    return getCourseProgressIsComplete(COURSE_FOUNDATIONS_ID, progress);
+  }
+  return true;
 }
 
 export function getPhase(num: 1 | 2 | 3 | 4) {

@@ -78,6 +78,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { applyPatch, validateScoreReadiness, type DiagramPatch, type DiagramPatchState, type OperationReport, type StickyCategory } from "@/lib/diagram-patch";
 import { useDiagramAssistant, type DiagramAssistantMode } from "@/lib/db/pfs/diagram-assistant";
 import { useMembers, type MemberSuggestion } from "@/lib/db/pfs/members";

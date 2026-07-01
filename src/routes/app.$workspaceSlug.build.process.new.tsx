@@ -883,6 +883,28 @@ function ProcessBuilder() {
     });
   }, [applyDiagram]);
 
+  const startOver = useCallback(() => {
+    if (typeof window !== "undefined") window.localStorage.removeItem(processBuilderDraftKey);
+    historyRef.current = [];
+    futureRef.current = [];
+    setLayoutDirection("RIGHT");
+    setShowToolTiles(true);
+    setStep("frame");
+    setStartPanel(null);
+    setOpenTriggerOnDiagram(false);
+    setTriggerPickerOpen(false);
+    setTemplateApplyError(null);
+    setDraftStatus("idle");
+    applyDiagram({
+      nodes: [],
+      edges: [],
+      selectedId: "",
+      selectedEdgeId: "",
+      frame: defaultFrame,
+      globalPass: defaultGlobalPass,
+    });
+  }, [applyDiagram]);
+
   useEffect(() => {
     if (step !== "diagram" || !openTriggerOnDiagram || nodesRef.current.length > 0) return;
     setTriggerPickerOpen(true);

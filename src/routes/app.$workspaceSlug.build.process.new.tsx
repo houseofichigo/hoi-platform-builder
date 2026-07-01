@@ -1560,6 +1560,7 @@ function ProcessBuilder() {
           canUndo={canUndo}
           canRedo={canRedo}
           onDelete={deleteSelected}
+          onStartOver={() => setStartOverConfirmOpen(true)}
           onOpenNodePicker={(target) => setNodePickerTarget(target)}
           onAddTemplate={addTemplateAfterSelected}
           onOpenTriggerPicker={() => setTriggerPickerOpen(true)}

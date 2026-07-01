@@ -1,66 +1,18 @@
-# Essential tables for Build & Onboarding
+Add a **Start over** button in the diagram-tab toolbar, placed immediately to the right of the existing **Delete** button.
 
-Below are the tables the app actually depends on to run the **onboarding (company setup, org chart, invites)** and **Build (process mapping, templates, tools)** flows. Grouped by concern.
+### Behavior
+- Clicking it opens a confirmation dialog: "Start over? This will discard your current diagram and return you to the Frame step."
+- On confirm:
+  1. Remove the in-progress builder draft from `localStorage` (`processBuilderDraftKey`).
+  2. Reset builder state: clear nodes/edges, reset frame fields to defaults, reset global pass to defaults.
+  3. Navigate the builder back to the **Frame** step (`setStep("frame")`).
+- On cancel, close the dialog and leave the diagram untouched.
 
-## 1. Workspace & identity (foundation — everything depends on these)
-- `workspaces` — tenant root; every other row scopes by `workspace_id`.
-- `workspace_members` — user ↔ workspace, role (`owner | admin | member | viewer`), `department_id`, `manager_member_id`.
-- `workspace_invitations` — pending invites with `email`, `role`, `department_id`, `manager_member_id`, `token`.
-- `profiles` — per-user display data (`full_name`, `avatar_url`, `job_role`) joined into org chart.
-- `hoi_admin_users` — gates platform-level admin (`/admin/*`).
+### Implementation scope
+- In `src/routes/app.$workspaceSlug.build.process.new.tsx`:
+  - Add a confirmation-dialog state + handlers in the main builder component.
+  - Pass an `onStartOver` callback into the `DiagramTab` sub-component.
+  - In `DiagramTab`, render the new button with a `RotateCw` icon and `text-[var(--danger)]` styling, between **Delete** and **Auto-layout**.
+- Use the existing shadcn `AlertDialog` primitives for the confirmation so the UX is consistent with the rest of the app.
 
-## 2. Company setup / Onboarding
-- `company_profile` — company-level metadata captured in the setup wizard.
-- `department` — org structure (parent_id, lead_member_id, headcount, sensitive-data flag, audience flag).
-- `audience` — distinct audiences referenced by departments.
-- `member_profile` — extended per-member onboarding fields.
-- `onboarding_events` — checklist / progress tracking.
-
-## 3. Org chart (read model used by Build)
-Backed by: `workspaces` + `department` + `workspace_members` + `workspace_invitations` + `profiles` (no dedicated table — assembled in `fetchOrgChart`).
-
-## 4. Process mapping (Build core)
-- `process` — the mapped process (status, department_id, owner_member_id, risk_tier, archived_at).
-- `process_step` — ordered steps within a process (actor_member_id, department_id, tool/action refs).
-- `process_status_audit` — status transitions for `decide_process` workflow.
-- `process_export` — exportable artifacts (PDF/JSON) per process.
-
-## 5. Template library
-- `process_template` — published templates shown in the Template Library cards.
-- `process_template_alias` — alternate names/lookup for templates.
-
-## 6. Tools & actions catalog (used inside process steps)
-- `tool_catalog` — master list of ~2,806 tools (vendor, category, logo, governance flags).
-- `tool_action_catalog` — actions each tool exposes (used by step pickers).
-- `tool` — workspace-scoped instance of a catalog tool (adoption record).
-- `tool_action` — workspace-scoped instance of a catalog action.
-- `tool_review_queue` — admin catalog console (enrichment queue).
-
-## 7. Approvals / governance (gates Build → Scale handoff)
-- `use_case_approvals` — approvals tied to processes/use cases.
-- `governance_flags` + `governance_threshold` — risk gates surfaced in Build.
-- `audit_log` — admin diff trail (`get_audit_log_with_diffs`).
-- `notifications` + `notification_preferences` — invite accepted, approval, roadmap events.
-
-## 8. Supporting (referenced by Build views)
-- `roadmap_entries` — created on process approval (Build → Scale bridge).
-- `vault` / `vault_reference` — secrets/connections attached to tools.
-- `knowledge_source` / `data_source` — referenced by process steps that read data.
-
-## Minimum viable set
-If you stripped to bare minimum for Build + Onboarding to function:
-
-```
-workspaces, workspace_members, workspace_invitations, profiles, hoi_admin_users,
-company_profile, department,
-process, process_step, process_status_audit,
-process_template,
-tool_catalog, tool_action_catalog, tool, tool_action,
-use_case_approvals, audit_log, notifications
-```
-
-Everything else is enrichment (audience, vault, roadmap, governance thresholds, exports, review queue).
-
----
-
-Want me to turn this into a docs file (e.g. `docs/build-onboarding-data-model.md`) once you switch to build mode?
+No routing, database, or backend changes required.

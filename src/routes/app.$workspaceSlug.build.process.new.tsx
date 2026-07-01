@@ -78,6 +78,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { applyPatch, validateScoreReadiness, type DiagramPatch, type DiagramPatchState, type OperationReport, type StickyCategory } from "@/lib/diagram-patch";
 import { useDiagramAssistant, type DiagramAssistantMode } from "@/lib/db/pfs/diagram-assistant";
 import { useMembers, type MemberSuggestion } from "@/lib/db/pfs/members";
@@ -729,6 +739,7 @@ function ProcessBuilder() {
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>(restoredDraft?.layoutDirection ?? "RIGHT");
   const [showToolTiles, setShowToolTiles] = useState(restoredDraft?.showToolTiles ?? true);
   const [draftStatus, setDraftStatus] = useState<"restored" | "saved" | "idle">(restoredDraft ? "restored" : "idle");
+  const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false);
   const historyRef = useRef<DiagramSnapshot[]>([]);
   const futureRef = useRef<DiagramSnapshot[]>([]);
   const appliedTemplateSearchRef = useRef<string | null>(null);
@@ -857,6 +868,28 @@ function ProcessBuilder() {
     setLayoutDirection("RIGHT");
     setShowToolTiles(true);
     setStep("start");
+    setStartPanel(null);
+    setOpenTriggerOnDiagram(false);
+    setTriggerPickerOpen(false);
+    setTemplateApplyError(null);
+    setDraftStatus("idle");
+    applyDiagram({
+      nodes: [],
+      edges: [],
+      selectedId: "",
+      selectedEdgeId: "",
+      frame: defaultFrame,
+      globalPass: defaultGlobalPass,
+    });
+  }, [applyDiagram]);
+
+  const startOver = useCallback(() => {
+    if (typeof window !== "undefined") window.localStorage.removeItem(processBuilderDraftKey);
+    historyRef.current = [];
+    futureRef.current = [];
+    setLayoutDirection("RIGHT");
+    setShowToolTiles(true);
+    setStep("frame");
     setStartPanel(null);
     setOpenTriggerOnDiagram(false);
     setTriggerPickerOpen(false);
@@ -1527,6 +1560,7 @@ function ProcessBuilder() {
           canUndo={canUndo}
           canRedo={canRedo}
           onDelete={deleteSelected}
+          onStartOver={() => setStartOverConfirmOpen(true)}
           onOpenNodePicker={(target) => setNodePickerTarget(target)}
           onAddTemplate={addTemplateAfterSelected}
           onOpenTriggerPicker={() => setTriggerPickerOpen(true)}
@@ -1587,6 +1621,23 @@ function ProcessBuilder() {
           onNavigateStep={setStep}
         />
       ) : null}
+
+      <AlertDialog open={startOverConfirmOpen} onOpenChange={setStartOverConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start over?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will discard your current diagram and return you to the Frame step.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setStartOverConfirmOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={startOver} className="bg-[var(--danger)] text-white hover:bg-[var(--danger)]/90">
+              Start over
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -1789,6 +1840,7 @@ function DiagramStep(props: {
   onToggleLayoutDirection: () => void;
   onNext: () => void;
   currentStep: BuilderStep;
+  onStartOver: () => void;
   onNavigateStep: (step: BuilderStep) => void;
 }) {
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);
@@ -1880,6 +1932,10 @@ function DiagramStep(props: {
               <Button type="button" variant="outline" disabled={!canDelete} onClick={props.onDelete} className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--danger)]">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
+              </Button>
+              <Button type="button" variant="outline" onClick={props.onStartOver} className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--danger)]">
+                <RotateCw className="mr-2 h-4 w-4" />
+                Start over
               </Button>
               <Button type="button" variant="outline" onClick={props.onLayout} className="rounded-[var(--r-md)] border-[var(--chalk)]">
                 <GitBranch className="mr-2 h-4 w-4" />

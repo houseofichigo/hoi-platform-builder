@@ -1916,6 +1916,10 @@ function DiagramStep(props: {
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete
               </Button>
+              <Button type="button" variant="outline" onClick={props.onStartOver} className="rounded-[var(--r-md)] border-[var(--chalk)] text-[var(--danger)]">
+                <RotateCw className="mr-2 h-4 w-4" />
+                Start over
+              </Button>
               <Button type="button" variant="outline" onClick={props.onLayout} className="rounded-[var(--r-md)] border-[var(--chalk)]">
                 <GitBranch className="mr-2 h-4 w-4" />
                 Auto-layout

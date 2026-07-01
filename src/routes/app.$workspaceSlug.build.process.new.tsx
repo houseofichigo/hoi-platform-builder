@@ -1621,6 +1621,23 @@ function ProcessBuilder() {
           onNavigateStep={setStep}
         />
       ) : null}
+
+      <AlertDialog open={startOverConfirmOpen} onOpenChange={setStartOverConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start over?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will discard your current diagram and return you to the Frame step.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setStartOverConfirmOpen(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={startOver} className="bg-[var(--danger)] text-white hover:bg-[var(--danger)]/90">
+              Start over
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -739,6 +739,7 @@ function ProcessBuilder() {
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>(restoredDraft?.layoutDirection ?? "RIGHT");
   const [showToolTiles, setShowToolTiles] = useState(restoredDraft?.showToolTiles ?? true);
   const [draftStatus, setDraftStatus] = useState<"restored" | "saved" | "idle">(restoredDraft ? "restored" : "idle");
+  const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false);
   const historyRef = useRef<DiagramSnapshot[]>([]);
   const futureRef = useRef<DiagramSnapshot[]>([]);
   const appliedTemplateSearchRef = useRef<string | null>(null);

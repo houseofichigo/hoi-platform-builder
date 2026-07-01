@@ -1822,6 +1822,7 @@ function DiagramStep(props: {
   onToggleLayoutDirection: () => void;
   onNext: () => void;
   currentStep: BuilderStep;
+  onStartOver: () => void;
   onNavigateStep: (step: BuilderStep) => void;
 }) {
   const [templateMenuOpen, setTemplateMenuOpen] = useState(false);

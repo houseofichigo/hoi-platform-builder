@@ -1,46 +1,28 @@
-Extract the DiagramStep (map process canvas) and all its helper components from the monolithic builder route into a clean, standalone downloadable file.
+# Refactor MapProcessDiagram.tsx to compile standalone
 
-**Scope**
-- Source file: `src/routes/app.$workspaceSlug.build.process.new.tsx` (4,649 lines).
-- Target: `/mnt/documents/MapProcessDiagram.tsx` (and a `MapProcessDiagram-types.ts` if needed).
+Goal: make `/mnt/documents/MapProcessDiagram.tsx` drop-in usable in any project without pulling TanStack Router route APIs.
 
-**What will be extracted**
-1. **DiagramStep** component (the canvas + toolbars + stepper + metrics footer).
-2. **Direct helpers** rendered by DiagramStep:
-   - `BuilderStageStepper`
-   - `CanvasToolbar`
-   - `TriggerPicker`
-   - `NodeToolPicker`
-   - `ToolActionChooser`
-   - `ToolActionSelect`
-   - `CopilotDrawer`
-   - `SidePanel` (node inspector)
-   - `PanelSection`, `DataProfileSummary`, `BriefPreview`, `TriggerConfigFields`, `DataChips`, `QualityControl`
-   - `IconButton`, `PlaceholderButton`, `Metric`
-3. **Utility functions** called by the above:
-   - `isProcessNode`, `hydrateNode`, `nodeIssues`, `deriveDiagram`, `deriveStepData`
-   - `formatToolActionGroup`, `rolePhrase`, `inferToolRole`, `isGenericStepLabel`
-   - `profileFrom`, `qualityFrom`, `manualProfile`, `outputFromToolAction`, `roleFromToolAction`
-   - `nodeKindLabel`, `kindIcon`, `statusChips` (if any)
-4. **Required types & constants** defined in the same file:
-   - `BuilderData`, `BuilderNode`, `ProcessBuilderNode`, `StickyBuilderNode`, `BuilderEdge`, `NodePickerTarget`, `DiagramSnapshot`, `ProcessBuilderDraft`, `StickyData`
-   - `LayoutDirection`, `BuilderStep`, `StartPanelMode`, `OpenNodePickerDetail`
-   - `defaultFrame`, `defaultGlobalPass`, `processBuilderDraftKey`
-   - `nodeKinds`, `inputTypes`, `drawerRootRows`, `processCategoryActions`, `stepTemplates`
-   - `eventTriggerOptions`, `criticalityOptions`, `toolRoleOptions`, `customEventValue`
+## Findings
 
-**How external dependencies will be handled**
-- Project-specific hooks (e.g., `useToolCatalog`, `useEnsureOrgToolFromCatalog`, `useToolActions`, `useMembers`, `useDataSources`, `useDepartments`, `useDiagramAssistant`, `useCreateSubmittedProcess`) will be left as imports from their existing paths. A `README` block at the top of the file will list the required internal modules.
-- UI primitives (`Button`, `Input`, `Badge`, `Select`, `Card`, `Textarea`, `Progress`, `Label`, `AlertDialog`) will remain imported from `@/components/ui/...`.
-- `@xyflow/react` imports and `lucide-react` icons will stay as-is.
-- The extracted file will be **syntactically valid TypeScript/TSX**, but it will rely on the consuming project to provide the listed internal hooks/types.
+- Only two truly route-specific symbols are imported at the top of the file: `createFileRoute` and `useNavigate` from `@tanstack/react-router` (line 2).
+- Neither symbol is actually referenced anywhere in the body (verified via grep — the only match is a comment on line 420 reminding to clean them up).
+- The remaining imports are legitimate runtime deps used by the component (React Flow, lucide, UI primitives, PFS helpers, `@/lib/*` utilities). They are not route-specific — they're the component's real dependencies.
+- File already carries `// @ts-nocheck` so TS won't complain about unused imports, but the router import still creates a hard runtime coupling to `@tanstack/react-router` (which a non-TanStack host project might not have installed).
 
-**Deliverable**
-- `/mnt/documents/MapProcessDiagram.tsx` (single file, or split into `MapProcessDiagram.tsx` + `MapProcessDiagram-types.ts` if it exceeds readable length).
-- A short dependency map comment at the top so you know what internal modules you must port to use it elsewhere.
+## Changes
 
-**Out of scope**
-- Frame step form fields
-- Submit / review step
-- Start choice overlay / template browser / AI draft panel
-- Route-level wiring (auth gate, navigation, draft persistence logic)
+1. **Remove** the line:
+   ```ts
+   import { createFileRoute, useNavigate } from "@tanstack/react-router";
+   ```
+2. **Remove** the now-stale reminder comment on line 420 ("Remove unused imports (e.g. createFileRoute, useNavigate, useMutation, etc.) when moving to another project.").
+3. **Add** a short header comment listing the external dependency surface a host project must provide so this file compiles:
+   - npm: `react`, `@xyflow/react`, `lucide-react`, `@tanstack/react-query` (used transitively by the `@/lib/db/pfs/*` hooks)
+   - local modules it expects at these `@/` paths (unchanged): `@/components/ui/*`, `@/components/build/pfs/{process-template-library,risk-tier-badge,tool-catalog-picker}`, `@/lib/diagram-patch`, `@/lib/db/pfs/*`, `@/lib/node-field-schema`, `@/lib/risk-tier`, `@/lib/scoring/process-score`, `@/lib/process-data`.
+4. **Write** the updated file to `/mnt/documents/MapProcessDiagram.tsx` (overwrite) and emit a `<presentation-artifact>` tag so you can re-download it.
+
+## Non-changes (intentional)
+
+- Not inlining the `@/lib/db/pfs/*` hooks or PFS components — that would balloon the file to 6k+ lines and re-couple it to Supabase. The header comment documents them as required peer modules instead.
+- Not touching the `@ts-nocheck` directive — keeps the file portable across TS configs.
+- No behavioral changes.

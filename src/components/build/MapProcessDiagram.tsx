@@ -2920,3 +2920,6 @@ function Metric({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+
+export { DiagramStep, BuilderStageStepper, CanvasToolbar, SidePanel, CopilotDrawer, ProcessNode, StickyNode, InsertEdge };
+export default DiagramStep;

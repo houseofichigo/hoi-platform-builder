@@ -48,6 +48,7 @@ import { Route as AppWorkspaceSlugScaleGovernanceRouteImport } from './routes/ap
 import { Route as AppWorkspaceSlugScaleAuditRouteImport } from './routes/app.$workspaceSlug.scale.audit'
 import { Route as AppWorkspaceSlugDiscoverSplatRouteImport } from './routes/app.$workspaceSlug.discover.$'
 import { Route as AppWorkspaceSlugBuildTemplatesRouteImport } from './routes/app.$workspaceSlug.build.templates'
+import { Route as AppWorkspaceSlugBuildMapVerifyRouteImport } from './routes/app.$workspaceSlug.build.map-verify'
 import { Route as AppWorkspaceSlugBuildLibraryRouteImport } from './routes/app.$workspaceSlug.build.library'
 import { Route as AppWorkspaceSlugBuildApprovalsRouteImport } from './routes/app.$workspaceSlug.build.approvals'
 import { Route as AppWorkspaceSlugAssessCompleteRouteImport } from './routes/app.$workspaceSlug.assess.complete'
@@ -276,6 +277,12 @@ const AppWorkspaceSlugBuildTemplatesRoute =
     path: '/templates',
     getParentRoute: () => AppWorkspaceSlugBuildRoute,
   } as any)
+const AppWorkspaceSlugBuildMapVerifyRoute =
+  AppWorkspaceSlugBuildMapVerifyRouteImport.update({
+    id: '/map-verify',
+    path: '/map-verify',
+    getParentRoute: () => AppWorkspaceSlugBuildRoute,
+  } as any)
 const AppWorkspaceSlugBuildLibraryRoute =
   AppWorkspaceSlugBuildLibraryRouteImport.update({
     id: '/library',
@@ -426,6 +433,7 @@ export interface FileRoutesByFullPath {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
+  '/app/$workspaceSlug/build/map-verify': typeof AppWorkspaceSlugBuildMapVerifyRoute
   '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
@@ -478,6 +486,7 @@ export interface FileRoutesByTo {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
+  '/app/$workspaceSlug/build/map-verify': typeof AppWorkspaceSlugBuildMapVerifyRoute
   '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
@@ -538,6 +547,7 @@ export interface FileRoutesById {
   '/app/$workspaceSlug/assess/complete': typeof AppWorkspaceSlugAssessCompleteRoute
   '/app/$workspaceSlug/build/approvals': typeof AppWorkspaceSlugBuildApprovalsRoute
   '/app/$workspaceSlug/build/library': typeof AppWorkspaceSlugBuildLibraryRoute
+  '/app/$workspaceSlug/build/map-verify': typeof AppWorkspaceSlugBuildMapVerifyRoute
   '/app/$workspaceSlug/build/templates': typeof AppWorkspaceSlugBuildTemplatesRoute
   '/app/$workspaceSlug/discover/$': typeof AppWorkspaceSlugDiscoverSplatRoute
   '/app/$workspaceSlug/scale/audit': typeof AppWorkspaceSlugScaleAuditRoute
@@ -599,6 +609,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
+    | '/app/$workspaceSlug/build/map-verify'
     | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
@@ -651,6 +662,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
+    | '/app/$workspaceSlug/build/map-verify'
     | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
@@ -710,6 +722,7 @@ export interface FileRouteTypes {
     | '/app/$workspaceSlug/assess/complete'
     | '/app/$workspaceSlug/build/approvals'
     | '/app/$workspaceSlug/build/library'
+    | '/app/$workspaceSlug/build/map-verify'
     | '/app/$workspaceSlug/build/templates'
     | '/app/$workspaceSlug/discover/$'
     | '/app/$workspaceSlug/scale/audit'
@@ -1025,6 +1038,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppWorkspaceSlugBuildTemplatesRouteImport
       parentRoute: typeof AppWorkspaceSlugBuildRoute
     }
+    '/app/$workspaceSlug/build/map-verify': {
+      id: '/app/$workspaceSlug/build/map-verify'
+      path: '/map-verify'
+      fullPath: '/app/$workspaceSlug/build/map-verify'
+      preLoaderRoute: typeof AppWorkspaceSlugBuildMapVerifyRouteImport
+      parentRoute: typeof AppWorkspaceSlugBuildRoute
+    }
     '/app/$workspaceSlug/build/library': {
       id: '/app/$workspaceSlug/build/library'
       path: '/library'
@@ -1185,6 +1205,7 @@ const AppWorkspaceSlugAdminRouteWithChildren =
 interface AppWorkspaceSlugBuildRouteChildren {
   AppWorkspaceSlugBuildApprovalsRoute: typeof AppWorkspaceSlugBuildApprovalsRoute
   AppWorkspaceSlugBuildLibraryRoute: typeof AppWorkspaceSlugBuildLibraryRoute
+  AppWorkspaceSlugBuildMapVerifyRoute: typeof AppWorkspaceSlugBuildMapVerifyRoute
   AppWorkspaceSlugBuildTemplatesRoute: typeof AppWorkspaceSlugBuildTemplatesRoute
   AppWorkspaceSlugBuildIndexRoute: typeof AppWorkspaceSlugBuildIndexRoute
   AppWorkspaceSlugBuildProcessIdRoute: typeof AppWorkspaceSlugBuildProcessIdRoute
@@ -1194,6 +1215,7 @@ interface AppWorkspaceSlugBuildRouteChildren {
 const AppWorkspaceSlugBuildRouteChildren: AppWorkspaceSlugBuildRouteChildren = {
   AppWorkspaceSlugBuildApprovalsRoute: AppWorkspaceSlugBuildApprovalsRoute,
   AppWorkspaceSlugBuildLibraryRoute: AppWorkspaceSlugBuildLibraryRoute,
+  AppWorkspaceSlugBuildMapVerifyRoute: AppWorkspaceSlugBuildMapVerifyRoute,
   AppWorkspaceSlugBuildTemplatesRoute: AppWorkspaceSlugBuildTemplatesRoute,
   AppWorkspaceSlugBuildIndexRoute: AppWorkspaceSlugBuildIndexRoute,
   AppWorkspaceSlugBuildProcessIdRoute: AppWorkspaceSlugBuildProcessIdRoute,
